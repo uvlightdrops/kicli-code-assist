@@ -112,10 +112,12 @@ Input Mode:
 ### ✅ [DONE] Async Operations
 
 - [x] Non-blocking LLM calls
-- [x] app.call_later() for async execution
+- [x] run_worker() with thread=True for background execution
+- [x] Spinner feedback on message submission
 - [x] Status updates during waiting
 - [x] User can navigate while waiting for response
 - [x] Exception handling in async context
+- [x] UI responsive while LLM processes
 
 ### ✅ [DONE] Python 3.10 Compatibility
 
@@ -220,10 +222,36 @@ Input Mode:
 
 1. **File Preview**: Placeholder only, no actual file viewing
 2. **Context Size**: No limit checking (could exceed API limits)
-3. **Async Model**: Uses `app.call_later()`, not true async/await
+3. **Async Model**: Uses `run_worker()` with threading, properly non-blocking
 4. **No History Persistence**: Sessions lost on exit
-5. **File Content**: Never loaded into memory (only path used)
+5. ✅ **File Context**: Now loaded and injected into LLM system message
 6. **Large Projects**: Scans everything (could be slow for huge projects)
+
+### Recently Fixed Issues
+
+✅ **Input Field Always Visible/Editable** (Session 2024-09-02)
+- Problem: Input field had cursor even in Browser mode, allowed typing
+- Solution: Added `blur()` in on_mount(), added disabled state management in watch_current_focus()
+- Result: Input field now properly hidden and disabled in Browser mode
+- Files: textual_app.py on_mount(), watch_current_focus(), action_focus_* methods
+
+✅ **UI Frozen on ENTER Key** (Current Session)
+- Problem: Multiple seconds of freeze after pressing ENTER, UI unresponsive
+- Root Cause: Using `app.call_later()` with async def, which still blocks the UI thread
+- Solution: Switched from `async def _send_to_llm_async()` to sync `_send_to_llm_worker()` run via `self.run_worker(thread=True)`
+- Result: UI remains responsive with spinner animation while LLM processes
+- Files: textual_app.py on_input_submitted_manual(), _send_to_llm_worker()
+
+✅ **File Content Not in LLM Context** (Current Session)
+- Problem: L key loaded files but content never sent to LLM
+- Root Cause: No file content injection into API request
+- Solution: 
+  - Track loaded files in self.loaded_files list with path + content
+  - Build context_text from loaded files in _send_to_llm_worker()
+  - Inject context_text into system message before calling LLM API
+- Result: LLM now receives actual file content (up to 10KB per file)
+- Files: textual_app.py action_load_file(), _send_to_llm_worker()
+
 
 ### Potential Improvements
 

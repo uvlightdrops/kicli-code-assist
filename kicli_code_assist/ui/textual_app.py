@@ -8,6 +8,9 @@ from textual.widgets import Header, Footer, Static, Input, RichLog
 from textual.binding import Binding
 from textual.reactive import reactive
 from textual.message import Message
+from textual.worker import Worker, WorkerState
+import threading
+import textwrap
 
 from kicli_code_assist.chat_session import ChatSession
 
@@ -144,6 +147,10 @@ class CodeAssistantApp(Static):
         self.input_field = None
         self.status_bar = None
         self.selected_file = None
+        self.loaded_files = []  # Track files added to context via L key
+        self.waiting_for_response = False  # Track if waiting for LLM
+        self.spinner_index = 0  # For spinner animation
+        self.llm_worker = None  # Track worker thread
         
         # Load ki-core config and LLM client
         from ki_core import Config
@@ -153,6 +160,19 @@ class CodeAssistantApp(Static):
         from kicli_code_assist.cli import _detect_best_provider
         provider = _detect_best_provider()
         self.client = create_client(self.config, provider)
+    
+    def _wrap_text(self, text: str, width: int = 80) -> str:
+        """Wrap text to fit terminal width."""
+        # Remove existing newlines and wrap
+        lines = []
+        for line in text.split('\n'):
+            if len(line) > width:
+                # Use textwrap to break long lines
+                wrapped = textwrap.fill(line, width=width)
+                lines.append(wrapped)
+            else:
+                lines.append(line)
+        return '\n'.join(lines)
     
     def compose(self) -> ComposeResult:
         """Create child widgets."""
@@ -188,23 +208,24 @@ class CodeAssistantApp(Static):
     
     def on_mount(self) -> None:
         """Setup after mount."""
-        self.file_list.focus()  # Start with browser focus, not input
+        # Blur input field first, then focus file list
+        self.input_field.blur()
+        self.file_list.focus()
         # Defer preview initialization until rendering is complete
         self.app.call_later(self._init_preview_async)
     
     def _init_preview_async(self) -> None:
         """Initialize preview after rendering."""
-        self.chat_display.write("Welcome to KI Code Assistant!\n")
-        self.chat_display.write("Use UP/DOWN to navigate files, ENTER to select, TAB to switch focus.\n")
+        self.chat_display.write("Welcome to KI Code Assistant!\nUse UP/DOWN to navigate files, ENTER to select, TAB to switch focus.\n")
     
     def action_focus_next(self) -> None:
         """Focus next widget (TAB)."""
         if self.current_focus == "browser":
             self.current_focus = "input"
-            self.input_field.focus()
+            # watch_current_focus will be called automatically
         else:
             self.current_focus = "browser"
-            self.file_list.focus()
+            # watch_current_focus will be called automatically
     
     def _on_key(self, event) -> None:
         """Handle ENTER key at app level for browser mode."""
@@ -219,10 +240,10 @@ class CodeAssistantApp(Static):
         """Focus previous widget (Shift+TAB)."""
         if self.current_focus == "input":
             self.current_focus = "browser"
-            self.file_list.focus()
+            # watch_current_focus will be called automatically
         else:
             self.current_focus = "input"
-            self.input_field.focus()
+            # watch_current_focus will be called automatically
     
     def action_cursor_up(self) -> None:
         """Move cursor up in file list (browser mode only)."""
@@ -250,31 +271,64 @@ class CodeAssistantApp(Static):
     
     def action_load_file(self) -> None:
         """Load selected file to context (L key)."""
-        if self.file_list:
-            file_path = self.file_list.get_selected_file()
-            if file_path:
-                self.chat_display.write(f"\n[bold cyan]📄 Added to context:[/] {file_path}")
-                self.selected_file = file_path
+        if not self.file_list:
+            return
+        
+        file_path = self.file_list.get_selected_file()
+        if not file_path:
+            self.chat_display.write("[bold yellow]⚠️  No file selected[/]\n")
+            return
+        
+        # Try to read file content
+        try:
+            path_obj = Path(file_path)
+            if path_obj.is_file():
+                with open(path_obj, 'r', encoding='utf-8', errors='ignore') as f:
+                    content = f.read()
+                
+                # Limit to first 10KB to avoid huge contexts
+                if len(content) > 10000:
+                    content = content[:10000] + "\n... [truncated]"
+                
+                # Store file in loaded files
+                self.loaded_files.append({
+                    "path": str(file_path),
+                    "content": content
+                })
+                
+                file_size = len(content)
+                self.chat_display.write(f"[bold cyan]📄 Added to context:[/] {file_path} ({file_size} bytes)\n")
+                self.selected_file = str(file_path)
             else:
-                self.chat_display.write("\n[bold yellow]⚠️  No file selected[/]")
+                self.chat_display.write(f"[bold yellow]⚠️  Not a file: {file_path}[/]\n")
+        except Exception as e:
+            self.chat_display.write(f"[bold red]❌ Error reading file: {str(e)}[/]\n")
     
     def action_load_context(self) -> None:
         """Load project context (Ctrl+L)."""
-        self.chat_display.write("[bold cyan]📊 Scanning project...[/]")
+        self.chat_display.write("[bold cyan]📊 Scanning project...[/] ")
         try:
             self.chat_session.load_project_context()
             status = self.chat_session.get_context_status()
-            self.chat_display.write(f"[bold green]✅ {status}[/]")
+            self.chat_display.write(f"[bold green]✅ {status}[/]\n")
             self.project_loaded = True
         except Exception as e:
-            self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]")
+            self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
     
     def watch_current_focus(self, focus: str) -> None:
-        """Update status when focus changes."""
+        """Update UI when focus changes."""
+        if focus == "input":
+            self.input_field.focus()
+            self.input_field.disabled = False
+        else:
+            # Browser mode: blur input and disable it
+            self.input_field.blur()
+            self.input_field.disabled = True
+        
+        # Update status bar
         focus_char = "B" if focus == "browser" else "I"
-        if self.status_bar:
-            ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
-            self.status_bar.update(f"Curr-focus: {focus_char}  |  {ctx_status}")
+        ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
+        self.status_bar.update(f"Curr-focus: {focus_char}  |  {ctx_status}")
     
     def on_input_submitted(self, event) -> None:
         """Handle message submission from Input widget."""
@@ -291,51 +345,80 @@ class CodeAssistantApp(Static):
         """Handle input submission (used by both event and action_select_cursor)."""
         self.input_field.value = ""
         
-        # Add user message to chat
-        self.chat_display.write(f"\n[bold cyan]You:[/] {msg}")
+        # Add user message to chat with text wrapping
+        wrapped_msg = self._wrap_text(msg, width=76)
+        self.chat_display.write(f"[bold cyan]You:[/] {wrapped_msg}\n")
         self.chat_session.add_message("user", msg)
         
-        # Show loading - NOW send async task
-        self.chat_display.write("\n[bold yellow]⏳ Waiting for LLM response...[/]")
-        self.app.call_later(self._send_to_llm_async, msg)
+        # Mark that we're waiting for response
+        self.waiting_for_response = True
+        self.spinner_index = 0
+        
+        # Show processing message with spinner
+        spinners = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        spinner = spinners[self.spinner_index % len(spinners)]
+        self.chat_display.write(f"[bold yellow]{spinner} Processing...[/]\n")
+        
+        # Run LLM call in background worker thread (non-blocking UI)
+        self.llm_worker = self.run_worker(self._send_to_llm_worker, thread=True)
     
-    async def _send_to_llm_async(self, msg: str) -> None:
-        """Send message to LLM asynchronously (non-blocking)."""
+    def _send_to_llm_worker(self) -> None:
+        """Send message to LLM in background thread (non-blocking)."""
         try:
+            # Build context with loaded files
+            context_text = ""
+            if self.loaded_files:
+                context_text += "\n\n📁 Loaded Files:\n"
+                for file_info in self.loaded_files:
+                    context_text += f"\n--- File: {file_info['path']} ---\n"
+                    context_text += file_info['content']
+                    context_text += "\n---\n"
+            
             # Get messages for API
             api_messages = self.chat_session.get_messages_for_api()
+            
+            # Inject loaded files into system message if present
+            if api_messages and api_messages[0]["role"] == "system" and context_text:
+                api_messages[0]["content"] += context_text
             
             # Convert to ki-core Message format
             from ki_core.core.models import Message, Role, ChatRequest
             messages = [
                 Message(
-                    role=Role.SYSTEM if msg["role"] == "system" else 
-                    Role.ASSISTANT if msg["role"] == "assistant" else 
+                    role=Role.SYSTEM if m["role"] == "system" else 
+                    Role.ASSISTANT if m["role"] == "assistant" else 
                     Role.USER,
-                    content=msg["content"]
+                    content=m["content"]
                 )
-                for msg in api_messages
+                for m in api_messages
             ]
             
-            # Create request and stream response
+            # Create request
             request = ChatRequest(messages=messages)
             response_text = ""
             
-            self.chat_display.write("\n[bold green]Assistant:[/]\n")
-            # Build response as single text to avoid line wrapping per word
+            # Mark that response is arriving (clear waiting state)
+            self.waiting_for_response = False
+            
+            # Show that assistant is responding
+            self.chat_display.write("[bold green]Assistant:[/] ")
+            
+            # Stream response chunks and display as they arrive
             for event in self.client.chat_stream(request):
                 if event.text:
                     response_text += event.text
             
-            # Write full response as one piece
-            self.chat_display.write(response_text)
-            self.chat_display.write("\n")
+            # Write full response with text wrapping
+            wrapped_response = self._wrap_text(response_text, width=76)
+            self.chat_display.write(wrapped_response + "\n")
             
-            # Add to session
+            # Add to session history
             self.chat_session.add_message("assistant", response_text)
         
         except Exception as e:
-            self.chat_display.write(f"[bold red]Error: {str(e)}[/]")
+            self.waiting_for_response = False
+            self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
+    
     
     def update_file_preview(self, path: Path) -> None:
         """Update file preview when file is selected."""
@@ -437,9 +520,8 @@ def main():
         RichLog {
             width: 100%;
             height: 1fr;
-            overflow: hidden;
-            overflow-x: hidden;
-            text-wrap: wrap;
+            overflow: auto;
+            overflow-x: auto;
         }
         
         #chat_input {
