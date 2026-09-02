@@ -1,106 +1,88 @@
-# Installation Guide - Dynamic ki-core Path
+# Installation Guide - kicli-code-assist
 
-## Problem
+## One-Step Installation
 
-The original `pyproject.toml` had hardcoded ki-core paths:
-```toml
-ki-core @ file:///home/flow/dev_flow/ki-core
-```
-
-This breaks if the project is moved to a different home directory or user.
-
-## Solution
-
-The `pyproject.toml` now uses a placeholder that gets expanded at install time:
-```toml
-ki-core @ file://${HOME}/dev_flow/ki-core
-```
-
-## Installation
-
-Use the provided install script to expand the `$HOME` placeholder:
+Just run:
 
 ```bash
-cd /home/flow/dev_flow/kicli-code-assist
 python3 install_local.py
 ```
 
-This script:
-1. Resolves `${HOME}` to the current user's home directory
-2. Verifies ki-core exists
-3. Updates `pyproject.toml` with the expanded path
-4. Installs the package with `pip install -e .`
+This script automatically:
+1. ✅ Creates a virtual environment (if needed)
+2. ✅ Resolves `${HOME}` to your home directory
+3. ✅ Expands ki-core path in `pyproject.toml`
+4. ✅ Installs all dependencies
+5. ✅ Verifies ki-core exists
 
-## How It Works
-
-### Before Installation
-```
-pyproject.toml contains:
-  ki-core @ file://${HOME}/dev_flow/ki-core
-```
-
-### During Installation (install_local.py)
-```python
-home = str(Path.home())  # e.g., /home/flow
-ki_core_path = os.path.join(home, "dev_flow", "ki-core")
-# Result: /home/flow/dev_flow/ki-core
-
-# Update pyproject.toml with expanded path
-content = content.replace("${HOME}/dev_flow/ki-core", ki_core_path)
-```
-
-### After Installation
-```
-pyproject.toml contains:
-  ki-core @ file:///home/flow/dev_flow/ki-core
-```
-
-## Verification
-
-After installation, check that ki-core is properly installed:
+## Quick Start
 
 ```bash
-python3 -c "from ki_core import Config; print('✅ ki-core imported successfully')"
+# Run the installer (one-time)
+python3 install_local.py
+
+# Activate venv
+source venv/bin/activate
+
+# Use the tool
+kicli-assist tui          # Terminal UI
+kicli-assist chat         # Simple chat mode
+kicli-assist --help       # See all options
 ```
 
-## Environment
+## How Dynamic Paths Work
 
-- `HOME`: Automatically resolved from `Path.home()`
-- `DEV_FLOW`: Expected at `${HOME}/dev_flow`
-- `KI-CORE`: Expected at `${HOME}/dev_flow/ki-core`
+**Problem:** Original hardcoded path broke for other users:
+```toml
+ki-core @ file:///home/flow/dev_flow/ki-core  ❌ Only works for user "flow"
+```
+
+**Solution:** Placeholder expanded at install time:
+```toml
+ki-core @ file://${HOME}/dev_flow/ki-core  ✅ Works for any user
+```
+
+The `install_local.py` script:
+- Reads current user's `$HOME` via `Path.home()`
+- Replaces `${HOME}` with actual path
+- Updates `pyproject.toml` with expanded path
+- Installs using venv's pip
+
+## Requirements
+
+- Python 3.10+
+- `ki-core` at `~/dev_flow/ki-core`
+- `ki-knowledge` at `~/dev_flow/ki-knowledge` (optional, for some features)
 
 ## Troubleshooting
 
-### "ki-core not found"
+### "ki-core not found at /home/youruser/dev_flow/ki-core"
 ```bash
-# Check if ki-core exists
+# Verify ki-core exists
 ls -la ~/dev_flow/ki-core
-
-# Should show: __init__.py, core/, adapters/, config.py, etc.
+# Should show: __init__.py, core/, config.py, etc.
 ```
 
-### Installation fails with permission error
+### Verify installation worked
 ```bash
-# Use --user flag
-python3 install_local.py --user
+source venv/bin/activate
+python3 -c "from ki_core import Config; print('✅ Success')"
 ```
 
-### Manual installation
-If the script fails, manually expand the path:
+### If things go wrong
+Delete `venv/` and re-run:
 ```bash
-# Get your home directory
-echo $HOME
-
-# Replace ${HOME} in pyproject.toml with actual path
-sed -i 's|${HOME}|/home/youruser|g' pyproject.toml
-
-# Install
-pip install -e .
+rm -rf venv/
+python3 install_local.py
 ```
 
-## Notes
+## For Multiple Users
 
-- The `install_local.py` script modifies `pyproject.toml` in-place
-- Original paths are resolved relative to the current user's `$HOME`
-- Each user needs to run `python3 install_local.py` when installing locally
-- The modified `pyproject.toml` can be committed (it contains placeholder)
+Each user runs the installer once:
+```bash
+cd ~/projects/kicli-code-assist  # (wherever they cloned it)
+python3 install_local.py
+```
+
+Each gets their own venv with paths expanded to their `$HOME`.
+

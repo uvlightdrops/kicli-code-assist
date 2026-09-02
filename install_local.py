@@ -4,16 +4,18 @@
 import os
 import sys
 import subprocess
+import venv
 from pathlib import Path
 
 def main():
-    # Get home directory dynamically
+    project_dir = Path(__file__).parent.absolute()
+    venv_dir = project_dir / "venv"
     home = str(Path.home())
     ki_core_path = os.path.join(home, "dev_flow", "ki-core")
-    ki_core_url = f"file://{ki_core_path}"
     
     print(f"🔧 Installing kicli-code-assist")
     print(f"  Home: {home}")
+    print(f"  Project: {project_dir}")
     print(f"  Ki-Core: {ki_core_path}")
     
     # Check if ki-core exists
@@ -21,34 +23,40 @@ def main():
         print(f"❌ Error: ki-core not found at {ki_core_path}")
         sys.exit(1)
     
-    # Read pyproject.toml
-    project_dir = os.path.dirname(os.path.abspath(__file__))
-    pyproject_path = os.path.join(project_dir, "pyproject.toml")
+    # Create venv if it doesn't exist
+    if not venv_dir.exists():
+        print(f"\n📦 Creating virtual environment at {venv_dir}...")
+        venv.create(venv_dir, with_pip=True)
+        print(f"✅ venv created")
     
+    # Get pip executable from venv
+    pip_exe = venv_dir / "bin" / "pip" if os.name != "nt" else venv_dir / "Scripts" / "pip.exe"
+    
+    # Read pyproject.toml and replace placeholder
+    pyproject_path = project_dir / "pyproject.toml"
     with open(pyproject_path, "r") as f:
         content = f.read()
     
-    # Replace dynamic placeholder if it exists
     if "${HOME}/dev_flow/ki-core" in content or "$HOME" in content:
         content = content.replace("${HOME}/dev_flow/ki-core", ki_core_path)
         content = content.replace("$HOME", home)
         
-        # Write back
         with open(pyproject_path, "w") as f:
             f.write(content)
-        print(f"✅ Updated pyproject.toml with expanded paths")
+        print(f"\n✅ Updated pyproject.toml with expanded paths")
     
-    # Install with pip
-    print("\n📦 Installing with pip...")
+    # Install with venv's pip
+    print(f"\n📦 Installing packages...")
     result = subprocess.run(
-        [sys.executable, "-m", "pip", "install", "-e", project_dir],
-        cwd=project_dir
+        [str(pip_exe), "install", "-e", str(project_dir)],
+        cwd=str(project_dir)
     )
     
     if result.returncode == 0:
-        print("\n✅ Installation successful!")
+        print(f"\n✅ Installation successful!")
+        print(f"\n📝 To activate: source {venv_dir}/bin/activate")
     else:
-        print("\n❌ Installation failed!")
+        print(f"\n❌ Installation failed!")
         sys.exit(1)
 
 if __name__ == "__main__":
