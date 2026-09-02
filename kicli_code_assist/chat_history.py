@@ -6,16 +6,40 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from ki_core import Config
+
 
 def get_cache_dir() -> Path:
-    """Get the cache directory for kicli-code-assist.
+    """Get the cache directory for kicli-code-assist from ki-core Config.
     
     Returns:
-        Path to cache directory: $HOME/dev_data/kicli-code-assist/
+        Path to cache directory from config, or default: $HOME/dev_data/kicli-code-assist/
     """
-    cache_dir = Path.home() / "dev_data" / "kicli-code-assist"
+    config = Config.from_env()
+    
+    # Get cache dir from config, with fallback
+    cache_dir_str = config.kicli_cache_dir or os.path.expanduser("~/dev_data/kicli-code-assist")
+    cache_dir = Path(cache_dir_str).expanduser()
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir
+
+
+def get_chat_history_dir() -> Path:
+    """Get the chat history directory from ki-core Config.
+    
+    Returns:
+        Path to chat history directory, or default: $cache_dir/chat_history/
+    """
+    config = Config.from_env()
+    
+    # Get chat history dir from config, with fallback
+    if config.kicli_chat_history_dir:
+        history_dir = Path(config.kicli_chat_history_dir).expanduser()
+    else:
+        history_dir = get_cache_dir() / "chat_history"
+    
+    history_dir.mkdir(parents=True, exist_ok=True)
+    return history_dir
 
 
 class ChatHistory:
@@ -28,9 +52,7 @@ class ChatHistory:
             session_name: Name of this chat session
         """
         self.session_name = session_name
-        cache_dir = get_cache_dir()
-        self.history_dir = cache_dir / "chat_history"
-        self.history_dir.mkdir(parents=True, exist_ok=True)
+        self.history_dir = get_chat_history_dir()
         self.session_file = self.history_dir / f"{session_name}.json"
         self.messages = []
         self._load_history()
