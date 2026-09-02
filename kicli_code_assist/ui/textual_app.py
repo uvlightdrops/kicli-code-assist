@@ -15,26 +15,55 @@ import textwrap
 from kicli_code_assist.chat_session import ChatSession
 
 
-class FocusAwareInput(Input):
-    """Input widget that handles ENTER submission properly."""
+class MultilineInput(Static):
+    """Multi-line input widget that wraps text and grows dynamically."""
     
     def __init__(self, parent_app=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
+        self.text_area = None
+    
+    def compose(self):
+        """Compose the multi-line input."""
+        from textual.widgets import TextArea
+        self.text_area = TextArea(id="text_input", language="markdown")
+        yield self.text_area
+    
+    def on_mount(self):
+        """Setup text area after mount."""
+        # Configure for input mode
+        self.text_area.show_line_numbers = False
+        self.text_area.show_cursor_line = False
     
     def on_key(self, event) -> None:
-        """Handle ENTER key to trigger submission."""
+        """Handle ENTER key submission."""
         from textual.keys import Keys
         
-        # When ENTER is pressed, submit the input
-        if event.key == Keys.Enter:
-            # Only trigger if we have a parent app in input focus
+        # Ctrl+ENTER to submit, ENTER for new line
+        if event.key == Keys.ControlJ or (event.key == Keys.Enter and "meta" in event.key):
             if self.parent_app and self.parent_app.current_focus == "input":
                 self.parent_app.action_select_cursor()
                 event.prevent_default()
-        else:
-            # Let Input handle other keys normally
-            super()._on_key(event) if hasattr(super(), '_on_key') else None
+    
+    def get_value(self) -> str:
+        """Get the current text value."""
+        return self.text_area.text
+    
+    def set_value(self, value: str) -> None:
+        """Set the text value."""
+        self.text_area.text = value
+    
+    def clear(self) -> None:
+        """Clear the text."""
+        self.text_area.text = ""
+    
+    def focus(self) -> None:
+        """Focus the text area."""
+        self.text_area.focus()
+    
+    def blur(self) -> None:
+        """Blur the text area."""
+        self.text_area.blur()
 
 
 class SelectableFileList(Static):
@@ -183,7 +212,8 @@ class CodeAssistantApp(Static):
         with Horizontal(id="main_container"):
             # Left: File list + preview
             with Vertical(id="left_panel", classes="panel"):
-                yield Static("📂 File List", classes="panel_title")
+                self.browser_title = Static("📂 File List", classes="panel_title", id="browser_title")
+                yield self.browser_title
                 self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
                 yield self.file_list
                 yield Static("👁️  File Preview", classes="panel_title")
@@ -193,12 +223,14 @@ class CodeAssistantApp(Static):
         
             # Right: Chat area
             with Vertical(id="right_panel", classes="panel"):
-                yield Static("💬 Chat", classes="panel_title")
+                self.chat_title = Static("💬 Chat", classes="panel_title", id="chat_title")
+                yield self.chat_title
                 self.chat_display = RichLog(highlight=False, markup=True)
                 yield self.chat_display
         
         # Input area
-        yield Static("⌨️  Input", classes="input_title")
+        self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
+        yield self.input_title
         self.input_field = FocusAwareInput(self, id="chat_input")
         yield self.input_field
         
@@ -325,19 +357,27 @@ class CodeAssistantApp(Static):
     
     def watch_current_focus(self, focus: str) -> None:
         """Update UI when focus changes."""
+        # Update CSS classes for title highlighting
+        self.browser_title.remove_class("active")
+        self.chat_title.remove_class("active")
+        self.input_title.remove_class("active")
+        
         if focus == "input":
             self.input_field.focus()
             self.input_field.disabled = False
+            self.input_title.add_class("active")
         elif focus == "chat":
             # Chat mode: give focus to chat display for scrolling
             self.input_field.blur()
             self.input_field.disabled = True
             self.chat_display.focus()
+            self.chat_title.add_class("active")
         else:  # browser
             # Browser mode: blur input and disable it
             self.input_field.blur()
             self.input_field.disabled = True
             self.file_list.focus()
+            self.browser_title.add_class("active")
         
         # Update status bar with current focus indicator
         focus_char = "B" if focus == "browser" else "C" if focus == "chat" else "I"
@@ -513,6 +553,36 @@ def main():
             width: 100%;
             height: 1;
             background: $boost;
+            text-style: bold;
+        }
+        
+        #browser_title {
+            background: $boost;
+        }
+        
+        #browser_title.active {
+            background: $warning;
+            color: $surface;
+            text-style: bold;
+        }
+        
+        #chat_title {
+            background: $boost;
+        }
+        
+        #chat_title.active {
+            background: $warning;
+            color: $surface;
+            text-style: bold;
+        }
+        
+        #input_title {
+            background: $boost;
+        }
+        
+        #input_title.active {
+            background: $warning;
+            color: $surface;
             text-style: bold;
         }
         

@@ -7,6 +7,8 @@ from datetime import datetime
 
 from ki_core import Config
 from kicli_code_assist.context import ProjectContextManager, ProjectInfo
+from kicli_code_assist.chat_history import ChatHistory
+from kicli_code_assist.prompts import SystemPrompts, PromptRole
 
 
 @dataclass
@@ -26,20 +28,28 @@ class ChatMessage:
 class ChatSession:
     """Manages chat session with project context awareness."""
 
-    def __init__(self, project_root: Optional[str] = None):
+    def __init__(self, project_root: Optional[str] = None, session_name: str = "default", role: PromptRole | str = PromptRole.CODE_ASSISTANT):
         """Initialize chat session.
 
         Args:
             project_root: Root directory to analyze. Defaults to current directory.
+            session_name: Name for this chat session (for persistence)
+            role: LLM role/persona (code_assistant, architect, debugger, etc.)
         """
         self.project_root = project_root or os.getcwd()
         self.config = Config.from_env()
         self.messages: list[ChatMessage] = []
         self.project_info: Optional[ProjectInfo] = None
         self.context_loaded = False
+        self.session_name = session_name
+        self.role = role if isinstance(role, PromptRole) else PromptRole(role)
 
         # Initialize context manager
         self.context_manager = ProjectContextManager(self.project_root)
+        
+        # Initialize chat history (persistence)
+        self.history = ChatHistory(session_name)
+        self.messages = [ChatMessage(role=msg["role"], content=msg["content"]) for msg in self.history.messages]
 
     def load_project_context(self, force_reload: bool = False) -> ProjectInfo:
         """Load and analyze project context.
@@ -58,34 +68,19 @@ class ChatSession:
         return self.project_info
 
     def get_system_prompt(self) -> str:
-        """Generate system prompt with or without project context.
+        """Generate system prompt using configured role and project context.
 
         Returns:
             System prompt string for LLM.
         """
-        base_prompt = (
-            "You are a helpful code assistant. Answer questions clearly and concisely. "
-            "Provide code examples when relevant. Ask for clarification if needed."
-        )
+        project_context = ""
+        if self.context_loaded and self.project_info:
+            project_context = self.project_info.to_context_string(max_tokens=3000)
 
-        if not self.context_loaded or not self.project_info:
-            return base_prompt
-
-        # Build project context part
-        project_context = self.project_info.to_context_string(max_tokens=3000)
-
-        return f"""{base_prompt}
-
-# PROJECT CONTEXT
-
-You are assisting with the following project:
-
-{project_context}
-
-Use this project context to provide relevant and accurate answers to the user's questions."""
+        return SystemPrompts.get_prompt(self.role, project_context)
 
     def add_message(self, role: str, content: str, include_context: bool = False) -> ChatMessage:
-        """Add message to chat history.
+        """Add message to chat history and persist to disk.
 
         Args:
             role: "user" or "assistant"
@@ -97,6 +92,11 @@ Use this project context to provide relevant and accurate answers to the user's 
         """
         message = ChatMessage(role=role, content=content, project_context_included=include_context)
         self.messages.append(message)
+        
+        # Persist to disk
+        metadata = {"context_included": include_context} if include_context else None
+        self.history.add_message(role, content, metadata)
+        
         return message
 
     def get_messages_for_api(self) -> list[dict]:
@@ -148,8 +148,51 @@ Use this project context to provide relevant and accurate answers to the user's 
         self.context_loaded = False
 
     def clear_history(self):
-        """Clear chat message history."""
+        """Clear chat message history (local and persistent)."""
         self.messages = []
+        self.history.clear()
+
+    def set_role(self, role: PromptRole | str) -> None:
+        """Change the LLM role/persona for this session.
+        
+        Args:
+            role: New role (code_assistant, architect, debugger, etc.)
+        """
+        self.role = role if isinstance(role, PromptRole) else PromptRole(role)
+
+    @staticmethod
+    def list_sessions() -> list[dict]:
+        """List all available chat sessions.
+        
+        Returns:
+            List of session info dicts
+        """
+        return ChatHistory.list_sessions()
+
+    @staticmethod
+    def load_session(session_name: str, project_root: Optional[str] = None) -> "ChatSession":
+        """Load an existing chat session.
+        
+        Args:
+            session_name: Name of session to load
+            project_root: Optional project root
+            
+        Returns:
+            New ChatSession instance with loaded history
+        """
+        session = ChatSession(project_root, session_name)
+        return session
+
+    def export_session(self, format_type: str = "markdown") -> str:
+        """Export this session to string format.
+        
+        Args:
+            format_type: "json" or "markdown"
+            
+        Returns:
+            Formatted session content
+        """
+        return self.history.export_session(self.session_name, format_type)
 
     def __repr__(self) -> str:
         """String representation."""
