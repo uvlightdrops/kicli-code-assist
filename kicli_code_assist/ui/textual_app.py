@@ -40,30 +40,36 @@ class MultilineInput(Static):
         from textual.keys import Keys
         
         # Ctrl+ENTER to submit, ENTER for new line
-        if event.key == Keys.ControlJ or (event.key == Keys.Enter and "meta" in event.key):
+        if event.key == Keys.ControlJ or (event.key == Keys.Enter and "meta" in str(event.key)):
             if self.parent_app and self.parent_app.current_focus == "input":
                 self.parent_app.action_select_cursor()
                 event.prevent_default()
     
     def get_value(self) -> str:
         """Get the current text value."""
-        return self.text_area.text
+        if self.text_area:
+            return self.text_area.text
+        return ""
     
     def set_value(self, value: str) -> None:
         """Set the text value."""
-        self.text_area.text = value
+        if self.text_area:
+            self.text_area.text = value
     
     def clear(self) -> None:
         """Clear the text."""
-        self.text_area.text = ""
+        if self.text_area:
+            self.text_area.text = ""
     
     def focus(self) -> None:
         """Focus the text area."""
-        self.text_area.focus()
+        if self.text_area:
+            self.text_area.focus()
     
     def blur(self) -> None:
         """Blur the text area."""
-        self.text_area.blur()
+        if self.text_area:
+            self.text_area.blur()
 
 
 class SelectableFileList(Static):
@@ -231,7 +237,7 @@ class CodeAssistantApp(Static):
         # Input area
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
-        self.input_field = FocusAwareInput(self, id="chat_input")
+        self.input_field = MultilineInput(self, id="chat_input")
         yield self.input_field
         
         # Status bar
@@ -301,7 +307,7 @@ class CodeAssistantApp(Static):
             self.file_list.action_select_cursor()
         elif self.current_focus == "input":
             # Manually handle input submission
-            msg = self.input_field.value.strip()
+            msg = self.input_field.get_value().strip()
             if msg:
                 self.on_input_submitted_manual(msg)
     
@@ -364,18 +370,15 @@ class CodeAssistantApp(Static):
         
         if focus == "input":
             self.input_field.focus()
-            self.input_field.disabled = False
             self.input_title.add_class("active")
         elif focus == "chat":
             # Chat mode: give focus to chat display for scrolling
             self.input_field.blur()
-            self.input_field.disabled = True
             self.chat_display.focus()
             self.chat_title.add_class("active")
         else:  # browser
-            # Browser mode: blur input and disable it
+            # Browser mode: blur input
             self.input_field.blur()
-            self.input_field.disabled = True
             self.file_list.focus()
             self.browser_title.add_class("active")
         
@@ -397,7 +400,7 @@ class CodeAssistantApp(Static):
     
     def on_input_submitted_manual(self, msg: str) -> None:
         """Handle input submission (used by both event and action_select_cursor)."""
-        self.input_field.value = ""
+        self.input_field.clear()
         
         # Add user message to chat with text wrapping
         wrapped_msg = self._wrap_text(msg, width=76)
@@ -610,8 +613,17 @@ def main():
         
         #chat_input {
             width: 100%;
-            height: 3;
+            height: auto;
+            min-height: 2;
+            max-height: 5;
             border: solid $primary;
+        }
+        
+        #text_input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: transparent;
         }
         
         .input_title {
