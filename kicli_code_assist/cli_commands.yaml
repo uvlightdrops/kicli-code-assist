@@ -1,0 +1,63 @@
+version: 1
+name: kicli-assist
+help: KI Code Assistant - interactive code generation and review
+commands:
+  - name: tui
+    help: Launch the terminal UI
+    callback: kicli_code_assist.cli:run_tui
+    options:
+      - names: ["-c", "--config"]
+        param: config
+        type: str
+        default: null
+        help: Optional config file path
+      - names: ["--provider"]
+        param: provider
+        type: str
+        default: null
+        help: LLM provider override
+  - name: tmux
+    help: Launch the tmux-based layout
+    callback: kicli_code_assist.cli:run_tmux
+    options:
+      - names: ["--simple"]
+        param: simple
+        type: bool
+        default: false
+        help: Use the simple 2-pane layout
+      - names: ["-s", "--session"]
+        param: session
+        type: str
+        default: ki-assist
+        help: Session name
+  - name: chat
+    help: Run the simple chat flow
+    callback: kicli_code_assist.cli:run_chat
+    options:
+      - names: ["--model"]
+        param: model
+        type: str
+        default: null
+        help: Override the model name
+      - names: ["--provider"]
+        param: provider
+        type: str
+        default: null
+        help: LLM provider override
+  - name: openinterpreter
+    help: Launch OpenInterpreter mode
+    callback: kicli_code_assist.cli:run_openinterpreter
+    options:
+      - names: ["-y", "--auto-run"]
+        param: auto_run
+        type: bool
+        default: false
+        help: Auto-run code if allowed
+      - names: ["--model"]
+        param: model
+        type: str
+        default: null
+        help: Override the model name
+  - name: doctor
+    help: Show CLI and environment diagnostics
+    callback: kicli_code_assist.cli:run_doctor

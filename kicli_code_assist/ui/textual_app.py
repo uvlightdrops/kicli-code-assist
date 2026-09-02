@@ -17,7 +17,9 @@ from kicli_code_assist.chat_session import ChatSession
 
 class MultilineInput(Static):
     """Multi-line input widget that wraps text and grows dynamically."""
-    
+
+    can_focus = True
+
     def __init__(self, parent_app=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
@@ -27,6 +29,7 @@ class MultilineInput(Static):
         """Compose the multi-line input."""
         from textual.widgets import TextArea
         self.text_area = TextArea(id="text_input", language="markdown")
+        self.text_area.can_focus = True
         yield self.text_area
     
     def on_mount(self):
@@ -34,6 +37,9 @@ class MultilineInput(Static):
         # Configure for input mode
         self.text_area.show_line_numbers = False
         self.text_area.show_cursor_line = False
+        self.text_area.can_focus = True
+        if self.parent_app and self.parent_app.current_focus == "input":
+            self.call_after_refresh(self.focus)
     
     def on_key(self, event) -> None:
         """Handle ENTER key submission."""
@@ -65,6 +71,7 @@ class MultilineInput(Static):
         """Focus the text area."""
         if self.text_area:
             self.text_area.focus()
+            self.text_area.can_focus = True
     
     def blur(self) -> None:
         """Blur the text area."""
@@ -256,6 +263,8 @@ class CodeAssistantApp(Static):
     def action_focus_input(self) -> None:
         """Focus the input panel."""
         self.current_focus = "input"
+        if self.input_field:
+            self.call_after_refresh(self.input_field.focus)
     
     def compose(self) -> ComposeResult:
         """Create child widgets."""
@@ -426,19 +435,23 @@ class CodeAssistantApp(Static):
             self.preview_title.remove_class("active")
         
         if focus == "input":
-            self.input_field.focus()
+            if self.input_field:
+                self.call_after_refresh(self.input_field.focus)
             self.input_title.add_class("active")
         elif focus == "chat":
-            self.input_field.blur()
+            if self.input_field:
+                self.input_field.blur()
             self.chat_display.focus()
             self.chat_title.add_class("active")
         elif focus == "preview":
-            self.input_field.blur()
+            if self.input_field:
+                self.input_field.blur()
             if self.preview_display:
                 self.preview_display.focus()
             self.preview_title.add_class("active")
         else:  # browser
-            self.input_field.blur()
+            if self.input_field:
+                self.input_field.blur()
             self.file_list.focus()
             self.browser_title.add_class("active")
         

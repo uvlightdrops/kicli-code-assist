@@ -23,6 +23,7 @@ sdist/
 var/
 wheels/
 *.egg-info/
+kicli_code_assist.egg-info/
 .installed.cfg
 *.egg
 
@@ -46,6 +47,11 @@ kicli.yaml
 creds.yaml
 config.yaml
 *.local.yaml
+
+# Local project runtime data
+context_cache/
+task_history.jsonl
+*.log
 
 # OS
 .DS_Store

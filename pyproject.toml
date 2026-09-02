@@ -16,6 +16,7 @@ dependencies = [
     "rich>=13.0.0",
     "pygments>=2.14.0",
     "pyyaml>=6.0",
+    "click>=8.1.7",
     "ki-core>=0.1.0a1",
 ]
 
@@ -28,7 +29,7 @@ dev = [
 audit = ["pip-audit>=2.7.0"]
 
 [project.scripts]
-kicli-assist = "kicli_code_assist.cli:main"
+kicli-assist = "kicli_code_assist.cli:cli"
 kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
 
 [tool.setuptools]
@@ -37,3 +38,6 @@ package-dir = {"" = "."}
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["kicli_code_assist*"]
+
+[tool.setuptools.package-data]
+kicli_code_assist = ["cli_commands.yaml"]
