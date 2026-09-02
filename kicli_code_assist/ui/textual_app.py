@@ -125,7 +125,7 @@ class CodeAssistantApp(Static):
     """Code assistant with file browser and chat."""
     
     # Reactive state
-    current_focus = reactive("browser")  # "browser" or "input"
+    current_focus = reactive("browser")  # "browser", "chat", or "input"
     project_loaded = reactive(False)
     
     BINDINGS = [
@@ -216,16 +216,17 @@ class CodeAssistantApp(Static):
     
     def _init_preview_async(self) -> None:
         """Initialize preview after rendering."""
-        self.chat_display.write("Welcome to KI Code Assistant!\nUse UP/DOWN to navigate files, ENTER to select, TAB to switch focus.\n")
+        self.chat_display.write("Welcome to KI Code Assistant!\nTAB: Browser (B) → Chat (C) → Input (I), UP/DOWN to navigate/scroll, L to load files.\n")
     
     def action_focus_next(self) -> None:
-        """Focus next widget (TAB)."""
+        """Focus next widget (TAB) - cycle: browser → chat → input → browser."""
         if self.current_focus == "browser":
+            self.current_focus = "chat"
+        elif self.current_focus == "chat":
             self.current_focus = "input"
-            # watch_current_focus will be called automatically
-        else:
+        else:  # input
             self.current_focus = "browser"
-            # watch_current_focus will be called automatically
+        # watch_current_focus will be called automatically
     
     def _on_key(self, event) -> None:
         """Handle ENTER key at app level for browser mode."""
@@ -237,26 +238,33 @@ class CodeAssistantApp(Static):
             event.prevent_default()
     
     def action_focus_previous(self) -> None:
-        """Focus previous widget (Shift+TAB)."""
+        """Focus previous widget (Shift+TAB) - cycle: browser ← chat ← input ← browser."""
         if self.current_focus == "input":
+            self.current_focus = "chat"
+        elif self.current_focus == "chat":
             self.current_focus = "browser"
-            # watch_current_focus will be called automatically
-        else:
+        else:  # browser
             self.current_focus = "input"
             # watch_current_focus will be called automatically
     
     def action_cursor_up(self) -> None:
-        """Move cursor up in file list (browser mode only)."""
+        """Move cursor up in file list (browser) or scroll chat (chat mode)."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_cursor_up()
+        elif self.current_focus == "chat" and self.chat_display:
+            # Scroll chat up
+            self.chat_display.scroll_up()
     
     def action_cursor_down(self) -> None:
-        """Move cursor down in file list (browser mode only)."""
+        """Move cursor down in file list (browser) or scroll chat (chat mode)."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_cursor_down()
+        elif self.current_focus == "chat" and self.chat_display:
+            # Scroll chat down
+            self.chat_display.scroll_down()
     
     def action_select_cursor(self) -> None:
-        """Select item in file list (browser mode) or submit (input mode)."""
+        """Select item in file list (browser) or submit (input mode)."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_select_cursor()
         elif self.current_focus == "input":
@@ -320,13 +328,19 @@ class CodeAssistantApp(Static):
         if focus == "input":
             self.input_field.focus()
             self.input_field.disabled = False
-        else:
+        elif focus == "chat":
+            # Chat mode: give focus to chat display for scrolling
+            self.input_field.blur()
+            self.input_field.disabled = True
+            self.chat_display.focus()
+        else:  # browser
             # Browser mode: blur input and disable it
             self.input_field.blur()
             self.input_field.disabled = True
+            self.file_list.focus()
         
-        # Update status bar
-        focus_char = "B" if focus == "browser" else "I"
+        # Update status bar with current focus indicator
+        focus_char = "B" if focus == "browser" else "C" if focus == "chat" else "I"
         ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
         self.status_bar.update(f"Curr-focus: {focus_char}  |  {ctx_status}")
     
