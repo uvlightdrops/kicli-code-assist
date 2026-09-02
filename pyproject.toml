@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kicli-code-assist"
+version = "0.1.0"
+description = "Headless Code Assistant with TUI and Diff Preview"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "KI Team"}]
+
+dependencies = [
+    "textual>=0.20.0",
+    "rich>=13.0.0",
+    "pygments>=2.14.0",
+    "pyyaml>=6.0",
+    "ki-core @ file:///home/flow/dev_flow/ki-core",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+[project.scripts]
+kicli-assist = "kicli_code_assist.cli:main"
+kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
+
+[tool.setuptools]
+packages = ["kicli_code_assist"]
