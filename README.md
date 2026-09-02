@@ -14,15 +14,17 @@ Headless code generation and review tool with interactive TUI and Tmux support.
 ## Installation
 
 ```bash
-# Clone repo
-git clone https://github.com/uvlightdrops/kicli-code-assist.git
-cd kicli-code-assist
+# Clone the repo and ensure ki-core is present in the sibling directory
+cd ~/dev_flow
+git clone <ki-core-repo-url> ki-core
+git clone <kicli-code-assist-repo-url> kicli-code-assist
 
-# Create venv (Python 3.10+ required)
+cd ~/dev_flow/kicli-code-assist
 python3.10 -m venv venv
 source venv/bin/activate
 
-# Install with ki-core integration
+# Install the shared base first, then the assistant
+pip install -e ~/dev_flow/ki-core
 pip install -e .
 ```
 

@@ -10,10 +10,10 @@ python3 install_local.py
 
 This script automatically:
 1. ✅ Creates a virtual environment (if needed)
-2. ✅ Resolves `${HOME}` to your home directory
-3. ✅ Expands ki-core path in `pyproject.toml`
-4. ✅ Installs all dependencies
-5. ✅ Verifies ki-core exists
+2. ✅ Verifies that a local `ki-core` checkout exists at `~/dev_flow/ki-core`
+3. ✅ Installs `ki-core` in editable mode
+4. ✅ Installs `kicli-code-assist` in editable mode
+5. ✅ Keeps the project portable without machine-specific `file://` URLs
 
 ## Quick Start
 
@@ -30,23 +30,9 @@ kicli-assist chat         # Simple chat mode
 kicli-assist --help       # See all options
 ```
 
-## How Dynamic Paths Work
+## How it works
 
-**Problem:** Original hardcoded path broke for other users:
-```toml
-ki-core @ file:///home/flow/dev_flow/ki-core  ❌ Only works for user "flow"
-```
-
-**Solution:** Placeholder expanded at install time:
-```toml
-ki-core @ file://${HOME}/dev_flow/ki-core  ✅ Works for any user
-```
-
-The `install_local.py` script:
-- Reads current user's `$HOME` via `Path.home()`
-- Replaces `${HOME}` with actual path
-- Updates `pyproject.toml` with expanded path
-- Installs using venv's pip
+The project now avoids hardcoded `file://${HOME}` package URLs. Instead, the installer explicitly installs the local `ki-core` checkout first, then installs the current project. This keeps the metadata stable and removes machine-specific path issues across different users or machines.
 
 ## Requirements
 
@@ -60,7 +46,7 @@ The `install_local.py` script:
 ```bash
 # Verify ki-core exists
 ls -la ~/dev_flow/ki-core
-# Should show: __init__.py, core/, config.py, etc.
+# Should show: src/, README.md, pyproject.toml, etc.
 ```
 
 ### Verify installation worked
@@ -78,11 +64,5 @@ python3 install_local.py
 
 ## For Multiple Users
 
-Each user runs the installer once:
-```bash
-cd ~/projects/kicli-code-assist  # (wherever they cloned it)
-python3 install_local.py
-```
-
-Each gets their own venv with paths expanded to their `$HOME`.
+Each user runs the installer once from their own clone and keeps a local venv. The project no longer depends on a single fixed absolute path.
 

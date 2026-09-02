@@ -16,7 +16,7 @@ dependencies = [
     "rich>=13.0.0",
     "pygments>=2.14.0",
     "pyyaml>=6.0",
-    "ki-core @ file://${HOME}/dev_flow/ki-core",
+    "ki-core>=0.1.0a1",
 ]
 
 [project.optional-dependencies]
@@ -32,4 +32,8 @@ kicli-assist = "kicli_code_assist.cli:main"
 kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
 
 [tool.setuptools]
-packages = ["kicli_code_assist"]
+package-dir = {"" = "."}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["kicli_code_assist*"]

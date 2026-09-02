@@ -78,18 +78,26 @@ class SelectableFileList(Static):
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
-        self.current_dir = Path(os.getcwd())
+        self.current_dir = self.parent_app.get_allowed_base_path()
         self.entries = []  # (path, is_dir)
         self.selected_index = 0
         self.load_directory()
     
+    def _is_in_allowed_root(self, path: Path) -> bool:
+        """Return True when path stays within the configured workspace root."""
+        return self.parent_app.is_path_allowed(path)
+    
     def load_directory(self):
         """Load entries for current directory."""
+        allowed_root = self.parent_app.get_allowed_base_path()
+        if not self.current_dir or not self._is_in_allowed_root(self.current_dir):
+            self.current_dir = allowed_root
         self.entries = []
         try:
-            # Add parent directory entry
-            if self.current_dir != self.current_dir.parent:
-                self.entries.append((self.current_dir.parent, True, ".."))
+            # Add parent directory entry only while still inside the allowed base root.
+            parent_dir = self.current_dir.parent
+            if self.current_dir != allowed_root and self._is_in_allowed_root(parent_dir):
+                self.entries.append((parent_dir, True, ".."))
             
             # Add files and directories
             for item in sorted(self.current_dir.iterdir()):
@@ -134,17 +142,26 @@ class SelectableFileList(Static):
         
         path, is_dir, _ = self.entries[self.selected_index]
         if is_dir:
-            self.current_dir = path
-            self.load_directory()
+            if path and self.parent_app.is_path_allowed(path):
+                self.current_dir = path
+                self.load_directory()
+            elif path and path.name == "..":
+                base_dir = self.parent_app.get_allowed_base_path()
+                if self.current_dir != base_dir:
+                    self.current_dir = self.current_dir.parent
+                    if not self.parent_app.is_path_allowed(self.current_dir):
+                        self.current_dir = base_dir
+                    self.load_directory()
         else:
-            self.parent_app.update_file_preview(path)
+            if path and self.parent_app.is_path_allowed(path):
+                self.parent_app.update_file_preview(path)
     
     def _update_preview(self):
         """Update preview for current selection."""
         if not self.entries:
             return
         path, is_dir, _ = self.entries[self.selected_index]
-        if not is_dir and path:
+        if not is_dir and path and self.parent_app.is_path_allowed(path):
             self.parent_app.update_file_preview(path)
             self.parent_app.selected_file = str(path)
     
@@ -153,14 +170,16 @@ class SelectableFileList(Static):
         if not self.entries:
             return None
         path, is_dir, _ = self.entries[self.selected_index]
-        return str(path) if not is_dir and path else None
+        if not path or is_dir or not self.parent_app.is_path_allowed(path):
+            return None
+        return str(path)
 
 
 class CodeAssistantApp(Static):
     """Code assistant with file browser and chat."""
     
     # Reactive state
-    current_focus = reactive("browser")  # "browser", "chat", or "input"
+    current_focus = reactive("browser")  # "browser", "chat", "input", or "preview"
     project_loaded = reactive(False)
     
     BINDINGS = [
@@ -168,6 +187,10 @@ class CodeAssistantApp(Static):
         Binding("shift+tab", "focus_previous", "Focus Previous", show=True),
         Binding("up", "cursor_up", "Up", show=False),
         Binding("down", "cursor_down", "Down", show=False),
+        Binding("ctrl+b", "focus_browser", "Browser", show=True),
+        Binding("ctrl+f", "focus_preview", "Preview", show=True),
+        Binding("ctrl+c", "focus_chat", "Chat", show=True),
+        Binding("ctrl+i", "focus_input", "Input", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
         Binding("q", "app_quit", "Quit", show=True),
@@ -178,6 +201,7 @@ class CodeAssistantApp(Static):
         self.chat_session = ChatSession(os.getcwd())
         self.file_list = None
         self.preview_display = None
+        self.preview_title = None
         self.chat_display = None
         self.input_field = None
         self.status_bar = None
@@ -192,22 +216,46 @@ class CodeAssistantApp(Static):
         from kicli_code_assist.examples.simple_chat import create_client
         
         self.config = Config.from_env()
+        self.allowed_base_path = self._resolve_allowed_base_path()
         from kicli_code_assist.cli import _detect_best_provider
         provider = _detect_best_provider()
         self.client = create_client(self.config, provider)
     
-    def _wrap_text(self, text: str, width: int = 80) -> str:
-        """Wrap text to fit terminal width."""
-        # Remove existing newlines and wrap
-        lines = []
-        for line in text.split('\n'):
-            if len(line) > width:
-                # Use textwrap to break long lines
-                wrapped = textwrap.fill(line, width=width)
-                lines.append(wrapped)
-            else:
-                lines.append(line)
-        return '\n'.join(lines)
+    def get_allowed_base_path(self) -> Path:
+        """Return the allowed project root for file browsing and previews."""
+        return self.allowed_base_path
+    
+    def _resolve_allowed_base_path(self) -> Path:
+        """Resolve the workspace root but prevent escapes outside the configured base."""
+        configured = getattr(self.config, "kicli_allowed_base_path", "") or os.getcwd()
+        candidate = Path(configured).expanduser().resolve()
+        if not candidate.exists() or not candidate.is_dir():
+            candidate = Path(os.getcwd()).resolve()
+        return candidate
+    
+    def is_path_allowed(self, path: Path | str) -> bool:
+        """Check whether a path stays within the configured project root."""
+        try:
+            resolved = Path(path).expanduser().resolve()
+        except OSError:
+            return False
+        return resolved == self.allowed_base_path or self.allowed_base_path in resolved.parents
+    
+    def action_focus_browser(self) -> None:
+        """Focus the file browser panel."""
+        self.current_focus = "browser"
+
+    def action_focus_preview(self) -> None:
+        """Focus the file preview panel."""
+        self.current_focus = "preview"
+
+    def action_focus_chat(self) -> None:
+        """Focus the chat panel."""
+        self.current_focus = "chat"
+
+    def action_focus_input(self) -> None:
+        """Focus the input panel."""
+        self.current_focus = "input"
     
     def compose(self) -> ComposeResult:
         """Create child widgets."""
@@ -222,7 +270,8 @@ class CodeAssistantApp(Static):
                 yield self.browser_title
                 self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
                 yield self.file_list
-                yield Static("👁️  File Preview", classes="panel_title")
+                self.preview_title = Static("👁️  File Preview", classes="panel_title", id="preview_title")
+                yield self.preview_title
                 # Use static widget for preview
                 self.preview_display = Static("No file selected", classes="preview")
                 yield self.preview_display
@@ -257,12 +306,14 @@ class CodeAssistantApp(Static):
         self.chat_display.write("Welcome to KI Code Assistant!\nTAB: Browser (B) → Chat (C) → Input (I), UP/DOWN to navigate/scroll, L to load files.\n")
     
     def action_focus_next(self) -> None:
-        """Focus next widget (TAB) - cycle: browser → chat → input → browser."""
+        """Focus next widget (TAB) - cycle: browser → chat → input → preview → browser."""
         if self.current_focus == "browser":
             self.current_focus = "chat"
         elif self.current_focus == "chat":
             self.current_focus = "input"
-        else:  # input
+        elif self.current_focus == "input":
+            self.current_focus = "preview"
+        else:  # preview
             self.current_focus = "browser"
         # watch_current_focus will be called automatically
     
@@ -276,30 +327,34 @@ class CodeAssistantApp(Static):
             event.prevent_default()
     
     def action_focus_previous(self) -> None:
-        """Focus previous widget (Shift+TAB) - cycle: browser ← chat ← input ← browser."""
-        if self.current_focus == "input":
+        """Focus previous widget (Shift+TAB) - cycle: preview ← input ← chat ← browser ← preview."""
+        if self.current_focus == "preview":
+            self.current_focus = "input"
+        elif self.current_focus == "input":
             self.current_focus = "chat"
         elif self.current_focus == "chat":
             self.current_focus = "browser"
         else:  # browser
-            self.current_focus = "input"
+            self.current_focus = "preview"
             # watch_current_focus will be called automatically
     
     def action_cursor_up(self) -> None:
-        """Move cursor up in file list (browser) or scroll chat (chat mode)."""
+        """Move cursor up in file list, scroll chat/preview if focused."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_cursor_up()
         elif self.current_focus == "chat" and self.chat_display:
-            # Scroll chat up
             self.chat_display.scroll_up()
+        elif self.current_focus == "preview" and self.preview_display:
+            self.preview_display.scroll_up()
     
     def action_cursor_down(self) -> None:
-        """Move cursor down in file list (browser) or scroll chat (chat mode)."""
+        """Move cursor down in file list, scroll chat/preview if focused."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_cursor_down()
         elif self.current_focus == "chat" and self.chat_display:
-            # Scroll chat down
             self.chat_display.scroll_down()
+        elif self.current_focus == "preview" and self.preview_display:
+            self.preview_display.scroll_down()
     
     def action_select_cursor(self) -> None:
         """Select item in file list (browser) or submit (input mode)."""
@@ -322,7 +377,7 @@ class CodeAssistantApp(Static):
         
         file_path = self.file_list.get_selected_file()
         if not file_path:
-            self.chat_display.write("[bold yellow]⚠️  No file selected[/]\n")
+            self.chat_display.write("[bold yellow]⚠️  No valid file selected within the allowed workspace[/]\n")
             return
         
         # Try to read file content
@@ -367,23 +422,35 @@ class CodeAssistantApp(Static):
         self.browser_title.remove_class("active")
         self.chat_title.remove_class("active")
         self.input_title.remove_class("active")
+        if self.preview_title:
+            self.preview_title.remove_class("active")
         
         if focus == "input":
             self.input_field.focus()
             self.input_title.add_class("active")
         elif focus == "chat":
-            # Chat mode: give focus to chat display for scrolling
             self.input_field.blur()
             self.chat_display.focus()
             self.chat_title.add_class("active")
+        elif focus == "preview":
+            self.input_field.blur()
+            if self.preview_display:
+                self.preview_display.focus()
+            self.preview_title.add_class("active")
         else:  # browser
-            # Browser mode: blur input
             self.input_field.blur()
             self.file_list.focus()
             self.browser_title.add_class("active")
         
         # Update status bar with current focus indicator
-        focus_char = "B" if focus == "browser" else "C" if focus == "chat" else "I"
+        if focus == "browser":
+            focus_char = "B"
+        elif focus == "preview":
+            focus_char = "P"
+        elif focus == "chat":
+            focus_char = "C"
+        else:
+            focus_char = "I"
         ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
         self.status_bar.update(f"Curr-focus: {focus_char}  |  {ctx_status}")
     
@@ -564,6 +631,16 @@ def main():
         }
         
         #browser_title.active {
+            background: $warning;
+            color: $surface;
+            text-style: bold;
+        }
+        
+        #preview_title {
+            background: $boost;
+        }
+        
+        #preview_title.active {
             background: $warning;
             color: $surface;
             text-style: bold;
