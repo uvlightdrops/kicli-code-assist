@@ -1,6 +1,7 @@
 """Chat history persistence and session management."""
 
 import json
+import os
 from datetime import datetime
 from pathlib import Path
 
@@ -14,8 +15,6 @@ def get_cache_dir() -> Path:
         Path to cache directory from config, or default: $HOME/dev_data/kicli-code-assist/
     """
     config = Config.from_env()
-    
-    # Get cache dir from config, with fallback
     cache_dir_str = config.kicli_cache_dir or os.path.expanduser("~/dev_data/kicli-code-assist")
     cache_dir = Path(cache_dir_str).expanduser()
     cache_dir.mkdir(parents=True, exist_ok=True)
@@ -29,9 +28,7 @@ def get_chat_history_dir() -> Path:
         Path to chat history directory, or default: $cache_dir/chat_history/
     """
     config = Config.from_env()
-
-    # Older ki-core builds may not expose this field yet.
-    chat_history_dir = getattr(config, "kicli_chat_history_dir", "")
+    chat_history_dir = config.kicli_chat_history_dir
     if chat_history_dir:
         history_dir = Path(chat_history_dir).expanduser()
     else:

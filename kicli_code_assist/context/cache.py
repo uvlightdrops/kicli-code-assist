@@ -56,7 +56,11 @@ class ContextCache:
             config: Configuration object
         """
         self.config = config or Config.from_env()
-        self.cache_dir = Path(cache_dir or self.config.kicli_cache_dir) / "context_cache"
+        from kicli_code_assist.chat_history import get_cache_dir
+
+        configured_cache_dir = cache_dir or self.config.kicli_cache_dir
+        base_cache_dir = Path(configured_cache_dir) if configured_cache_dir else get_cache_dir()
+        self.cache_dir = base_cache_dir / "context_cache"
         self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         self.max_cache_size_mb = self.config.context_cache_max_size_mb

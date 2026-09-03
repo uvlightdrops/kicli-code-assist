@@ -4,7 +4,7 @@ import os
 from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.widgets import Header, Footer, Static, Input, RichLog
+from textual.widgets import Header, Footer, Static, RichLog, TextArea
 from textual.binding import Binding
 from textual.reactive import reactive
 from textual.message import Message
@@ -15,72 +15,10 @@ import textwrap
 from kicli_code_assist.chat_session import ChatSession
 
 
-class MultilineInput(Static):
-    """Multi-line input widget that wraps text and grows dynamically."""
-
-    can_focus = True
-
-    def __init__(self, parent_app=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.parent_app = parent_app
-        self.text_area = None
-    
-    def compose(self):
-        """Compose the multi-line input."""
-        from textual.widgets import TextArea
-        self.text_area = TextArea(id="text_input", language="markdown")
-        self.text_area.can_focus = True
-        yield self.text_area
-    
-    def on_mount(self):
-        """Setup text area after mount."""
-        # Configure for input mode
-        self.text_area.show_line_numbers = False
-        self.text_area.show_cursor_line = False
-        self.text_area.can_focus = True
-        if self.parent_app and self.parent_app.current_focus == "input":
-            self.call_after_refresh(self.focus)
-    
-    def on_key(self, event) -> None:
-        """Handle ENTER key submission."""
-        from textual.keys import Keys
-        
-        # Ctrl+ENTER to submit, ENTER for new line
-        if event.key == Keys.ControlJ or (event.key == Keys.Enter and "meta" in str(event.key)):
-            if self.parent_app and self.parent_app.current_focus == "input":
-                self.parent_app.action_select_cursor()
-                event.prevent_default()
-    
-    def get_value(self) -> str:
-        """Get the current text value."""
-        if self.text_area:
-            return self.text_area.text
-        return ""
-    
-    def set_value(self, value: str) -> None:
-        """Set the text value."""
-        if self.text_area:
-            self.text_area.text = value
-    
-    def clear(self) -> None:
-        """Clear the text."""
-        if self.text_area:
-            self.text_area.text = ""
-    
-    def focus(self) -> None:
-        """Focus the text area."""
-        if self.text_area:
-            self.text_area.focus()
-            self.text_area.can_focus = True
-    
-    def blur(self) -> None:
-        """Blur the text area."""
-        if self.text_area:
-            self.text_area.blur()
-
-
 class SelectableFileList(Static):
     """Navigable file list for current directory."""
+
+    can_focus = True
     
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -182,6 +120,130 @@ class SelectableFileList(Static):
         return str(path)
 
 
+class PreviewPane(Static):
+    """Scrollable preview with line selection support."""
+
+    can_focus = True
+
+    def __init__(self, parent_app, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent_app = parent_app
+        self.lines: list[str] = []
+        self.file_path: Path | None = None
+        self.cursor_line = 0
+        self.selection_start: int | None = None
+        self.selection_end: int | None = None
+        self.preview_scroll_offset = 0
+        self.page_size = 20
+
+    def set_content(self, path: Path, lines: list[str]) -> None:
+        """Load preview content for a file."""
+        self.file_path = path
+        self.lines = lines
+        self.cursor_line = 0
+        self.selection_start = None
+        self.selection_end = None
+        self.preview_scroll_offset = 0
+        self._refresh_preview()
+
+    def action_cursor_down(self) -> None:
+        """Move cursor down one line."""
+        if self.cursor_line < max(0, len(self.lines) - 1):
+            self.cursor_line += 1
+            self._ensure_cursor_visible()
+            self._refresh_preview()
+
+    def action_cursor_up(self) -> None:
+        """Move cursor up one line."""
+        if self.cursor_line > 0:
+            self.cursor_line -= 1
+            self._ensure_cursor_visible()
+            self._refresh_preview()
+
+    def action_page_down(self) -> None:
+        """Scroll down like less/more."""
+        if self.lines:
+            self.cursor_line = min(len(self.lines) - 1, self.cursor_line + self.page_size)
+            self._ensure_cursor_visible()
+            self._refresh_preview()
+
+    def action_page_up(self) -> None:
+        """Scroll up like less/more."""
+        if self.lines:
+            self.cursor_line = max(0, self.cursor_line - self.page_size)
+            self._ensure_cursor_visible()
+            self._refresh_preview()
+
+    def mark_start(self) -> None:
+        """Mark selection start line."""
+        self.selection_start = self.cursor_line
+        if self.selection_end is not None and self.selection_end < self.selection_start:
+            self.selection_end = None
+        self._refresh_preview()
+
+    def mark_end(self) -> None:
+        """Mark selection end line."""
+        if self.selection_start is None:
+            self.selection_start = self.cursor_line
+        self.selection_end = self.cursor_line
+        self._refresh_preview()
+
+    def append_selection_to_context(self) -> None:
+        """Append selected range to the next KI request."""
+        if self.file_path is None or not self.lines:
+            return
+
+        start = self.selection_start if self.selection_start is not None else self.cursor_line
+        end = self.selection_end if self.selection_end is not None else self.cursor_line
+        start, end = sorted((start, end))
+        selected_lines = self.lines[start:end + 1]
+        self.parent_app.append_preview_selection(self.file_path, start + 1, end + 1, selected_lines)
+
+    def _ensure_cursor_visible(self) -> None:
+        if self.cursor_line < self.preview_scroll_offset:
+            self.preview_scroll_offset = self.cursor_line
+        elif self.cursor_line >= self.preview_scroll_offset + self.page_size:
+            self.preview_scroll_offset = self.cursor_line - self.page_size + 1
+
+    def _refresh_preview(self) -> None:
+        if self.file_path is None:
+            self.update("No file selected")
+            return
+
+        start = self.preview_scroll_offset
+        end = min(len(self.lines), start + self.page_size)
+        rendered = [f"{self.file_path.name}", "─" * 60]
+        selection_range = None
+        if self.selection_start is not None:
+            selection_end = self.selection_end if self.selection_end is not None else self.selection_start
+            selection_range = range(min(self.selection_start, selection_end), max(self.selection_start, selection_end) + 1)
+
+        for line_no in range(start, end):
+            cursor = ">" if line_no == self.cursor_line else " "
+            marker = "* " if selection_range and line_no in selection_range else "  "
+            rendered.append(f"{cursor}{marker}{line_no + 1:3} {self.lines[line_no]}")
+
+        if end < len(self.lines):
+            rendered.append("... (truncated)")
+
+        self.update("\n".join(rendered))
+
+
+class ChatInput(TextArea):
+    """Single-purpose chat input with Enter-to-send."""
+
+    def __init__(self, parent_app, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent_app = parent_app
+
+    def on_key(self, event) -> None:
+        """Submit on Enter when the input has focus."""
+        if event.key == "enter" and self.parent_app.current_focus == "input":
+            self.parent_app.action_select_cursor()
+            event.prevent_default()
+            event.stop()
+
+
 class CodeAssistantApp(Static):
     """Code assistant with file browser and chat."""
     
@@ -192,13 +254,18 @@ class CodeAssistantApp(Static):
     BINDINGS = [
         Binding("tab", "focus_next", "Focus Next", show=True),
         Binding("shift+tab", "focus_previous", "Focus Previous", show=True),
+        Binding("enter", "select_cursor", "Select / Send", show=False),
         Binding("up", "cursor_up", "Up", show=False),
         Binding("down", "cursor_down", "Down", show=False),
+        Binding("pageup", "page_up", "Page Up", show=False),
+        Binding("pagedown", "page_down", "Page Down", show=False),
         Binding("ctrl+b", "focus_browser", "Browser", show=True),
         Binding("ctrl+f", "focus_preview", "Preview", show=True),
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
+        Binding("s", "mark_selection_start", "Mark Start", show=True),
+        Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
         Binding("q", "app_quit", "Quit", show=True),
     ]
@@ -234,7 +301,7 @@ class CodeAssistantApp(Static):
     
     def _resolve_allowed_base_path(self) -> Path:
         """Resolve the workspace root but prevent escapes outside the configured base."""
-        configured = getattr(self.config, "kicli_allowed_base_path", "") or os.getcwd()
+        configured = self.config.kicli_allowed_base_path or os.getcwd()
         candidate = Path(configured).expanduser().resolve()
         if not candidate.exists() or not candidate.is_dir():
             candidate = Path(os.getcwd()).resolve()
@@ -251,14 +318,19 @@ class CodeAssistantApp(Static):
     def action_focus_browser(self) -> None:
         """Focus the file browser panel."""
         self.current_focus = "browser"
+        self.call_after_refresh(self.file_list.focus)
 
     def action_focus_preview(self) -> None:
         """Focus the file preview panel."""
         self.current_focus = "preview"
+        if self.preview_display:
+            self.call_after_refresh(self.preview_display.focus)
 
     def action_focus_chat(self) -> None:
         """Focus the chat panel."""
         self.current_focus = "chat"
+        if self.chat_display:
+            self.call_after_refresh(self.chat_display.focus)
 
     def action_focus_input(self) -> None:
         """Focus the input panel."""
@@ -275,14 +347,14 @@ class CodeAssistantApp(Static):
         with Horizontal(id="main_container"):
             # Left: File list + preview
             with Vertical(id="left_panel", classes="panel"):
-                self.browser_title = Static("📂 File List", classes="panel_title", id="browser_title")
+                self.browser_title = Static("📂 Browser", classes="panel_title", id="browser_title")
                 yield self.browser_title
                 self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
                 yield self.file_list
                 self.preview_title = Static("👁️  File Preview", classes="panel_title", id="preview_title")
                 yield self.preview_title
                 # Use static widget for preview
-                self.preview_display = Static("No file selected", classes="preview")
+                self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
                 yield self.preview_display
         
             # Right: Chat area
@@ -295,7 +367,10 @@ class CodeAssistantApp(Static):
         # Input area
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
-        self.input_field = MultilineInput(self, id="chat_input")
+        self.input_field = ChatInput(self, id="chat_input", language="markdown")
+        self.input_field.show_line_numbers = False
+        self.input_field.show_cursor_line = False
+        self.input_field.can_focus = True
         yield self.input_field
         
         # Status bar
@@ -304,9 +379,8 @@ class CodeAssistantApp(Static):
     
     def on_mount(self) -> None:
         """Setup after mount."""
-        # Blur input field first, then focus file list
-        self.input_field.blur()
-        self.file_list.focus()
+        self.input_field.focus()
+        self.current_focus = "input"
         # Defer preview initialization until rendering is complete
         self.app.call_later(self._init_preview_async)
     
@@ -325,15 +399,6 @@ class CodeAssistantApp(Static):
         else:  # preview
             self.current_focus = "browser"
         # watch_current_focus will be called automatically
-    
-    def _on_key(self, event) -> None:
-        """Handle ENTER key at app level for browser mode."""
-        from textual.events import Key
-        
-        # ENTER in browser mode selects file
-        if event.key == "enter" and self.current_focus == "browser":
-            self.action_select_cursor()
-            event.prevent_default()
     
     def action_focus_previous(self) -> None:
         """Focus previous widget (Shift+TAB) - cycle: preview ← input ← chat ← browser ← preview."""
@@ -363,17 +428,43 @@ class CodeAssistantApp(Static):
         elif self.current_focus == "chat" and self.chat_display:
             self.chat_display.scroll_down()
         elif self.current_focus == "preview" and self.preview_display:
-            self.preview_display.scroll_down()
-    
+            self.preview_display.action_cursor_down()
+
     def action_select_cursor(self) -> None:
         """Select item in file list (browser) or submit (input mode)."""
         if self.current_focus == "browser" and self.file_list:
             self.file_list.action_select_cursor()
+        elif self.current_focus == "preview" and self.preview_display:
+            self.preview_display.append_selection_to_context()
         elif self.current_focus == "input":
             # Manually handle input submission
-            msg = self.input_field.get_value().strip()
+            msg = self.input_field.text.strip()
             if msg:
                 self.on_input_submitted_manual(msg)
+
+    def action_page_up(self) -> None:
+        """Page up in preview/chat."""
+        if self.current_focus == "chat" and self.chat_display:
+            self.chat_display.scroll_page_up()
+        elif self.current_focus == "preview" and self.preview_display:
+            self.preview_display.action_page_up()
+
+    def action_page_down(self) -> None:
+        """Page down in preview/chat."""
+        if self.current_focus == "chat" and self.chat_display:
+            self.chat_display.scroll_page_down()
+        elif self.current_focus == "preview" and self.preview_display:
+            self.preview_display.action_page_down()
+
+    def action_mark_selection_start(self) -> None:
+        """Mark selection start in preview."""
+        if self.current_focus == "preview" and self.preview_display:
+            self.preview_display.mark_start()
+
+    def action_mark_selection_end(self) -> None:
+        """Mark selection end in preview."""
+        if self.current_focus == "preview" and self.preview_display:
+            self.preview_display.mark_end()
     
     def action_app_quit(self) -> None:
         """Quit the application (Q key)."""
@@ -439,20 +530,14 @@ class CodeAssistantApp(Static):
                 self.call_after_refresh(self.input_field.focus)
             self.input_title.add_class("active")
         elif focus == "chat":
-            if self.input_field:
-                self.input_field.blur()
             self.chat_display.focus()
             self.chat_title.add_class("active")
         elif focus == "preview":
-            if self.input_field:
-                self.input_field.blur()
             if self.preview_display:
-                self.preview_display.focus()
+                self.call_after_refresh(self.preview_display.focus)
             self.preview_title.add_class("active")
         else:  # browser
-            if self.input_field:
-                self.input_field.blur()
-            self.file_list.focus()
+            self.call_after_refresh(self.file_list.focus)
             self.browser_title.add_class("active")
         
         # Update status bar with current focus indicator
@@ -480,7 +565,7 @@ class CodeAssistantApp(Static):
     
     def on_input_submitted_manual(self, msg: str) -> None:
         """Handle input submission (used by both event and action_select_cursor)."""
-        self.input_field.clear()
+        self.input_field.text = ""
         
         # Add user message to chat with text wrapping
         wrapped_msg = self._wrap_text(msg, width=76)
@@ -498,6 +583,15 @@ class CodeAssistantApp(Static):
         
         # Run LLM call in background worker thread (non-blocking UI)
         self.llm_worker = self.run_worker(self._send_to_llm_worker, thread=True)
+
+    def _wrap_text(self, text: str, width: int = 76) -> str:
+        """Wrap plain text for chat display."""
+        lines = text.splitlines() or [text]
+        wrapped_lines = [
+            textwrap.fill(line, width=width) if line.strip() else ""
+            for line in lines
+        ]
+        return "\n".join(wrapped_lines)
     
     def _send_to_llm_worker(self) -> None:
         """Send message to LLM in background thread (non-blocking)."""
@@ -561,23 +655,23 @@ class CodeAssistantApp(Static):
         """Update file preview when file is selected."""
         try:
             if path.is_file() and path.suffix not in ['.pyc', '.o']:
-                # Read first 30 lines
                 with open(path, 'r', encoding='utf-8', errors='ignore') as f:
-                    lines = f.readlines()[:30]
-                
-                # Format preview text - NO MARKUP for Static widgets
-                preview_lines = [f"{path.name}"]
-                preview_lines.append("─" * 60)
-                for i, line in enumerate(lines, 1):
-                    preview_lines.append(f"{i:3} {line.rstrip()}")
-                
-                if len(lines) == 30:
-                    preview_lines.append("... (truncated)")
-                
-                # Update static widget
-                self.preview_display.update("\n".join(preview_lines))
+                    lines = [line.rstrip("\n") for line in f.readlines()]
+
+                self.preview_display.set_content(path, lines)
         except Exception as e:
             self.preview_display.update(f"Error reading file: {str(e)}")
+
+    def append_preview_selection(self, path: Path, start_line: int, end_line: int, lines: list[str]) -> None:
+        """Add a selected preview range to the next KI request context."""
+        selection_content = "\n".join(lines)
+        self.loaded_files.append({
+            "path": f"{path}#L{start_line}-L{end_line}",
+            "content": selection_content,
+        })
+        self.chat_display.write(
+            f"[bold cyan]📎 Added line range:[/] {path} L{start_line}-L{end_line}\n"
+        )
     
     def show_fallback_preview(self):
         """Show first Python file as fallback."""

@@ -141,8 +141,15 @@ class TaskTracker:
         self.config = config or Config.from_env()
         self.tasks: Dict[str, Task] = {}
         self.active_task: Optional[str] = None
+        session_dir = self.config.kicli_session_dir
+        if session_dir:
+            history_dir = Path(session_dir)
+        else:
+            from kicli_code_assist.chat_history import get_cache_dir
+
+            history_dir = get_cache_dir() / "session"
         self.history_file = (
-            Path(self.config.kicli_session_dir) / "task_history.jsonl"
+            history_dir / "task_history.jsonl"
         )
         self.history_file.parent.mkdir(parents=True, exist_ok=True)
 

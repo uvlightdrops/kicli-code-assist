@@ -17,6 +17,7 @@ from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.filters import Condition
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.widgets import TextArea
 
 from rich.console import Console
 from rich.panel import Panel
@@ -37,8 +38,7 @@ class UIState:
     current_file: Optional[str] = None  # Selected file path
     file_preview: str = ""  # Preview of selected file
     project_context_status: str = "❌ No context loaded"  # Project context status
-    focus_area: str = "files"  # "files" or "input" - which area is focused
-    input_window: Optional[object] = None  # Reference to input window for focus
+    focus_area: str = "input"  # Visual mode for file nav vs chat input
     
     def __post_init__(self):
         if self.selected_changes is None:
@@ -84,6 +84,7 @@ class CodeAssistantTUI:
         self.chat_buffer = Buffer()
         # Input buffer is where user types
         self.input_buffer = Buffer()
+        self.input_field: Optional[TextArea] = None
         self.file_buffer = Buffer()
         
         # Key bindings (will be set up after layout is created)
@@ -103,23 +104,20 @@ class CodeAssistantTUI:
             """Quit on Ctrl-C."""
             event.app.exit()
         
-        @self.kb.add('tab')
-        def _(event):
-            """Toggle focus between file browser and input with TAB."""
-            if self.state.focus_area == "files":
-                self.state.focus_area = "input"
-                event.app.layout.focus(self.state.input_window)
-            else:
-                self.state.focus_area = "files"
-            self._redraw()
-        
         @self.kb.add('c-l')
         def _(event):
             """Load project context with Ctrl-L."""
             self._load_project_context()
             self._redraw()
         
-        # File browser navigation - only active when focus_area is "files"
+        @self.kb.add('escape')
+        def _(event):
+            """Return to input mode and focus the chat field."""
+            self.state.focus_area = "input"
+            event.app.layout.focus(self.input_field)
+            self._redraw()
+
+        # File browser navigation - only active when file mode is enabled
         @self.kb.add('down', filter=Condition(lambda: self.state.focus_area == "files"))
         def _(event):
             """Move down in file list."""
@@ -141,7 +139,7 @@ class CodeAssistantTUI:
             self._update_file_preview()
             self._redraw()
         
-        @self.kb.add('enter', filter=Condition(lambda: self.state.focus_area == "input"))
+        @self.kb.add('enter', filter=Condition(lambda: self.app.layout.has_focus(self.input_field)))
         def _(event):
             """Send chat message from input."""
             self._send_chat_message()
@@ -171,12 +169,12 @@ class CodeAssistantTUI:
         
         @self.kb.add('s-tab')
         def _(event):
-            """Go back to previous area (Shift-Tab)."""
-            if self.state.focus_area == "input":
-                self.state.focus_area = "files"
-            else:
+            """Toggle between file navigation mode and input mode."""
+            if self.state.focus_area == "files":
                 self.state.focus_area = "input"
-                event.app.layout.focus(self.state.input_window)
+                event.app.layout.focus(self.input_field)
+            else:
+                self.state.focus_area = "files"
             self._redraw()
         
         @self.kb.add('y', filter=Condition(lambda: self.state.focus_area == "files"))
@@ -213,14 +211,15 @@ class CodeAssistantTUI:
     
     def _send_chat_message(self) -> None:
         """Send message to chat and get LLM response."""
-        msg = self.input_buffer.text.strip()
+        msg = self.input_field.text.strip() if self.input_field else ""
         if not msg:
             return
         
         # Add user message to UI and session
         self.add_message("You", msg)
         self.chat_session.add_message("user", msg)
-        self.input_buffer.text = ""
+        if self.input_field:
+            self.input_field.text = ""
         self._redraw()
         
         # Show loading message
@@ -304,17 +303,14 @@ class CodeAssistantTUI:
             height=None  # Dynamic height
         )
         
-        # Create input buffer control before storing it
-        input_buffer_control = BufferControl(buffer=self.input_buffer, focus_on_click=True)
-        
-        input_window = Window(
-            content=input_buffer_control,
+        self.input_field = TextArea(
+            multiline=False,
+            wrap_lines=False,
+            focus_on_click=True,
+            scrollbar=False,
             height=3,
-            dont_extend_width=True
         )
-        
-        # Store input window reference for focus control
-        self.state.input_window = input_window
+        self.input_buffer = self.input_field.buffer
         
         # Context status window
         context_status_window = Window(
@@ -323,7 +319,7 @@ class CodeAssistantTUI:
         )
         
         help_text = HTML(
-            "<b>[↑↓]</b> Navigate  <b>[ENTER]</b> Open/Send  "
+            "<b>[SHIFT+TAB]</b> Toggle Mode  <b>[ESC]</b> Input  <b>[↑↓]</b> Navigate  <b>[ENTER]</b> Open/Send  "
             "<b>[L]</b> Load  <b>[H]</b> Home  <b>[R]</b> Refresh  "
             "<b>[CTRL+L]</b> Load Context  <b>[?]</b> Help  <b>[CTRL+C]</b> Quit"
         )
@@ -371,7 +367,7 @@ class CodeAssistantTUI:
             chat_title,
             chat_window,  # Proportional height - fills available space
             input_title,
-            input_window,  # Fixed 3 lines for input
+            self.input_field,  # Fixed 3 lines for input
         ])
         
         # Main layout: Left and right panels (horizontal split)
@@ -387,8 +383,10 @@ class CodeAssistantTUI:
             help_window,
         ])
         
+        layout = Layout(root_container, focused_element=self.input_field)
+
         return Application(
-            layout=Layout(root_container),
+            layout=layout,
             key_bindings=self.kb,
             full_screen=True
         )

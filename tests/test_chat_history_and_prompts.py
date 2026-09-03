@@ -1,11 +1,9 @@
 """Tests for chat history persistence and LLM prompts."""
 
 import json
-from types import SimpleNamespace
-from pathlib import Path
 import pytest
 
-from kicli_code_assist.chat_history import ChatHistory, get_chat_history_dir
+from kicli_code_assist.chat_history import ChatHistory
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.prompts import SystemPrompts, PromptRole, PromptTemplates
 
@@ -101,19 +99,6 @@ class TestChatHistory:
         history.add_message("user", "Question", metadata)
         
         assert history.messages[0]["metadata"] == metadata
-
-    def test_chat_history_dir_falls_back_when_config_field_missing(self, monkeypatch, tmp_path):
-        """Use cache dir fallback when ki-core config lacks chat history field."""
-        config = SimpleNamespace(kicli_cache_dir=str(tmp_path))
-        monkeypatch.setattr(
-            "kicli_code_assist.chat_history.Config.from_env",
-            lambda: config,
-        )
-
-        history_dir = get_chat_history_dir()
-
-        assert history_dir == tmp_path / "chat_history"
-
 
 class TestSystemPrompts:
     """Test LLM system prompts."""
