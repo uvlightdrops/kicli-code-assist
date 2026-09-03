@@ -12,16 +12,6 @@ class OpenInterpreterConfig:
     base_url: str = "https://api.openai.com/v1"
     auto_run: bool = False
     
-    @classmethod
-    def from_yaml(cls, ki_creds: dict, ki_profile: dict) -> "OpenInterpreterConfig":
-        """Load from YAML config."""
-        return cls(
-            model=ki_profile.get("model", "gpt-4o-mini"),
-            api_key=ki_creds.get("api_key", ""),
-            base_url=ki_creds.get("base_url", "https://api.openai.com/v1"),
-        )
-
-
 class OpenInterpreterProvider:
     """Execution provider using OpenInterpreter."""
     
@@ -37,9 +27,9 @@ class OpenInterpreterProvider:
     def _validate_config(self) -> None:
         """Validate configuration."""
         if not self.config.api_key:
-            raise ValueError("OpenInterpreter requires api_key in creds.yaml")
+            raise ValueError("OpenInterpreter requires an API key in ki-core config or environment")
         if not self.config.base_url:
-            raise ValueError("OpenInterpreter requires base_url in creds.yaml")
+            raise ValueError("OpenInterpreter requires a base_url in ki-core config or environment")
     
     def start_interactive(self) -> None:
         """Start interactive OpenInterpreter session."""

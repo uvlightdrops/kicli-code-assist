@@ -30,14 +30,15 @@ pip install -e .
 
 ## Configuration
 
-**See [`docs/KI_CORE_INTEGRATION.md`](docs/KI_CORE_INTEGRATION.md) for setup with ki-core!**
+**See [`docs/KI_CORE_INTEGRATION.md`](docs/KI_CORE_INTEGRATION.md) for layered config setup with ki-core.**
 
-kicli-code-assist uses ki-core for LLM access. To get started:
+kicli-code-assist uses ki-core for LLM access and config resolution. To get started:
 
-1. Copy config: `cp /path/to/ki-core/ki.yaml.example ki.yaml`
-2. Edit with your LLM provider (OpenAI, Ollama, or company KI server)
-3. Create `creds.yaml` for sensitive data (api keys)
-4. Run the tool!
+1. Copy base config: `cp /path/to/ki-core/ki.yaml.example ki.yaml`
+2. Edit provider and `kicli:` settings
+3. Create `creds.yaml` for sensitive data
+4. Optionally add layered overrides under `config/`
+5. Run the tool
 
 ## Quick Start
 
