@@ -22,17 +22,10 @@ def get_cache_dir() -> Path:
 
 
 def get_chat_history_dir() -> Path:
-    """Get the chat history directory from ki-core Config.
-    
-    Returns:
-        Path to chat history directory, or default: $cache_dir/chat_history/
-    """
+    """Get the chat history directory from ki-core Config."""
     config = Config.from_env()
     chat_history_dir = config.kicli_chat_history_dir
-    if chat_history_dir:
-        history_dir = Path(chat_history_dir).expanduser()
-    else:
-        history_dir = get_cache_dir() / "chat_history"
+    history_dir = Path(chat_history_dir).expanduser()
 
     history_dir.mkdir(parents=True, exist_ok=True)
     return history_dir
@@ -119,7 +112,7 @@ class ChatHistory:
         Returns:
             List of session info dicts with name, created, updated, message_count
         """
-        history_dir = get_cache_dir() / "chat_history"
+        history_dir = get_chat_history_dir()
         if not history_dir.exists():
             return []
 

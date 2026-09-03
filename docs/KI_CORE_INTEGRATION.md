@@ -9,7 +9,8 @@ The assistant does not maintain its own separate YAML merge system anymore. It r
 1. `ki-core` base config discovery
 2. optional layered project config under `config/`
 3. `creds.yaml` for secrets
-4. environment variables as final overrides
+4. schema validation of the merged YAML
+5. environment variables as final overrides
 
 ## Recommended project layout
 
@@ -69,6 +70,8 @@ openai:
 - `context_*` and `diff_*` settings
 
 These come from `ki-core.Config.from_env()`.
+
+The YAML contract itself now lives in `ki-core/schema/config.schema.yaml`; `kicli-code-assist` consumes the validated result through the flat `Config` API.
 
 ## Notes
 

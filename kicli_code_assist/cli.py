@@ -86,6 +86,24 @@ def run_doctor() -> None:
     click.echo(f"- kicli_cache_dir: {config.kicli_cache_dir or '<unset>'}")
 
 
+def run_config_init(output_path: str | None = None) -> None:
+    """Generate a default config skeleton with all available options."""
+    from ki_core.schema_manager import generate_config_skeleton, get_schema_path
+
+    output = Path(output_path or "ki.yaml")
+    try:
+        base_schema = get_schema_path()
+        kicli_schema = Path(__file__).parent.parent / "schema" / "kicli.schema.yaml"
+        additional = [kicli_schema] if kicli_schema.exists() else None
+
+        generate_config_skeleton(base_schema, output, additional)
+        click.echo(f"✅ Config skeleton generated: {output}")
+        click.echo(f"📝 Edit {output} and set your credentials")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise click.Exit(1)
+
+
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
     """Load the YAML command tree, or fallback to the built-in default."""
     default_path = Path(__file__).with_name("cli_commands.yaml")
@@ -124,8 +142,28 @@ def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
                 "help": "Show CLI and environment diagnostics",
                 "callback": "kicli_code_assist.cli:run_doctor",
             },
+            {
+                "name": "config",
+                "help": "Config management",
+                "commands": [
+                    {
+                        "name": "init",
+                        "help": "Generate default config skeleton",
+                        "callback": "kicli_code_assist.cli:run_config_init",
+                        "options": [
+                            {
+                                "names": ["-o", "--output"],
+                                "param": "output_path",
+                                "default": "ki.yaml",
+                                "help": "Output path for config file",
+                            }
+                        ],
+                    }
+                ],
+            },
         ],
     }
+
 
 
 def _resolve_callback(callback_ref: str | None) -> Callable[..., Any]:

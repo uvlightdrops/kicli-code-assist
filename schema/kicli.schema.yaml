@@ -1,0 +1,98 @@
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "KiCLI Code Assist Configuration"
+description: "Application-specific schema for kicli-code-assist"
+type: object
+properties:
+  apps:
+    type: object
+    properties:
+      kicli:
+        type: object
+        title: "KiCLI Settings"
+        properties:
+          workspace_root:
+            type: string
+            description: "Root directory for workspace analysis"
+            default: ""
+          prompt_history_dir:
+            type: string
+            description: "Directory to store prompt history"
+            default: ""
+          context:
+            type: object
+            title: "Context Configuration"
+            properties:
+              max_files:
+                type: integer
+                description: "Maximum number of files to include in context"
+                default: 10
+                minimum: 1
+                maximum: 1000
+              max_size_mb:
+                type: number
+                description: "Maximum total size of context files in MB"
+                default: 5
+                minimum: 0.1
+                maximum: 1000
+              relevance_threshold:
+                type: number
+                description: "Minimum relevance score for file inclusion (0-1)"
+                default: 0.15
+                minimum: 0
+                maximum: 1
+              cache_enabled:
+                type: boolean
+                description: "Enable context caching"
+                default: true
+              cache_ttl_hours:
+                type: integer
+                description: "Cache time-to-live in hours"
+                default: 24
+                minimum: 1
+              cache_max_size_mb:
+                type: number
+                description: "Maximum cache size in MB"
+                default: 50
+                minimum: 1
+              ignore_patterns:
+                type: string
+                description: "Comma-separated glob patterns to ignore"
+                default: "__pycache__,*.pyc,node_modules,.git,.env"
+            additionalProperties: false
+            required: []
+          diff:
+            type: object
+            title: "Diff Configuration"
+            properties:
+              context_lines:
+                type: integer
+                description: "Number of context lines around changes"
+                default: 3
+                minimum: 0
+                maximum: 50
+              format:
+                type: string
+                description: "Diff format (unified, context, or side-by-side)"
+                enum: ["unified", "context", "side-by-side"]
+                default: "unified"
+              highlight_syntax:
+                type: boolean
+                description: "Enable syntax highlighting in diffs"
+                default: true
+              auto_apply_threshold:
+                type: number
+                description: "Confidence threshold for auto-applying changes (0-1)"
+                default: 0.8
+                minimum: 0
+                maximum: 1
+              max_file_size_kb:
+                type: integer
+                description: "Maximum file size for diff display in KB"
+                default: 100
+                minimum: 1
+            additionalProperties: false
+            required: []
+        additionalProperties: false
+        required: []
+    additionalProperties: true
+additionalProperties: true

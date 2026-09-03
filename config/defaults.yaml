@@ -1,0 +1,18 @@
+apps:
+  kicli:
+    workspace_root: ''
+    prompt_history_dir: ''
+    context:
+      max_files: 10
+      max_size_mb: 5
+      relevance_threshold: 0.15
+      cache_enabled: true
+      cache_ttl_hours: 24
+      cache_max_size_mb: 50
+      ignore_patterns: __pycache__,*.pyc,node_modules,.git,.env
+    diff:
+      context_lines: 3
+      format: unified
+      highlight_syntax: true
+      auto_apply_threshold: 0.8
+      max_file_size_kb: 100
