@@ -21,7 +21,7 @@ commands:
     callback: kicli_code_assist.cli:run_tmux
     options:
       - names: ["--simple"]
-        param: simple
+        param: si mple
         type: bool
         default: false
         help: Use the simple 2-pane layout
