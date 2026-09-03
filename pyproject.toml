@@ -17,7 +17,7 @@ dependencies = [
     "pygments>=2.14.0",
     "pyyaml>=6.0",
     "click>=8.1.7",
-    "ki-core @ file:///home/flow/dev_flow/ki-core",
+    "ki-core>=0.1.0a1",
 ]
 
 [project.optional-dependencies]
