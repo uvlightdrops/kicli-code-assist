@@ -1,8 +1,8 @@
 {
   "session_name": "persist-test",
-  "created": 1788640764.054618,
-  "updated": 1788640780.204883,
-  "message_count": 3,
+  "created": 1788640780.2050467,
+  "updated": 1788642332.357303,
+  "message_count": 4,
   "messages": [
     {
       "role": "user",
@@ -18,6 +18,11 @@
       "role": "user",
       "content": "Hello",
       "timestamp": "2026-09-05T22:39:40.204868"
+    },
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-09-05T23:05:32.357287"
     }
   ]
 }

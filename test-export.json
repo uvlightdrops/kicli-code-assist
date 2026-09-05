@@ -1,8 +1,8 @@
 {
   "session_name": "test-export",
-  "created": 1788640779.863592,
-  "updated": 1788640779.863669,
-  "message_count": 6,
+  "created": 1788642331.9847016,
+  "updated": 1788642331.984778,
+  "message_count": 8,
   "messages": [
     {
       "role": "user",
@@ -33,6 +33,16 @@
       "role": "assistant",
       "content": "Answer",
       "timestamp": "2026-09-05T22:39:39.863329"
+    },
+    {
+      "role": "user",
+      "content": "Question",
+      "timestamp": "2026-09-05T23:05:31.984216"
+    },
+    {
+      "role": "assistant",
+      "content": "Answer",
+      "timestamp": "2026-09-05T23:05:31.984503"
     }
   ]
 }

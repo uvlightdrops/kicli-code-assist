@@ -1,8 +1,8 @@
 {
   "session_name": "test-meta",
-  "created": 1788640763.8150287,
-  "updated": 1788640779.967752,
-  "message_count": 3,
+  "created": 1788640779.9679253,
+  "updated": 1788642332.093514,
+  "message_count": 4,
   "messages": [
     {
       "role": "user",
@@ -26,6 +26,15 @@
       "role": "user",
       "content": "Question",
       "timestamp": "2026-09-05T22:39:39.967735",
+      "metadata": {
+        "context_included": true,
+        "tokens_used": 250
+      }
+    },
+    {
+      "role": "user",
+      "content": "Question",
+      "timestamp": "2026-09-05T23:05:32.093496",
       "metadata": {
         "context_included": true,
         "tokens_used": 250

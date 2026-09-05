@@ -1,8 +1,8 @@
 {
   "session_name": "test-md",
-  "created": 1788640779.905267,
-  "updated": 1788640779.90534,
-  "message_count": 6,
+  "created": 1788642332.0290642,
+  "updated": 1788642332.029147,
+  "message_count": 8,
   "messages": [
     {
       "role": "user",
@@ -33,6 +33,16 @@
       "role": "assistant",
       "content": "It works like this...",
       "timestamp": "2026-09-05T22:39:39.905006"
+    },
+    {
+      "role": "user",
+      "content": "How does this work?",
+      "timestamp": "2026-09-05T23:05:32.028593"
+    },
+    {
+      "role": "assistant",
+      "content": "It works like this...",
+      "timestamp": "2026-09-05T23:05:32.028820"
     }
   ]
 }
