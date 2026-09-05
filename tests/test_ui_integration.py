@@ -6,7 +6,7 @@ from kicli_code_assist.ui.focus_manager import FocusManager, FocusMode
 from kicli_code_assist.ui.diff_viewer import DiffPanel, DiffDisplay, DiffViewerState
 from kicli_code_assist.ui.task_status import TaskStatusWidget, TaskStatusCompact
 from kicli_code_assist.executor.task_tracker import TaskTracker, TaskStatus, TaskType
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 class MockConfig:

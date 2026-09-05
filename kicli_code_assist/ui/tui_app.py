@@ -55,8 +55,8 @@ class CodeAssistantTUI:
             on_message: Callback when user sends message
             provider: LLM provider (auto-detect if None)
         """
-        # Load ki-core config
-        from ki_core import Config
+        # Load resolved kicli-code-assist config
+        from kicli_code_assist.app_config import AppConfig as Config
         from kicli_code_assist.examples.simple_chat import create_client
         
         self.config = Config.from_env()

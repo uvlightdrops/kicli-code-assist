@@ -1,7 +1,7 @@
 """Simple chat example with ki-core integration."""
 import sys
 import os
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 from ki_core.adapters.mock import MockAIClient
 from ki_core.adapters.ollama import OllamaClient
 from ki_core.adapters.openai_compat import OpenAICompatibleClient
@@ -12,7 +12,7 @@ def create_client(config: Config, provider: str = "mock"):
     """Create LLM client based on provider choice.
     
     Args:
-        config: ki-core Config object
+        config: resolved kicli-code-assist AppConfig
         provider: 'mock', 'ollama', or 'openai'
     """
     if provider == "mock":

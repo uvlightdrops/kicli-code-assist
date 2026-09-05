@@ -5,11 +5,11 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 def get_cache_dir() -> Path:
-    """Get the cache directory for kicli-code-assist from ki-core Config.
+    """Get the cache directory for kicli-code-assist from the resolved kicli-code-assist config.
     
     Returns:
         Path to cache directory from config, or default: $HOME/dev_data/kicli-code-assist/
@@ -22,7 +22,7 @@ def get_cache_dir() -> Path:
 
 
 def get_chat_history_dir() -> Path:
-    """Get the chat history directory from ki-core Config."""
+    """Get the chat history directory from the resolved kicli-code-assist config."""
     config = Config.from_env()
     chat_history_dir = config.kicli_chat_history_dir
     history_dir = Path(chat_history_dir).expanduser()

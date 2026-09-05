@@ -8,7 +8,7 @@ from typing import Optional, Dict, List, Set, Tuple
 from dataclasses import dataclass, field
 from collections import defaultdict
 
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 @dataclass

@@ -10,7 +10,7 @@ from kicli_code_assist.executor.task_tracker import (
     Task,
     TaskMetrics,
 )
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 class TestTaskMetrics:

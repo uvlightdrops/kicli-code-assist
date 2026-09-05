@@ -15,7 +15,7 @@ def _detect_best_provider():
     3. Company KI (if configured)
     4. Mock (fallback for testing)
     """
-    from ki_core import Config
+    from kicli_code_assist.app_config import AppConfig as Config
 
     config = Config.from_env()
 
@@ -61,7 +61,7 @@ def run_chat(model: str | None = None, provider: str | None = None) -> None:
 
 def run_openinterpreter(auto_run: bool = False, model: str | None = None) -> None:
     """Launch OpenInterpreter mode."""
-    from ki_core import Config
+    from kicli_code_assist.app_config import AppConfig as Config
     from kicli_code_assist.executor.openinterpreter_provider import OpenInterpreterConfig, OpenInterpreterProvider
 
     ki_config = Config.from_env()
@@ -77,7 +77,7 @@ def run_openinterpreter(auto_run: bool = False, model: str | None = None) -> Non
 
 def run_doctor() -> None:
     """Display quick environment diagnostics."""
-    from ki_core import Config
+    from kicli_code_assist.app_config import AppConfig as Config
     config = Config.from_env()
     click.echo("KI Code Assistant diagnostics")
     click.echo(f"- provider detection: {_detect_best_provider()}")
@@ -97,9 +97,8 @@ def run_config_init(output_path: str | None = None) -> None:
         kicli_schema = Path(__file__).parent.parent / "schema" / "kicli.schema.yaml"
         additional = [kicli_schema] if kicli_schema.exists() else None
 
+        # generate_skeleton() already echoes success/next-step messages.
         generate_skeleton(base_schema, output, additional)
-        click.echo(f"✅ Config skeleton generated: {output}")
-        click.echo(f"📝 Edit {output} and set your credentials")
     except Exception as e:
         click.echo(f"❌ Error: {e}", err=True)
         raise click.Exit(1)

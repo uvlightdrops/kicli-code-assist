@@ -7,7 +7,7 @@ from typing import List, Dict, Optional, Tuple, NamedTuple
 from dataclasses import dataclass
 from enum import Enum
 
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 class DiffFormat(Enum):

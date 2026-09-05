@@ -3,6 +3,123 @@ title: "KiCLI Code Assist Configuration"
 description: "Application-specific schema for kicli-code-assist"
 type: object
 properties:
+  storage:
+    type: object
+    title: "Storage Locations"
+    properties:
+      cache_dir:
+        type: string
+        default: ""
+        description: "Cache directory (defaults to ~/dev_data/kicli-code-assist)"
+      session_dir:
+        type: string
+        default: ""
+        description: "Directory for task/session tracking state"
+      history_dir:
+        type: string
+        default: ""
+        description: "Directory for chat history persistence"
+    additionalProperties: true
+  security:
+    type: object
+    title: "Path Security Settings"
+    properties:
+      allowed_base_path:
+        type: string
+        default: ""
+        description: "Absolute path that must not be left (e.g. /home/user/project). Empty string = no restriction"
+      enforce_path_restriction:
+        type: boolean
+        default: false
+        description: "Enable path restriction enforcement"
+    additionalProperties: true
+  prompts:
+    type: object
+    title: "Prompt Management Settings"
+    properties:
+      active_role:
+        type: string
+        default: "developer"
+        description: "Currently active prompt role"
+      roles:
+        type: object
+        additionalProperties:
+          type: object
+          properties:
+            name:
+              type: string
+              description: "Display name of the role"
+            description:
+              type: string
+              description: "Role description"
+            system_prompt:
+              type: string
+              description: "System prompt for this role"
+            enabled:
+              type: boolean
+              default: true
+            version:
+              type: string
+              default: "1.0"
+          required: ["name", "system_prompt"]
+          additionalProperties: true
+      custom_templates:
+        type: array
+        items:
+          type: object
+          properties:
+            id:
+              type: string
+              description: "Unique identifier"
+            name:
+              type: string
+              description: "Template name"
+            description:
+              type: string
+              description: "Template description"
+            system_prompt:
+              type: string
+              description: "System prompt text"
+            tags:
+              type: array
+              items:
+                type: string
+            created_at:
+              type: string
+              format: "date-time"
+            modified_at:
+              type: string
+              format: "date-time"
+          required: ["id", "name", "system_prompt"]
+          additionalProperties: true
+      language_learning:
+        type: object
+        properties:
+          enabled:
+            type: boolean
+            default: false
+          target_language:
+            type: string
+            description: "Language to learn"
+          native_language:
+            type: string
+            default: "English"
+            description: "Native language"
+          level:
+            type: string
+            enum: ["beginner", "intermediate", "advanced"]
+            default: "beginner"
+        additionalProperties: true
+      favorites:
+        type: array
+        items:
+          type: string
+        description: "Favorite roles/templates"
+      auto_save_custom:
+        type: boolean
+        default: true
+        description: "Auto-save custom templates to config"
+    additionalProperties: true
   apps:
     type: object
     properties:

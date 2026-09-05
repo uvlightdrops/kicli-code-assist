@@ -5,7 +5,7 @@ from typing import Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 from kicli_code_assist.context import ProjectContextManager, ProjectInfo
 from kicli_code_assist.chat_history import ChatHistory
 from kicli_code_assist.prompts import SystemPrompts, PromptRole

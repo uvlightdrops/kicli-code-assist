@@ -350,8 +350,8 @@ class CodeAssistantApp(Static):
         self.spinner_index = 0  # For spinner animation
         self.llm_worker = None  # Track worker thread
         
-        # Load ki-core config and LLM client
-        from ki_core import Config
+        # Load resolved kicli-code-assist config and LLM client
+        from kicli_code_assist.app_config import AppConfig as Config
         from kicli_code_assist.examples.simple_chat import create_client
         
         self.config = Config.from_env()
@@ -360,9 +360,10 @@ class CodeAssistantApp(Static):
         provider = _detect_best_provider()
         self.client = create_client(self.config, provider)
         
-        # Initialize prompt manager
-        config_dict = self.config.to_dict() if hasattr(self.config, 'to_dict') else {}
-        self.prompt_manager = PromptManager(config_dict)
+        # Initialize prompt manager with the full raw config dict (needed
+        # for the top-level "prompts" section, which AppConfig doesn't
+        # flatten into its own attributes).
+        self.prompt_manager = PromptManager(self.config.raw)
     
     def get_allowed_base_path(self) -> Path:
         """Return the allowed project root for file browsing and previews."""

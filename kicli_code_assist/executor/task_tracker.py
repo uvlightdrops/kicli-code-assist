@@ -8,7 +8,7 @@ from enum import Enum
 import json
 from pathlib import Path
 
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 class TaskStatus(Enum):

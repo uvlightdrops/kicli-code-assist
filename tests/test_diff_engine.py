@@ -8,7 +8,7 @@ from kicli_code_assist.context.diff_engine import (
     LLMOutputParser,
     DiffGenerator,
 )
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 
 class TestLineChange:
