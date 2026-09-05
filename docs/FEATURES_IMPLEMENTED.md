@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-09-05  
-**Status:** 2 complete features | 1 in-progress feature
+**Status:** 3 complete features | 1 in-progress feature
 
 ---
 
@@ -100,9 +100,123 @@ kicli-assist chat --export <format>      # Export chat session
 
 ---
 
-## 🚧 IN-PROGRESS FEATURES
+### 3. Prompt Management System
 
-### 3. Path Restriction & Security
+**Category:** KI SETTINGS
+
+**Completed Tasks:**
+- [x] Core dataclasses (CustomTemplate, PromptRole, PromptsConfig)
+- [x] PromptManager orchestration with 5 built-in roles
+- [x] Custom template management (CRUD)
+- [x] Language learning configuration and prompt injection
+- [x] Favorites system for roles and templates
+- [x] Full serialization/deserialization support
+- [x] CLI command group with 13 subcommands
+- [x] Export/import configuration with merge support
+- [x] Complete test coverage (47 core + 22 CLI tests)
+
+**Completed Features:**
+- **Phase 1 (Core):** PromptManager class, 5 built-in roles, template system, LL mode
+- **Phase 2 (CLI):** Full command interface via `ki prompts` command group
+
+**Pending Tasks:**
+- [ ] GUI/TUI integration (role selector, template editor)
+- [ ] Prompt preview panel in chat UI
+- [ ] Keyboard shortcuts for quick role switching
+- [ ] Template gallery/marketplace
+
+**What was built:**
+
+*Phase 1 - Core Implementation (47 tests):*
+- PromptManager class with role and template management
+- 5 built-in default roles: Developer, Tutor, Translator, Language Learning, Code Reviewer
+- CustomTemplate dataclass with full CRUD operations
+- LanguageLearningConfig with 3 difficulty levels
+- Full serialization to/from YAML
+- Backward compatibility with legacy SystemPrompts
+
+*Phase 2 - CLI Commands (22 tests):*
+- Complete command interface with nested subcommand groups
+- Role management: list, show, set active
+- Template management: create, show, delete, list
+- Favorites management: add, remove
+- Language learning: enable, disable, show config
+- Configuration: export to file/stdout, import with merge
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/prompts/models.py` - Dataclasses (175 LOC)
+- `kicli-code-assist/kicli_code_assist/prompts/manager.py` - PromptManager (380 LOC)
+- `kicli-code-assist/kicli_code_assist/prompts/__init__.py` - Module init
+- `yaml-cfg-wizard/src/yaml_cfg_wizard/prompts_cli.py` - CLI utilities (400 LOC)
+- `kicli-code-assist/tests/test_prompt_manager.py` - Core tests (620 LOC)
+- `yaml-cfg-wizard/tests/test_prompts_cli.py` - CLI tests (550 LOC)
+
+**Documentation:**
+- [PROMPT_MANAGEMENT_DESIGN.md](PROMPT_MANAGEMENT_DESIGN.md) - Complete design specification
+- [../kicli-code-assist/PHASE1_COMPLETE.md](../kicli-code-assist/PHASE1_COMPLETE.md) - Phase 1 details
+- [../yaml-cfg-wizard/PHASE2_COMPLETE.md](../yaml-cfg-wizard/PHASE2_COMPLETE.md) - Phase 2 details
+
+**CLI Commands:**
+```bash
+# Role management
+ki prompts list                               # List all roles
+ki prompts show <role-id>                     # Show role details
+ki prompts set <role-id>                      # Set active role
+
+# Template management
+ki prompts templates list                     # List templates
+ki prompts templates create <id> --name NAME --prompt PROMPT
+ki prompts templates delete <id>              # Delete template
+
+# Favorites
+ki prompts favorites add <id>                 # Add to favorites
+ki prompts favorites remove <id>              # Remove from favorites
+
+# Language learning
+ki prompts language-learning enable <lang> [--level LEVEL]
+ki prompts language-learning disable
+ki prompts language-learning show
+
+# Configuration
+ki prompts export [--output FILE]             # Export configuration
+ki prompts import <FILE>                      # Import configuration
+```
+
+**Configuration:**
+```yaml
+prompts:
+  active_role: developer
+  roles:
+    developer:
+      id: developer
+      name: Developer
+      system_prompt: |
+        You are an expert software developer...
+  custom_templates:
+    - id: my-template
+      name: My Custom Role
+      system_prompt: Custom prompt...
+      tags: [python, debugging]
+  language_learning:
+    enabled: true
+    target_language: Español
+    native_language: English
+    level: intermediate
+  favorites: [developer, my-template]
+```
+
+**Testing:**
+- ✅ 47 core tests (Phase 1)
+- ✅ 22 CLI tests (Phase 2)
+- ✅ 69 total prompt management tests
+
+**Commits:**
+1. `feat: Implement Prompt Management Phase 1 - Core Dataclasses and PromptManager`
+2. `feat: Implement Prompt Management Phase 2 - CLI Commands`
+
+---
+
+### 4. Path Restriction & Security
 
 **Category:** SECURITY
 
@@ -198,7 +312,7 @@ python examples/security_examples.py      # 6 examples
 
 ## 🚧 PARTIAL FEATURES
 
-### 4. Focus Management (GUI)
+### 5. Focus Management (GUI)
 
 **Category:** GUI
 
