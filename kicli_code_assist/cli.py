@@ -104,6 +104,112 @@ def run_config_init(output_path: str | None = None) -> None:
         raise click.Exit(1)
 
 
+def run_config_show(key: str | None = None) -> None:
+    """Show config value by key (dot-notation: llm.default_provider)."""
+    from ki_core import Config
+    
+    try:
+        config = Config.from_env()
+        config_dict = config.__dict__
+        
+        if not key:
+            # Show all config
+            click.echo(yaml.dump(config_dict, default_flow_style=False, sort_keys=True))
+            return
+        
+        # Look up key directly
+        if key in config_dict:
+            value = config_dict[key]
+            if value is None or value == "":
+                click.echo(f"⚠️  Key '{key}' is not set")
+            else:
+                click.echo(f"{key}: {value}")
+        else:
+            click.echo(f"❌ Key '{key}' not found", err=True)
+            raise click.ClickException(f"Key '{key}' not found")
+    except click.ClickException:
+        raise
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise click.ClickException(str(e))
+
+
+def run_config_list() -> None:
+    """List all config keys in hierarchical view."""
+    from ki_core import Config
+    
+    def print_tree(d: dict, prefix: str = "", is_last: bool = True) -> None:
+        items = sorted(d.items())
+        for i, (k, v) in enumerate(items):
+            is_last_item = i == len(items) - 1
+            current_prefix = "└── " if is_last_item else "├── "
+            click.echo(f"{prefix}{current_prefix}{k}")
+            
+            if isinstance(v, dict):
+                next_prefix = prefix + ("    " if is_last_item else "│   ")
+                print_tree(v, next_prefix, is_last_item)
+    
+    try:
+        config = Config.from_env()
+        config_dict = config.__dict__
+        click.echo("📋 Config keys:")
+        print_tree(config_dict)
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise click.ClickException(str(e))
+
+
+def run_config_validate() -> None:
+    """Validate current config against schema."""
+    from ki_core import Config
+    from ki_core.schema_manager import load_merged_schema, get_schema_path
+    import jsonschema
+    
+    try:
+        config = Config.from_env()
+        config_dict = config.__dict__
+        
+        base_schema = get_schema_path()
+        kicli_schema = Path(__file__).parent.parent / "schema" / "kicli.schema.yaml"
+        additional = [kicli_schema] if kicli_schema.exists() else None
+        schema = load_merged_schema(base_schema, additional)
+        
+        jsonschema.validate(config_dict, schema)
+        click.echo("✅ Config is valid")
+    except jsonschema.ValidationError as e:
+        click.echo(f"❌ Validation error: {e.message}", err=True)
+        click.echo(f"   Path: {' → '.join(str(p) for p in e.path)}", err=True)
+        raise click.ClickException(f"Validation error: {e.message}")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise click.ClickException(str(e))
+
+
+def run_config_paths() -> None:
+    """Show config file search paths and status."""
+    from pathlib import Path
+    
+    search_paths = [
+        Path.cwd() / "ki.yaml",
+        Path.home() / ".ki" / "ki.yaml",
+        Path.home() / ".ki.yaml",
+        Path("/etc/ki/ki.yaml"),
+    ]
+    
+    click.echo("📁 Config file search paths:")
+    for p in search_paths:
+        status = "✅ exists" if p.exists() else "  missing"
+        click.echo(f"  {status}: {p}")
+    
+    # Show env var override
+    import os
+    env_override = os.getenv("KI_CONFIG_PATH")
+    if env_override:
+        click.echo(f"\n📌 Environment override (KI_CONFIG_PATH):")
+        click.echo(f"  {env_override}")
+
+
+
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
     """Load the YAML command tree, or fallback to the built-in default."""
     default_path = Path(__file__).with_name("cli_commands.yaml")
@@ -237,6 +343,51 @@ def _register_yaml_commands(root: click.Group, config_path: str | None = None) -
 
 
 _register_yaml_commands(cli)
+
+
+# Register config subcommands directly (not via YAML due to argument support)
+@cli.group(name="config", help="Config management")
+def config_group() -> None:
+    """Config management commands."""
+    pass
+
+
+@config_group.command(name="init", help="Generate default config skeleton")
+@click.option(
+    "-o", "--output",
+    "output_path",
+    type=str,
+    default="ki.yaml",
+    help="Output path for config file"
+)
+def config_init(output_path: str) -> None:
+    """Generate a default config skeleton with all available options."""
+    run_config_init(output_path)
+
+
+@config_group.command(name="show", help="Show config value by key (dot-notation: llm.default_provider)")
+@click.argument("key", required=False)
+def config_show(key: str | None) -> None:
+    """Show config value by key."""
+    run_config_show(key)
+
+
+@config_group.command(name="list", help="List all config keys in hierarchical view")
+def config_list() -> None:
+    """List all config keys."""
+    run_config_list()
+
+
+@config_group.command(name="validate", help="Validate current config against schema")
+def config_validate() -> None:
+    """Validate config."""
+    run_config_validate()
+
+
+@config_group.command(name="paths", help="Show config file search paths and status")
+def config_paths() -> None:
+    """Show config paths."""
+    run_config_paths()
 
 
 def main() -> None:
