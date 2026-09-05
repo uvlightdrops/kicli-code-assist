@@ -27,6 +27,7 @@ Welcome to kicli-code-assist documentation. This guide will help you navigate al
 ### Configuration
 - **[KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md)** - Layered config system
 - **[CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md)** - Config resolution order
+- **[SECURITY.md](SECURITY.md)** - Path restriction and security settings
 
 ---
 
@@ -62,7 +63,7 @@ kicli-code-assist/
 - ✅ Schema-based configuration (complete)
 - ✅ Chat history export (complete)
 - 🚧 TUI focus management (partial)
-- ⏳ Path security (pending)
+- 🚧 Path security (in progress)
 - ⏳ Prompt templates (pending)
 
 **See [customer_requests.md](customer_requests.md) for full details.**

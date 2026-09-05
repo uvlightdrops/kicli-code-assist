@@ -30,7 +30,7 @@
 
 - [x] Fix TUI input focus and submission (done)
 - [ ] File preview scrollable mit Fokus
-- [ ] Shortcuts für Fokus: STRG+F (file), STRG+B (browser), STRG+C (chat), STRG+I (input)
+- [X] Shortcuts für Fokus: STRG+F (file), STRG+B (browser), STRG+C (chat), STRG+I (input)
 
 **Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#3-tui-focus-management-gui)
 
@@ -38,7 +38,7 @@
 
 ### ⏳ SECURITY - Path Restriction
 **Status: NOT STARTED** ⏳
-
+- [ ] Settings page in der UI
 - [ ] Setting für Absolutpfad im Linux system, der nicht verlassen werden darf
 
 **Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#4-absolute-path-security-setting-security)
