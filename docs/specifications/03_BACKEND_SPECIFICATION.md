@@ -328,7 +328,7 @@ def _detect_best_provider() -> str:
         return os.getenv("KI_PROVIDER")
     
     # 2. Check OpenAI availability
-    from ki_core import Config
+    from kicli_code_assist.app_config import AppConfig as Config
     config = Config.from_env()
     if config.openai_key:
         return "openai"

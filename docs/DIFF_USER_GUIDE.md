@@ -14,7 +14,7 @@ Das Diff Engine System ermöglicht es:
 
 ```python
 from kicli_code_assist.context.diff_engine import LLMOutputParser, DiffGenerator
-from ki_core import Config
+from kicli_code_assist.app_config import AppConfig as Config
 
 # Konfiguration laden
 config = Config.from_env()

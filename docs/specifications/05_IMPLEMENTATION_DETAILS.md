@@ -150,7 +150,7 @@ def __init__(self):
     self.selected_file = None
     
     # Load LLM client
-    from ki_core import Config
+    from kicli_code_assist.app_config import AppConfig as Config
     self.config = Config.from_env()
     
     from kicli_code_assist.cli import _detect_best_provider
