@@ -61,3 +61,15 @@ commands:
   - name: doctor
     help: Show CLI and environment diagnostics
     callback: kicli_code_assist.cli:run_doctor
+  - name: config
+    help: Config management
+    commands:
+      - name: init
+        help: Generate default config skeleton
+        callback: kicli_code_assist.cli:run_config_init
+        options:
+          - names: ["-o", "--output"]
+            param: output_path
+            type: str
+            default: ki.yaml
+            help: Output path for config file
