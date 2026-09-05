@@ -1,0 +1,17 @@
+{
+  "session_name": "test-meta",
+  "created": 1788640184.449952,
+  "updated": 1788640184.449953,
+  "message_count": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Question",
+      "timestamp": "2026-09-05T22:29:44.449940",
+      "metadata": {
+        "context_included": true,
+        "tokens_used": 250
+      }
+    }
+  ]
+}

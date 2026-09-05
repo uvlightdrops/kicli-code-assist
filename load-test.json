@@ -1,0 +1,13 @@
+{
+  "session_name": "load-test",
+  "created": 1788640184.764028,
+  "updated": 1788640184.764069,
+  "message_count": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Original message",
+      "timestamp": "2026-09-05T22:29:44.763874"
+    }
+  ]
+}
