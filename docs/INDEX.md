@@ -8,26 +8,25 @@ Welcome to kicli-code-assist documentation. This guide will help you navigate al
 
 - **[README.md](../README.md)** - Project overview and quick start
 - **[INSTALLATION.md](../INSTALLATION.md)** - Detailed setup instructions
-- **[customer_requests.md](customer_requests.md)** - Feature status and tracking
+- **[customer_requests.md](customer_requests.md)** - **All features organized by status** ⭐
 
 ---
 
 ## 🎯 User Guides
 
 ### Getting Started
-- **[KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md)** - How config system works
 - **[INSTALLATION.md](../INSTALLATION.md)** - Step-by-step setup
+- **[KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md)** - How the config system works
 
 ### Using the Tool
-- **[CHAT_WITH_FILES_WORKFLOW.md](CHAT_WITH_FILES_WORKFLOW.md)** - Chat workflow with files
-- **[FILE_BROWSER.md](FILE_BROWSER.md)** - Using the file browser
+- **[CHAT_WITH_FILES_WORKFLOW.md](CHAT_WITH_FILES_WORKFLOW.md)** - Complete usage workflow
+- **[FILE_BROWSER.md](FILE_BROWSER.md)** - Navigating and selecting files
 - **[DIFF_USER_GUIDE.md](DIFF_USER_GUIDE.md)** - Reviewing and applying diffs
 - **[CHAT_HISTORY_AND_PROMPTS.md](CHAT_HISTORY_AND_PROMPTS.md)** - Chat sessions and history
 
-### Configuration
-- **[KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md)** - Layered config system
-- **[CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md)** - Config resolution order
-- **[SECURITY.md](SECURITY.md)** - Path restriction and security settings
+### Configuration & Security
+- **[CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md)** - Config resolution layers
+- **[SECURITY.md](SECURITY.md)** - Path restriction and security settings (NEW!)
 
 ---
 
@@ -66,7 +65,7 @@ kicli-code-assist/
 - 🚧 Path security (in progress)
 - ⏳ Prompt templates (pending)
 
-**See [customer_requests.md](customer_requests.md) for full details.**
+**See [customer_requests.md](customer_requests.md) for detailed feature descriptions and documentation links.**
 
 ### Centralized Tracking
 Full ecosystem status (ki-core, yaml-cfg-wizard, kicli) tracked in:
