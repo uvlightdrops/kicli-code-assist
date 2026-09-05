@@ -4,13 +4,19 @@
 
 ## Effective config model
 
-The assistant does not maintain its own separate YAML merge system anymore. It relies on:
+The assistant does not maintain its own separate YAML merge system. It relies on:
 
-1. `ki-core` base config discovery
+1. `ki-core` base config discovery (`ki_core.load_config()`)
 2. optional layered project config under `config/`
 3. `creds.yaml` for secrets
-4. schema validation of the merged YAML
-5. environment variables as final overrides
+4. schema validation + defaults from the merged YAML schema
+   (`ki-core`'s generic base schema + this app's own
+   `schema/kicli.schema.yaml`)
+5. environment variables (`KI_CFG_*` prefix) as final overrides
+
+`ki-core` itself has no app-specific config class. This app defines its
+own thin, typed accessor - `kicli_code_assist.app_config.AppConfig` -
+on top of the plain dict `ki_core.load_config()` returns.
 
 ## Recommended project layout
 
@@ -28,53 +34,66 @@ kicli-code-assist/
 
 ## Minimal setup
 
+Generate a config skeleton (merges ki-core's base schema with this app's
+`schema/kicli.schema.yaml`, filling in all schema-declared defaults):
+
 ```bash
-cp /path/to/ki-core/ki.yaml.example ki.yaml
+kicli-assist config init -o ki.yaml
 chmod 600 creds.yaml
 ```
 
-Example:
+Example `ki.yaml`:
 
 ```yaml
-ollama:
-  base_url: "http://localhost:11434"
-  model: "llama3.2"
+llm:
+  providers:
+    ollama:
+      base_url: "http://localhost:11434"
+      model: "llama3.2"
 
-kicli:
+storage:
   cache_dir: "~/dev_data/kicli-code-assist"
   session_dir: "~/dev_data/kicli-code-assist/session"
-  chat_history_dir: "~/dev_data/kicli-code-assist/chat_history"
-  allowed_base_path: "/path/to/workspace"
+  history_dir: "~/dev_data/kicli-code-assist/chat_history"
+
+apps:
+  kicli:
+    workspace_root: "/path/to/workspace"
 ```
 
-Secrets:
+Secrets (`creds.yaml`, deep-merged over `ki.yaml`):
 
 ```yaml
-ki:
-  base_url: "https://ki.company.com"
-  api_key: "..."
-
-openai:
-  api_key: "sk-..."
+llm:
+  providers:
+    ki:
+      base_url: "https://ki.company.com"
+      api_key: "..."
+    openai:
+      api_key: "sk-..."
 ```
 
-## Used `Config` fields
+## Used `AppConfig` fields
 
-`kicli-code-assist` currently reads:
+`kicli_code_assist.app_config.AppConfig` (built from `ki_core.load_config()`)
+exposes:
 
-- `kicli_cache_dir`
-- `kicli_session_dir`
-- `kicli_chat_history_dir`
-- `kicli_allowed_base_path`
-- provider fields such as `ki_base_url`, `ki_api_key`, `openai_api_key`, `ollama_base_url`
-- `context_*` and `diff_*` settings
-
-These come from `ki-core.Config.from_env()`.
-
-The YAML contract itself now lives in `ki-core/schema/config.schema.yaml`; `kicli-code-assist` consumes the validated result through the flat `Config` API.
+- `kicli_cache_dir`, `kicli_session_dir`, `kicli_chat_history_dir`,
+  `kicli_allowed_base_path` (from `storage.*` / `apps.kicli.*`)
+- provider fields: `ki_base_url`, `ki_api_key`, `openai_api_key`,
+  `ollama_base_url`, etc. (from `llm.providers.*`, generic ki-core schema)
+- `context_*` and `diff_*` settings (from `apps.kicli.context.*` /
+  `apps.kicli.diff.*`)
+- `raw`: the full resolved config dict, for consumers that need direct
+  dict access (e.g. `security.*` for `kicli_code_assist.security`,
+  `prompts.*` for `PromptManager`)
 
 ## Notes
 
-- Keep app-specific YAML under the `kicli:` section.
+- Keep app-specific YAML under `apps.kicli.*` (or the dedicated
+  top-level sections this app owns: `storage`, `security`, `prompts`).
 - Keep secrets in `creds.yaml`.
-- Top-level legacy keys still work through `ki-core`, but `kicli:` is the preferred YAML shape.
+- The old flat legacy top-level keys (`ki:`, `ollama:`, `openai:`,
+  `kicli:`, `context:`, `diff:`) have been removed from the schema and
+  are no longer recognized - use the nested `llm.providers.*` /
+  `apps.kicli.*` shape shown above.

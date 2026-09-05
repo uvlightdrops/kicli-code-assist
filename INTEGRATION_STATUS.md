@@ -142,16 +142,18 @@ All projects require Python 3.10+ (confirmed compatible)
 ### Setup (First Time)
 
 ```bash
-# Copy config from ki-core
-cp /path/to/ki-core/ki.yaml.example ki.yaml
+# Generate a config skeleton (schema defaults filled in automatically)
+kicli-assist config init -o ki.yaml
 
 # Edit with your LLM provider
 vi ki.yaml
 
 # Create credentials file (optional)
 cat > creds.yaml << 'EOF'
-openai:
-  api_key: "sk-..."
+llm:
+  providers:
+    openai:
+      api_key: "sk-..."
 EOF
 chmod 600 creds.yaml
 ```
