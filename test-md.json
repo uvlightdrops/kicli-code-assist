@@ -1,8 +1,8 @@
 {
   "session_name": "test-md",
-  "created": 1788640184.3971534,
-  "updated": 1788640184.397212,
-  "message_count": 2,
+  "created": 1788640779.905267,
+  "updated": 1788640779.90534,
+  "message_count": 6,
   "messages": [
     {
       "role": "user",
@@ -13,6 +13,26 @@
       "role": "assistant",
       "content": "It works like this...",
       "timestamp": "2026-09-05T22:29:44.397038"
+    },
+    {
+      "role": "user",
+      "content": "How does this work?",
+      "timestamp": "2026-09-05T22:39:23.750771"
+    },
+    {
+      "role": "assistant",
+      "content": "It works like this...",
+      "timestamp": "2026-09-05T22:39:23.750990"
+    },
+    {
+      "role": "user",
+      "content": "How does this work?",
+      "timestamp": "2026-09-05T22:39:39.904755"
+    },
+    {
+      "role": "assistant",
+      "content": "It works like this...",
+      "timestamp": "2026-09-05T22:39:39.905006"
     }
   ]
 }

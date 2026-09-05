@@ -1,8 +1,8 @@
 {
   "session_name": "test-session-2",
-  "created": 1788640184.2592387,
-  "updated": 1788640184.259287,
-  "message_count": 2,
+  "created": 1788640786.9377306,
+  "updated": 1788640786.937846,
+  "message_count": 8,
   "messages": [
     {
       "role": "user",
@@ -13,6 +13,36 @@
       "role": "assistant",
       "content": "Hi there!",
       "timestamp": "2026-09-05T22:29:44.259265"
+    },
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-09-05T22:39:23.579195"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there!",
+      "timestamp": "2026-09-05T22:39:23.579472"
+    },
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-09-05T22:39:39.734121"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there!",
+      "timestamp": "2026-09-05T22:39:39.734427"
+    },
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-09-05T22:39:46.937499"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there!",
+      "timestamp": "2026-09-05T22:39:46.937808"
     }
   ]
 }

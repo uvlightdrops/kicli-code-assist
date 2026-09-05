@@ -1,13 +1,23 @@
 {
   "session_name": "list-test",
-  "created": 1788640184.7149556,
-  "updated": 1788640184.714994,
-  "message_count": 1,
+  "created": 1788640780.282219,
+  "updated": 1788640780.282338,
+  "message_count": 3,
   "messages": [
     {
       "role": "user",
       "content": "Test",
       "timestamp": "2026-09-05T22:29:44.714830"
+    },
+    {
+      "role": "user",
+      "content": "Test",
+      "timestamp": "2026-09-05T22:39:24.132539"
+    },
+    {
+      "role": "user",
+      "content": "Test",
+      "timestamp": "2026-09-05T22:39:40.282087"
     }
   ]
 }
