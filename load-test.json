@@ -1,8 +1,8 @@
 {
   "session_name": "load-test",
-  "created": 1788642332.522962,
-  "updated": 1788642332.523083,
-  "message_count": 4,
+  "created": 1788643772.7785063,
+  "updated": 1788643772.778591,
+  "message_count": 5,
   "messages": [
     {
       "role": "user",
@@ -23,6 +23,11 @@
       "role": "user",
       "content": "Original message",
       "timestamp": "2026-09-05T23:05:32.522786"
+    },
+    {
+      "role": "user",
+      "content": "Original message",
+      "timestamp": "2026-09-05T23:29:32.778341"
     }
   ]
 }

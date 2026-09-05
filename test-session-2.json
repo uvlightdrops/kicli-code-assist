@@ -1,8 +1,8 @@
 {
   "session_name": "test-session-2",
-  "created": 1788642331.789741,
-  "updated": 1788642331.789857,
-  "message_count": 10,
+  "created": 1788643772.0883381,
+  "updated": 1788643772.088489,
+  "message_count": 12,
   "messages": [
     {
       "role": "user",
@@ -53,6 +53,16 @@
       "role": "assistant",
       "content": "Hi there!",
       "timestamp": "2026-09-05T23:05:31.789833"
+    },
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-09-05T23:29:32.088099"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there!",
+      "timestamp": "2026-09-05T23:29:32.088452"
     }
   ]
 }

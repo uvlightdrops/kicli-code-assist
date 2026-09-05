@@ -1,8 +1,8 @@
 {
   "session_name": "test-session-3",
-  "created": 1788642331.8550768,
-  "updated": 1788642331.855214,
-  "message_count": 4,
+  "created": 1788643772.150209,
+  "updated": 1788643772.150299,
+  "message_count": 5,
   "messages": [
     {
       "role": "user",
@@ -23,6 +23,11 @@
       "role": "user",
       "content": "Test message",
       "timestamp": "2026-09-05T23:05:31.854848"
+    },
+    {
+      "role": "user",
+      "content": "Test message",
+      "timestamp": "2026-09-05T23:29:32.150013"
     }
   ]
 }

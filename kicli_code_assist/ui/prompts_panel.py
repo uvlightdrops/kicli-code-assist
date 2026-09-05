@@ -30,6 +30,8 @@ class LanguageLearningToggled(Message):
 class RoleSelector(Static):
     """Display and select available prompt roles."""
     
+    can_focus = True
+    
     DEFAULT_CSS = """
     RoleSelector {
         height: auto;
@@ -136,6 +138,8 @@ class RoleSelector(Static):
 class LanguageLearningPanel(Static):
     """Language learning configuration panel."""
     
+    can_focus = True
+    
     DEFAULT_CSS = """
     LanguageLearningPanel {
         height: auto;
@@ -198,6 +202,8 @@ class LanguageLearningPanel(Static):
 class PromptStatusBar(Static):
     """Status bar showing current active prompt and quick info."""
     
+    can_focus = True
+    
     DEFAULT_CSS = """
     PromptStatusBar {
         height: 3;
@@ -246,11 +252,21 @@ class PromptStatusBar(Static):
 class PromptsPanel(Vertical):
     """Complete prompt management panel with role selector and settings."""
     
+    can_focus = True
+    
     DEFAULT_CSS = """
     PromptsPanel {
         height: auto;
         width: 100%;
         background: $surface;
+    }
+    
+    PromptsPanel > Static.title {
+        height: 1;
+        dock: top;
+        background: $primary;
+        color: $surface;
+        content-align: center middle;
     }
     """
     
@@ -260,10 +276,15 @@ class PromptsPanel(Vertical):
     
     def compose(self):
         """Compose the prompt management panel."""
-        yield Label("[bold cyan]🤖 PROMPT MANAGEMENT[/bold cyan]")
+        # Title that doesn't block focus
+        title = Static("[bold]🤖 PROMPT MANAGEMENT[/bold]", classes="title")
+        yield title
+        
+        # Focusable components
         yield RoleSelector(self.manager)
         yield LanguageLearningPanel(self.manager)
         yield PromptStatusBar(self.manager)
+    
     
     def get_effective_prompt(self) -> str:
         """Get the current effective system prompt."""

@@ -24,11 +24,12 @@ class PromptsModal(ModalScreen):
     CSS = """
     PromptsModal {
         align: center middle;
+        background: $surface 50%;
     }
     
-    PromptsModal > Vertical {
-        width: 90;
-        height: 30;
+    PromptsModal PromptsPanel {
+        width: 100;
+        height: 40;
         border: solid $primary;
         background: $surface;
         padding: 1;
@@ -42,11 +43,28 @@ class PromptsModal(ModalScreen):
     def __init__(self, prompt_manager: PromptManager):
         super().__init__()
         self.prompt_manager = prompt_manager
+        self.prompts_panel = None
     
     def compose(self) -> ComposeResult:
-        """Create modal content."""
-        with Vertical():
-            yield PromptsPanel(self.prompt_manager)
+        """Create modal content - direct panel without containers."""
+        self.prompts_panel = PromptsPanel(self.prompt_manager)
+        yield self.prompts_panel
+    
+    def on_mount(self) -> None:
+        """Focus the prompts panel on mount after render."""
+        self.call_after_refresh(self._ensure_focus)
+    
+    def _ensure_focus(self) -> None:
+        """Ensure prompts panel has focus."""
+        if self.prompts_panel:
+            # Try to focus on the first child widget (RoleSelector)
+            for child in self.prompts_panel.children:
+                if child.can_focus:
+                    child.focus()
+                    return
+            # Fallback to panel itself
+            if self.prompts_panel.can_focus:
+                self.prompts_panel.focus()
     
     def action_close_modal(self) -> None:
         """Close the modal."""
