@@ -263,12 +263,21 @@ class CodeAssistantApp(Static):
         Binding("ctrl+f", "focus_preview", "Preview", show=True),
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
+        Binding("ctrl+p", "open_prompts", "Prompts", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
         Binding("q", "app_quit", "Quit", show=True),
     ]
+    
+    # Local keys per focus area
+    FOCUS_KEYS = {
+        "browser": ["↑/↓ navigate", "enter select", "s mark start"],
+        "preview": ["↑/↓ scroll", "pgup/pgdn page", "enter select"],
+        "chat": ["↑/↓ scroll", "pgup/pgdn page"],
+        "input": ["enter send", "esc cancel"],
+    }
     
     def __init__(self):
         super().__init__()
@@ -516,6 +525,12 @@ class CodeAssistantApp(Static):
         except Exception as e:
             self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
     
+    def action_open_prompts(self) -> None:
+        """Open prompt management UI (Ctrl+P)."""
+        self.chat_display.write("[bold cyan]🎯 Prompt Management[/] - Coming soon in modal dialog\n")
+        # TODO: Implement modal dialog with PromptsPanel from Phase 3
+
+    
     def watch_current_focus(self, focus: str) -> None:
         """Update UI when focus changes."""
         # Update CSS classes for title highlighting
@@ -540,17 +555,25 @@ class CodeAssistantApp(Static):
             self.call_after_refresh(self.file_list.focus)
             self.browser_title.add_class("active")
         
-        # Update status bar with current focus indicator
-        if focus == "browser":
-            focus_char = "B"
-        elif focus == "preview":
-            focus_char = "P"
-        elif focus == "chat":
-            focus_char = "C"
-        else:
-            focus_char = "I"
+        # Update status bar with intelligent key hints
+        self._update_status_bar(focus)
+    
+    def _update_status_bar(self, focus: str) -> None:
+        """Update status bar with global and local key hints."""
+        # Global navigation shortcuts
+        global_keys = "tab/⇧tab ↔  ^b ^f ^i ^c  ^p"
+        
+        # Local keys for current focus area
+        local_keys = "  |  "
+        if focus in self.FOCUS_KEYS:
+            local_keys += " ".join(self.FOCUS_KEYS[focus])
+        
+        # Context status
         ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
-        self.status_bar.update(f"Curr-focus: {focus_char}  |  {ctx_status}")
+        
+        # Full status line
+        status_text = f"Focus: {global_keys}{local_keys}  |  {ctx_status}"
+        self.status_bar.update(status_text)
     
     def on_input_submitted(self, event) -> None:
         """Handle message submission from Input widget."""
