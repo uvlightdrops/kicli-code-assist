@@ -113,17 +113,20 @@ kicli-assist chat --export <format>      # Export chat session
 - [x] Full serialization/deserialization support
 - [x] CLI command group with 13 subcommands
 - [x] Export/import configuration with merge support
-- [x] Complete test coverage (47 core + 22 CLI tests)
+- [x] Complete test coverage (47 core + 22 CLI + 27 TUI tests)
+- [x] TUI components (RoleSelector, LanguageLearningPanel, PromptPreview, TemplateEditor)
+- [x] Message-based component communication
+- [x] Keyboard navigation for all TUI components
 
 **Completed Features:**
 - **Phase 1 (Core):** PromptManager class, 5 built-in roles, template system, LL mode
 - **Phase 2 (CLI):** Full command interface via `ki prompts` command group
+- **Phase 3 (TUI):** Interactive UI components with keyboard shortcuts and real-time updates
 
 **Pending Tasks:**
-- [ ] GUI/TUI integration (role selector, template editor)
-- [ ] Prompt preview panel in chat UI
-- [ ] Keyboard shortcuts for quick role switching
+- [ ] Integration into main textual_app
 - [ ] Template gallery/marketplace
+- [ ] Advanced template editor with live preview
 
 **What was built:**
 
@@ -143,18 +146,34 @@ kicli-assist chat --export <format>      # Export chat session
 - Language learning: enable, disable, show config
 - Configuration: export to file/stdout, import with merge
 
+*Phase 3 - TUI Integration (27 tests):*
+- RoleSelector component with navigation and favorites
+- LanguageLearningPanel with toggle functionality
+- PromptStatusBar showing current state
+- PromptPreview with syntax highlighting
+- PromptInfo with detailed metadata display
+- TemplateEditor modal for CRUD operations
+- TemplateList with keyboard navigation
+- Message-based component communication (PromptChanged, LanguageLearningToggled)
+- Full keyboard shortcuts (vim-like navigation, F for favorites, T for LL toggle)
+
 **Files:**
 - `kicli-code-assist/kicli_code_assist/prompts/models.py` - Dataclasses (175 LOC)
 - `kicli-code-assist/kicli_code_assist/prompts/manager.py` - PromptManager (380 LOC)
 - `kicli-code-assist/kicli_code_assist/prompts/__init__.py` - Module init
 - `yaml-cfg-wizard/src/yaml_cfg_wizard/prompts_cli.py` - CLI utilities (400 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/prompts_panel.py` - UI components (400 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/template_editor.py` - Template editor modal (350 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/prompt_preview.py` - Prompt preview panel (300 LOC)
 - `kicli-code-assist/tests/test_prompt_manager.py` - Core tests (620 LOC)
 - `yaml-cfg-wizard/tests/test_prompts_cli.py` - CLI tests (550 LOC)
+- `kicli-code-assist/tests/test_prompts_tui.py` - TUI tests (450 LOC)
 
 **Documentation:**
 - [PROMPT_MANAGEMENT_DESIGN.md](PROMPT_MANAGEMENT_DESIGN.md) - Complete design specification
 - [../kicli-code-assist/PHASE1_COMPLETE.md](../kicli-code-assist/PHASE1_COMPLETE.md) - Phase 1 details
-- [../yaml-cfg-wizard/PHASE2_COMPLETE.md](../yaml-cfg-wizard/PHASE2_COMPLETE.md) - Phase 2 details
+- [../kicli-code-assist/PHASE2_COMPLETE.md](../kicli-code-assist/PHASE2_COMPLETE.md) - Phase 2 details
+- [../kicli-code-assist/PHASE3_COMPLETE.md](../kicli-code-assist/PHASE3_COMPLETE.md) - Phase 3 details
 
 **CLI Commands:**
 ```bash
@@ -208,11 +227,13 @@ prompts:
 **Testing:**
 - ✅ 47 core tests (Phase 1)
 - ✅ 22 CLI tests (Phase 2)
-- ✅ 69 total prompt management tests
+- ✅ 27 TUI tests (Phase 3)
+- ✅ 96 total prompt management tests
 
 **Commits:**
 1. `feat: Implement Prompt Management Phase 1 - Core Dataclasses and PromptManager`
 2. `feat: Implement Prompt Management Phase 2 - CLI Commands`
+3. `feat(prompts): Phase 3 - TUI integration complete`
 
 ---
 
