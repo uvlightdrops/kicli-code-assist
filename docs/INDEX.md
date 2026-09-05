@@ -8,7 +8,8 @@ Welcome to kicli-code-assist documentation. This guide will help you navigate al
 
 - **[README.md](../README.md)** - Project overview and quick start
 - **[INSTALLATION.md](../INSTALLATION.md)** - Detailed setup instructions
-- **[customer_requests.md](customer_requests.md)** - **All features organized by status** ⭐
+- **[customer_requests.md](customer_requests.md)** - 📝 Open customer requests & feature backlog
+- **[FEATURES_IMPLEMENTED.md](FEATURES_IMPLEMENTED.md)** - ✅ Completed & in-progress features
 
 ---
 
