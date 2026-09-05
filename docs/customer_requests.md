@@ -1,16 +1,55 @@
-
 ## Neue Anfragen des Kunden zu bugs und features
 
-### GUI
-- [ ] Für den File preview muss es auch einen Fokus geben um ihn scrollen zu können bei Bedarf. 
-- [ ] shortcuts für Fokus STRG + x mit x aus "F" file preview, "B" für Browser, "C" für Chat, "I" für Input.
+**📊 Status:** 2 of 5 features complete | [Detailed Progress in feature_status.md](./feature_status.md)
 
+---
 
+### ✅ DEPLOYMENT - Schema-based Configuration
+**Status: COMPLETE** ✅
 
-### Security
-- [ ] setting für den Absolutpfad im Linux system, der nicht verlassen werden darf
+- [x] Schema holen aus ki-core
+- [x] Config skeleton erzeugen mit yaml-cfg
+- [x] yaml configs gemäß yaml-cfg-wizard geholt und gemerged
+- [x] Keine fallbacks mehr im code
 
+**Implementation:** See [feature_status.md](./feature_status.md#1-schema-based-configuration-system-deployment)
 
-### deployment
+---
 
-- [ ] Bitte baue das repo so um dass wir unser schema holen (aus ki-core) und daraus hier ein mit yaml-cfg ein config skelet erzeugen mit den default werten. So dass dann die yaml configs gemäß yaml-cfg-wizard geholt und gemerged werden und keine weiteren fallbacks mehr im code vorkommen. 
+### ✅ I/O FEATURES - Chat History
+**Status: COMPLETE** ✅
+
+- [x] Der aktuelle Chat verlauf manuell als Datei speichern
+
+**Implementation:** See [feature_status.md](./feature_status.md#2-chat-history-management-io-features)
+
+---
+
+### 🚧 GUI - Focus Management
+**Status: PARTIAL** 🚧
+
+- [x] Fix TUI input focus and submission (done)
+- [ ] File preview scrollable mit Fokus
+- [ ] Shortcuts für Fokus: STRG+F (file), STRG+B (browser), STRG+C (chat), STRG+I (input)
+
+**Implementation:** See [feature_status.md](./feature_status.md#3-tui-focus-management-gui)
+
+---
+
+### ⏳ SECURITY - Path Restriction
+**Status: NOT STARTED** ⏳
+
+- [ ] Setting für Absolutpfad im Linux system, der nicht verlassen werden darf
+
+**Implementation:** See [feature_status.md](./feature_status.md#4-absolute-path-security-setting-security)
+
+---
+
+### ⏳ KI SETTINGS - Prompt Management
+**Status: NOT STARTED** ⏳
+
+- [ ] Prompts verwaltung
+- [ ] Mehrere Rollen wählbar
+- [ ] Sprachlernmodus etc.
+
+**Implementation:** See [feature_status.md](./feature_status.md#5-prompt-management-ki-settings)
