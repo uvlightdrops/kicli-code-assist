@@ -11,6 +11,17 @@
 
 **Category:** DEPLOYMENT
 
+**Completed Tasks:**
+- [x] Base schema in ki-core
+- [x] App-specific schema extension in kicli-code-assist
+- [x] Config skeleton generation
+- [x] Layered config resolution (7 layers)
+- [x] Removed legacy code-based fallbacks
+
+**Pending Tasks:**
+- [ ] Config validation CLI enhancements
+- [ ] Config migration tools (old → new format)
+
 **What was built:**
 - Base schema in ki-core with all config options
 - App-specific schema in kicli-code-assist
@@ -51,6 +62,17 @@ yaml-cfg-wizard config paths                           # Show config file locati
 
 **Category:** I/O FEATURES
 
+**Completed Tasks:**
+- [x] Chat history persistence to database/files
+- [x] Manual save/export CLI command
+- [x] Multiple export formats support
+
+**Pending Tasks:**
+- [ ] Chat session organization (folders/tags)
+- [ ] Chat search across history
+- [ ] Chat import from external sources
+- [ ] Automatic backup of chat history
+
 **What was built:**
 - Chat history persistence to database/files
 - Manual save/export CLI command
@@ -85,6 +107,26 @@ kicli-assist chat --export <format>      # Export chat session
 **Category:** SECURITY
 
 **Progress:** 60% - Core implementation complete, integration pending
+
+**Completed Tasks:**
+- [x] PathValidator class with full API (100 LOC)
+  - `is_allowed()` - check path without raising
+  - `validate()` - enforce or warn based on config
+  - `make_relative()` - convert absolute to relative paths
+  - Full path normalization and symlink resolution
+- [x] Directory traversal prevention
+- [x] Optional enforcement modes (warn vs block)
+- [x] 26 comprehensive tests (all passing)
+  - 13 core validator tests (yaml-cfg-wizard)
+  - 13 integration tests (kicli-code-assist)
+- [x] Security integration module (kicli_code_assist/security.py)
+- [x] Documentation & Examples
+
+**Pending Tasks:**
+- [ ] UI settings panel for security configuration
+- [ ] Integration into file browser (validate on load)
+- [ ] Integration into diff module (validate diff files)
+- [ ] CLI testing commands
 
 **What has been completed:**
 - [x] PathValidator class with full API (100 LOC)
@@ -154,7 +196,31 @@ python examples/security_examples.py      # 6 examples
 
 ---
 
-## 📚 User Guides
+## 🚧 PARTIAL FEATURES
+
+### 4. Focus Management (GUI)
+
+**Category:** GUI
+
+**Progress:** 40% - Framework complete, scrolling features pending
+
+**Completed Tasks:**
+- [x] Focus manager framework (FocusManager class)
+- [x] Keyboard shortcuts (CTRL+F, CTRL+B, CTRL+I, CTRL+D)
+- [x] TUI input focus fixes
+- [x] Focus state tracking between panes
+
+**Pending Tasks:**
+- [ ] Scrollable file preview with scroll focus
+- [ ] Arrow key navigation in focused preview
+- [ ] Visual focus indicator in UI (border highlight)
+- [ ] CTRL+H for chat pane (CTRL+C conflicts with interrupt)
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/ui/focus_manager.py` - Focus management
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - TUI integration
+
+---
 
 **Complete guides for using implemented features:**
 
