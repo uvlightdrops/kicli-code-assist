@@ -88,7 +88,8 @@ def run_doctor() -> None:
 
 def run_config_init(output_path: str | None = None) -> None:
     """Generate a default config skeleton with all available options."""
-    from ki_core.schema_manager import generate_config_skeleton, get_schema_path
+    from yaml_cfg_wizard.config_cli import generate_skeleton
+    from ki_core.schema_manager import get_schema_path
 
     output = Path(output_path or "ki.yaml")
     try:
@@ -96,7 +97,7 @@ def run_config_init(output_path: str | None = None) -> None:
         kicli_schema = Path(__file__).parent.parent / "schema" / "kicli.schema.yaml"
         additional = [kicli_schema] if kicli_schema.exists() else None
 
-        generate_config_skeleton(base_schema, output, additional)
+        generate_skeleton(base_schema, output, additional)
         click.echo(f"✅ Config skeleton generated: {output}")
         click.echo(f"📝 Edit {output} and set your credentials")
     except Exception as e:
