@@ -9,10 +9,48 @@ from textual.binding import Binding
 from textual.reactive import reactive
 from textual.message import Message
 from textual.worker import Worker, WorkerState
+from textual.screen import ModalScreen
 import threading
 import textwrap
 
 from kicli_code_assist.chat_session import ChatSession
+from kicli_code_assist.prompts import PromptManager
+from kicli_code_assist.ui.prompts_panel import PromptsPanel
+
+
+class PromptsModal(ModalScreen):
+    """Modal dialog for prompt management."""
+    
+    CSS = """
+    PromptsModal {
+        align: center middle;
+    }
+    
+    PromptsModal > Vertical {
+        width: 90;
+        height: 30;
+        border: solid $primary;
+        background: $surface;
+        padding: 1;
+    }
+    """
+    
+    BINDINGS = [
+        Binding("escape", "close_modal", "Close", show=True),
+    ]
+    
+    def __init__(self, prompt_manager: PromptManager):
+        super().__init__()
+        self.prompt_manager = prompt_manager
+    
+    def compose(self) -> ComposeResult:
+        """Create modal content."""
+        with Vertical():
+            yield PromptsPanel(self.prompt_manager)
+    
+    def action_close_modal(self) -> None:
+        """Close the modal."""
+        self.app.pop_screen()
 
 
 class SelectableFileList(Static):
@@ -263,7 +301,7 @@ class CodeAssistantApp(Static):
         Binding("ctrl+f", "focus_preview", "Preview", show=True),
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
-        Binding("ctrl+p", "open_prompts", "Prompts", show=True),
+        Binding("ctrl+o", "open_prompts", "Prompts", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
@@ -303,6 +341,10 @@ class CodeAssistantApp(Static):
         from kicli_code_assist.cli import _detect_best_provider
         provider = _detect_best_provider()
         self.client = create_client(self.config, provider)
+        
+        # Initialize prompt manager
+        config_dict = self.config.to_dict() if hasattr(self.config, 'to_dict') else {}
+        self.prompt_manager = PromptManager(config_dict)
     
     def get_allowed_base_path(self) -> Path:
         """Return the allowed project root for file browsing and previews."""
@@ -526,9 +568,8 @@ class CodeAssistantApp(Static):
             self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
     
     def action_open_prompts(self) -> None:
-        """Open prompt management UI (Ctrl+P)."""
-        self.chat_display.write("[bold cyan]🎯 Prompt Management[/] - Coming soon in modal dialog\n")
-        # TODO: Implement modal dialog with PromptsPanel from Phase 3
+        """Open prompt management UI (Ctrl+O)."""
+        self.app.push_screen(PromptsModal(self.prompt_manager))
 
     
     def watch_current_focus(self, focus: str) -> None:
@@ -561,7 +602,7 @@ class CodeAssistantApp(Static):
     def _update_status_bar(self, focus: str) -> None:
         """Update status bar with global and local key hints."""
         # Global navigation shortcuts
-        global_keys = "tab/⇧tab ↔  ^b ^f ^i ^c  ^p"
+        global_keys = "tab/⇧tab ↔  ^b ^f ^i ^c  ^o"
         
         # Local keys for current focus area
         local_keys = "  |  "
