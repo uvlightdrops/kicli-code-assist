@@ -1,6 +1,6 @@
 ## Neue Anfragen des Kunden zu bugs und features
 
-**📊 Status:** 2 of 5 features complete | [Detailed Progress in feature_status.md](./feature_status.md)
+**📊 Status:** 2 of 5 features complete | [Detailed Progress in yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md)
 
 ---
 
@@ -12,7 +12,7 @@
 - [x] yaml configs gemäß yaml-cfg-wizard geholt und gemerged
 - [x] Keine fallbacks mehr im code
 
-**Implementation:** See [feature_status.md](./feature_status.md#1-schema-based-configuration-system-deployment)
+**Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#1-schema-based-configuration-system-deployment)
 
 ---
 
@@ -21,7 +21,7 @@
 
 - [x] Der aktuelle Chat verlauf manuell als Datei speichern
 
-**Implementation:** See [feature_status.md](./feature_status.md#2-chat-history-management-io-features)
+**Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#2-chat-history-management-io-features)
 
 ---
 
@@ -32,7 +32,7 @@
 - [ ] File preview scrollable mit Fokus
 - [ ] Shortcuts für Fokus: STRG+F (file), STRG+B (browser), STRG+C (chat), STRG+I (input)
 
-**Implementation:** See [feature_status.md](./feature_status.md#3-tui-focus-management-gui)
+**Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#3-tui-focus-management-gui)
 
 ---
 
@@ -41,7 +41,7 @@
 
 - [ ] Setting für Absolutpfad im Linux system, der nicht verlassen werden darf
 
-**Implementation:** See [feature_status.md](./feature_status.md#4-absolute-path-security-setting-security)
+**Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#4-absolute-path-security-setting-security)
 
 ---
 
@@ -52,4 +52,4 @@
 - [ ] Mehrere Rollen wählbar
 - [ ] Sprachlernmodus etc.
 
-**Implementation:** See [feature_status.md](./feature_status.md#5-prompt-management-ki-settings)
+**Implementation:** See [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#5-prompt-management-ki-settings)
