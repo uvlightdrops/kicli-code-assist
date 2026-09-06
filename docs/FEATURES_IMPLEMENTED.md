@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-09-05  
-**Status:** 5 complete features | 1 in-progress feature
+**Status:** 6 complete features | 1 in-progress feature
 
 ---
 
@@ -384,6 +384,34 @@ python examples/security_examples.py      # 6 examples
 - `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - Ctrl+S binding, `action_open_settings`
 - `kicli-code-assist/tests/test_settings_tui.py` - Unit tests
 - `ki-core/src/ki_core/config.py` - `find_config_path()` public API (used to know which file to write back to)
+
+---
+
+### 7. TLS Certificate Diagnostics
+
+**Category:** Configuration / Connectivity (lives mostly in ki-core; consumed here)
+
+**Progress:** 100%
+
+**Completed Tasks:**
+- [x] `ki-chat cert-diagnose <host[:port]|url>` command (ki-core) - shows the
+  presented cert's subject/issuer/SAN/validity dates, whether it's trusted
+  by the same CA bundle `requests` uses, and which CA bundle sources
+  (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, OpenSSL defaults, certifi) are in play
+- [x] Previously-unused `http.verify_ssl` schema field is now actually wired
+  into `OllamaClient`/`OpenAICompatibleClient` via a new `verify` param
+  (`True`/`False`/path-to-CA-bundle, same semantics as `requests`' `verify=`)
+- [x] `create_client()` in kicli-code-assist passes `config.http_verify_ssl`
+  through to both clients
+- [x] SSL errors from either client now raise a `ProviderError` pointing at
+  `ki-chat cert-diagnose <host>` instead of a bare requests traceback
+
+**Files:**
+- `ki-core/src/ki_core/cert_diagnostics.py` - certificate inspection/verification logic
+- `ki-core/src/ki_core/cli.py` - `cert-diagnose` command
+- `ki-core/src/ki_core/adapters/openai_compat.py`, `ollama.py` - `verify` param wiring
+- `ki-core/tests/test_cert_diagnostics.py`, `test_adapter_tls_verify.py` - Unit tests
+- `kicli-code-assist/kicli_code_assist/examples/simple_chat.py` - passes `http_verify_ssl` through
 
 ---
 
