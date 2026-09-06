@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-09-05  
-**Status:** 3 complete features | 1 in-progress feature
+**Status:** 4 complete features | 1 in-progress feature
 
 ---
 
@@ -116,14 +116,15 @@ kicli-assist chat --export <format>      # Export chat session
 - [x] TUI components (RoleSelector, LanguageLearningPanel, PromptPreview, TemplateEditor)
 - [x] Message-based component communication
 - [x] Keyboard navigation for all TUI components
+- [x] Integration into main textual_app (Ctrl+O modal, full keyboard navigation)
 
 **Completed Features:**
 - **Phase 1 (Core):** PromptManager class, 5 built-in roles, template system, LL mode
 - **Phase 2 (CLI):** Full command interface via `ki prompts` command group
 - **Phase 3 (TUI):** Interactive UI components with keyboard shortcuts and real-time updates
+- **Phase 4 (Integration):** PromptsModal wired into main app (Ctrl+O), full in-modal keyboard navigation (role select, favorites, active role, escape to close)
 
 **Pending Tasks:**
-- [ ] Integration into main textual_app
 - [ ] Template gallery/marketplace
 - [ ] Advanced template editor with live preview
 
@@ -164,6 +165,7 @@ kicli-assist chat --export <format>      # Export chat session
 - `kicli-code-assist/kicli_code_assist/ui/prompts_panel.py` - UI components (400 LOC)
 - `kicli-code-assist/kicli_code_assist/ui/template_editor.py` - Template editor modal (350 LOC)
 - `kicli-code-assist/kicli_code_assist/ui/prompt_preview.py` - Prompt preview panel (300 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - PromptsModal (Ctrl+O) integration into main app
 - `kicli-code-assist/tests/test_prompt_manager.py` - Core tests (620 LOC)
 - `yaml-cfg-wizard/tests/test_prompts_cli.py` - CLI tests (550 LOC)
 - `kicli-code-assist/tests/test_prompts_tui.py` - TUI tests (450 LOC)
@@ -330,29 +332,28 @@ python examples/security_examples.py      # 6 examples
 
 ---
 
-## 🚧 PARTIAL FEATURES
-
 ### 5. Focus Management (GUI)
 
 **Category:** GUI
 
-**Progress:** 40% - Framework complete, scrolling features pending
+**Progress:** 90% - Core navigation, scrolling, and visual indicator complete
 
 **Completed Tasks:**
 - [x] Focus manager framework (FocusManager class)
-- [x] Keyboard shortcuts (CTRL+F, CTRL+B, CTRL+I, CTRL+D)
+- [x] Keyboard shortcuts (CTRL+F, CTRL+B, CTRL+I, CTRL+C, CTRL+O)
 - [x] TUI input focus fixes
 - [x] Focus state tracking between panes
+- [x] Scrollable file preview with scroll focus
+- [x] Arrow key navigation in focused preview
+- [x] Visual focus indicator in UI (title highlight via CSS "active" class)
+- [x] Status bar shows global + context-specific active keys per focused pane
 
-**Pending Tasks:**
-- [ ] Scrollable file preview with scroll focus
-- [ ] Arrow key navigation in focused preview
-- [ ] Visual focus indicator in UI (border highlight)
-- [ ] CTRL+H for chat pane (CTRL+C conflicts with interrupt)
+**Known remaining gap:**
+- [ ] CTRL+H for chat pane (currently CTRL+C, which conflicts with interrupt)
 
 **Files:**
 - `kicli-code-assist/kicli_code_assist/ui/focus_manager.py` - Focus management
-- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - TUI integration
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - TUI integration, status bar, PreviewPane scrolling
 
 ---
 

@@ -19,9 +19,6 @@
 ## 🖥️ GUI
 
 ### Focus Management
-- [ ] Scrollable file preview with scroll focus
-- [ ] Arrow key navigation in focused preview
-- [ ] Visual focus indicator in UI (border highlight)
 - [ ] CTRL+H for chat pane (CTRL+C conflicts with interrupt)
 
 ---
@@ -29,13 +26,7 @@
 ## 🤖 KI SETTINGS
 
 ### Prompt Management
-- [ ] Prompt templates system (base templates in schema)
-- [ ] Multiple selectable roles (Developer, Tutor, Translator, etc.)
-- [ ] Role-specific prompt injection
-- [ ] Language learning mode
-- [ ] Prompt preview and editing UI
 - [ ] Prompt history/library management
-- [ ] CLI commands for prompt management
 
 ---
 
