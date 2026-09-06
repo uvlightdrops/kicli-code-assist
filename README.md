@@ -43,7 +43,7 @@ pip install -e .
 
 ```bash
 # Auto-generate config skeleton with all defaults
-kicli-assist config init -o ki.yaml
+yaml-cfg config skeleton -o ki.yaml
 
 # Edit with your settings
 vim ki.yaml
@@ -103,8 +103,8 @@ kicli-assist chat --model gpt-4     # Specific model
 
 ### Config Management
 ```bash
-kicli-assist config init              # Generate skeleton
-kicli-assist config init -o config.yaml  # Custom path
+yaml-cfg config skeleton              # Generate skeleton
+yaml-cfg config skeleton -o config.yaml  # Custom path
 
 # Config inspection (via yaml-cfg-wizard)
 yaml-cfg config show key
@@ -149,7 +149,7 @@ All configuration is **schema-driven** via `yaml-cfg-wizard`:
 ### Generate Skeleton
 
 ```bash
-kicli-assist config init -o ki.yaml
+yaml-cfg config skeleton -o ki.yaml
 ```
 
 This generates a complete config file with:
@@ -253,7 +253,7 @@ pytest tests/test_diff.py   # Specific test
 
 ```bash
 # Create local dev config
-kicli-assist config init
+yaml-cfg config skeleton
 
 # Use local Ollama
 export KI_CFG_LLM__DEFAULT_PROVIDER=ollama

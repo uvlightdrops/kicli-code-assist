@@ -38,7 +38,7 @@ Generate a config skeleton (merges ki-core's base schema with this app's
 `schema/kicli.schema.yaml`, filling in all schema-declared defaults):
 
 ```bash
-kicli-assist config init -o ki.yaml
+yaml-cfg config skeleton -o ki.yaml
 chmod 600 creds.yaml
 ```
 

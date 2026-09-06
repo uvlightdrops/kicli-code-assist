@@ -50,7 +50,7 @@ pip install -e .
 
 ```bash
 # Auto-generate config skeleton
-kicli-assist config init -o ki.yaml
+yaml-cfg config skeleton -o ki.yaml
 
 # Edit config with your settings
 vim ki.yaml
@@ -175,7 +175,7 @@ source .venv/bin/activate
 
 ```bash
 # Generate config
-kicli-assist config init
+yaml-cfg config skeleton
 
 # Inspect the resolved config tree
 yaml-cfg config list --config ki.yaml

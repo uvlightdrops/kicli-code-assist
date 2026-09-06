@@ -143,7 +143,7 @@ All projects require Python 3.10+ (confirmed compatible)
 
 ```bash
 # Generate a config skeleton (schema defaults filled in automatically)
-kicli-assist config init -o ki.yaml
+yaml-cfg config skeleton -o ki.yaml
 
 # Edit with your LLM provider
 vi ki.yaml

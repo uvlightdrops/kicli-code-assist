@@ -97,7 +97,7 @@ All historical development phases are archived in:
 kicli-assist tui               # Terminal UI
 kicli-assist chat              # Simple chat
 kicli-assist tmux              # Tmux layout
-kicli-assist config init       # Generate config
+yaml-cfg config skeleton       # Generate config
 
 # Get help
 kicli-assist --help
