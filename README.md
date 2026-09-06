@@ -107,10 +107,9 @@ kicli-assist config init              # Generate skeleton
 kicli-assist config init -o config.yaml  # Custom path
 
 # Config inspection (via yaml-cfg-wizard)
-yaml-cfg-wizard config show key
-yaml-cfg-wizard config list
-yaml-cfg-wizard config verify config.yaml schema.yaml
-yaml-cfg-wizard config paths
+yaml-cfg config show key
+yaml-cfg config list
+yaml-cfg config verify config.yaml schema.yaml
 ```
 
 ### System

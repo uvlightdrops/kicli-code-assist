@@ -82,7 +82,7 @@ print(f"Mode: {info['mode']}")  # 'enforce' or 'warn'
 
 ```bash
 # Show security settings
-yaml-cfg-wizard config show security
+yaml-cfg config show security
 
 # Validate a specific path
 python -c "

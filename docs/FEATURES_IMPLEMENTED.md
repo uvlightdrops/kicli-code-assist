@@ -50,10 +50,9 @@
 **CLI Commands:**
 ```bash
 kicli-assist config init -o ki.yaml                    # Generate skeleton
-yaml-cfg-wizard config show [KEY]                      # View config value
-yaml-cfg-wizard config list                            # List all settings
-yaml-cfg-wizard config verify config.yaml schema.yaml  # Validate
-yaml-cfg-wizard config paths                           # Show config file locations
+yaml-cfg config show [KEY]                      # View config value
+yaml-cfg config list                            # List all settings
+yaml-cfg config verify config.yaml schema.yaml  # Validate
 ```
 
 ---

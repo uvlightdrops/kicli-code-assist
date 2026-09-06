@@ -107,12 +107,11 @@ kicli-assist doctor            # Environment check
 ### Config
 ```bash
 # View configuration
-yaml-cfg-wizard config show [KEY]
-yaml-cfg-wizard config list
-yaml-cfg-wizard config paths
+yaml-cfg config show [KEY]
+yaml-cfg config list
 
 # Validate
-yaml-cfg-wizard config verify config.yaml schema.yaml
+yaml-cfg config verify config.yaml schema.yaml
 ```
 
 ### Development

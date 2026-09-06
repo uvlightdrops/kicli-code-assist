@@ -177,8 +177,8 @@ source .venv/bin/activate
 # Generate config
 kicli-assist config init
 
-# Check where config is searched
-yaml-cfg-wizard config paths
+# Inspect the resolved config tree
+yaml-cfg config list --config ki.yaml
 ```
 
 ### Provider Not Found
@@ -273,7 +273,7 @@ pip install -e . --upgrade
 
 - **Diagnostics:** `kicli-assist doctor`
 - **Help:** `kicli-assist --help`
-- **Config Help:** `yaml-cfg-wizard config --help`
+- **Config Help:** `yaml-cfg config --help`
 - **Issues:** Check [docs/](docs/)
 
 ---

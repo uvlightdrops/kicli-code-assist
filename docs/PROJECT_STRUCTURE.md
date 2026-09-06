@@ -43,7 +43,7 @@ The ecosystem consists of three main projects with clear separation of concerns:
 **CLI Commands:**
 ```
 yaml-cfg-wizard scaffold <template> <output>
-yaml-cfg-wizard config show|list|validate|skeleton
+yaml-cfg config show|list|validate|skeleton
 ```
 
 ## 3. kicli-code-assist
