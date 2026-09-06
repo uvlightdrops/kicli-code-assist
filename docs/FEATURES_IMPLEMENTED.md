@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-09-05  
-**Status:** 4 complete features | 1 in-progress feature
+**Status:** 5 complete features | 1 in-progress feature
 
 ---
 
@@ -354,6 +354,36 @@ python examples/security_examples.py      # 6 examples
 **Files:**
 - `kicli-code-assist/kicli_code_assist/ui/focus_manager.py` - Focus management
 - `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - TUI integration, status bar, PreviewPane scrolling
+
+---
+
+### 6. Settings Page (GUI)
+
+**Category:** GUI / Configuration
+
+**Progress:** 100%
+
+**Completed Tasks:**
+- [x] Schema-driven settings form (Ctrl+S modal) that walks the merged
+  ki-core + kicli JSON schema to discover editable fields instead of a
+  hardcoded field list
+- [x] Widget selection per schema type: `Select` for enum, `Switch` for
+  boolean, `Input` (+ `Integer`/`Number` validators) for string/int/number
+- [x] Current values pre-filled from the already-resolved `AppConfig.raw`
+- [x] Save writes only the edited dotted-paths back onto the active
+  `ki.yaml`, leaving untouched sections (creds, prompts, custom provider
+  keys, ...) exactly as they were
+- [x] Sensitive leaf fields (`api_key`, `password`, `secret`, `token`)
+  are excluded from the editable form wherever they occur in the schema
+- [x] Exposed sections: `llm`, `http`, `security`, `storage`,
+  `apps.kicli` (`prompts` excluded - has its own Ctrl+O modal; `creds`
+  excluded - secrets)
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/ui/settings_panel.py` - SettingsPanel + SettingsModal
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - Ctrl+S binding, `action_open_settings`
+- `kicli-code-assist/tests/test_settings_tui.py` - Unit tests
+- `ki-core/src/ki_core/config.py` - `find_config_path()` public API (used to know which file to write back to)
 
 ---
 

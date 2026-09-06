@@ -9,7 +9,6 @@
 ## 🔐 SECURITY
 
 ### Path Restriction
-- [ ] UI settings panel for security configuration
 - [ ] Integration into file browser (validate paths on load)
 - [ ] Integration into diff module (validate diff files)
 - [ ] CLI commands for security testing/validation
