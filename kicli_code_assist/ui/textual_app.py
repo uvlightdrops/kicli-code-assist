@@ -320,6 +320,7 @@ class CodeAssistantApp(Static):
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
+        Binding("ctrl+s", "open_settings", "Settings", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
@@ -590,6 +591,14 @@ class CodeAssistantApp(Static):
         """Open prompt management UI (Ctrl+O)."""
         self.app.push_screen(PromptsModal(self.prompt_manager))
 
+    def action_open_settings(self) -> None:
+        """Open the schema-driven settings editor (Ctrl+S)."""
+        from kicli_code_assist.ui.settings_panel import SettingsModal
+        import ki_core
+        self.app.push_screen(
+            SettingsModal(self.config.raw, ki_core.find_config_path())
+        )
+
     
     def watch_current_focus(self, focus: str) -> None:
         """Update UI when focus changes."""
@@ -621,7 +630,7 @@ class CodeAssistantApp(Static):
     def _update_status_bar(self, focus: str) -> None:
         """Update status bar with global and local key hints."""
         # Global navigation shortcuts
-        global_keys = "tab/⇧tab ↔  ^b ^f ^i ^c  ^o"
+        global_keys = "tab/⇧tab ↔  ^b ^f ^i ^c  ^o ^s"
         
         # Local keys for current focus area
         local_keys = "  |  "
