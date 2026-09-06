@@ -20,7 +20,8 @@ def create_client(config: Config, provider: str = "mock"):
     elif provider == "ollama":
         return OllamaClient(
             base_url=config.ollama_base_url,
-            model=config.ollama_model
+            model=config.ollama_model,
+            verify=config.http_verify_ssl,
         )
     elif provider == "openai":
         if not config.openai_api_key:
@@ -29,7 +30,8 @@ def create_client(config: Config, provider: str = "mock"):
         return OpenAICompatibleClient(
             base_url=config.openai_base_url,
             api_key=config.openai_api_key,
-            model=config.openai_model
+            model=config.openai_model,
+            verify=config.http_verify_ssl,
         )
     else:
         raise ValueError(f"Unknown provider: {provider}")
