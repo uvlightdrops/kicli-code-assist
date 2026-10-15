@@ -5,6 +5,8 @@ from typing import Any, Callable, Dict, Iterable, List
 import click
 import yaml
 
+from ki_core import find_config_path
+
 
 def _detect_best_provider():
     """Detect best available LLM provider based on config.
@@ -187,9 +189,26 @@ def _add_yaml_group(group: click.Group, commands: Iterable[Dict[str, Any]]) -> N
         group.add_command(_build_command(entry))
 
 
-@click.group(name="kicli-assist", help="KI Code Assistant - interactive code generation and review")
-def cli() -> None:
+@click.group(
+    name="kicli-assist",
+    help="KI Code Assistant - interactive code generation and review",
+    context_settings={"help_option_names": ["-h", "--help"]},
+)
+@click.option("-q", "--quiet", is_flag=True, help="Suppress config file location output")
+@click.pass_context
+def cli(ctx: click.Context, quiet: bool) -> None:
     """Top-level Click entrypoint."""
+    ctx.ensure_object(dict)
+    ctx.obj["quiet"] = quiet
+
+    # Display config location unless quiet mode is enabled
+    if not quiet:
+        try:
+            config_file = find_config_path()
+            config_abs = config_file.resolve()
+            click.echo(f"Config: {config_abs}", err=True)
+        except Exception:
+            pass
 
 
 def _register_yaml_commands(root: click.Group, config_path: str | None = None) -> click.Group:
