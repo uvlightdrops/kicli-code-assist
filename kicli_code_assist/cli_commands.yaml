@@ -61,3 +61,123 @@ commands:
   - name: doctor
     help: Show CLI and environment diagnostics
     callback: kicli_code_assist.cli:run_doctor
+  - name: config
+    help: Config management (from ki-core)
+    commands:
+      - name: resolve
+        help: Resolve and display full config
+        callback: kicli_code_assist.cli:run_config
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "resolve"
+            help: Subcommand
+      - name: verify
+        help: Verify config against schema
+        callback: kicli_code_assist.cli:run_config
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "verify"
+            help: Subcommand
+      - name: skeleton
+        help: Generate config skeleton
+        callback: kicli_code_assist.cli:run_config
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "skeleton"
+            help: Subcommand
+          - names: ["-o", "--output"]
+            param: output
+            type: str
+            default: "ki.yaml"
+            help: Output file
+      - name: show
+        help: Show config or specific key
+        callback: kicli_code_assist.cli:run_config
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "show"
+            help: Subcommand
+          - names: ["--key"]
+            param: key
+            type: str
+            default: null
+            help: Specific key to show
+  - name: profile
+    help: Profile management (from ki-core)
+    commands:
+      - name: list
+        help: List available profiles
+        callback: kicli_code_assist.cli:run_profile
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "list"
+            help: Subcommand
+      - name: set
+        help: Set active profile
+        callback: kicli_code_assist.cli:run_profile
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "set"
+            help: Subcommand
+          - names: ["--name"]
+            param: name
+            type: str
+            default: null
+            help: Profile name
+      - name: active
+        help: Show active profile
+        callback: kicli_code_assist.cli:run_profile
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "active"
+            help: Subcommand
+  - name: stage
+    help: Stage management (from ki-core)
+    commands:
+      - name: list
+        help: List available stages
+        callback: kicli_code_assist.cli:run_stage
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "list"
+            help: Subcommand
+      - name: set
+        help: Set active stage
+        callback: kicli_code_assist.cli:run_stage
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "set"
+            help: Subcommand
+          - names: ["--name"]
+            param: name
+            type: str
+            default: null
+            help: Stage name
+      - name: active
+        help: Show active stage
+        callback: kicli_code_assist.cli:run_stage
+        options:
+          - names: ["--subcommand"]
+            param: subcommand
+            type: str
+            default: "active"
+            help: Subcommand
+

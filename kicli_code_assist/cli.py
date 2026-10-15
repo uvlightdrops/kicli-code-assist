@@ -84,6 +84,72 @@ def run_doctor() -> None:
     ki_core_doctor(echo_fn=click.echo, show_config_path=False)
 
 
+def run_config(subcommand: str | None = None, **kwargs: Any) -> None:
+    """Config management (delegates to ki-core base implementation)."""
+    from ki_core.commands import run_resolve, run_verify, run_skeleton, run_show
+    
+    subcommand = subcommand or "resolve"
+    
+    try:
+        if subcommand == "resolve":
+            run_resolve(echo_fn=click.echo)
+        elif subcommand == "verify":
+            run_verify(echo_fn=click.echo)
+        elif subcommand == "skeleton":
+            output_file = kwargs.get("output", "ki.yaml")
+            run_skeleton(echo_fn=click.echo, output_file=output_file)
+        elif subcommand == "show":
+            key = kwargs.get("key")
+            run_show(echo_fn=click.echo, key=key)
+        else:
+            click.echo(f"Unknown config subcommand: {subcommand}")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise
+
+
+def run_profile(subcommand: str | None = None, **kwargs: Any) -> None:
+    """Profile management (delegates to ki-core base implementation)."""
+    from ki_core.commands import run_profile_list, run_profile_set, run_profile_active
+    
+    subcommand = subcommand or "active"
+    
+    try:
+        if subcommand == "list":
+            run_profile_list(echo_fn=click.echo)
+        elif subcommand == "set":
+            profile_name = kwargs.get("name", "")
+            run_profile_set(echo_fn=click.echo, profile_name=profile_name)
+        elif subcommand == "active":
+            run_profile_active(echo_fn=click.echo)
+        else:
+            click.echo(f"Unknown profile subcommand: {subcommand}")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise
+
+
+def run_stage(subcommand: str | None = None, **kwargs: Any) -> None:
+    """Stage management (delegates to ki-core base implementation)."""
+    from ki_core.commands import run_stage_list, run_stage_set, run_stage_active
+    
+    subcommand = subcommand or "active"
+    
+    try:
+        if subcommand == "list":
+            run_stage_list(echo_fn=click.echo)
+        elif subcommand == "set":
+            stage_name = kwargs.get("name", "")
+            run_stage_set(echo_fn=click.echo, stage_name=stage_name)
+        elif subcommand == "active":
+            run_stage_active(echo_fn=click.echo)
+        else:
+            click.echo(f"Unknown stage subcommand: {subcommand}")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise
+
+
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
     """Load the YAML command tree, or fallback to the built-in default."""
     default_path = Path(__file__).with_name("cli_commands.yaml")
