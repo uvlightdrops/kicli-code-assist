@@ -78,56 +78,10 @@ def run_openinterpreter(auto_run: bool = False, model: str | None = None) -> Non
 
 
 def run_doctor() -> None:
-    """Display quick environment diagnostics including config resolution chain."""
-    from ki_core import active_layers, find_config_path
-    from kicli_code_assist.app_config import AppConfig as Config
+    """Display configuration diagnostics (delegates to ki-core base implementation)."""
+    from ki_core.commands import run_doctor as ki_core_doctor
     
-    config = Config.from_env()
-    layers = active_layers()
-    config_file = find_config_path()
-    
-    click.echo("KI Code Assistant diagnostics")
-    click.echo()
-    click.echo("Configuration resolution chain (highest to lowest priority):")
-    click.echo("  1. creds.yaml (secrets)")
-    click.echo("  2. Environment variables (KI_CFG_*)")
-    click.echo("  3. config/runtime/runtime.yaml (host-local overrides)")
-    if layers.get('stage'):
-        click.echo(f"  4. config/stages/{layers.get('stage')}.yaml (active stage)")
-    else:
-        click.echo("  4. config/stages/<stage>.yaml (no active stage)")
-    if layers.get('profile'):
-        click.echo(f"  5. config/profiles/{layers.get('profile')}.yaml (active profile)")
-    else:
-        click.echo("  5. config/profiles/<profile>.yaml (no active profile)")
-    click.echo(f"  6. {config_file.resolve()} (main config)")
-    click.echo("  7. config/defaults/*.yaml (per-layer defaults)")
-    click.echo("  8. ki-core schema defaults (fallback)")
-    click.echo()
-    
-    click.echo("Active layers:")
-    click.echo(f"  - Profile: {layers.get('profile') or '(none - using schema defaults)'}")
-    click.echo(f"  - Stage:   {layers.get('stage') or '(none - using schema defaults)'}")
-    click.echo()
-    
-    click.echo("LLM Provider (detection order: ollama → openai → ki → mock):")
-    click.echo(f"  - Detected: {_detect_best_provider()}")
-    click.echo(f"  - Ollama base_url: {config.ollama_base_url or '(ki-core schema default: http://localhost:11434)'}")
-    click.echo(f"  - Ollama model:    {config.ollama_model or '(ki-core schema default: llama3.2)'}")
-    click.echo(f"  - KI base_url:     {config.ki_base_url or '(unset)'}")
-    click.echo(f"  - OpenAI API key:  {'set' if config.openai_api_key else 'missing'}")
-    click.echo()
-    
-    click.echo("Storage paths (from config):")
-    click.echo(f"  - Cache dir:   {config.kicli_cache_dir or '(unset)'}")
-    click.echo(f"  - Session dir: {config.kicli_session_dir or '(unset)'}")
-    click.echo()
-    
-    click.echo("To change defaults, edit files in order of precedence:")
-    click.echo(f"  - For profile-specific settings: vim config/profiles/<name>.yaml")
-    click.echo(f"  - For stage-specific settings: vim config/stages/<name>.yaml")
-    click.echo(f"  - For global settings: vim {config_file.resolve()}")
-    click.echo(f"  - Use environment: KI_CFG_LLM__PROVIDERS__OLLAMA__BASE_URL=... (highest priority)")
+    ki_core_doctor(echo_fn=click.echo, show_config_path=False)
 
 
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
