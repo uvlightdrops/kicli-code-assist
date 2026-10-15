@@ -33,6 +33,19 @@ audit = ["pip-audit>=2.7.0"]
 kicli-assist = "kicli_code_assist.cli:cli"
 kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
 
+[tool.stackctl]
+config_loader = "ki_core:load_config"
+config_key = "stack"
+
+[[tool.stackctl.siblings]]
+name = "yaml-cfg-wizard"
+path = "yaml_cfg_wizard"
+url = "https://github.com/uvlightdrops/yaml-cfg-wizard.git"
+
+[[tool.stackctl.siblings]]
+name = "ki-core"
+url = "https://github.com/uvlightdrops/ki-core.git"
+
 [tool.setuptools]
 package-dir = {"" = "."}
 

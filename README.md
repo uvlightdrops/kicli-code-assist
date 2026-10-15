@@ -74,7 +74,8 @@ kicli-assist chat
 - **[Chat History Guide](docs/CHAT_HISTORY_AND_PROMPTS.md)** - Session management
 
 ### Technical Reference
-- **[Configuration System](docs/KI_CORE_INTEGRATION.md)** - Layered config setup
+- **[Configuration System](docs/YAML_CONFIG_SYSADMIN.md)** - Layered config setup
+- **[Shared YAML configuration concepts](../yaml_cfg_wizard/doc/YAML_CONFIG_CONCEPTS.md)**
 - **[Project Context](docs/PROJECT_CONTEXT.md)** - Context detection and management
 - **[Integration Status](INTEGRATION_STATUS.md)** - Current feature status
 
@@ -125,7 +126,7 @@ kicli-assist tmux              # Tmux multi-pane layout
 
 ### Schema-Based System
 
-All configuration is **schema-driven** via `yaml-cfg-wizard`:
+Configuration schemas and defaults are provided via `yaml-cfg-wizard`:
 
 1. **Base Schema** (ki-core)
    ```yaml
@@ -138,12 +139,13 @@ All configuration is **schema-driven** via `yaml-cfg-wizard`:
    ```
 
 3. **Resolution Order** (highest to lowest priority)
-   - Environment variables (`KI_CFG_*`)
-   - Runtime files (`config/runtime/`)
-   - Stage overrides (`config/stages/`)
-   - Profile overrides (`config/profiles/`)
-   - Default values (`config/defaults/`)
-   - Config file (`ki.yaml`)
+   - Credentials (`creds.yaml`)
+   - Environment overrides (`KI_CFG_*`)
+   - Runtime configuration (`config/runtime/`)
+   - Selected stage (`config/stages/`)
+   - Selected profile (`config/profiles/`)
+   - Project config (`ki.yaml`)
+   - Defaults directory (`config/defaults/`)
    - Schema defaults
 
 ### Generate Skeleton
