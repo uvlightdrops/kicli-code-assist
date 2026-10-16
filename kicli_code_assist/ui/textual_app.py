@@ -325,6 +325,7 @@ class CodeAssistantApp(Static):
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
         Binding("ctrl+s", "open_settings", "Settings", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
+        Binding("ctrl+x", "open_shell_command_dialog", "Shell Command", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
@@ -605,6 +606,24 @@ class CodeAssistantApp(Static):
         self.app.push_screen(
             SettingsModal(self.config.raw, ki_core.find_config_path())
         )
+
+    def action_open_shell_command_dialog(self) -> None:
+        """Open manual shell command entry dialog (Ctrl+X)."""
+        from kicli_code_assist.executor.shell_execution import ShellCommandBatch
+        from kicli_code_assist.ui.shell_command_editor import CommandManualEntryDialog
+        
+        # Create empty batch to populate
+        modal = CommandManualEntryDialog()
+        self.app.push_screen(modal, callback=self._on_manual_command_entry_result)
+    
+    def _on_manual_command_entry_result(self, batch: ShellCommandBatch) -> None:
+        """Handle manual command entry dialog result."""
+        if batch is None or len(batch.commands) == 0:
+            self.chat_display.write("[bold yellow]⊘ No commands entered[/]\n")
+            return
+        
+        # Show approval modal with user-entered commands
+        self.show_shell_approval_modal(batch, "User-entered commands")
 
     
     def watch_current_focus(self, focus: str) -> None:
