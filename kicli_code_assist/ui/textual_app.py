@@ -814,14 +814,22 @@ class CodeAssistantApp(Static):
     async def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
         """Execute shell batch in background worker (async)."""
         try:
-            from kicli_code_assist.executor.shell_execution import ShellExecutionApproval, ApprovalDecision
+            from kicli_code_assist.executor.shell_execution import (
+                ShellExecutionApproval, 
+                ApprovalDecision, 
+                SessionPermissionLevel
+            )
+            
+            # Determine session permission level from result
+            session_mode = getattr(result, 'session_mode', False)
+            perm_level = SessionPermissionLevel.SESSION if session_mode else SessionPermissionLevel.BATCH
             
             # Create approval object
             approval = ShellExecutionApproval(
                 batch_id=batch.id,
                 decision=ApprovalDecision.APPROVED,
                 approved_by="user",
-                session_mode=getattr(result, 'session_mode', False)
+                session_permission_level=perm_level
             )
             
             # Execute batch in thread pool to avoid blocking
