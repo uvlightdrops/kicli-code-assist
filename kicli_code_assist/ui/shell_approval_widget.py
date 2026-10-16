@@ -52,34 +52,55 @@ class ShellCommandApprovalModal(ModalScreen):
     }
     
     ShellCommandApprovalModal > Vertical {
-        width: 90;
-        height: 35;
+        width: 95;
+        height: 38;
         border: solid $primary;
         background: $panel;
-        padding: 1 2;
+        padding: 0;
     }
     
     #approval-header {
-        dock: top;
-        height: 3;
+        height: auto;
         border-bottom: solid $primary;
-        padding: 0 0 1 0;
+        padding: 1 2;
+        background: $boost;
+    }
+    
+    #approval-header Label {
+        width: 100%;
     }
     
     #commands-scroll {
         height: 1fr;
         border-bottom: solid $primary;
-        padding: 1 0;
+        padding: 1 2;
     }
     
-    #approval-footer {
-        dock: bottom;
-        height: 3;
-        padding: 1 0 0 0;
+    #session-mode-container {
+        height: auto;
+        padding: 1 2;
+        border-bottom: solid $primary;
+        background: $boost;
+    }
+    
+    #button-container {
+        height: auto;
+        padding: 1 2;
+        background: $boost;
+    }
+    
+    #button-container Horizontal {
+        width: 100%;
+        height: auto;
+    }
+    
+    #button-container Button {
+        margin-right: 1;
+        margin-bottom: 0;
     }
     
     #commands-display {
-        padding: 0 1;
+        padding: 0;
     }
     
     #risk-level {
@@ -89,33 +110,26 @@ class ShellCommandApprovalModal(ModalScreen):
     
     #risk-critical {
         background: $error;
+        color: $text;
     }
     
     #risk-high {
         background: $warning;
+        color: $text;
     }
     
     #risk-medium {
         background: $warning;
+        color: $text;
     }
     
     #risk-low {
         background: $success;
+        color: $text;
     }
     
-    #session-mode-container {
-        height: 1;
-        padding: 0 1;
-    }
-    
-    #button-container {
-        height: 1;
-        width: 100%;
-        padding: 1 0;
-    }
-    
-    #button-container Button {
-        margin-right: 1;
+    TextArea {
+        height: 1fr;
     }
     """
     
@@ -132,6 +146,14 @@ class ShellCommandApprovalModal(ModalScreen):
         super().__init__()
         self.command_batch = command_batch
         self.result: Optional[ApprovalResult] = None
+    
+    def on_mount(self) -> None:
+        """Focus commands scroll area instead of buttons."""
+        try:
+            commands_scroll = self.query_one("#commands-scroll")
+            commands_scroll.focus()
+        except Exception:
+            pass  # If not found, let default focus work
     
     def compose(self) -> ComposeResult:
         """Compose widget tree."""
