@@ -213,14 +213,15 @@ class ShellCommandApprovalModal(ModalScreen):
             self.result = ApprovalResult(
                 approved=True,
                 session_mode=session_mode,
+                edited_commands=[cmd for cmd in self.command_batch.commands]
             )
-            self.app.pop_screen()
+            self.dismiss(self.result)
         elif button_id == "btn-skip":
             self.result = ApprovalResult(
                 approved=False,
                 session_mode=False,
             )
-            self.app.pop_screen()
+            self.dismiss(self.result)
         elif button_id == "btn-edit":
             # Emit message to parent to handle editing
             self.post_message(self.EditCommandsRequested(self.command_batch))
@@ -228,11 +229,12 @@ class ShellCommandApprovalModal(ModalScreen):
             # Emit message to parent to handle manual entry
             self.post_message(self.AddManualCommandRequested())
         elif button_id == "btn-cancel":
-            self.result = ApprovalResult(
-                approved=False,
-                session_mode=False,
-            )
-            self.app.pop_screen()
+            self.dismiss(None)
+    
+    def on_switch_changed(self, event: Switch.Changed) -> None:
+        """Handle session mode toggle."""
+        # Just track the value - it's read from query_one when Execute is clicked
+        pass
     
     def update_batch(self, batch: ShellCommandBatch) -> None:
         """Update the command batch after editing.
