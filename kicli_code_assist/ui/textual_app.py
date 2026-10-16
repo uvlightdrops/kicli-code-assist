@@ -799,8 +799,12 @@ class CodeAssistantApp(Static):
                 # Create batch from edited commands
                 batch = ShellCommandBatch(commands=result.edited_commands)
                 
-                # Run execution in background worker (use lambda to pass arguments)
-                self.run_worker(lambda: self._execute_shell_batch_worker(batch, result))
+                # Create async wrapper (Python doesn't support async lambda)
+                async def run_execution():
+                    await self._execute_shell_batch_worker(batch, result)
+                
+                # Run execution in background worker
+                self.run_worker(run_execution)
             else:
                 self.chat_display.write("[bold yellow]⊘ No commands to execute[/]\n")
         else:
