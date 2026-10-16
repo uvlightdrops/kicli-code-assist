@@ -96,7 +96,7 @@ class ShellCommandApprovalModal(ModalScreen):
     }
     
     #risk-medium {
-        background: $yellow;
+        background: $warning;
     }
     
     #risk-low {
