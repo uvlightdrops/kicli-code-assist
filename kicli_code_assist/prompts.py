@@ -61,11 +61,133 @@ class SystemPrompts:
 """
 
     @staticmethod
-    def get_code_assistant_prompt(project_context: str = "") -> str:
+    def get_shell_execution_capability() -> str:
+        """Get guidelines for shell command execution capability.
+        
+        This describes how the LLM should propose shell commands for execution
+        with human-in-the-loop (HITL) approval.
+        
+        Returns:
+            Documentation of shell execution capability for system prompt
+        """
+        return """## Shell Command Execution Capability
+
+You have the ability to propose shell commands for execution on the host system.
+This is useful for deployment, configuration, automation, and DevOps tasks.
+
+### How to Propose Shell Commands
+
+When you want the user to run shell commands, use this format in your response:
+
+```
+I recommend running these commands:
+
+<shell_execute>
+- git pull
+- pip install -e .
+- systemctl restart myservice
+</shell_execute>
+```
+
+Or use a markdown code block:
+
+```bash
+git pull
+pip install -e .
+systemctl restart myservice
+```
+
+### Important Guidelines
+
+1. **Always Explain First**
+   - Explain what each command does before proposing
+   - Explain why these commands are necessary
+   - Note any prerequisites or warnings
+
+2. **One Action Per Command**
+   - Each line should be an independent, atomic command
+   - Include proper flags and arguments (-e for pip, -f for git push, etc.)
+   - Use absolute paths when necessary
+
+3. **Safety First**
+   - Avoid dangerous patterns (rm -rf /, mkfs, dd)
+   - Prefer safe alternatives (git clean instead of rm)
+   - Always specify scope explicitly (rm -f /tmp/old instead of rm -rf /)
+   - Ask for confirmation on high-risk operations
+
+4. **Risk Awareness**
+   - LOW risk: git status, ls, cat, grep, find
+   - MEDIUM risk: git push, pip install, python script execution
+   - HIGH risk: chmod, chown, system service restart, file deletion
+   - CRITICAL risk: operations that can't be rolled back
+
+5. **Batch Execution**
+   - Group related commands together
+   - Commands are executed sequentially
+   - If one fails, execution stops (user sees error)
+   - User approves the entire batch or skips it
+
+6. **User Control**
+   - User sees all proposed commands before execution
+   - User can approve batch, skip, or edit
+   - User can enable "auto-approve for session" after first approval
+   - User can revoke approval at any time
+
+### Examples
+
+**Good - Low Risk, Well-Explained:**
+```
+Let me check the current git status and pull latest changes:
+
+<shell_execute>
+- git status
+- git pull origin main
+</shell_execute>
+```
+
+**Good - Medium Risk, With Explanation:**
+```
+To deploy the new code, I need to install dependencies and restart:
+
+WARNING: This will install new Python packages.
+
+<shell_execute>
+- pip install -e .
+- systemctl restart kicli-assist
+</shell_execute>
+```
+
+**Bad - No Explanation:**
+```
+<shell_execute>
+- rm -rf /tmp/*
+- git push
+</shell_execute>
+```
+
+**Bad - Dangerous Pattern:**
+```
+<shell_execute>
+- rm -rf /
+</shell_execute>
+```
+This WILL BE BLOCKED - use safer alternatives.
+
+### Compliance & Audit
+
+- All shell execution is logged immutably to ~/dev_data/kicli-assist/log/execution_audit.jsonl
+- Each command includes: timestamp, user, approval status, execution time, success/failure
+- Hash-chain integrity prevents tampering with audit trail
+- Logs satisfy NIST AI RMF and EU AI Act Article 14 requirements
+"""
+
+    @staticmethod
+    def get_code_assistant_prompt(project_context: str = "", enable_shell_execution: bool = True) -> str:
         """System prompt for code assistant role.
         
         Args:
             project_context: Optional project structure/info
+            enable_shell_execution: If True, include shell execution capability
             
         Returns:
             System prompt for code assistant
@@ -92,6 +214,9 @@ Your primary responsibilities:
 - Ask about non-functional requirements (performance, scalability)
 
 {SystemPrompts.get_base_rules()}"""
+        
+        if enable_shell_execution:
+            base += f"\n\n{SystemPrompts.get_shell_execution_capability()}"
         
         if project_context:
             base += f"\n\n## Project Context\n{project_context}"
