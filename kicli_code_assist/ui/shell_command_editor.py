@@ -259,28 +259,39 @@ class CommandManualEntryDialog(ModalScreen):
     }
     
     CommandManualEntryDialog > Vertical {
-        width: 85;
-        height: 32;
+        width: 90;
+        height: 35;
         border: solid $primary;
         background: $panel;
-        padding: 1 2;
+        padding: 0;
     }
     
     #entry-header {
-        height: 2;
+        height: auto;
         border-bottom: solid $primary;
-        padding: 0 0 1 0;
+        padding: 1 2;
+        background: $boost;
+    }
+    
+    #entry-header Label {
+        width: 100%;
     }
     
     #entry-body {
         height: 1fr;
-        padding: 1 0;
+        padding: 1 2;
+        border-bottom: solid $primary;
     }
     
     #entry-footer {
-        height: 3;
-        border-top: solid $primary;
-        padding: 1 0 0 0;
+        height: auto;
+        padding: 1 2;
+        background: $boost;
+    }
+    
+    #entry-footer Horizontal {
+        width: 100%;
+        height: auto;
     }
     
     TextArea {
@@ -309,7 +320,7 @@ class CommandManualEntryDialog(ModalScreen):
             # Header
             with Vertical(id="entry-header"):
                 yield Label("[bold]➕ Enter Shell Commands Manually[/]")
-                yield Label("[dim]One command per line, or paste multi-line script (Ctrl+Enter to submit)[/]")
+                yield Label("[dim]One per line or multi-line script | Ctrl+Enter submit | Esc cancel[/]")
             
             # Body
             with Vertical(id="entry-body"):
@@ -317,9 +328,10 @@ class CommandManualEntryDialog(ModalScreen):
                 yield self.text_area
             
             # Footer
-            with Horizontal(id="entry-footer"):
-                yield Button("Submit [Ctrl+Enter]", id="submit-btn", variant="primary")
-                yield Button("Cancel [Esc]", id="cancel-btn", variant="error")
+            with Vertical(id="entry-footer"):
+                with Horizontal():
+                    yield Button("Submit [Ctrl+Enter]", id="submit-btn", variant="primary")
+                    yield Button("Cancel [Esc]", id="cancel-btn", variant="error")
     
     def on_mount(self) -> None:
         """Focus text area."""
