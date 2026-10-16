@@ -857,16 +857,21 @@ class CodeAssistantApp(Static):
                 for i, cmd_result in enumerate(results, 1):
                     cmd = batch.commands[i-1] if i <= len(batch.commands) else None
                     
-                    status_icon = "✓" if cmd_result.success else "✗"
-                    status_color = "green" if cmd_result.success else "red"
+                    status_icon = "✓" if cmd_result["success"] else "✗"
+                    status_color = "green" if cmd_result["success"] else "red"
                     
                     self.chat_display.write(f"\n[bold]{i}. [{status_color}]{status_icon}[/] {cmd.command if cmd else 'Unknown'}\n")
                     
-                    if cmd_result.stdout:
-                        self.chat_display.write(f"[dim]{cmd_result.stdout}[/]\n")
+                    if cmd_result.get("stdout"):
+                        self.chat_display.write(f"[dim]{cmd_result['stdout']}[/]\n")
                     
-                    if cmd_result.stderr:
-                        self.chat_display.write(f"[bold red]{cmd_result.stderr}[/]\n")
+                    if cmd_result.get("stderr"):
+                        self.chat_display.write(f"[bold red]{cmd_result['stderr']}[/]\n")
+                    
+                    # Show returncode if non-zero
+                    returncode = cmd_result.get("returncode", 0)
+                    if returncode != 0:
+                        self.chat_display.write(f"[yellow]Return code: {returncode}[/]\n")
             else:
                 self.chat_display.write(f"[bold red]✗ Execution failed: {execution_result.get('reason', 'Unknown error')}[/]\n")
         

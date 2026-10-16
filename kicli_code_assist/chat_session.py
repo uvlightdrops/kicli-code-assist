@@ -391,8 +391,10 @@ class ChatSession:
                 {
                     "command": r.command,
                     "success": r.success,
-                    "exit_code": r.exit_code,
-                    "output_lines": len(r.output.split('\n')) if r.output else 0,
+                    "returncode": r.returncode,
+                    "stdout": r.stdout,
+                    "stderr": r.stderr,
+                    "execution_time_ms": r.execution_time_ms,
                 }
                 for r in results
             ],
