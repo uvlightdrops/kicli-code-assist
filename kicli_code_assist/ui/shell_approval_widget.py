@@ -137,6 +137,16 @@ class ShellCommandApprovalModal(ModalScreen):
         ("escape", "cancel", "Cancel"),
     ]
     
+    class EditCommandsRequested(Message):
+        """Message: user requested to edit commands."""
+        def __init__(self, batch: ShellCommandBatch) -> None:
+            super().__init__()
+            self.batch = batch
+    
+    class AddManualCommandRequested(Message):
+        """Message: user requested to add manual command."""
+        pass
+    
     def __init__(self, command_batch: ShellCommandBatch):
         """Initialize approval modal.
         
@@ -300,16 +310,3 @@ class CommandsSkipped(Message):
     def __init__(self, batch_id: str) -> None:
         self.batch_id = batch_id
         super().__init__()
-
-
-class EditCommandsRequested(Message):
-    """Posted when user clicks Edit button."""
-    
-    def __init__(self, batch: ShellCommandBatch) -> None:
-        self.batch = batch
-        super().__init__()
-
-
-class AddManualCommandRequested(Message):
-    """Posted when user clicks Add Manual Command button."""
-    pass
