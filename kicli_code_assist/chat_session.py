@@ -4,6 +4,7 @@ import os
 from typing import Optional
 from dataclasses import dataclass, field
 from datetime import datetime
+from pathlib import Path
 
 from kicli_code_assist.app_config import AppConfig as Config
 from kicli_code_assist.context import ProjectContextManager, ProjectInfo
@@ -14,6 +15,9 @@ from kicli_code_assist.executor.shell_execution import (
     ShellExecutionApproval,
     SessionPermissionLevel,
 )
+from kicli_code_assist.executor.safe_executor import SafeCodeExecutor
+from kicli_code_assist.executor.audit_trail import AuditTrailLogger
+from kicli_code_assist.executor.response_parser import ShellExecutionResponseParser
 
 
 @dataclass
@@ -62,6 +66,11 @@ class ChatSession:
         self.shell_session_approved_at: Optional[datetime] = None
         self.shell_session_approver: Optional[str] = None
         self.shell_execution_log: list = []  # List of ExecutionAuditRecord
+        
+        # Shell execution infrastructure
+        self._shell_executor: Optional[SafeCodeExecutor] = None
+        self._audit_trail_logger: Optional[AuditTrailLogger] = None
+        self._init_shell_audit_trail()
 
     def load_project_context(self, force_reload: bool = False) -> ProjectInfo:
         """Load and analyze project context.
@@ -290,4 +299,101 @@ class ChatSession:
             "successful": successful,
             "failed": total_commands - successful,
             "session_approval_active": self.shell_session_approved_at is not None,
+        }
+
+    def _init_shell_audit_trail(self) -> None:
+        """Initialize shell execution audit trail logger.
+        
+        Creates log directory in ~/dev_data/<session_name>/shell_audit/ and
+        initializes AuditTrailLogger and SafeCodeExecutor.
+        """
+        try:
+            # Create log directory: ~/dev_data/<session_name>/shell_audit/
+            log_dir = Path.home() / "dev_data" / self.session_name / "shell_audit"
+            log_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Initialize audit trail logger
+            log_file = log_dir / "execution_audit.jsonl"
+            self._audit_trail_logger = AuditTrailLogger(log_file)
+            
+            # Initialize executor (no auto-execution; controlled by caller)
+            self._shell_executor = SafeCodeExecutor()
+        except Exception as e:
+            # Log but don't fail session startup
+            print(f"⚠️  Warning: Could not initialize shell audit trail: {e}")
+            self._audit_trail_logger = None
+            self._shell_executor = None
+
+    def parse_shell_batch_from_response(self, llm_response: str) -> Optional[ShellCommandBatch]:
+        """Parse shell commands from LLM response.
+        
+        Extracts commands from <shell_execute> XML blocks or markdown code blocks.
+        
+        Args:
+            llm_response: Raw LLM response text
+            
+        Returns:
+            ShellCommandBatch if commands found, None otherwise
+        """
+        return ShellExecutionResponseParser.parse(llm_response)
+
+    def execute_shell_batch(self, batch: ShellCommandBatch, approval: ShellExecutionApproval) -> dict:
+        """Execute approved shell command batch and log to audit trail.
+        
+        Args:
+            batch: ShellCommandBatch to execute
+            approval: ShellExecutionApproval with user decision
+            
+        Returns:
+            Execution result dict with status, outputs, errors
+            
+        Raises:
+            RuntimeError: If executor or audit logger not initialized
+        """
+        if not self._shell_executor or not self._audit_trail_logger:
+            raise RuntimeError("Shell execution infrastructure not initialized")
+        
+        if approval.decision != "approved":
+            return {
+                "status": "rejected",
+                "reason": f"Batch rejected: {approval.rejection_reason or 'user decision'}",
+                "commands_attempted": 0,
+                "commands_succeeded": 0,
+            }
+        
+        # Execute batch
+        results = self._shell_executor.execute_batch(batch)
+        
+        # Log to audit trail
+        from kicli_code_assist.executor.shell_execution import ExecutionAuditRecord
+        audit_record = ExecutionAuditRecord(
+            session_id=self.session_name,
+            timestamp=datetime.now(),
+            command_batch=batch,
+            approval=approval,
+            execution_results=results,
+        )
+        
+        try:
+            self._audit_trail_logger.log_execution(audit_record)
+            self.add_shell_execution_record(audit_record)
+        except Exception as e:
+            print(f"⚠️  Warning: Could not log to audit trail: {e}")
+        
+        # Return summary
+        successful = sum(1 for r in results if r.success)
+        return {
+            "status": "completed",
+            "commands_attempted": len(batch.commands),
+            "commands_succeeded": successful,
+            "commands_failed": len(batch.commands) - successful,
+            "results": [
+                {
+                    "command": r.command,
+                    "success": r.success,
+                    "exit_code": r.exit_code,
+                    "output_lines": len(r.output.split('\n')) if r.output else 0,
+                }
+                for r in results
+            ],
         }
