@@ -786,7 +786,7 @@ class CodeAssistantApp(Static):
             # User skipped
             self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
     
-    
+    def update_file_preview(self, path: Path) -> None:
         """Update file preview when file is selected."""
         try:
             if path.is_file() and path.suffix not in ['.pyc', '.o']:
