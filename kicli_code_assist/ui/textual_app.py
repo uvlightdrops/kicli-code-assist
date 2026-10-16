@@ -1,6 +1,7 @@
 """Modern TUI for code assistant using Textual."""
 
 import os
+import asyncio
 from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
@@ -798,16 +799,16 @@ class CodeAssistantApp(Static):
                 # Create batch from edited commands
                 batch = ShellCommandBatch(commands=result.edited_commands)
                 
-                # Run execution in background worker
-                self.run_worker(self._execute_shell_batch_worker, batch, result)
+                # Run execution in background worker (use lambda to pass arguments)
+                self.run_worker(lambda: self._execute_shell_batch_worker(batch, result))
             else:
                 self.chat_display.write("[bold yellow]⊘ No commands to execute[/]\n")
         else:
             # User skipped
             self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
     
-    def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
-        """Execute shell batch in background worker thread."""
+    async def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
+        """Execute shell batch in background worker (async)."""
         try:
             from kicli_code_assist.executor.shell_execution import ShellExecutionApproval, ApprovalDecision
             
@@ -819,8 +820,13 @@ class CodeAssistantApp(Static):
                 session_mode=getattr(result, 'session_mode', False)
             )
             
-            # Execute batch
-            execution_result = self.chat_session.execute_shell_batch(batch, approval)
+            # Execute batch in thread pool to avoid blocking
+            execution_result = await asyncio.get_event_loop().run_in_executor(
+                None, 
+                self.chat_session.execute_shell_batch, 
+                batch, 
+                approval
+            )
             
             # Display results in chat
             self.chat_display.write(f"\n[bold cyan]🔧 Execution Results:[/]\n")
