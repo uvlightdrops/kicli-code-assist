@@ -19,6 +19,7 @@ from kicli_code_assist.ui.prompts_panel import PromptsPanel
 from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegration
 from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
+from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 
 
 class PromptsModal(ModalScreen):
