@@ -793,17 +793,67 @@ class CodeAssistantApp(Static):
             # User cancelled
             self.chat_display.write("[bold yellow]⊘ Shell command execution cancelled[/]\n")
         elif hasattr(result, 'approved') and result.approved:
-            # User approved - show execution summary
+            # User approved - execute commands in background worker
             if hasattr(result, 'edited_commands') and result.edited_commands:
-                self.chat_display.write(
-                    f"[bold green]✓ Executing {len(result.edited_commands)} command(s)...[/]\n"
-                )
-                for cmd in result.edited_commands:
-                    self.chat_display.write(f"[dim]  $ {cmd.command}[/]\n")
-            self.chat_display.write("[bold green]Commands executed with approval[/]\n")
+                # Create batch from edited commands
+                batch = ShellCommandBatch(commands=result.edited_commands)
+                
+                # Run execution in background worker
+                self.run_worker(self._execute_shell_batch_worker, batch, result)
+            else:
+                self.chat_display.write("[bold yellow]⊘ No commands to execute[/]\n")
         else:
             # User skipped
             self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
+    
+    def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
+        """Execute shell batch in background worker thread."""
+        try:
+            from kicli_code_assist.executor.shell_execution import ShellExecutionApproval, ApprovalDecision
+            
+            # Create approval object
+            approval = ShellExecutionApproval(
+                batch_id=batch.id,
+                decision=ApprovalDecision.APPROVED,
+                approved_by="user",
+                session_mode=getattr(result, 'session_mode', False)
+            )
+            
+            # Execute batch
+            execution_result = self.chat_session.execute_shell_batch(batch, approval)
+            
+            # Display results in chat
+            self.chat_display.write(f"\n[bold cyan]🔧 Execution Results:[/]\n")
+            
+            if execution_result.get("status") == "completed":
+                attempted = execution_result.get("commands_attempted", 0)
+                succeeded = execution_result.get("commands_succeeded", 0)
+                failed = execution_result.get("commands_failed", 0)
+                
+                self.chat_display.write(
+                    f"[bold green]✓ {succeeded}/{attempted} commands succeeded[/]\n"
+                )
+                
+                # Show output for each command
+                results = execution_result.get("results", [])
+                for i, cmd_result in enumerate(results, 1):
+                    cmd = batch.commands[i-1] if i <= len(batch.commands) else None
+                    
+                    status_icon = "✓" if cmd_result.success else "✗"
+                    status_color = "green" if cmd_result.success else "red"
+                    
+                    self.chat_display.write(f"\n[bold]{i}. [{status_color}]{status_icon}[/] {cmd.command if cmd else 'Unknown'}\n")
+                    
+                    if cmd_result.stdout:
+                        self.chat_display.write(f"[dim]{cmd_result.stdout}[/]\n")
+                    
+                    if cmd_result.stderr:
+                        self.chat_display.write(f"[bold red]{cmd_result.stderr}[/]\n")
+            else:
+                self.chat_display.write(f"[bold red]✗ Execution failed: {execution_result.get('reason', 'Unknown error')}[/]\n")
+        
+        except Exception as e:
+            self.chat_display.write(f"[bold red]❌ Error executing commands: {str(e)}[/]\n")
     
     def update_file_preview(self, path: Path) -> None:
         """Update file preview when file is selected."""
