@@ -338,6 +338,13 @@ class CommandManualEntryDialog(ModalScreen):
         if self.text_area:
             self.text_area.focus()
     
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button clicks."""
+        if event.button.id == "submit-btn":
+            self.action_submit()
+        elif event.button.id == "cancel-btn":
+            self.action_cancel()
+    
     def action_submit(self) -> None:
         """Parse and submit commands."""
         if not self.text_area:
@@ -360,13 +367,13 @@ class CommandManualEntryDialog(ModalScreen):
         
         if commands:
             batch = ShellCommandBatch(commands=commands)
-            self.app.pop_screen(batch)
+            self.dismiss(batch)
         else:
-            self.app.pop_screen(None)
+            self.dismiss(None)
     
     def action_cancel(self) -> None:
         """Cancel entry."""
-        self.app.pop_screen(None)
+        self.dismiss(None)
 
 
 class CommandBatchEditorPanel(Static):
