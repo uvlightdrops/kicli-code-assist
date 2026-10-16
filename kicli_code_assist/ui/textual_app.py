@@ -5,7 +5,7 @@ import asyncio
 from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.widgets import Header, Footer, Static, RichLog, TextArea
+from textual.widgets import Header, Footer, Static, RichLog, TextArea, TabbedContent, TabPane
 from textual.binding import Binding
 from textual.reactive import reactive
 from textual.message import Message
@@ -20,6 +20,7 @@ from kicli_code_assist.ui.prompts_panel import PromptsPanel
 from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegration
 from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
+from kicli_code_assist.ui.terminal_panel import TerminalPanel
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 
 
@@ -349,6 +350,7 @@ class CodeAssistantApp(Static):
         self.preview_display = None
         self.preview_title = None
         self.chat_display = None
+        self.terminal_panel = None  # Terminal output panel
         self.input_field = None
         self.status_bar = None
         self.selected_file = None
@@ -438,12 +440,18 @@ class CodeAssistantApp(Static):
                 self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
                 yield self.preview_display
         
-            # Right: Chat area
+            # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
-                self.chat_title = Static("💬 Chat", classes="panel_title", id="chat_title")
-                yield self.chat_title
-                self.chat_display = RichLog(highlight=False, markup=True)
-                yield self.chat_display
+                with TabbedContent(id="chat_terminal_tabs"):
+                    # Chat tab
+                    with TabPane("💬 Chat", id="tab_chat"):
+                        self.chat_display = RichLog(highlight=False, markup=True)
+                        yield self.chat_display
+                    
+                    # Terminal tab
+                    with TabPane("🖥️  Terminal", id="tab_terminal"):
+                        self.terminal_panel = TerminalPanel(id="terminal_panel")
+                        yield self.terminal_panel
         
         # Input area
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
@@ -840,17 +848,20 @@ class CodeAssistantApp(Static):
                 approval
             )
             
-            # Display results in chat
+            # Display results in chat AND terminal
             self.chat_display.write(f"\n[bold cyan]🔧 Execution Results:[/]\n")
+            if self.terminal_panel:
+                self.terminal_panel.write(f"\n[bold cyan]🔧 Execution Results:[/]\n")
             
             if execution_result.get("status") == "completed":
                 attempted = execution_result.get("commands_attempted", 0)
                 succeeded = execution_result.get("commands_succeeded", 0)
                 failed = execution_result.get("commands_failed", 0)
                 
-                self.chat_display.write(
-                    f"[bold green]✓ {succeeded}/{attempted} commands succeeded[/]\n"
-                )
+                summary = f"[bold green]✓ {succeeded}/{attempted} commands succeeded[/]\n"
+                self.chat_display.write(summary)
+                if self.terminal_panel:
+                    self.terminal_panel.write_success(f"{succeeded}/{attempted} commands succeeded")
                 
                 # Show output for each command
                 results = execution_result.get("results", [])
@@ -860,20 +871,33 @@ class CodeAssistantApp(Static):
                     status_icon = "✓" if cmd_result["success"] else "✗"
                     status_color = "green" if cmd_result["success"] else "red"
                     
-                    self.chat_display.write(f"\n[bold]{i}. [{status_color}]{status_icon}[/] {cmd.command if cmd else 'Unknown'}\n")
+                    line = f"\n[bold]{i}. [{status_color}]{status_icon}[/] {cmd.command if cmd else 'Unknown'}\n"
+                    self.chat_display.write(line)
+                    if self.terminal_panel:
+                        self.terminal_panel.write_command(cmd.command if cmd else "Unknown")
                     
                     if cmd_result.get("stdout"):
                         self.chat_display.write(f"[dim]{cmd_result['stdout']}[/]\n")
+                        if self.terminal_panel:
+                            self.terminal_panel.write_stdout(cmd_result['stdout'])
                     
                     if cmd_result.get("stderr"):
                         self.chat_display.write(f"[bold red]{cmd_result['stderr']}[/]\n")
+                        if self.terminal_panel:
+                            self.terminal_panel.write_stderr(cmd_result['stderr'])
                     
                     # Show returncode if non-zero
                     returncode = cmd_result.get("returncode", 0)
                     if returncode != 0:
-                        self.chat_display.write(f"[yellow]Return code: {returncode}[/]\n")
+                        rc_line = f"[yellow]Return code: {returncode}[/]\n"
+                        self.chat_display.write(rc_line)
+                        if self.terminal_panel:
+                            self.terminal_panel.write(f"[yellow]Return code: {returncode}[/]\n")
             else:
-                self.chat_display.write(f"[bold red]✗ Execution failed: {execution_result.get('reason', 'Unknown error')}[/]\n")
+                error_msg = f"[bold red]✗ Execution failed: {execution_result.get('reason', 'Unknown error')}[/]\n"
+                self.chat_display.write(error_msg)
+                if self.terminal_panel:
+                    self.terminal_panel.write_error(execution_result.get('reason', 'Unknown error'))
         
         except Exception as e:
             self.chat_display.write(f"[bold red]❌ Error executing commands: {str(e)}[/]\n")
