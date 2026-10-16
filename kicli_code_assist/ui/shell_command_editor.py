@@ -313,8 +313,7 @@ class CommandManualEntryDialog(ModalScreen):
             
             # Body
             with Vertical(id="entry-body"):
-                self.text_area = TextArea(language="bash")
-                self.text_area.name = "command_text_area"
+                self.text_area = TextArea(language="bash", id="command_text_area")
                 yield self.text_area
             
             # Footer
