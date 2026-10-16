@@ -1,0 +1,52 @@
+/* Shell Command Editor Styles */
+
+CommandManualEntryDialog {
+    align: center middle;
+    background: $surface 50%;
+}
+
+CommandManualEntryDialog > Vertical {
+    width: 90;
+    height: 35;
+    border: solid $primary;
+    background: $panel;
+    padding: 0;
+}
+
+#entry-header {
+    height: auto;
+    border-bottom: solid $primary;
+    padding: 1 2;
+    background: $boost;
+}
+
+#entry-header Label {
+    width: 100%;
+}
+
+#entry-body {
+    height: 1fr;
+    padding: 1 2;
+    border-bottom: solid $primary;
+}
+
+#entry-footer {
+    height: auto;
+    padding: 1 2;
+    background: $boost;
+}
+
+#entry-footer Horizontal {
+    width: 100%;
+    height: auto;
+}
+
+TextArea {
+    height: 1fr;
+    border: solid $accent;
+    background: $surface;
+}
+
+Button {
+    margin-right: 1;
+}

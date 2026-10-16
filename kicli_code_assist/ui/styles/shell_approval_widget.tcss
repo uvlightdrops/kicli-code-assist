@@ -1,0 +1,87 @@
+/* Shell Command Approval Modal Styles */
+
+ShellCommandApprovalModal {
+    align: center middle;
+    background: $surface 50%;
+}
+
+ShellCommandApprovalModal > Vertical {
+    width: 95;
+    height: 38;
+    border: solid $primary;
+    background: $panel;
+    padding: 0;
+}
+
+#approval-header {
+    height: auto;
+    border-bottom: solid $primary;
+    padding: 1 2;
+    background: $boost;
+}
+
+#approval-header Label {
+    width: 100%;
+}
+
+#commands-scroll {
+    height: 1fr;
+    border-bottom: solid $primary;
+    padding: 1 2;
+}
+
+#session-mode-container {
+    height: auto;
+    padding: 1 2;
+    border-bottom: solid $primary;
+    background: $boost;
+}
+
+#button-container {
+    height: auto;
+    padding: 1 2;
+    background: $boost;
+}
+
+#button-container Horizontal {
+    width: 100%;
+    height: auto;
+}
+
+#button-container Button {
+    margin-right: 1;
+    margin-bottom: 0;
+}
+
+#commands-display {
+    padding: 0;
+}
+
+#risk-level {
+    padding: 0 1;
+    width: 100%;
+}
+
+#risk-critical {
+    background: $error;
+    color: $text;
+}
+
+#risk-high {
+    background: $warning;
+    color: $text;
+}
+
+#risk-medium {
+    background: $warning;
+    color: $text;
+}
+
+#risk-low {
+    background: $success;
+    color: $text;
+}
+
+TextArea {
+    height: 1fr;
+}

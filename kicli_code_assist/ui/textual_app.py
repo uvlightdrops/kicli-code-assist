@@ -792,16 +792,15 @@ class CodeAssistantApp(Static):
         if result is None:
             # User cancelled
             self.chat_display.write("[bold yellow]⊘ Shell command execution cancelled[/]\n")
-        elif isinstance(result, dict) and result.get("approved"):
+        elif hasattr(result, 'approved') and result.approved:
             # User approved - show execution summary
-            batch = result.get("batch")
-            if batch:
+            if hasattr(result, 'edited_commands') and result.edited_commands:
                 self.chat_display.write(
-                    f"[bold green]✓ Executing {len(batch.commands)} command(s)...[/]\n"
+                    f"[bold green]✓ Executing {len(result.edited_commands)} command(s)...[/]\n"
                 )
-                for cmd in batch.commands:
+                for cmd in result.edited_commands:
                     self.chat_display.write(f"[dim]  $ {cmd.command}[/]\n")
-                self.chat_display.write("[bold green]Commands executed with approval[/]\n")
+            self.chat_display.write("[bold green]Commands executed with approval[/]\n")
         else:
             # User skipped
             self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
