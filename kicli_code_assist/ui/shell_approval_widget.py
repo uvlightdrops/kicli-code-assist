@@ -200,7 +200,8 @@ class ShellCommandApprovalModal(ModalScreen):
             with Horizontal(id="button-container"):
                 yield Button("Execute Batch", id="btn-execute", variant="primary")
                 yield Button("Skip", id="btn-skip", variant="warning")
-                yield Button("Edit", id="btn-edit", variant="default")
+                yield Button("Edit Commands", id="btn-edit", variant="default")
+                yield Button("Add Manual Command", id="btn-add-manual", variant="default")
                 yield Button("Cancel", id="btn-cancel", variant="error")
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
@@ -221,14 +222,26 @@ class ShellCommandApprovalModal(ModalScreen):
             )
             self.app.pop_screen()
         elif button_id == "btn-edit":
-            # TODO: Implement edit UI in next iteration
-            self.notify("Edit mode coming soon", timeout=3)
+            # Emit message to parent to handle editing
+            self.post_message(self.EditCommandsRequested(self.command_batch))
+        elif button_id == "btn-add-manual":
+            # Emit message to parent to handle manual entry
+            self.post_message(self.AddManualCommandRequested())
         elif button_id == "btn-cancel":
             self.result = ApprovalResult(
                 approved=False,
                 session_mode=False,
             )
             self.app.pop_screen()
+    
+    def update_batch(self, batch: ShellCommandBatch) -> None:
+        """Update the command batch after editing.
+        
+        Args:
+            batch: Updated batch
+        """
+        self.command_batch = batch
+        self.refresh()
     
     def action_cancel(self) -> None:
         """Cancel approval."""
@@ -263,3 +276,16 @@ class CommandsSkipped(Message):
     def __init__(self, batch_id: str) -> None:
         self.batch_id = batch_id
         super().__init__()
+
+
+class EditCommandsRequested(Message):
+    """Posted when user clicks Edit button."""
+    
+    def __init__(self, batch: ShellCommandBatch) -> None:
+        self.batch = batch
+        super().__init__()
+
+
+class AddManualCommandRequested(Message):
+    """Posted when user clicks Add Manual Command button."""
+    pass
