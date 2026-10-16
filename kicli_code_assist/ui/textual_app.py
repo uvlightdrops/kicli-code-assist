@@ -16,6 +16,9 @@ import textwrap
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.prompts import PromptManager
 from kicli_code_assist.ui.prompts_panel import PromptsPanel
+from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegration
+from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
+from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
 
 
 class PromptsModal(ModalScreen):
@@ -365,6 +368,10 @@ class CodeAssistantApp(Static):
         # for the top-level "prompts" section, which AppConfig doesn't
         # flatten into its own attributes).
         self.prompt_manager = PromptManager(self.config.raw)
+        
+        # Initialize shell execution integration and workflow
+        self.shell_integration = ShellExecutorIntegration(self.chat_session)
+        self.editing_workflow = CommandEditingWorkflow()
     
     def get_allowed_base_path(self) -> Path:
         """Return the allowed project root for file browsing and previews."""
@@ -731,19 +738,55 @@ class CodeAssistantApp(Static):
                 if event.text:
                     response_text += event.text
             
-            # Write full response with text wrapping
-            wrapped_response = self._wrap_text(response_text, width=76)
-            self.chat_display.write(wrapped_response + "\n")
+            # Try to extract shell commands from response
+            command_batch = self.shell_integration.try_extract_commands(response_text)
             
-            # Add to session history
-            self.chat_session.add_message("assistant", response_text)
+            if command_batch and len(command_batch.commands) > 0:
+                # Commands found - show approval modal instead of printing response
+                self.chat_display.write("[bold cyan]🔧 Found shell commands - awaiting approval...[/]\n")
+                
+                # Add response to history
+                self.chat_session.add_message("assistant", response_text)
+                
+                # Show approval modal (will handle execution, editing, etc. in message handlers)
+                self.show_shell_approval_modal(command_batch, response_text)
+            else:
+                # No commands - show response normally
+                wrapped_response = self._wrap_text(response_text, width=76)
+                self.chat_display.write(wrapped_response + "\n")
+                
+                # Add to session history
+                self.chat_session.add_message("assistant", response_text)
         
         except Exception as e:
             self.waiting_for_response = False
             self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
     
+    def show_shell_approval_modal(self, command_batch, response_text: str) -> None:
+        """Show shell command approval modal."""
+        modal = ShellCommandApprovalModal(command_batch)
+        self.app.push_screen(modal, callback=self._on_shell_approval_result)
     
-    def update_file_preview(self, path: Path) -> None:
+    def _on_shell_approval_result(self, result) -> None:
+        """Handle result from shell approval modal."""
+        if result is None:
+            # User cancelled
+            self.chat_display.write("[bold yellow]⊘ Shell command execution cancelled[/]\n")
+        elif isinstance(result, dict) and result.get("approved"):
+            # User approved - show execution summary
+            batch = result.get("batch")
+            if batch:
+                self.chat_display.write(
+                    f"[bold green]✓ Executing {len(batch.commands)} command(s)...[/]\n"
+                )
+                for cmd in batch.commands:
+                    self.chat_display.write(f"[dim]  $ {cmd.command}[/]\n")
+                self.chat_display.write("[bold green]Commands executed with approval[/]\n")
+        else:
+            # User skipped
+            self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
+    
+    
         """Update file preview when file is selected."""
         try:
             if path.is_file() and path.suffix not in ['.pyc', '.o']:
