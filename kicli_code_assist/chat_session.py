@@ -9,6 +9,11 @@ from kicli_code_assist.app_config import AppConfig as Config
 from kicli_code_assist.context import ProjectContextManager, ProjectInfo
 from kicli_code_assist.chat_history import ChatHistory
 from kicli_code_assist.prompts import SystemPrompts, PromptRole
+from kicli_code_assist.executor.shell_execution import (
+    ShellCommandBatch,
+    ShellExecutionApproval,
+    SessionPermissionLevel,
+)
 
 
 @dataclass
@@ -19,6 +24,7 @@ class ChatMessage:
     content: str
     timestamp: datetime = field(default_factory=datetime.now)
     project_context_included: bool = False
+    shell_command_batch: Optional[ShellCommandBatch] = None  # If this is a proposed command batch
 
     def to_dict(self):
         """Convert to dict for LLM API."""
@@ -50,6 +56,12 @@ class ChatSession:
         # Initialize chat history (persistence)
         self.history = ChatHistory(session_name)
         self.messages = [ChatMessage(role=msg["role"], content=msg["content"]) for msg in self.history.messages]
+        
+        # Shell execution state (HITL approval workflow)
+        self.shell_execution_mode: SessionPermissionLevel = SessionPermissionLevel.BATCH
+        self.shell_session_approved_at: Optional[datetime] = None
+        self.shell_session_approver: Optional[str] = None
+        self.shell_execution_log: list = []  # List of ExecutionAuditRecord
 
     def load_project_context(self, force_reload: bool = False) -> ProjectInfo:
         """Load and analyze project context.
@@ -197,3 +209,85 @@ class ChatSession:
     def __repr__(self) -> str:
         """String representation."""
         return f"ChatSession(project={self.project_info.name if self.project_info else 'unknown'}, messages={len(self.messages)})"
+
+    # ========================================================================
+    # Shell Command Execution (HITL Approval Workflow)
+    # ========================================================================
+
+    def should_auto_execute_shell(self, command_batch: Optional[ShellCommandBatch] = None) -> bool:
+        """Check if shell commands should auto-execute without approval.
+        
+        Args:
+            command_batch: Batch to check (optional, for future risk-based filtering)
+            
+        Returns:
+            True if session-level approval has been granted and is still active
+        """
+        if self.shell_execution_mode == SessionPermissionLevel.SESSION:
+            return self.shell_session_approved_at is not None
+        return False
+
+    def approve_shell_execution_for_session(self, approver: str) -> None:
+        """Grant session-level shell execution approval.
+        
+        After this, all command batches will auto-execute without individual approval
+        (until session ends or approval is revoked).
+        
+        Args:
+            approver: Username of person granting approval
+        """
+        self.shell_session_approved_at = datetime.now()
+        self.shell_session_approver = approver
+        self.shell_execution_mode = SessionPermissionLevel.SESSION
+
+    def revoke_session_shell_approval(self) -> None:
+        """Revoke session-level shell execution approval.
+        
+        Subsequent commands will require individual batch approval.
+        """
+        self.shell_session_approved_at = None
+        self.shell_session_approver = None
+        self.shell_execution_mode = SessionPermissionLevel.BATCH
+
+    def set_shell_execution_mode(self, mode: SessionPermissionLevel) -> None:
+        """Set shell execution approval mode.
+        
+        Args:
+            mode: BATCH (approve each batch) or SESSION (auto-approve all)
+        """
+        self.shell_execution_mode = mode
+        if mode == SessionPermissionLevel.BATCH:
+            self.revoke_session_shell_approval()
+
+    def add_shell_execution_record(self, record) -> None:
+        """Add immutable shell execution audit record.
+        
+        Args:
+            record: ExecutionAuditRecord instance
+        """
+        self.shell_execution_log.append(record)
+
+    def get_shell_execution_summary(self) -> dict:
+        """Get summary of shell commands executed in this session.
+        
+        Returns:
+            Dict with execution statistics
+        """
+        if not self.shell_execution_log:
+            return {
+                "total_records": 0,
+                "total_commands": 0,
+                "successful": 0,
+                "failed": 0,
+            }
+        
+        total_commands = sum(len(r.approval.batch_id and [r.command_batch] or []) for r in self.shell_execution_log)
+        successful = sum(len(r.execution_results or []) for r in self.shell_execution_log if r.execution_results and all(r.success for r in r.execution_results))
+        
+        return {
+            "total_records": len(self.shell_execution_log),
+            "total_commands": total_commands,
+            "successful": successful,
+            "failed": total_commands - successful,
+            "session_approval_active": self.shell_session_approved_at is not None,
+        }
