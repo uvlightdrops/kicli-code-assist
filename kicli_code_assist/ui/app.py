@@ -315,7 +315,7 @@ class CodeAssistantApp(Static):
             duration_ms: How long to show (milliseconds)
         """
         self.status_bar.update(message)
-        self.call_later(self._restore_status_bar, delay=duration_ms / 1000.0)
+        self.set_timer(lambda: self._restore_status_bar(), interval=duration_ms / 1000.0, count=1)
     
     def _restore_status_bar(self) -> None:
         """Restore status bar to show focus and context info."""
