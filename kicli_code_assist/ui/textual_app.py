@@ -434,6 +434,8 @@ class CodeAssistantApp(Static):
         with Horizontal(id="main_container"):
             # Left: Browser/Editor tabs
             with Vertical(id="left_panel", classes="panel"):
+                self.browser_title = Static("📂 Browser", classes="panel_title", id="browser_title")
+                yield self.browser_title
                 with TabbedContent(id="browser_editor_tabs"):
                     # Browser tab
                     with TabPane("📂 Browser", id="tab_browser"):
@@ -447,6 +449,8 @@ class CodeAssistantApp(Static):
         
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
+                self.chat_title = Static("💬 Chat  🖥️  Terminal", classes="panel_title", id="chat_title")
+                yield self.chat_title
                 with TabbedContent(id="chat_terminal_tabs"):
                     # Chat tab
                     with TabPane("💬 Chat", id="tab_chat"):
