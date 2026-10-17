@@ -2,12 +2,20 @@
 
 from pathlib import Path
 from textual.widgets import Static
+from textual.message import Message
 
 
 class PreviewPane(Static):
     """Scrollable preview with line selection support."""
 
     can_focus = True
+    
+    class PreviewEnter(Message):
+        """Posted when Enter pressed on preview file."""
+        def __init__(self, file_path: Path, content: str) -> None:
+            self.file_path = file_path
+            self.content = content
+            super().__init__()
 
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -19,6 +27,7 @@ class PreviewPane(Static):
         self.selection_end: int | None = None
         self.preview_scroll_offset = 0
         self.page_size = 20
+        self.is_frozen = False
 
     def set_content(self, path: Path, lines: list[str]) -> None:
         """Load preview content for a file."""
@@ -82,6 +91,14 @@ class PreviewPane(Static):
         start, end = sorted((start, end))
         selected_lines = self.lines[start:end + 1]
         self.parent_app.append_preview_selection(self.file_path, start + 1, end + 1, selected_lines)
+    
+    def action_enter(self) -> None:
+        """Open file in editor (Enter key)."""
+        if self.file_path and self.lines:
+            content = "\n".join(self.lines)
+            self.post_message(self.PreviewEnter(self.file_path, content))
+            self.is_frozen = True
+            self._refresh_preview()
 
     def _ensure_cursor_visible(self) -> None:
         if self.cursor_line < self.preview_scroll_offset:
@@ -96,7 +113,8 @@ class PreviewPane(Static):
 
         start = self.preview_scroll_offset
         end = min(len(self.lines), start + self.page_size)
-        rendered = [f"{self.file_path.name}", "─" * 60]
+        frozen_indicator = " 🔒 FROZEN" if self.is_frozen else ""
+        rendered = [f"{self.file_path.name}{frozen_indicator}", "─" * 60]
         selection_range = None
         if self.selection_start is not None:
             selection_end = self.selection_end if self.selection_end is not None else self.selection_start

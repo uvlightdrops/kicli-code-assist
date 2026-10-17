@@ -23,6 +23,7 @@ from kicli_code_assist.ui.edit_tab import EditTab
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 from kicli_code_assist.ui.panels.file_browser import SelectableFileList
 from kicli_code_assist.ui.panels.preview_pane import PreviewPane
+from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
 from kicli_code_assist.ui.input.chat_input import ChatInput
 
@@ -72,6 +73,7 @@ class CodeAssistantApp(Static):
         self.chat_session = ChatSession(os.getcwd())
         self.current_cwd = os.getcwd()  # Track current working directory
         self.file_list = None
+        self.left_panel = None  # New LeftPanel with browser/editor tabs
         self.preview_display = None
         self.preview_title = None
         self.chat_display = None
@@ -173,18 +175,10 @@ class CodeAssistantApp(Static):
         
         # Main content area
         with Horizontal(id="main_container"):
-            # Left: Browser/Editor tabs
+            # Left: Browser/Editor tabs (new LeftPanel)
             with Vertical(id="left_panel", classes="panel"):
-                with TabbedContent(id="browser_editor_tabs"):
-                    # Browser tab
-                    with TabPane("📂 Browser", id="tab_browser"):
-                        with Vertical():
-                            self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
-                            yield self.file_list
-                            self.preview_title = Static("👁️  File Preview", classes="panel_title", id="preview_title")
-                            yield self.preview_title
-                            self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
-                            yield self.preview_display
+                self.left_panel = LeftPanel(parent_app=self)
+                yield self.left_panel
         
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
@@ -219,8 +213,19 @@ class CodeAssistantApp(Static):
     
     def on_mount(self) -> None:
         """Setup after mount."""
+        # Get references to file_list and preview_display after widgets are mounted
+        self.file_list = self.left_panel.query_one("#file-browser", SelectableFileList)
+        self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
+        self.left_panel.add_preview_pane(self.preview_display)
+        
         if self.input_field:
             self.call_after_refresh(self.input_field.focus)
+    
+    def on_preview_pane_preview_enter(self, message: PreviewPane.PreviewEnter) -> None:
+        """Handle Enter key in preview to open editor tab."""
+        # Create editor tab
+        editor = self.left_panel.create_editor_tab(str(message.file_path), message.content)
+        self.app.notify(f"📝 Editing {message.file_path.name}", timeout=2)
     
     def action_open_prompts(self) -> None:
         """Open prompt management UI (Ctrl+O)."""
