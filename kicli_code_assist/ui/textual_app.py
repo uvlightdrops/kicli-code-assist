@@ -21,6 +21,7 @@ from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegra
 from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
 from kicli_code_assist.ui.terminal_panel import TerminalPanel
+from kicli_code_assist.ui.widgets.shell_input import ShellPanel
 from kicli_code_assist.ui.edit_tab import EditTab
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 
@@ -423,10 +424,10 @@ class CodeAssistantApp(Static):
         Binding("ctrl+f", "focus_preview", "Preview", show=True),
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
+        Binding("ctrl+x", "focus_shell", "Shell", show=True),
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
         Binding("ctrl+s", "open_settings", "Settings", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
-        Binding("ctrl+x", "open_shell_command_dialog", "Shell Command", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
@@ -449,6 +450,7 @@ class CodeAssistantApp(Static):
         self.preview_title = None
         self.chat_display = None
         self.terminal_panel = None  # Terminal output panel
+        self.shell_panel = None  # Shell input panel
         self.input_field = None
         self.status_bar = None
         self.selected_file = None
@@ -520,6 +522,16 @@ class CodeAssistantApp(Static):
         if self.input_field:
             self.call_after_refresh(self.input_field.focus)
     
+    def action_focus_shell(self) -> None:
+        """Focus the shell panel (Ctrl+X)."""
+        self.current_focus = "shell"
+        tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
+        tabs.active = "tab_shell"
+        # Focus the shell input after switching tab
+        if hasattr(self, 'shell_panel') and self.shell_panel:
+            if self.shell_panel.input:
+                self.call_after_refresh(self.shell_panel.input.focus)
+    
     def compose(self) -> ComposeResult:
         """Create child widgets."""
         # Title
@@ -552,6 +564,11 @@ class CodeAssistantApp(Static):
                     with TabPane("🖥️  Terminal", id="tab_terminal"):
                         self.terminal_panel = TerminalPanel(id="terminal_panel")
                         yield self.terminal_panel
+                    
+                    # Shell tab (Ctrl+X)
+                    with TabPane("⌨️  Shell", id="tab_shell"):
+                        self.shell_panel = ShellPanel(id="shell_panel")
+                        yield self.shell_panel
         
         # Input area
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
