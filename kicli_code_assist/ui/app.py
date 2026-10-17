@@ -552,12 +552,14 @@ class CodeAssistantApp(Static):
         self, message: FileEditorPane._AISuggestionsRequested
     ) -> None:
         """Handle AI suggestions request from file editor."""
-        # Start async workflow in background worker (sync function that runs asyncio.run internally)
+        # Start async workflow in background worker
+        # Use lambda because run_worker doesn't support args directly
         self.run_worker(
-            self._process_ai_suggestions_worker,
-            message.file_path,
-            message.file_content,
-            thread=True,  # Sync function, run in thread
+            lambda: self._process_ai_suggestions_worker(
+                message.file_path,
+                message.file_content
+            ),
+            thread=True,
         )
     
     def _process_ai_suggestions_worker(

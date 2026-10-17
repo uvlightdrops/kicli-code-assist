@@ -118,6 +118,14 @@ class FileEditorPane(Container):
             self.editor.focus()
             # Update initial mode display
             self._update_mode_indicator()
+        
+        # Bind checkbox to reactive property
+        if self.ai_checkbox:
+            # Watch checkbox changes and update reactive property
+            def on_checkbox_changed(value: bool) -> None:
+                self.ai_suggestions_enabled = value
+            
+            self.ai_checkbox.watch("value", on_checkbox_changed, init=False)
     
     def _update_mode_indicator(self) -> None:
         """Update mode indicator from current VimTextArea state.
@@ -214,8 +222,13 @@ class FileEditorPane(Container):
         """Handle AI suggestions checkbox change."""
         if enabled and not self._ai_in_progress:
             self._ai_in_progress = True
+            # Show feedback
+            self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
             # Trigger AI processing
             self.app.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
+        elif not enabled:
+            # User unchecked
+            self._ai_in_progress = False
     
     def on_text_area_changed(self) -> None:
         """Track content changes for dirty state and auto-save."""
