@@ -332,12 +332,12 @@ class SelectableRichLog(RichLog):
 
 
 class ChatInput(TextArea):
-    """Chat input with history support (like shell)."""
+    """Chat input with command history support (like shell)."""
 
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
-        self.history = []  # History of submitted commands
+        self.command_history = []  # History of submitted commands
         self.history_index = -1  # Current position in history (-1 = new input)
         self.pending_input = ""  # Store current input while browsing history
 
@@ -347,7 +347,7 @@ class ChatInput(TextArea):
             # Save to history and submit
             text = self.text.strip()
             if text:
-                self.history.append(text)
+                self.command_history.append(text)
                 self.history_index = -1
                 self.pending_input = ""
             self.parent_app.action_select_cursor()
@@ -372,7 +372,7 @@ class ChatInput(TextArea):
 
     def _history_up(self) -> None:
         """Show previous command from history."""
-        if not self.history:
+        if not self.command_history:
             return
         
         # Save current input if we're at the end of history
@@ -380,23 +380,24 @@ class ChatInput(TextArea):
             self.pending_input = self.text
         
         # Move back in history
-        if self.history_index < len(self.history) - 1:
+        if self.history_index < len(self.command_history) - 1:
             self.history_index += 1
-            self.text = self.history[-(self.history_index + 1)]
+            self.text = self.command_history[-(self.history_index + 1)]
 
     def _history_down(self) -> None:
         """Show next command from history (or clear)."""
-        if not self.history or self.history_index == -1:
+        if not self.command_history or self.history_index == -1:
             return
         
         # Move forward in history
         if self.history_index > 0:
             self.history_index -= 1
-            self.text = self.history[-(self.history_index + 1)]
+            self.text = self.command_history[-(self.history_index + 1)]
         else:
             # Back to current input
             self.history_index = -1
             self.text = self.pending_input
+
 
 
 class CodeAssistantApp(Static):
