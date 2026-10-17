@@ -123,8 +123,6 @@ class ShellInput(TextArea):
                     self.cursor_location = (len(lines) - 1, len(lines[-1]))
                     return
         
-        super().on_key(event)
-        
         # Update palette filter as user types
         if self.palette and not event.key in ("up", "down", "enter", "escape"):
             self._update_palette()

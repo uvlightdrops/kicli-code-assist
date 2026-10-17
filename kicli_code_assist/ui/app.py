@@ -361,10 +361,23 @@ class CodeAssistantApp(Static):
     
     def action_load_file(self) -> None:
         """Load file to context via L key."""
-        if self.current_focus == "browser" and self.file_list:
-            selected = self.file_list.get_selected_file()
-            if selected:
-                self.run_worker(lambda: self._load_file_to_context(selected), thread=True)
+        if not self.file_list:
+            if self.chat_display:
+                self.chat_display.write("[bold red]✗ File browser not available[/]\n")
+            return
+            
+        if self.current_focus != "browser":
+            if self.chat_display:
+                self.chat_display.write(f"[bold yellow]ℹ️  Focus is on {self.current_focus}, not browser. Press Ctrl+B to switch to browser.[/]\n")
+            return
+        
+        selected = self.file_list.get_selected_file()
+        if not selected:
+            if self.chat_display:
+                self.chat_display.write("[bold yellow]ℹ️  No file selected. Navigate with arrow keys and press L.[/]\n")
+            return
+            
+        self.run_worker(lambda: self._load_file_to_context(selected), thread=True)
     
     def action_app_quit(self) -> None:
         """Quit the application."""
