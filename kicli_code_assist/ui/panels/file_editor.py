@@ -44,14 +44,21 @@ class FileEditorPane(Container):
     }
     
     FileEditorPane > #editor-buttons {
-        height: 1;
+        height: auto;
         dock: bottom;
         background: $surface;
         border-top: solid $primary;
+        layout: horizontal;
     }
     
     FileEditorPane > #editor-buttons > Button {
         margin: 0 1;
+        height: auto;
+    }
+    
+    FileEditorPane > #editor-buttons > Checkbox {
+        margin: 0 1;
+        height: auto;
     }
     
     FileEditorPane VimTextArea {
