@@ -1,0 +1,55 @@
+"""Error modal styles."""
+
+#error-modal-container {
+    width: 80;
+    height: 24;
+    border: solid $accent;
+    background: $surface;
+}
+
+#error-content {
+    width: 100%;
+    height: 1fr;
+    padding: 1 2;
+}
+
+#error-title {
+    width: 100%;
+    height: auto;
+    color: $error;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+#error-message {
+    width: 100%;
+    height: auto;
+    color: $text;
+    margin-bottom: 1;
+}
+
+#hints-header {
+    width: 100%;
+    height: auto;
+    color: $warning;
+    text-style: bold;
+    margin-bottom: 1;
+}
+
+.error-hint {
+    width: 100%;
+    height: auto;
+    color: $text-muted;
+    margin-bottom: 0;
+}
+
+#error-buttons {
+    width: 100%;
+    height: auto;
+    align: center bottom;
+    padding-top: 1;
+}
+
+#error-buttons Button {
+    margin: 0 1;
+}
