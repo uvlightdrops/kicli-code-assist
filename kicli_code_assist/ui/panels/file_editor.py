@@ -118,14 +118,13 @@ class FileEditorPane(Container):
             self.editor.focus()
             # Update initial mode display
             self._update_mode_indicator()
-        
-        # Bind checkbox to reactive property
-        if self.ai_checkbox:
-            # Watch checkbox changes and update reactive property
-            def on_checkbox_changed(value: bool) -> None:
-                self.ai_suggestions_enabled = value
-            
-            self.ai_checkbox.watch("value", on_checkbox_changed, init=False)
+    
+    def on_checkbox_changed(self, event: Checkbox.Changed) -> None:
+        """Handle checkbox value change directly via message."""
+        if event.control.id == "btn-ai-suggestions":
+            print(f"DEBUG: Checkbox changed - enabled={event.value}")
+            self.ai_suggestions_enabled = event.value
+            print(f"DEBUG: ai_suggestions_enabled set to {event.value}")
     
     def _update_mode_indicator(self) -> None:
         """Update mode indicator from current VimTextArea state.
@@ -220,14 +219,18 @@ class FileEditorPane(Container):
     
     def watch_ai_suggestions_enabled(self, enabled: bool) -> None:
         """Handle AI suggestions checkbox change."""
+        print(f"DEBUG: watch_ai_suggestions_enabled called with {enabled}")
         if enabled and not self._ai_in_progress:
+            print(f"DEBUG: Starting AI processing")
             self._ai_in_progress = True
             # Show feedback
             self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
             # Trigger AI processing
             self.app.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
+            print(f"DEBUG: Message posted to app")
         elif not enabled:
             # User unchecked
+            print(f"DEBUG: AI disabled")
             self._ai_in_progress = False
     
     def on_text_area_changed(self) -> None:

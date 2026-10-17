@@ -552,6 +552,7 @@ class CodeAssistantApp(Static):
         self, message: FileEditorPane._AISuggestionsRequested
     ) -> None:
         """Handle AI suggestions request from file editor."""
+        print(f"DEBUG: App received AI suggestions request for {message.file_path}")
         # Start async workflow in background worker
         # Use lambda because run_worker doesn't support args directly
         self.run_worker(
@@ -561,11 +562,13 @@ class CodeAssistantApp(Static):
             ),
             thread=True,
         )
+        print(f"DEBUG: Worker started")
     
     def _process_ai_suggestions_worker(
         self, file_path: str, file_content: str
     ) -> None:
         """Process AI suggestions (runs in worker thread)."""
+        print(f"DEBUG: Worker processing {file_path}")
         # Build prompt from file context
         prompt = f"""Please suggest improvements to this file:
 
@@ -583,6 +586,7 @@ Only suggest changes that are clearly beneficial."""
 
         # Run async processing
         try:
+            print(f"DEBUG: Calling AI workflow manager")
             suggestion = asyncio.run(
                 self.ai_workflow_manager.process_user_prompt(
                     prompt=prompt,
@@ -592,11 +596,13 @@ Only suggest changes that are clearly beneficial."""
                 )
             )
             
+            print(f"DEBUG: AI returned suggestion: {suggestion is not None}")
             if suggestion:
                 self._current_ai_suggestion = suggestion
                 # Show approval modal on main thread
                 self.call_later(self._show_ai_approval_modal)
         except Exception as e:
+            print(f"DEBUG: AI Error: {e}")
             self.chat_display.write(f"[bold red]✗ AI Processing Error: {str(e)}[/]\n")
     
     def _ai_progress_callback(self, status: str) -> None:
