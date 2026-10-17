@@ -529,8 +529,6 @@ class CodeAssistantApp(Static):
         with Horizontal(id="main_container"):
             # Left: Browser/Editor tabs
             with Vertical(id="left_panel", classes="panel"):
-                self.browser_title = Static("📂 Browser", classes="panel_title", id="browser_title")
-                yield self.browser_title
                 with TabbedContent(id="browser_editor_tabs"):
                     # Browser tab
                     with TabPane("📂 Browser", id="tab_browser"):
@@ -544,8 +542,6 @@ class CodeAssistantApp(Static):
         
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
-                self.chat_title = Static("💬 Chat  🖥️  Terminal", classes="panel_title", id="chat_title")
-                yield self.chat_title
                 with TabbedContent(id="chat_terminal_tabs"):
                     # Chat tab
                     with TabPane("💬 Chat", id="tab_chat"):
@@ -759,27 +755,21 @@ class CodeAssistantApp(Static):
     
     def watch_current_focus(self, focus: str) -> None:
         """Update UI when focus changes."""
-        # Update CSS classes for title highlighting
-        self.browser_title.remove_class("active")
-        self.chat_title.remove_class("active")
-        self.input_title.remove_class("active")
-        if self.preview_title:
-            self.preview_title.remove_class("active")
-        
+        # Set focus to appropriate widget based on focus mode
         if focus == "input":
             if self.input_field:
                 self.call_after_refresh(self.input_field.focus)
             self.input_title.add_class("active")
         elif focus == "chat":
-            self.chat_display.focus()
-            self.chat_title.add_class("active")
+            if self.chat_display:
+                self.chat_display.focus()
         elif focus == "preview":
-            if self.preview_display:
+            if self.preview_display and self.preview_title:
                 self.call_after_refresh(self.preview_display.focus)
-            self.preview_title.add_class("active")
+                self.preview_title.add_class("active")
         else:  # browser
-            self.call_after_refresh(self.file_list.focus)
-            self.browser_title.add_class("active")
+            if self.file_list:
+                self.call_after_refresh(self.file_list.focus)
         
         # Update status bar with intelligent key hints
         self._update_status_bar(focus)
