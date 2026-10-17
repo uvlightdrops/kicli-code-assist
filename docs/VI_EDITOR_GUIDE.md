@@ -2,7 +2,7 @@
 
 ## Modes
 
-The editor has 4 modes, shown in the header with color indicators:
+The editor has 4 modes, shown in the header with **bold colored** indicators:
 
 | Mode | Color | Entry | Exit |
 |------|-------|-------|------|
@@ -10,6 +10,8 @@ The editor has 4 modes, shown in the header with color indicators:
 | **INSERT** | Green | i/a/o/O | Esc |
 | **VISUAL** | Yellow | v/V | Esc |
 | **COMMAND** | Magenta | : | Esc |
+
+**Mode Indicator**: Updates instantly as you type. Located in editor header, right side (e.g., bold cyan "NORMAL").
 
 ## Movement (NORMAL mode)
 
@@ -81,12 +83,33 @@ Press `:` in NORMAL mode to enter COMMAND mode:
 
 | Command | Action |
 |---------|--------|
-| `:w` | Save file |
-| `:q` | Quit editor |
+| `:w` | Save file (auto-focus) |
+| `:q` | Quit editor (auto-save if dirty) |
 | `:q!` | Quit without saving |
 | `:wq` | Save and quit |
 | `:nnn` | Go to line nnn |
 | `:set number` | Show line numbers |
+
+**Note**: Commands work automatically when you press Enter. No need to click Save button separately!
+
+## How It Works (Technical)
+
+### Mode Indicator Updates
+- **Event-Driven**: Uses VimTextArea.ModeChanged messages instead of polling
+- **Zero Lag**: Updates instantly on every keystroke
+- **No Flicker**: Only refreshes when mode actually changes
+
+### Command Handling
+- **:w**: Automatically calls Save (writes to disk)
+- **:q**: Closes editor tab (auto-saves if dirty)
+- **:wq**: Saves and closes
+- Messages propagate from VimTextArea → FileEditorPane event handlers
+
+### Why This Is Better
+❌ Old: Polling at 100-200ms = delay, flicker, CPU usage  
+✅ New: Event-driven = instant, smooth, efficient
+
+## How It Works (Technical)
 
 ## Common Workflows
 
