@@ -409,7 +409,9 @@ class CodeAssistantApp(Static):
             with open(path, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
             
-            self.chat_session.add_file(str(path), content)
+            # Add file as a message to include in chat context
+            msg_content = f"<file path=\"{path}\">\n{content}\n</file>"
+            self.chat_session.add_message("user", msg_content, include_context=True)
             self.loaded_files.append(str(path))
             self.chat_display.write(f"[bold green]✓ Loaded: {path.name}[/]\n")
             self.project_loaded = True
