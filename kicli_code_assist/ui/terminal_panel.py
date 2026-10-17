@@ -4,6 +4,7 @@ from textual.widgets import Static, RichLog
 from textual.containers import Vertical
 from rich.console import Console
 from rich.text import Text
+from datetime import datetime
 
 
 class TerminalPanel(Static):
@@ -12,12 +13,14 @@ class TerminalPanel(Static):
     DEFAULT_CSS = """
     TerminalPanel {
         border: solid $primary;
-        background: $surface;
+        background: $boost;
+        color: $text;
     }
     
     TerminalPanel > RichLog {
         width: 100%;
         height: 100%;
+        background: $boost;
     }
     """
     
@@ -33,8 +36,8 @@ class TerminalPanel(Static):
     
     def on_mount(self) -> None:
         """Setup after mount."""
-        self.terminal_output.write("🖥️  Terminal Output\n")
-        self.terminal_output.write("[dim]────────────────────────────────────[/]\n")
+        self.terminal_output.write("[bold]🖥️  Terminal Output[/]\n")
+        self.terminal_output.write("[dim]────────────────────────────────────────────────────────[/]\n")
     
     def write(self, text: str) -> None:
         """Write text to terminal output."""
@@ -46,30 +49,34 @@ class TerminalPanel(Static):
             self.output_buffer = self.output_buffer[-self.max_lines:]
     
     def write_command(self, command: str) -> None:
-        """Write a command line (bold cyan)."""
-        self.write(f"[bold cyan]$ {command}[/]\n")
+        """Write a command line (shell prompt style)."""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.write(f"[dim]{timestamp}[/] [bold cyan]$ {command}[/]\n")
     
     def write_stdout(self, text: str) -> None:
-        """Write stdout (dim gray)."""
+        """Write stdout (normal)."""
         if text.strip():
-            self.write(f"[dim]{text}[/]\n")
+            self.write(f"{text}\n")
     
     def write_stderr(self, text: str) -> None:
         """Write stderr (bold red)."""
         if text.strip():
-            self.write(f"[bold red]{text}[/]\n")
+            self.write(f"[bold red]✗ {text}[/]\n")
     
     def write_status(self, text: str) -> None:
         """Write status line (bold)."""
-        self.write(f"[bold]{text}[/]\n")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.write(f"[dim]{timestamp}[/] [bold blue]→ {text}[/]\n")
     
     def write_success(self, text: str) -> None:
         """Write success message (bold green)."""
-        self.write(f"[bold green]✓ {text}[/]\n")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.write(f"[dim]{timestamp}[/] [bold green]✓ {text}[/]\n")
     
     def write_error(self, text: str) -> None:
         """Write error message (bold red)."""
-        self.write(f"[bold red]✗ {text}[/]\n")
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.write(f"[dim]{timestamp}[/] [bold red]✗ {text}[/]\n")
     
     def clear(self) -> None:
         """Clear terminal output."""
