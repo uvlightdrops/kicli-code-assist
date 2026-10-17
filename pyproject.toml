@@ -13,6 +13,7 @@ authors = [{name = "KI Team"}]
 
 dependencies = [
     "textual>=0.20.0",
+    "textual-vim-textarea>=0.1.0",
     "rich>=13.0.0",
     "pygments>=2.14.0",
     "pyyaml>=6.0",

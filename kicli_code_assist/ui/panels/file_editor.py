@@ -1,16 +1,17 @@
-"""File editor pane with syntax highlighting and dirty state tracking."""
+"""File editor pane with Vi/Vim editing support and syntax highlighting."""
 
 from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.reactive import Reactive
-from textual.widgets import TextArea, Button, Label, Static, Checkbox
+from textual.widgets import Button, Label, Static, Checkbox
 from textual.widget import Widget
 from textual.message import Message
+from textual_vim_textarea import VimTextArea
 
 
 class FileEditorPane(Container):
-    """Editable file content with syntax highlighting, dirty tracking, and AI suggestions."""
+    """Editable file content with Vi/Vim support, syntax highlighting, and dirty state tracking."""
     
     DEFAULT_CSS = """
     FileEditorPane {
@@ -30,6 +31,12 @@ class FileEditorPane(Container):
         width: 1fr;
     }
     
+    FileEditorPane > #editor-mode-indicator {
+        width: 1fr;
+        text-align: right;
+        padding-right: 1;
+    }
+    
     FileEditorPane > #editor-buttons {
         height: 1;
         dock: bottom;
@@ -41,7 +48,7 @@ class FileEditorPane(Container):
         margin: 0 1;
     }
     
-    FileEditorPane TextArea {
+    FileEditorPane VimTextArea {
         height: 1fr;
     }
     """
@@ -50,6 +57,7 @@ class FileEditorPane(Container):
     content: Reactive[str] = Reactive("")
     is_dirty: Reactive[bool] = Reactive(False)
     ai_suggestions_enabled: Reactive[bool] = Reactive(False)
+    vim_mode: Reactive[str] = Reactive("NORMAL")
     
     def __init__(self, file_path: str, content: str, name: str | None = None, id: str | None = None):
         """Initialize file editor.
@@ -64,17 +72,20 @@ class FileEditorPane(Container):
         self.file_path = file_path
         self.content = content
         self._original_content = content
-        self.editor: TextArea | None = None
+        self.editor: VimTextArea | None = None
         self.ai_checkbox: Checkbox | None = None
+        self.mode_indicator: Label | None = None
         self._ai_in_progress = False
     
     def compose(self) -> ComposeResult:
         """Create editor layout."""
         with Horizontal(id="editor-header"):
             yield Label(f"📝 {Path(self.file_path).name}", id="editor-title")
+            self.mode_indicator = Label("NORMAL", id="editor-mode-indicator")
+            yield self.mode_indicator
         
-        # TextArea for editing
-        self.editor = TextArea(
+        # VimTextArea for Vi/Vim editing
+        self.editor = VimTextArea(
             text=self.content,
             language=self._detect_language(),
             id="file-textarea"
@@ -91,6 +102,34 @@ class FileEditorPane(Container):
         """Setup after mount."""
         if self.editor:
             self.editor.focus()
+            # Start monitoring vim mode changes
+            self.set_interval(0.1, self._update_vim_mode)
+    
+    def _update_vim_mode(self) -> None:
+        """Update mode indicator based on VimTextArea state."""
+        if self.editor and self.mode_indicator:
+            # Get current mode from VimTextArea
+            mode = "NORMAL"
+            if hasattr(self.editor, '_vim_state'):
+                vim_mode = self.editor._vim_state.mode
+                mode_map = {
+                    'normal': 'NORMAL',
+                    'insert': 'INSERT',
+                    'visual': 'VISUAL',
+                    'command': 'COMMAND',
+                }
+                mode = mode_map.get(vim_mode, vim_mode.upper())
+            
+            # Color the mode indicator
+            color_map = {
+                'NORMAL': 'cyan',
+                'INSERT': 'green',
+                'VISUAL': 'yellow',
+                'COMMAND': 'magenta',
+            }
+            color = color_map.get(mode, 'white')
+            self.mode_indicator.update(f"[{color}]{mode}[/{color}]")
+            self.vim_mode = mode
     
     def _detect_language(self) -> str:
         """Detect language from file extension."""
