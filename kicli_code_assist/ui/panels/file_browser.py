@@ -85,7 +85,7 @@ class SelectableFileList(Static):
             self._update_preview()
     
     def action_select_cursor(self):
-        """Enter directory or select file."""
+        """Enter directory or select file, or edit file if file selected."""
         if not self.entries:
             return
         
@@ -103,7 +103,14 @@ class SelectableFileList(Static):
                     self.load_directory()
         else:
             if path and self.parent_app.is_path_allowed(path):
-                self.parent_app.update_file_preview(path)
+                # Open file in editor tab directly
+                try:
+                    with open(path, 'r', encoding='utf-8', errors='replace') as f:
+                        content = f.read()
+                    editor = self.parent_app.left_panel.create_editor_tab(str(path), content)
+                    self.parent_app.app.notify(f"📝 Editing {path.name}", timeout=2)
+                except Exception as e:
+                    self.parent_app.app.notify(f"❌ Error opening file: {e}", timeout=3)
     
     def _update_preview(self):
         """Update preview for current selection."""
