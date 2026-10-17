@@ -300,8 +300,15 @@ class CodeAssistantApp(Static):
         if focus in self.FOCUS_KEYS:
             local_keys += " ".join(self.FOCUS_KEYS[focus])
         
-        # Context status
-        ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
+        # Context status: show loaded files or project context
+        if self.loaded_files:
+            # Show loaded files with truncation if too many
+            files_display = ", ".join(Path(f).name for f in self.loaded_files[:5])
+            if len(self.loaded_files) > 5:
+                files_display += f", +{len(self.loaded_files) - 5} more"
+            ctx_status = f"📁 Loaded: {files_display}"
+        else:
+            ctx_status = self.chat_session.get_context_status() if self.project_loaded else "❌ No context"
         
         # Full status line
         status_text = f"Focus: {global_keys}{local_keys}  |  {ctx_status}"
@@ -453,8 +460,10 @@ class CodeAssistantApp(Static):
             msg_content = f"<file path=\"{path}\">\n{content}\n</file>"
             self.chat_session.add_message("user", msg_content, include_context=True)
             self.loaded_files.append(str(path))
-            self.show_status_message(f"[bold green]✓ Loaded: {path.name}[/]", duration_ms=2000)
             self.project_loaded = True
+            
+            # Show success message, then update to show loaded files
+            self.show_status_message(f"[bold green]✓ Loaded: {path.name}[/]", duration_ms=2000)
             
         except Exception as e:
             self.show_status_message(f"[bold red]✗ Error loading file: {str(e)}[/]", duration_ms=3000)
