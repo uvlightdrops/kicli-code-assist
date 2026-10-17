@@ -833,20 +833,16 @@ class CodeAssistantApp(Static):
                 # Create batch from edited commands
                 batch = ShellCommandBatch(commands=result.edited_commands)
                 
-                # Create async wrapper (Python doesn't support async lambda)
-                async def run_execution():
-                    await self._execute_shell_batch_worker(batch, result)
-                
-                # Run execution in background worker
-                self.run_worker(run_execution)
+                # Run execution in background worker (synchronous, no async needed)
+                self.run_worker(self._execute_shell_batch_worker, batch, result)
             else:
                 self.chat_display.write("[bold yellow]⊘ No commands to execute[/]\n")
         else:
             # User skipped
             self.chat_display.write("[bold yellow]⊘ Commands skipped[/]\n")
     
-    async def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
-        """Execute shell batch in background worker (async)."""
+    def _execute_shell_batch_worker(self, batch: ShellCommandBatch, result) -> None:
+        """Execute shell batch in background worker (synchronous blocking)."""
         try:
             from kicli_code_assist.executor.shell_execution import (
                 ShellExecutionApproval, 
@@ -866,13 +862,8 @@ class CodeAssistantApp(Static):
                 session_permission_level=perm_level
             )
             
-            # Execute batch in thread pool to avoid blocking
-            execution_result = await asyncio.get_event_loop().run_in_executor(
-                None, 
-                self.chat_session.execute_shell_batch, 
-                batch, 
-                approval
-            )
+            # Execute batch directly (blocking is OK in worker thread)
+            execution_result = self.chat_session.execute_shell_batch(batch, approval)
             
             # Display results in chat AND terminal
             self.chat_display.write(f"\n[bold cyan]🔧 Execution Results:[/]\n")
