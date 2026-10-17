@@ -307,6 +307,21 @@ class CodeAssistantApp(Static):
         status_text = f"Focus: {global_keys}{local_keys}  |  {ctx_status}"
         self.status_bar.update(status_text)
     
+    def show_status_message(self, message: str, duration_ms: int = 3000) -> None:
+        """Show a temporary status message, then restore status bar.
+        
+        Args:
+            message: Message to display
+            duration_ms: How long to show (milliseconds)
+        """
+        self.status_bar.update(message)
+        self.call_later(self._restore_status_bar, delay=duration_ms / 1000.0)
+    
+    def _restore_status_bar(self) -> None:
+        """Restore status bar to show focus and context info."""
+        self._update_status_bar(self.current_focus)
+    
+    
     def action_cursor_up(self) -> None:
         """Move cursor up in current panel."""
         if self.current_focus == "browser" and self.file_list:
@@ -362,19 +377,22 @@ class CodeAssistantApp(Static):
     def action_load_file(self) -> None:
         """Load file to context via L key."""
         if not self.file_list:
-            if self.chat_display:
-                self.chat_display.write("[bold red]✗ File browser not available[/]\n")
+            self.show_status_message("[bold red]✗ File browser not available[/]", duration_ms=2000)
             return
             
         if self.current_focus != "browser":
-            if self.chat_display:
-                self.chat_display.write(f"[bold yellow]ℹ️  Focus is on {self.current_focus}, not browser. Press Ctrl+B to switch to browser.[/]\n")
+            self.show_status_message(
+                f"[bold yellow]ℹ️  Focus on {self.current_focus}. Press Ctrl+B for browser, then L.[/]",
+                duration_ms=3000
+            )
             return
         
         selected = self.file_list.get_selected_file()
         if not selected:
-            if self.chat_display:
-                self.chat_display.write("[bold yellow]ℹ️  No file selected. Navigate with arrow keys and press L.[/]\n")
+            self.show_status_message(
+                "[bold yellow]ℹ️  No file selected. Navigate ↑↓ and press L.[/]",
+                duration_ms=2500
+            )
             return
             
         self.run_worker(lambda: self._load_file_to_context(selected), thread=True)
@@ -416,7 +434,7 @@ class CodeAssistantApp(Static):
         try:
             path = Path(file_path)
             if not self.is_path_allowed(path):
-                self.chat_display.write(f"[bold red]✗ Path not allowed: {file_path}[/]\n")
+                self.show_status_message(f"[bold red]✗ Path not allowed: {file_path}[/]", duration_ms=2000)
                 return
             
             with open(path, 'r', encoding='utf-8', errors='replace') as f:
@@ -426,11 +444,11 @@ class CodeAssistantApp(Static):
             msg_content = f"<file path=\"{path}\">\n{content}\n</file>"
             self.chat_session.add_message("user", msg_content, include_context=True)
             self.loaded_files.append(str(path))
-            self.chat_display.write(f"[bold green]✓ Loaded: {path.name}[/]\n")
+            self.show_status_message(f"[bold green]✓ Loaded: {path.name}[/]", duration_ms=2000)
             self.project_loaded = True
             
         except Exception as e:
-            self.chat_display.write(f"[bold red]✗ Error loading file: {str(e)}[/]\n")
+            self.show_status_message(f"[bold red]✗ Error loading file: {str(e)}[/]", duration_ms=3000)
     
     def update_file_preview(self, path: Path) -> None:
         """Update preview pane with file contents."""
