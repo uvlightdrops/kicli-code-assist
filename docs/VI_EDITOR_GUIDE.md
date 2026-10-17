@@ -2,16 +2,16 @@
 
 ## Modes
 
-The editor has 4 modes, shown in the header with **bold colored** indicators:
+The editor has 4 modes, shown in the header with **BRIGHT BOLD COLORED ICONS**:
 
-| Mode | Color | Entry | Exit |
-|------|-------|-------|------|
-| **NORMAL** | Cyan | Esc | - |
-| **INSERT** | Green | i/a/o/O | Esc |
-| **VISUAL** | Yellow | v/V | Esc |
-| **COMMAND** | Magenta | : | Esc |
+| Mode | Icon | Color | Entry | Exit |
+|------|------|-------|-------|------|
+| **NORMAL** | ◆ | Cyan | Esc | - |
+| **INSERT** | ✏ | Green | i/a/o/O | Esc |
+| **VISUAL** | ▢ | Yellow | v/V | Esc |
+| **COMMAND** | : | Magenta | : | Esc |
 
-**Mode Indicator**: Updates instantly as you type. Located in editor header, right side (e.g., bold cyan "NORMAL").
+**Mode Indicator**: Located in editor header top-right. Very visible with bright colors on dark background. Updates instantly as you type.
 
 ## Movement (NORMAL mode)
 
@@ -83,31 +83,39 @@ Press `:` in NORMAL mode to enter COMMAND mode:
 
 | Command | Action |
 |---------|--------|
-| `:w` | Save file (auto-focus) |
 | `:q` | Quit editor (auto-save if dirty) |
 | `:q!` | Quit without saving |
-| `:wq` | Save and quit |
 | `:nnn` | Go to line nnn |
 | `:set number` | Show line numbers |
 
-**Note**: Commands work automatically when you press Enter. No need to click Save button separately!
+**Note**: `:w` (save) is **not needed**! The editor auto-saves after 2 seconds of inactivity, like VS Code.
+
+## Auto-Save
+
+The editor automatically saves your changes:
+- You edit code → file marked as dirty
+- Stop typing for 2 seconds → file auto-saves
+- Notification shows: "💾 filename.py auto-saved"
+- Dirty indicator (`*`) disappears
+
+**Manual Save**: Click the 💾 Save button to save immediately.
 
 ## How It Works (Technical)
 
 ### Mode Indicator Updates
-- **Event-Driven**: Uses VimTextArea.ModeChanged messages instead of polling
-- **Zero Lag**: Updates instantly on every keystroke
-- **No Flicker**: Only refreshes when mode actually changes
+- **Event-Driven**: Uses VimTextArea.ModeChanged messages
+- **Zero Lag**: Instant visual feedback
+- **Bright Colors**: Cyan/Green/Yellow/Magenta on dark background for visibility
+- **Icons**: Each mode has a distinctive icon for quick recognition
 
-### Command Handling
-- **:w**: Automatically calls Save (writes to disk)
-- **:q**: Closes editor tab (auto-saves if dirty)
-- **:wq**: Saves and closes
-- Messages propagate from VimTextArea → FileEditorPane event handlers
-
-### Why This Is Better
-❌ Old: Polling at 100-200ms = delay, flicker, CPU usage  
-✅ New: Event-driven = instant, smooth, efficient
+### Auto-Save vs :w
+- **Old Way (:w)**: Press `:w` in NORMAL mode
+- **New Way (Auto-Save)**: Edit, pause 2 seconds, done
+- **Why Better**:
+  - No mode switching required
+  - No vim commands to remember  
+  - Automatic background saves prevent data loss
+  - Familiar to VS Code / modern editor users
 
 ## How It Works (Technical)
 
