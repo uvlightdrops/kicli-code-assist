@@ -318,10 +318,10 @@ class CodeAssistantApp(Static):
             self.status_bar.update(message)
             self.set_timer(duration_ms / 1000.0, self._restore_status_bar)
         
-        # If called from worker thread, schedule on main thread
+        # If called from worker thread, schedule on main thread via app
         try:
             # Try to call from thread if we're in a worker
-            self.call_from_thread(_show_and_restore)
+            self.app.call_from_thread(_show_and_restore)
         except RuntimeError:
             # Already on main thread
             _show_and_restore()
