@@ -5,6 +5,7 @@ from textual.containers import Horizontal, Vertical
 from textual.events import Key
 from textual.reactive import reactive
 from .command_history import CommandHistory
+from .command_palette import CommandPalette
 import os
 
 
@@ -41,7 +42,7 @@ class CurrentDirectory(Static):
 
 
 class ShellInput(TextArea):
-    """Shell command input with history and current directory."""
+    """Shell command input with history and command palette."""
     
     DEFAULT_CSS = """
     ShellInput {
@@ -56,9 +57,41 @@ class ShellInput(TextArea):
         super().__init__(*args, **kwargs)
         self.command_history = CommandHistory(max_items=100)
         self.language = "bash"  # Syntax highlighting for bash
+        self.palette = None  # Will be set by parent
+        self.palette_active = False
     
     def on_key(self, event: Key) -> None:
-        """Handle key events for history navigation."""
+        """Handle key events for history navigation and palette."""
+        # If palette is visible, handle arrow keys for navigation
+        if self.palette and self.palette.visible:
+            if event.key == "up":
+                event.prevent_default()
+                event.stop()
+                self.palette.select_up()
+                return
+            elif event.key == "down":
+                event.prevent_default()
+                event.stop()
+                self.palette.select_down()
+                return
+            elif event.key == "enter":
+                # Select from palette
+                event.prevent_default()
+                event.stop()
+                selected = self.palette.get_selected_command()
+                if selected:
+                    self.text = selected + " "
+                    self.cursor_location = (0, len(self.text))
+                    self.palette.hide()
+                return
+            elif event.key == "escape":
+                # Close palette
+                event.prevent_default()
+                event.stop()
+                self.palette.hide()
+                return
+        
+        # Otherwise, normal history navigation
         if event.key == "up":
             # Check if we're at the beginning of input
             cursor_location = self.cursor_location
@@ -67,6 +100,7 @@ class ShellInput(TextArea):
                 previous = self.command_history.up(current_input)
                 if previous is not None:
                     event.prevent_default()
+                    event.stop()
                     self.text = previous
                     # Move cursor to end
                     self.cursor_location = (len(previous.split('\n')) - 1, len(previous.split('\n')[-1]))
@@ -80,6 +114,7 @@ class ShellInput(TextArea):
                 next_cmd = self.command_history.down()
                 if next_cmd is not None:
                     event.prevent_default()
+                    event.stop()
                     self.text = next_cmd
                     # Move cursor to end
                     lines = next_cmd.split('\n')
@@ -87,6 +122,22 @@ class ShellInput(TextArea):
                     return
         
         super().on_key(event)
+        
+        # Update palette filter as user types
+        if self.palette and not event.key in ("up", "down", "enter", "escape"):
+            self._update_palette()
+    
+    def _update_palette(self) -> None:
+        """Update palette based on current input."""
+        # Get first word of input (command)
+        text = self.text.strip()
+        first_word = text.split()[0] if text else ""
+        
+        # Filter palette
+        if first_word:
+            self.palette.filter_commands(first_word)
+        else:
+            self.palette.hide()
     
     def submit_command(self) -> str:
         """Submit command and return it."""
@@ -94,6 +145,8 @@ class ShellInput(TextArea):
         if command:
             self.command_history.add(command)
             self.text = ""
+            if self.palette:
+                self.palette.hide()
         return command
     
     def get_text(self) -> str:
@@ -102,7 +155,7 @@ class ShellInput(TextArea):
 
 
 class ShellPanel(Vertical):
-    """Shell panel with input, history, and current directory."""
+    """Shell panel with input, history, current directory, and command palette."""
     
     DEFAULT_CSS = """
     ShellPanel {
@@ -115,14 +168,21 @@ class ShellPanel(Vertical):
         super().__init__(*args, **kwargs)
         self.cwd_display = None
         self.input = None
+        self.palette = None
     
     def compose(self):
         """Compose the shell panel."""
         self.cwd_display = CurrentDirectory()
         yield self.cwd_display
         
-        self.input = ShellInput(id="shell_input", language="bash")
-        yield self.input
+        # Create container for input + palette
+        with Vertical(id="shell_input_container"):
+            self.palette = CommandPalette(id="command_palette")
+            yield self.palette
+            
+            self.input = ShellInput(id="shell_input", language="bash")
+            self.input.palette = self.palette  # Link palette to input
+            yield self.input
     
     def on_mount(self) -> None:
         """Setup after mount."""
@@ -144,3 +204,4 @@ class ShellPanel(Vertical):
         if self.input:
             return self.input.submit_command()
         return ""
+
