@@ -292,19 +292,111 @@ class PreviewPane(Static):
         self.update("\n".join(rendered))
 
 
+class SelectableRichLog(RichLog):
+    """RichLog with text selection support for mouse and keyboard."""
+    
+    DEFAULT_CSS = """
+    SelectableRichLog {
+        height: 1fr;
+        width: 100%;
+        border: none;
+        background: $panel;
+    }
+    """
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.can_focus = True
+        self.selected_text = ""
+        self.selection_start = None
+        self.selection_end = None
+    
+    def on_mouse_down(self, event) -> None:
+        """Start text selection on mouse down."""
+        self.selection_start = event.offset
+        self.selection_end = event.offset
+        event.prevent_default()
+    
+    def on_mouse_move(self, event) -> None:
+        """Update text selection on mouse move."""
+        if self.selection_start is not None:
+            self.selection_end = event.offset
+            event.prevent_default()
+    
+    def on_mouse_up(self, event) -> None:
+        """Finish text selection on mouse up."""
+        if self.selection_start is not None and self.selection_end is not None:
+            # Text selection is handled, cursor doesn't need focus
+            pass
+        event.prevent_default()
+
+
 class ChatInput(TextArea):
-    """Single-purpose chat input with Enter-to-send."""
+    """Chat input with history support (like shell)."""
 
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
+        self.history = []  # History of submitted commands
+        self.history_index = -1  # Current position in history (-1 = new input)
+        self.pending_input = ""  # Store current input while browsing history
 
     def on_key(self, event) -> None:
-        """Submit on Enter when the input has focus."""
+        """Handle key events: Enter to send, Up/Down for history."""
         if event.key == "enter" and self.parent_app.current_focus == "input":
+            # Save to history and submit
+            text = self.text.strip()
+            if text:
+                self.history.append(text)
+                self.history_index = -1
+                self.pending_input = ""
             self.parent_app.action_select_cursor()
             event.prevent_default()
             event.stop()
+        
+        elif event.key == "up":
+            # Up arrow: browse history
+            cursor_row = self.cursor_location[0]
+            if cursor_row == 0:  # Only if cursor is in first line
+                event.prevent_default()
+                event.stop()
+                self._history_up()
+        
+        elif event.key == "down":
+            # Down arrow: browse history forward
+            cursor_row = self.cursor_location[0]
+            if cursor_row == 0:  # Only if cursor is in first line
+                event.prevent_default()
+                event.stop()
+                self._history_down()
+
+    def _history_up(self) -> None:
+        """Show previous command from history."""
+        if not self.history:
+            return
+        
+        # Save current input if we're at the end of history
+        if self.history_index == -1:
+            self.pending_input = self.text
+        
+        # Move back in history
+        if self.history_index < len(self.history) - 1:
+            self.history_index += 1
+            self.text = self.history[-(self.history_index + 1)]
+
+    def _history_down(self) -> None:
+        """Show next command from history (or clear)."""
+        if not self.history or self.history_index == -1:
+            return
+        
+        # Move forward in history
+        if self.history_index > 0:
+            self.history_index -= 1
+            self.text = self.history[-(self.history_index + 1)]
+        else:
+            # Back to current input
+            self.history_index = -1
+            self.text = self.pending_input
 
 
 class CodeAssistantApp(Static):
@@ -454,7 +546,7 @@ class CodeAssistantApp(Static):
                 with TabbedContent(id="chat_terminal_tabs"):
                     # Chat tab
                     with TabPane("💬 Chat", id="tab_chat"):
-                        self.chat_display = RichLog(highlight=False, markup=True)
+                        self.chat_display = SelectableRichLog(highlight=False, markup=True)
                         yield self.chat_display
                     
                     # Terminal tab

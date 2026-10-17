@@ -101,7 +101,7 @@ RichLog {
 #chat_input {
     width: 100%;
     height: auto;
-    min-height: 2;
+    min-height: 3;
     max-height: 5;
     border: solid $primary;
 }
