@@ -342,8 +342,10 @@ class ChatInput(TextArea):
         self.pending_input = ""  # Store current input while browsing history
 
     def on_key(self, event) -> None:
-        """Handle key events: Enter to send, Up/Down for history."""
-        if event.key == "enter" and self.parent_app.current_focus == "input":
+        """Handle key events: Ctrl+Enter or Enter to send, Up/Down for history."""
+        # Ctrl+Enter or Enter with current_focus check = send
+        if (event.key == "ctrl+enter" or 
+            (event.key == "enter" and self.parent_app.current_focus == "input")):
             # Save to history and submit
             text = self.text.strip()
             if text:
