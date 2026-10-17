@@ -28,18 +28,20 @@ class FileEditorPane(Container):
         dock: top;
         background: $surface;
         border-bottom: solid $primary;
+        layout: horizontal;
     }
     
-    FileEditorPane > #editor-header > Label {
+    FileEditorPane > #editor-header #editor-title {
         text-align: left;
         width: 1fr;
+        padding-left: 1;
     }
     
-    FileEditorPane > #editor-mode-indicator {
-        width: 1fr;
+    FileEditorPane > #editor-header #editor-mode-indicator {
         text-align: right;
-        padding-right: 1;
-        content-align: right middle;
+        width: auto;
+        padding-right: 2;
+        content-align: middle right;
     }
     
     FileEditorPane > #editor-buttons {
@@ -81,6 +83,7 @@ class FileEditorPane(Container):
         self.ai_checkbox: Checkbox | None = None
         self.mode_indicator: Label | None = None
         self._ai_in_progress = False
+        self._auto_save_timer = None
     
     def compose(self) -> ComposeResult:
         """Create editor layout."""
@@ -130,17 +133,30 @@ class FileEditorPane(Container):
                 else:
                     mode = str(vim_mode).upper()
             
-            # Color the mode indicator - bright, visible colors
-            color_map = {
-                'NORMAL': '$cyan',
-                'INSERT': '$green',
-                'VISUAL': '$yellow',
-                'VISUAL_LINE': '$yellow',
-                'COMMAND': '$magenta',
+            # Create mode display with icon and background color
+            mode_icons = {
+                'NORMAL': '◆',
+                'INSERT': '✏',
+                'VISUAL': '▢',
+                'VISUAL_LINE': '▬',
+                'COMMAND': ':',
             }
-            color = color_map.get(mode, '$white')
-            # Use bold for extra visibility
-            self.mode_indicator.update(f"[bold {color}]{mode}[/bold {color}]")
+            
+            icon = mode_icons.get(mode, '●')
+            
+            # Use Textual color names that are definitely visible
+            color_map = {
+                'NORMAL': 'bright_cyan on navy_blue',
+                'INSERT': 'bright_green on navy_blue',
+                'VISUAL': 'bright_yellow on navy_blue',
+                'VISUAL_LINE': 'bright_yellow on navy_blue',
+                'COMMAND': 'bright_magenta on navy_blue',
+            }
+            
+            style = color_map.get(mode, 'white on navy_blue')
+            # Very visible: bold + color + background
+            display_text = f"[{style} bold]{icon} {mode}[/{style} bold]"
+            self.mode_indicator.update(display_text)
             self.vim_mode = mode
         except Exception:
             # Silently ignore errors during mode updates
@@ -196,10 +212,19 @@ class FileEditorPane(Container):
             self.app.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
     
     def on_text_area_changed(self) -> None:
-        """Track content changes for dirty state."""
+        """Track content changes for dirty state and auto-save."""
         if self.editor:
             current_content = self.editor.text
             self.is_dirty = current_content != self._original_content
+            
+            # Schedule auto-save after 2 seconds of inactivity
+            if self.is_dirty:
+                # Cancel previous timer if exists
+                if self._auto_save_timer:
+                    self._auto_save_timer.stop()
+                
+                # Schedule new auto-save
+                self._auto_save_timer = self.set_timer(2.0, lambda: self._do_auto_save())
     
     def action_save(self) -> bool:
         """Save file to disk.
@@ -210,6 +235,11 @@ class FileEditorPane(Container):
         if not self.editor:
             return False
         
+        # Cancel auto-save timer if running
+        if self._auto_save_timer:
+            self._auto_save_timer.stop()
+            self._auto_save_timer = None
+        
         try:
             Path(self.file_path).write_text(self.editor.text)
             self._original_content = self.editor.text
@@ -218,6 +248,12 @@ class FileEditorPane(Container):
         except Exception as e:
             self.app.notify(f"Error saving file: {e}", severity="error")
             return False
+    
+    def _do_auto_save(self) -> None:
+        """Auto-save after inactivity."""
+        if self.is_dirty:
+            self.action_save()
+            self.app.notify(f"💾 {Path(self.file_path).name} auto-saved", timeout=1)
     
     def action_discard(self) -> None:
         """Reload from disk and discard changes."""
@@ -244,8 +280,9 @@ class FileEditorPane(Container):
             self.ai_checkbox.value = False
     
     def on_vim_text_area_save_requested(self, message: VimTextArea.SaveRequested) -> None:
-        """Handle ':w' command from vim."""
-        self.action_save()
+        """Handle ':w' command from vim - disabled in favor of Ctrl+S button."""
+        # :w saves are handled via button clicks instead
+        pass
     
     def on_vim_text_area_quit_requested(self, message: VimTextArea.QuitRequested) -> None:
         """Handle ':q' command from vim.
