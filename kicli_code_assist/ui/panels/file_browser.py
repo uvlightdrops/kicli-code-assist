@@ -47,11 +47,26 @@ class SelectableFileList(Static):
         self.update_display()
     
     def update_display(self):
-        """Update the file list display."""
+        """Update the file list display with coloring for loaded files."""
         lines = []
         for i, (path, is_dir, display) in enumerate(self.entries):
             marker = ">" if i == self.selected_index else " "
-            lines.append(f"{marker} {display}")
+            
+            # Check if this file is in loaded_files
+            is_loaded = False
+            if path and not is_dir:
+                # Normalize path for comparison
+                path_str = str(path.resolve())
+                loaded_normalized = [str(Path(f).resolve()) for f in self.parent_app.loaded_files]
+                is_loaded = path_str in loaded_normalized
+            
+            # Color loaded files
+            if is_loaded:
+                line = f"{marker} [green]{display}[/green] ✓"
+            else:
+                line = f"{marker} {display}"
+            
+            lines.append(line)
         
         self.update("\n".join(lines))
     

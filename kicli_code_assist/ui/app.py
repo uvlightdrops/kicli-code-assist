@@ -462,6 +462,12 @@ class CodeAssistantApp(Static):
             self.loaded_files.append(str(path))
             self.project_loaded = True
             
+            # Refresh file browser display to show loaded file in color
+            if self.file_list:
+                def refresh_display():
+                    self.file_list.update_display()
+                self.app.call_from_thread(refresh_display)
+            
             # Show success message, then update to show loaded files
             self.show_status_message(f"[bold green]✓ Loaded: {path.name}[/]", duration_ms=2000)
             
