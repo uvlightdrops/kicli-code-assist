@@ -21,6 +21,7 @@ from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegra
 from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
 from kicli_code_assist.ui.terminal_panel import TerminalPanel
+from kicli_code_assist.ui.edit_tab import EditTab
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 
 
@@ -309,6 +310,8 @@ class ChatInput(TextArea):
 class CodeAssistantApp(Static):
     """Code assistant with file browser and chat."""
     
+    CSS_PATH = "styles/textual_app.tcss"
+    
     # Reactive state
     current_focus = reactive("browser")  # "browser", "chat", "input", or "preview"
     project_loaded = reactive(False)
@@ -358,6 +361,7 @@ class CodeAssistantApp(Static):
         self.waiting_for_response = False  # Track if waiting for LLM
         self.spinner_index = 0  # For spinner animation
         self.llm_worker = None  # Track worker thread
+        self.open_edit_tabs = {}  # Track {file_path: EditTab}
         
         # Load resolved kicli-code-assist config and LLM client
         from kicli_code_assist.app_config import AppConfig as Config
@@ -428,17 +432,18 @@ class CodeAssistantApp(Static):
         
         # Main content area
         with Horizontal(id="main_container"):
-            # Left: File list + preview
+            # Left: Browser/Editor tabs
             with Vertical(id="left_panel", classes="panel"):
-                self.browser_title = Static("📂 Browser", classes="panel_title", id="browser_title")
-                yield self.browser_title
-                self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
-                yield self.file_list
-                self.preview_title = Static("👁️  File Preview", classes="panel_title", id="preview_title")
-                yield self.preview_title
-                # Use static widget for preview
-                self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
-                yield self.preview_display
+                with TabbedContent(id="browser_editor_tabs"):
+                    # Browser tab
+                    with TabPane("📂 Browser", id="tab_browser"):
+                        with Vertical():
+                            self.file_list = SelectableFileList(self, id="file_list_display", classes="preview")
+                            yield self.file_list
+                            self.preview_title = Static("👁️  File Preview", classes="panel_title", id="preview_title")
+                            yield self.preview_title
+                            self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
+                            yield self.preview_display
         
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
@@ -593,6 +598,23 @@ class CodeAssistantApp(Static):
                 self.chat_display.write(f"[bold yellow]⚠️  Not a file: {file_path}[/]\n")
         except Exception as e:
             self.chat_display.write(f"[bold red]❌ Error reading file: {str(e)}[/]\n")
+    
+    def action_edit_file(self) -> None:
+        """Edit selected file in editor tab (E key)."""
+        if not self.file_list:
+            return
+        
+        file_path = self.file_list.get_selected_file()
+        if not file_path:
+            self.chat_display.write("[bold yellow]⚠️  No valid file selected[/]\n")
+            return
+        
+        path_obj = Path(file_path)
+        if not path_obj.is_file():
+            self.chat_display.write(f"[bold yellow]⚠️  Not a file: {file_path}[/]\n")
+            return
+        
+        self.open_file_in_editor(path_obj)
     
     def action_load_context(self) -> None:
         """Load project context (Ctrl+L)."""
@@ -938,6 +960,49 @@ class CodeAssistantApp(Static):
         except Exception as e:
             # Silently fail
             pass
+    
+    def open_file_in_editor(self, path: Path) -> None:
+        """Open a file in a new editor tab.
+        
+        Args:
+            path: Path to file to edit
+        """
+        if not path or not path.is_file():
+            return
+        
+        # Convert to absolute path
+        abs_path = path.resolve()
+        
+        # Check if already open
+        if abs_path in self.open_edit_tabs:
+            # Switch to existing tab
+            tabs = self.query_one("#browser_editor_tabs", TabbedContent)
+            tab_id = f"edit_tab_{abs_path.name}"
+            tabs.active = tab_id
+            return
+        
+        try:
+            # Read file content
+            content = abs_path.read_text()
+            
+            # Create edit tab
+            edit_tab = EditTab(abs_path, content)
+            
+            # Add to tab pane
+            tabs = self.query_one("#browser_editor_tabs", TabbedContent)
+            tab_pane = TabPane(f"✏️ {abs_path.name}", edit_tab, id=f"edit_tab_{abs_path.name}")
+            tabs.add_pane(tab_pane)
+            
+            # Track it
+            self.open_edit_tabs[abs_path] = edit_tab
+            
+            # Switch to new tab
+            tabs.active = f"edit_tab_{abs_path.name}"
+            
+            self.chat_display.write(f"[cyan]📂 Opened {abs_path.name} in editor[/]\n")
+        
+        except Exception as e:
+            self.chat_display.write(f"[red]✗ Error opening file: {str(e)}[/]\n")
 
 
 def main():
@@ -945,135 +1010,7 @@ def main():
     from textual.app import App
     
     class CodeAssistantMain(App):
-        CSS = """
-        Screen {
-            layout: vertical;
-        }
-        
-        .title {
-            width: 100%;
-            height: 1;
-            content-align: center middle;
-            background: $accent;
-            color: $text;
-            text-style: bold;
-        }
-        
-        #main_container {
-            height: 1fr;
-        }
-        
-        #left_panel {
-            width: 1fr;
-            height: 1fr;
-            border: heavy $primary;
-            overflow: hidden;
-        }
-        
-        #right_panel {
-            width: 1fr;
-            height: 1fr;
-            border: heavy $primary;
-            overflow: hidden;
-        }
-        
-        .panel_title {
-            width: 100%;
-            height: 1;
-            background: $boost;
-            text-style: bold;
-        }
-        
-        #browser_title {
-            background: $boost;
-        }
-        
-        #browser_title.active {
-            background: $warning;
-            color: $surface;
-            text-style: bold;
-        }
-        
-        #preview_title {
-            background: $boost;
-        }
-        
-        #preview_title.active {
-            background: $warning;
-            color: $surface;
-            text-style: bold;
-        }
-        
-        #chat_title {
-            background: $boost;
-        }
-        
-        #chat_title.active {
-            background: $warning;
-            color: $surface;
-            text-style: bold;
-        }
-        
-        #input_title {
-            background: $boost;
-        }
-        
-        #input_title.active {
-            background: $warning;
-            color: $surface;
-            text-style: bold;
-        }
-        
-        ListView {
-            width: 100%;
-            height: 1fr;
-            border: none;
-        }
-        
-        .preview {
-            width: 100%;
-            height: auto;
-            border: none;
-            background: $panel;
-            padding: 1;
-            overflow: auto;
-        }
-        
-        RichLog {
-            width: 100%;
-            height: 1fr;
-            overflow: auto;
-            overflow-x: auto;
-        }
-        
-        #chat_input {
-            width: 100%;
-            height: auto;
-            min-height: 2;
-            max-height: 5;
-            border: solid $primary;
-        }
-        
-        #text_input {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: transparent;
-        }
-        
-        .input_title {
-            width: 100%;
-            height: 1;
-            background: $boost;
-            text-style: bold;
-        }
-        
-        .status_bar {
-            width: 100%;
-            height: 1;
-            background: $panel;
-        }
-        """
+        CSS_PATH = "styles/textual_app.tcss"
         
         BINDINGS = [
             ("ctrl+c", "quit", "Quit"),
