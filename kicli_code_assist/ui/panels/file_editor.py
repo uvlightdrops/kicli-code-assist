@@ -4,12 +4,13 @@ from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Container, Horizontal
 from textual.reactive import Reactive
-from textual.widgets import TextArea, Button, Label, Static
+from textual.widgets import TextArea, Button, Label, Static, Checkbox
 from textual.widget import Widget
+from textual.message import Message
 
 
 class FileEditorPane(Container):
-    """Editable file content with syntax highlighting and dirty tracking."""
+    """Editable file content with syntax highlighting, dirty tracking, and AI suggestions."""
     
     DEFAULT_CSS = """
     FileEditorPane {
@@ -48,6 +49,7 @@ class FileEditorPane(Container):
     file_path: Reactive[str] = Reactive("")
     content: Reactive[str] = Reactive("")
     is_dirty: Reactive[bool] = Reactive(False)
+    ai_suggestions_enabled: Reactive[bool] = Reactive(False)
     
     def __init__(self, file_path: str, content: str, name: str | None = None, id: str | None = None):
         """Initialize file editor.
@@ -63,6 +65,8 @@ class FileEditorPane(Container):
         self.content = content
         self._original_content = content
         self.editor: TextArea | None = None
+        self.ai_checkbox: Checkbox | None = None
+        self._ai_in_progress = False
     
     def compose(self) -> ComposeResult:
         """Create editor layout."""
@@ -80,6 +84,8 @@ class FileEditorPane(Container):
         with Horizontal(id="editor-buttons"):
             yield Button("💾 Save", id="btn-save", variant="primary")
             yield Button("↶ Discard", id="btn-discard")
+            self.ai_checkbox = Checkbox("🤖 AI Suggestions", id="btn-ai-suggestions")
+            yield self.ai_checkbox
     
     def on_mount(self) -> None:
         """Setup after mount."""
@@ -114,6 +120,13 @@ class FileEditorPane(Container):
             label = self.query_one("#editor-title", Label)
             filename = Path(self.file_path).name
             label.update(f"📝 {filename}{'*' if is_dirty else ''}")
+    
+    def watch_ai_suggestions_enabled(self, enabled: bool) -> None:
+        """Handle AI suggestions checkbox change."""
+        if enabled and not self._ai_in_progress:
+            self._ai_in_progress = True
+            # Trigger AI processing
+            self.app.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
     
     def on_text_area_changed(self) -> None:
         """Track content changes for dirty state."""
@@ -150,9 +163,29 @@ class FileEditorPane(Container):
             except Exception as e:
                 self.app.notify(f"Error loading file: {e}", severity="error")
     
+    def apply_changes(self, new_content: str) -> None:
+        """Apply AI-suggested changes to editor.
+        
+        Args:
+            new_content: New file content with changes applied
+        """
+        if self.editor:
+            self.editor.text = new_content
+            self.is_dirty = True
+        self._ai_in_progress = False
+        if self.ai_checkbox:
+            self.ai_checkbox.value = False
+    
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
         if event.button.id == "btn-save":
             self.action_save()
         elif event.button.id == "btn-discard":
             self.action_discard()
+    
+    class _AISuggestionsRequested(Message):
+        """Posted when AI suggestions are requested."""
+        def __init__(self, file_path: str, content: str) -> None:
+            self.file_path = file_path
+            self.content = content
+            super().__init__()
