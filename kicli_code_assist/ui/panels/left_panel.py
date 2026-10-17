@@ -98,8 +98,10 @@ class LeftPanel(Container):
         self.tabbed_content.add_pane(tab)
         self._editor_tabs[tab_id] = tab
         
-        # Focus the new editor tab
+        # Focus the new editor tab and ensure editor gets focus
         self.tabbed_content.active = tab_id
+        # Schedule editor focus after tab switch completes
+        self.app.call_later(lambda: editor.editor.focus() if editor.editor else None)
         
         return editor
     

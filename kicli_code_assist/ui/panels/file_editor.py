@@ -11,7 +11,11 @@ from textual_vim_textarea import VimTextArea
 
 
 class FileEditorPane(Container):
-    """Editable file content with Vi/Vim support, syntax highlighting, and dirty state tracking."""
+    """Editable file content with Vi/Vim support, syntax highlighting, and dirty state tracking.
+    
+    Uses event-driven mode updates via VimTextArea.ModeChanged messages for smooth, responsive
+    mode indicator updates. No polling needed.
+    """
     
     DEFAULT_CSS = """
     FileEditorPane {
@@ -35,6 +39,7 @@ class FileEditorPane(Container):
         width: 1fr;
         text-align: right;
         padding-right: 1;
+        content-align: right middle;
     }
     
     FileEditorPane > #editor-buttons {
@@ -102,34 +107,57 @@ class FileEditorPane(Container):
         """Setup after mount."""
         if self.editor:
             self.editor.focus()
-            # Start monitoring vim mode changes
-            self.set_interval(0.1, self._update_vim_mode)
+            # Update initial mode display
+            self._update_mode_indicator()
     
-    def _update_vim_mode(self) -> None:
-        """Update mode indicator based on VimTextArea state."""
-        if self.editor and self.mode_indicator:
-            # Get current mode from VimTextArea
+    def _update_mode_indicator(self) -> None:
+        """Update mode indicator from current VimTextArea state.
+        
+        Called on mount and via ModeChanged messages from VimTextArea.
+        """
+        if not self.editor or not self.mode_indicator:
+            return
+        
+        try:
             mode = "NORMAL"
-            if hasattr(self.editor, '_vim_state'):
-                vim_mode = self.editor._vim_state.mode
-                mode_map = {
-                    'normal': 'NORMAL',
-                    'insert': 'INSERT',
-                    'visual': 'VISUAL',
-                    'command': 'COMMAND',
-                }
-                mode = mode_map.get(vim_mode, vim_mode.upper())
             
-            # Color the mode indicator
+            # Get mode from VimTextArea._vim_state
+            if hasattr(self.editor, '_vim_state') and self.editor._vim_state:
+                vim_mode = self.editor._vim_state.mode
+                # Use .name property of Mode enum
+                if hasattr(vim_mode, 'name'):
+                    mode = vim_mode.name
+                else:
+                    mode = str(vim_mode).upper()
+            
+            # Color the mode indicator - bright, visible colors
             color_map = {
-                'NORMAL': 'cyan',
-                'INSERT': 'green',
-                'VISUAL': 'yellow',
-                'COMMAND': 'magenta',
+                'NORMAL': '$cyan',
+                'INSERT': '$green',
+                'VISUAL': '$yellow',
+                'VISUAL_LINE': '$yellow',
+                'COMMAND': '$magenta',
             }
-            color = color_map.get(mode, 'white')
-            self.mode_indicator.update(f"[{color}]{mode}[/{color}]")
+            color = color_map.get(mode, '$white')
+            # Use bold for extra visibility
+            self.mode_indicator.update(f"[bold {color}]{mode}[/bold {color}]")
             self.vim_mode = mode
+        except Exception:
+            # Silently ignore errors during mode updates
+            pass
+    
+    def on_vim_text_area_mode_changed(self, message: VimTextArea.ModeChanged) -> None:
+        """Handle mode change events from VimTextArea."""
+        self._update_mode_indicator()
+    
+    def on_vim_text_area_status_changed(self, message: VimTextArea.StatusChanged) -> None:
+        """Handle status change events from VimTextArea.
+        
+        This is called on every vim keystroke, including in command mode.
+        Use this to update any command-line indicator if needed.
+        """
+        # Status already shown in editor, just update mode if needed
+        self._update_mode_indicator()
     
     def _detect_language(self) -> str:
         """Detect language from file extension."""
@@ -214,6 +242,20 @@ class FileEditorPane(Container):
         self._ai_in_progress = False
         if self.ai_checkbox:
             self.ai_checkbox.value = False
+    
+    def on_vim_text_area_save_requested(self, message: VimTextArea.SaveRequested) -> None:
+        """Handle ':w' command from vim."""
+        self.action_save()
+    
+    def on_vim_text_area_quit_requested(self, message: VimTextArea.QuitRequested) -> None:
+        """Handle ':q' command from vim.
+        
+        In a full vim-like app, this would close the editor tab.
+        For now, we just save if dirty.
+        """
+        if self.is_dirty:
+            self.action_save()
+        # Could close tab here: self.parent.remove_child(self)
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
