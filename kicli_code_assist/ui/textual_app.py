@@ -440,11 +440,13 @@ class CodeAssistantApp(Static):
         "preview": ["↑/↓ scroll", "pgup/pgdn page", "enter select"],
         "chat": ["↑/↓ scroll", "pgup/pgdn page"],
         "input": ["enter send", "esc cancel"],
+        "shell": ["↑/↓ history", "enter run", "esc cancel"],
     }
     
     def __init__(self):
         super().__init__()
         self.chat_session = ChatSession(os.getcwd())
+        self.current_cwd = os.getcwd()  # Track current working directory
         self.file_list = None
         self.preview_display = None
         self.preview_title = None
@@ -527,10 +529,18 @@ class CodeAssistantApp(Static):
         self.current_focus = "shell"
         tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
         tabs.active = "tab_shell"
-        # Focus the shell input after switching tab
+        # Update CWD display and focus input
         if hasattr(self, 'shell_panel') and self.shell_panel:
+            self.shell_panel.update_cwd(self.current_cwd)
             if self.shell_panel.input:
                 self.call_after_refresh(self.shell_panel.input.focus)
+    
+    def set_cwd(self, new_cwd: str) -> None:
+        """Change current working directory and update shell panel."""
+        if os.path.isdir(new_cwd):
+            self.current_cwd = new_cwd
+            if self.shell_panel:
+                self.shell_panel.update_cwd(new_cwd)
     
     def compose(self) -> ComposeResult:
         """Create child widgets."""
