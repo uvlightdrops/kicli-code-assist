@@ -6,6 +6,7 @@ from textual.events import Key
 from textual.reactive import reactive
 from .command_history import CommandHistory
 from .command_palette import CommandPalette
+from .shell_prompt import ShellPrompt
 import os
 
 
@@ -58,6 +59,7 @@ class ShellInput(TextArea):
         self.command_history = CommandHistory(max_items=100)
         self.language = "bash"  # Syntax highlighting for bash
         self.palette = None  # Will be set by parent
+        self.prompt = None  # Will be set by parent
         self.palette_active = False
     
     def on_key(self, event: Key) -> None:
@@ -162,6 +164,11 @@ class ShellPanel(Vertical):
         height: 100%;
         width: 100%;
     }
+    
+    ShellPanel > #shell_input_container {
+        height: auto;
+        width: 100%;
+    }
     """
     
     def __init__(self, *args, **kwargs):
@@ -169,20 +176,27 @@ class ShellPanel(Vertical):
         self.cwd_display = None
         self.input = None
         self.palette = None
+        self.prompt = None
     
     def compose(self):
         """Compose the shell panel."""
         self.cwd_display = CurrentDirectory()
         yield self.cwd_display
         
-        # Create container for input + palette
+        # Create container for palette
         with Vertical(id="shell_input_container"):
             self.palette = CommandPalette(id="command_palette")
             yield self.palette
             
-            self.input = ShellInput(id="shell_input", language="bash")
-            self.input.palette = self.palette  # Link palette to input
-            yield self.input
+            # Shell input line with prompt
+            with Horizontal(id="shell_input_line"):
+                self.prompt = ShellPrompt(id="shell_prompt")
+                yield self.prompt
+                
+                self.input = ShellInput(id="shell_input", language="bash")
+                self.input.palette = self.palette  # Link palette to input
+                self.input.prompt = self.prompt  # Link prompt to input
+                yield self.input
     
     def on_mount(self) -> None:
         """Setup after mount."""
@@ -204,4 +218,19 @@ class ShellPanel(Vertical):
         if self.input:
             return self.input.submit_command()
         return ""
+    
+    def set_command_waiting(self) -> None:
+        """Set prompt to waiting state."""
+        if self.prompt:
+            self.prompt.set_waiting()
+    
+    def set_command_error(self) -> None:
+        """Set prompt to error state."""
+        if self.prompt:
+            self.prompt.set_error()
+    
+    def set_command_ready(self) -> None:
+        """Set prompt to ready state."""
+        if self.prompt:
+            self.prompt.set_ready()
 
