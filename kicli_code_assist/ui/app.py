@@ -341,7 +341,7 @@ class CodeAssistantApp(Static):
             text = self.input_field.text.strip()
             if text:
                 self.input_field.text = ""
-                self.run_worker(self._submit_chat, text)
+                self.run_worker(self._submit_chat, text, thread=True)
     
     def action_mark_selection_start(self) -> None:
         """Mark selection start in preview."""
@@ -357,14 +357,14 @@ class CodeAssistantApp(Static):
     def action_load_context(self) -> None:
         """Load selected file to context (Ctrl+L)."""
         if self.selected_file:
-            self.run_worker(self._load_file_to_context, self.selected_file)
+            self.run_worker(self._load_file_to_context, self.selected_file, thread=True)
     
     def action_load_file(self) -> None:
         """Load file to context via L key."""
         if self.current_focus == "browser" and self.file_list:
             selected = self.file_list.get_selected_file()
             if selected:
-                self.run_worker(self._load_file_to_context, selected)
+                self.run_worker(self._load_file_to_context, selected, thread=True)
     
     def action_app_quit(self) -> None:
         """Quit the application."""
@@ -459,7 +459,7 @@ class CodeAssistantApp(Static):
         
         # Execute approved commands
         self.chat_display.write(f"[bold blue]→ Executing {len(result.commands)} commands...[/]\n")
-        self.run_worker(self._execute_shell_commands, result)
+        self.run_worker(self._execute_shell_commands, result, thread=True)
     
     def _execute_shell_commands(self, batch: ShellCommandBatch) -> None:
         """Execute shell commands (worker thread)."""
