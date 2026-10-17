@@ -26,6 +26,10 @@ from kicli_code_assist.ui.panels.preview_pane import PreviewPane
 from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
 from kicli_code_assist.ui.input.chat_input import ChatInput
+from kicli_code_assist.ui.panels.file_editor import FileEditorPane
+from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
+from kicli_code_assist.ai_workflow import AIWorkflowManager
+from kicli_code_assist.llm_integration import get_async_integration
 
 
 class CodeAssistantApp(Static):
@@ -106,6 +110,12 @@ class CodeAssistantApp(Static):
         # Initialize shell execution integration and workflow
         self.shell_integration = ShellExecutorIntegration(self.chat_session)
         self.editing_workflow = CommandEditingWorkflow()
+        
+        # Initialize AI workflow manager
+        self.ai_workflow_manager = AIWorkflowManager(
+            llm_integration=get_async_integration(),
+        )
+        self._current_ai_suggestion = None  # Track active AI suggestion
     
     def _resolve_allowed_base_path(self) -> Path:
         """Resolve the base path that file operations are allowed to access."""
@@ -480,3 +490,96 @@ class CodeAssistantApp(Static):
                     
         except Exception as e:
             self.terminal_panel.write_error(str(e))
+    
+    def on_file_editor_pane_ai_suggestions_requested(
+        self, message: FileEditorPane._AISuggestionsRequested
+    ) -> None:
+        """Handle AI suggestions request from file editor."""
+        # Start async workflow in background worker
+        self.run_worker(
+            self._process_ai_suggestions_worker,
+            message.file_path,
+            message.file_content,
+        )
+    
+    def _process_ai_suggestions_worker(
+        self, file_path: str, file_content: str
+    ) -> None:
+        """Process AI suggestions (runs in worker thread)."""
+        # Build prompt from file context
+        prompt = f"""Please suggest improvements to this file:
+
+File: {file_path}
+Language: {Path(file_path).suffix[1:].lower()}
+
+Analyze for:
+- Code quality issues
+- Security vulnerabilities
+- Performance improvements
+- Best practices
+- Readability
+
+Only suggest changes that are clearly beneficial."""
+
+        # Run async processing
+        try:
+            suggestion = asyncio.run(
+                self.ai_workflow_manager.process_user_prompt(
+                    prompt=prompt,
+                    file_context=file_content,
+                    current_file_path=file_path,
+                    on_progress=self._ai_progress_callback,
+                )
+            )
+            
+            if suggestion:
+                self._current_ai_suggestion = suggestion
+                # Show approval modal on main thread
+                self.call_later(self._show_ai_approval_modal)
+        except Exception as e:
+            self.chat_display.write(f"[bold red]✗ AI Processing Error: {str(e)}[/]\n")
+    
+    def _ai_progress_callback(self, status: str) -> None:
+        """Callback for AI processing progress updates."""
+        self.chat_display.write(f"[dim]⋯ {status}[/]\n")
+    
+    def _show_ai_approval_modal(self) -> None:
+        """Show AI approval modal for current suggestion."""
+        if not self._current_ai_suggestion:
+            return
+        
+        modal = ApprovalModal(self._current_ai_suggestion.approval_session)
+        self.app.push_screen(modal, callback=self._on_ai_approval_result)
+    
+    def _on_ai_approval_result(self, approved_session) -> None:
+        """Handle AI approval result."""
+        if approved_session is None:
+            self.chat_display.write("[dim]⋯ AI suggestions cancelled[/]\n")
+            return
+        
+        if not self._current_ai_suggestion:
+            return
+        
+        # Apply approved changes to editor
+        def apply_to_editor(new_content: str) -> None:
+            # Find the editor tab for this file and update it
+            suggestion = self._current_ai_suggestion
+            for tab in self.open_edit_tabs.values():
+                if hasattr(tab, 'editor_pane') and tab.editor_pane.file_path == suggestion.file_path:
+                    tab.editor_pane.content = new_content
+                    if tab.editor_pane.editor:
+                        tab.editor_pane.editor.text = new_content
+                    break
+        
+        success = self.ai_workflow_manager.apply_approved_changes(
+            self._current_ai_suggestion,
+            apply_to_editor,
+        )
+        
+        if success:
+            summary = self.ai_workflow_manager.get_session_summary(approved_session)
+            self.chat_display.write(f"[green]{summary}[/]\n")
+        else:
+            self.chat_display.write("[bold yellow]⚠ No approved changes to apply[/]\n")
+        
+        self._current_ai_suggestion = None
