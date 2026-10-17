@@ -41,7 +41,6 @@ class FileEditorPane(Container):
         text-align: right;
         width: auto;
         padding-right: 2;
-        content-align: middle right;
     }
     
     FileEditorPane > #editor-buttons {
