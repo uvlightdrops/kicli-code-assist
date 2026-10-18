@@ -17,9 +17,6 @@ class SelectableRichLog(RichLog):
         width: 100%;
         border: none;
         background: $panel;
-        /* Enable text selection and copying */
-        selection-background: $accent;
-        selection-text: $text;
     }
     """
     
