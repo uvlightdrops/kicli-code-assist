@@ -107,8 +107,18 @@ class AIWorkflowManager:
             on_progress("Sending to LLM...")
 
         try:
-            context = self._build_context(prompt, file_context, current_file_path)
-            llm_response = await self.llm_integration.achat_with_context(context)
+            # Build context as messages for LLM
+            system_prompt = "You are a helpful code assistant. Analyze the provided code and provide specific, actionable improvements. Format your response with clear explanations and code examples."
+            
+            messages = [
+                {"role": "user", "content": self._build_context(prompt, file_context, current_file_path)}
+            ]
+            
+            llm_response = await self.llm_integration.query(
+                messages=messages,
+                system_prompt=system_prompt,
+                on_progress=on_progress,
+            )
         except Exception as e:
             if on_progress:
                 on_progress(f"ERROR: LLM call failed: {e}")
