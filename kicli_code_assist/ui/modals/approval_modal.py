@@ -189,7 +189,8 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
                         
                         from textual.widgets import Static
                         with ScrollableContainer(id=f"hunk-content-{idx}"):
-                            yield Static(preview_text, id=f"hunk-text-{idx}")
+                            # Use markup=False to prevent parsing code with special chars
+                            yield Static(preview_text, id=f"hunk-text-{idx}", markup=False)
 
                         # Approval buttons for this hunk
                         with Horizontal():

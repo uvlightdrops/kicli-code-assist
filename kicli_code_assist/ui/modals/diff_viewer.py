@@ -6,6 +6,7 @@ from textual.containers import Vertical, Horizontal
 from textual.binding import Binding
 from textual.screen import Screen
 from textual.widgets import RichLog
+from rich.text import Text
 import difflib
 
 
@@ -103,28 +104,31 @@ class DiffViewerModal(Screen):
         ))
         
         if not diff:
-            self.diff_log.write("[dim]No changes[/dim]\n")
+            self.diff_log.write("No changes\n")
             return
         
-        # Format and color diff
-        self.diff_log.write(f"[bold cyan]📄 {self.file_path}[/bold cyan]\n")
-        self.diff_log.write("[dim]" + "─" * 60 + "[/dim]\n")
+        # Format diff - escape line content to avoid markup errors
+        self.diff_log.write(f"📄 {self.file_path}\n")
+        self.diff_log.write("─" * 60 + "\n")
         
         for line in diff:
+            # Escape special markup characters
+            escaped_line = line.replace("[", r"\[").replace("]", r"\]")
+            
             if line.startswith("---"):
-                self.diff_log.write(f"[dim]{line}[/dim]\n")
+                self.diff_log.write(Text(escaped_line, style="dim") + "\n")
             elif line.startswith("+++"):
-                self.diff_log.write(f"[dim]{line}[/dim]\n")
+                self.diff_log.write(Text(escaped_line, style="dim") + "\n")
             elif line.startswith("@@"):
-                self.diff_log.write(f"[yellow]{line}[/yellow]\n")
+                self.diff_log.write(Text(escaped_line, style="yellow") + "\n")
             elif line.startswith("+"):
-                self.diff_log.write(f"[green]{line}[/green]\n")
+                self.diff_log.write(Text(escaped_line, style="green") + "\n")
             elif line.startswith("-"):
-                self.diff_log.write(f"[red]{line}[/red]\n")
+                self.diff_log.write(Text(escaped_line, style="red") + "\n")
             else:
-                self.diff_log.write(f"[dim]{line}[/dim]\n")
+                self.diff_log.write(Text(escaped_line, style="dim") + "\n")
         
-        self.diff_log.write(f"\n[dim]{'─' * 60}[/dim]\n")
+        self.diff_log.write("\n" + "─" * 60 + "\n")
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
