@@ -125,12 +125,12 @@ class FileEditorPane(Container):
             self._update_mode_indicator()
     
     def _get_code_assistant_app(self) -> "CodeAssistantApp":
-        """Get the CodeAssistantApp widget from the app hierarchy."""
-        # FileEditorPane is nested in LeftPanel -> CodeAssistantApp -> CodeAssistantMain -> CodeAssistantTUI
-        # query_one finds the first matching widget
+        """Get the CodeAssistantApp widget from the screen."""
+        # FileEditorPane is nested in LeftPanel -> CodeAssistantApp
+        # CodeAssistantApp is on the current screen
         try:
             from kicli_code_assist.ui.app import CodeAssistantApp
-            return self.app.query_one(CodeAssistantApp)
+            return self.screen.query_one(CodeAssistantApp)
         except Exception:
             raise RuntimeError("Could not find CodeAssistantApp in widget hierarchy")
     
