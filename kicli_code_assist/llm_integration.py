@@ -63,13 +63,12 @@ class AsyncLLMIntegration:
         # Try Ollama if configured
         if self.config.ollama_base_url:
             try:
-                from ki_core.adapters.openai_compat import OpenAICompatibleClient
+                from ki_core.adapters.ollama import OllamaClient
                 
                 # Use configured model, or reasonable defaults for local Ollama
                 model = self.config.ollama_model or "llama3.2"
-                client = OpenAICompatibleClient(
+                client = OllamaClient(
                     base_url=self.config.ollama_base_url,
-                    api_key="not-needed",  # Ollama doesn't require auth
                     model=model,
                 )
                 providers.append(client)
@@ -118,7 +117,7 @@ class AsyncLLMIntegration:
             if redactions > 0:
                 logger.info(f"Filtered {redactions} secret(s) from system prompt")
 
-        # Build ChatRequest
+        # Build ChatRequest with model from active provider
         from ki_core.core.models import ChatRequest, Message, Role
 
         message_objs = [
@@ -126,9 +125,18 @@ class AsyncLLMIntegration:
             for msg in messages
         ]
         
+        # Use model from the configured provider
+        model = None
+        if self.config.openai_api_key:
+            model = self.config.openai_model
+        elif self.config.ollama_base_url:
+            model = self.config.ollama_model or "llama3.2"
+        else:
+            model = "gpt-4o-mini"
+        
         request = ChatRequest(
             messages=message_objs,
-            model=self.config.openai_model or self.config.ollama_model or "gpt-4o-mini",
+            model=model,
         )
 
         try:
