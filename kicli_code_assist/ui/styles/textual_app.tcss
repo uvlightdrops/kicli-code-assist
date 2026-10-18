@@ -99,11 +99,25 @@ RichLog {
 }
 
 #chat_input {
-    width: 100%;
+    width: 1fr;
     height: auto;
     min-height: 3;
     max-height: 5;
     border: solid $primary;
+}
+
+#input_container {
+    width: 100%;
+    height: auto;
+    layout: horizontal;
+    background: $surface;
+    border-top: solid $primary;
+}
+
+#chat-send-btn {
+    width: auto;
+    height: auto;
+    margin: 0 1;
 }
 
 #text_input {

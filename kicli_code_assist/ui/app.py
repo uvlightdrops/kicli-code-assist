@@ -212,15 +212,11 @@ class CodeAssistantApp(Static):
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
         
-        input_container = Horizontal(id="input_container")
+        input_container = Horizontal(id="input_container", classes="input_container")
         self.input_field = ChatInput(self, id="chat_input", language="markdown")
         self.input_field.show_line_numbers = False
         self.input_field.show_cursor_line = False
         self.input_field.can_focus = True
-        input_container.styles.height = "auto"
-        input_container.styles.layout = "horizontal"
-        input_container.styles.background = "$surface"
-        input_container.styles.border_top = "solid $primary"
         input_container.add_child(self.input_field)
         
         send_btn = Button("↵ Send", id="chat-send-btn", variant="primary")
