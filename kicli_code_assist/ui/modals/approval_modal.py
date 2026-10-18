@@ -86,27 +86,31 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
 
     ApprovalModal > Vertical {
         width: 120;
-        height: auto;
+        height: 35;
         border: solid $accent;
         background: $surface;
+        layout: vertical;
     }
 
     ApprovalModal #title {
         width: 1fr;
+        height: auto;
         text-align: center;
         text-style: bold;
     }
 
     ApprovalModal #summary {
         width: 1fr;
+        height: auto;
         padding: 0 2;
         text-align: center;
     }
 
     ApprovalModal #hunks-container {
         width: 1fr;
-        height: auto;
+        height: 1fr;
         border: dashed $primary;
+        overflow-y: auto;
     }
 
     ApprovalModal #hunk-widget {
@@ -119,15 +123,28 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
     ApprovalModal #button-panel {
         width: 1fr;
         height: auto;
-        dock: bottom;
         border-top: solid $accent;
         padding: 1 2;
+        layout: horizontal;
     }
 
     ApprovalModal #approval-stats {
         width: 1fr;
         text-align: center;
-        padding: 1 0;
+    }
+    
+    ApprovalModal [id*="hunk-content"] {
+        width: 1fr;
+        height: auto;
+        max-height: 8;
+        overflow-y: auto;
+        border: solid $panel;
+        margin: 1 0;
+    }
+    
+    ApprovalModal [id*="hunk-text"] {
+        width: 1fr;
+        height: auto;
     }
     """
 
@@ -163,14 +180,16 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
                         header_text = f"{status_emoji} {hunk.file_path}:{hunk.start_line}-{hunk.end_line}"
                         yield Label(header_text)
 
-                        # Show preview of changes
+                        # Show preview of changes in a scrollable container
                         preview_lines = []
-                        for line in hunk.lines[:5]:  # Show first 5 lines
+                        for line in hunk.lines:
                             preview_lines.append(f"  {line.modified_line[:70]}")
-                        if len(hunk.lines) > 5:
-                            preview_lines.append(f"  ... and {len(hunk.lines) - 5} more lines")
 
-                        yield Label("\n".join(preview_lines))
+                        preview_text = "\n".join(preview_lines)
+                        
+                        from textual.widgets import Static
+                        with ScrollableContainer(id=f"hunk-content-{idx}"):
+                            yield Static(preview_text, id=f"hunk-text-{idx}")
 
                         # Approval buttons for this hunk
                         with Horizontal():
