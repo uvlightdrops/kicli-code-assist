@@ -125,7 +125,7 @@ class FileEditorPane(Container):
             self.ai_suggestions_enabled = event.value
             # Log to app's chat display instead of console
             msg = f"[dim][AI] Checkbox {'checked' if event.value else 'unchecked'}[/]"
-            self.app.post_message(self._LogMessage(msg))
+            self.post_message(self._LogMessage(msg))
     
     def _update_mode_indicator(self) -> None:
         """Update mode indicator from current VimTextArea state.
@@ -223,15 +223,15 @@ class FileEditorPane(Container):
         if enabled and not self._ai_in_progress:
             self._ai_in_progress = True
             # Show feedback in Chat tab
-            self.app.post_message(self._LogMessage(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]"))
+            self.post_message(self._LogMessage(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]"))
             # Show notification overlay
             self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
             # Trigger AI processing
-            self.app.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
+            self.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
         elif not enabled:
             # User unchecked
             self._ai_in_progress = False
-            self.app.post_message(self._LogMessage(f"[dim][AI] Analysis cancelled[/]"))
+            self.post_message(self._LogMessage(f"[dim][AI] Analysis cancelled[/]"))
     
     def on_text_area_changed(self) -> None:
         """Track content changes for dirty state and auto-save."""

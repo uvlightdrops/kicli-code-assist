@@ -25,7 +25,7 @@ from kicli_code_assist.ui.panels.file_browser import SelectableFileList
 from kicli_code_assist.ui.panels.preview_pane import PreviewPane
 from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
-from kicli_code_assist.ui.input.chat_input import ChatInput
+from kicli_code_assist.ui.input.chat_input import ChatInputBar
 from kicli_code_assist.ui.panels.file_editor import FileEditorPane
 from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
@@ -211,9 +211,7 @@ class CodeAssistantApp(Static):
         # Input area
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
-        self.input_field = ChatInput(self, id="chat_input", language="markdown")
-        self.input_field.show_line_numbers = False
-        self.input_field.show_cursor_line = False
+        self.input_field = ChatInputBar(self, id="chat_input")
         self.input_field.can_focus = True
         yield self.input_field
         
@@ -369,9 +367,9 @@ class CodeAssistantApp(Static):
                 self.file_list.action_select_cursor()
         elif self.current_focus == "input":
             # Submit chat message
-            text = self.input_field.text.strip()
+            text = self.input_field.input_widget.text.strip()
             if text:
-                self.input_field.text = ""
+                self.input_field.input_widget.text = ""
                 self.run_worker(lambda: self._submit_chat(text), thread=True)
     
     def action_mark_selection_start(self) -> None:

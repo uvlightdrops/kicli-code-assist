@@ -1,6 +1,46 @@
-"""Chat input widget with command history."""
+"""Chat input widget with command history and send button."""
 
-from textual.widgets import TextArea
+from textual.widgets import TextArea, Button, Static
+from textual.containers import Horizontal
+from textual.app import ComposeResult
+
+
+class ChatInputBar(Static):
+    """Chat input bar with TextArea and Send button."""
+    
+    DEFAULT_CSS = """
+    ChatInputBar {
+        height: auto;
+        layout: horizontal;
+        background: $surface;
+        border-top: solid $primary;
+    }
+    
+    ChatInputBar #chat-input-area {
+        width: 1fr;
+        height: auto;
+    }
+    
+    ChatInputBar #chat-send-btn {
+        width: auto;
+        height: auto;
+        margin: 0 1;
+    }
+    """
+    
+    def __init__(self, parent_app, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.parent_app = parent_app
+        self.input_widget = ChatInput(parent_app, id="chat-input-area")
+    
+    def compose(self) -> ComposeResult:
+        yield self.input_widget
+        yield Button("↵ Send", id="chat-send-btn", variant="primary")
+    
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle Send button click."""
+        if event.button.id == "chat-send-btn":
+            self.input_widget.send_message()
 
 
 class ChatInput(TextArea):
@@ -13,18 +53,21 @@ class ChatInput(TextArea):
         self.history_index = -1  # Current position in history (-1 = new input)
         self.pending_input = ""  # Store current input while browsing history
 
-    def on_key(self, event) -> None:
-        """Handle key events: Ctrl+Enter or Enter to send, Up/Down for history."""
-        # Ctrl+Enter or Enter with current_focus check = send
-        if (event.key == "ctrl+enter" or 
-            (event.key == "enter" and self.parent_app.current_focus == "input")):
-            # Save to history and submit
-            text = self.text.strip()
-            if text:
-                self.command_history.append(text)
-                self.history_index = -1
-                self.pending_input = ""
+    def send_message(self) -> None:
+        """Send current message."""
+        text = self.text.strip()
+        if text:
+            self.command_history.append(text)
+            self.history_index = -1
+            self.pending_input = ""
             self.parent_app.action_select_cursor()
+            self.text = ""  # Clear input
+    
+    def on_key(self, event) -> None:
+        """Handle key events: Ctrl+Enter or Shift+Enter to send, Up/Down for history."""
+        if event.key == "ctrl+enter" or event.key == "shift+enter":
+            # Ctrl+Enter or Shift+Enter = send
+            self.send_message()
             event.prevent_default()
             event.stop()
         
