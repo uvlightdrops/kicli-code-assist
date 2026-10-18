@@ -49,13 +49,14 @@ class AsyncLLMIntegration:
                 from ki_core.adapters.openai_async import AsyncOpenAIClient
                 from ki_core.core.models import ChatRequest
                 
+                model = self.config.openai_model or "gpt-4o-mini"
                 client = AsyncOpenAIClient(
                     api_key=self.config.openai_api_key,
-                    model=self.config.llm_model or "gpt-4o-mini",
+                    model=model,
                     timeout=30,
                 )
                 providers.append(client)
-                logger.info("✓ OpenAI provider initialized")
+                logger.info(f"✓ OpenAI provider initialized ({model})")
             except Exception as e:
                 logger.warning(f"Failed to initialize OpenAI: {e}")
 
@@ -64,13 +65,14 @@ class AsyncLLMIntegration:
             try:
                 from ki_core.adapters.openai_compat import OpenAICompatibleClient
                 
+                model = self.config.ollama_model or "llama2"
                 client = OpenAICompatibleClient(
                     base_url=self.config.ollama_base_url,
                     api_key="not-needed",  # Ollama doesn't require auth
-                    model="llama2",
+                    model=model,
                 )
                 providers.append(client)
-                logger.info("✓ Ollama provider initialized")
+                logger.info(f"✓ Ollama provider initialized ({model})")
             except Exception as e:
                 logger.warning(f"Failed to initialize Ollama: {e}")
 
@@ -123,7 +125,7 @@ class AsyncLLMIntegration:
         
         request = ChatRequest(
             messages=message_objs,
-            model=self.config.llm_model,
+            model=self.config.openai_model or self.config.ollama_model or "gpt-4o-mini",
         )
 
         try:

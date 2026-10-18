@@ -1,10 +1,15 @@
-"""Chat display with text selection."""
+"""Chat display with Rich formatting and text selection support."""
 
 from textual.widgets import RichLog
 
 
 class SelectableRichLog(RichLog):
-    """RichLog with text selection support for mouse and keyboard."""
+    """RichLog with text selection support.
+    
+    - Rich markup support for colors/formatting
+    - Mouse selection (triple-click to select line)
+    - Copy-to-clipboard via standard text selection
+    """
     
     DEFAULT_CSS = """
     SelectableRichLog {
@@ -12,31 +17,13 @@ class SelectableRichLog(RichLog):
         width: 100%;
         border: none;
         background: $panel;
+        /* Enable text selection and copying */
+        selection-background: $accent;
+        selection-text: $text;
     }
     """
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Enable keyboard focus for text selection
         self.can_focus = True
-        self.selected_text = ""
-        self.selection_start = None
-        self.selection_end = None
-    
-    def on_mouse_down(self, event) -> None:
-        """Start text selection on mouse down."""
-        self.selection_start = event.offset
-        self.selection_end = event.offset
-        event.prevent_default()
-    
-    def on_mouse_move(self, event) -> None:
-        """Update text selection on mouse move."""
-        if self.selection_start is not None:
-            self.selection_end = event.offset
-            event.prevent_default()
-    
-    def on_mouse_up(self, event) -> None:
-        """Finish text selection on mouse up."""
-        if self.selection_start is not None and self.selection_end is not None:
-            # Text selection is handled, cursor doesn't need focus
-            pass
-        event.prevent_default()
