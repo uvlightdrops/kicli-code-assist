@@ -9,6 +9,11 @@ from textual.widget import Widget
 from textual.message import Message
 from textual_vim_textarea import VimTextArea
 
+# Import parent app class for type hints
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from kicli_code_assist.ui.app import CodeAssistantApp
+
 
 class FileEditorPane(Container):
     """Editable file content with Vi/Vim support, syntax highlighting, and dirty state tracking.
@@ -119,13 +124,24 @@ class FileEditorPane(Container):
             # Update initial mode display
             self._update_mode_indicator()
     
+    def _get_code_assistant_app(self) -> "CodeAssistantApp":
+        """Get the CodeAssistantApp widget from the app hierarchy."""
+        # FileEditorPane is nested in LeftPanel -> CodeAssistantApp -> CodeAssistantMain -> CodeAssistantTUI
+        # query_one finds the first matching widget
+        try:
+            from kicli_code_assist.ui.app import CodeAssistantApp
+            return self.app.query_one(CodeAssistantApp)
+        except Exception:
+            raise RuntimeError("Could not find CodeAssistantApp in widget hierarchy")
+    
     def on_checkbox_changed(self, event: Checkbox.Changed) -> None:
         """Handle checkbox value change directly via message."""
         if event.control.id == "btn-ai-suggestions":
             self.ai_suggestions_enabled = event.value
             # Log directly to app's chat display
             msg = f"[dim][AI] Checkbox {'checked' if event.value else 'unchecked'}[/]"
-            self.app.chat_display.write(msg)
+            code_app = self._get_code_assistant_app()
+            code_app.chat_display.write(msg)
     
     def _update_mode_indicator(self) -> None:
         """Update mode indicator from current VimTextArea state.
@@ -220,10 +236,11 @@ class FileEditorPane(Container):
     
     def watch_ai_suggestions_enabled(self, enabled: bool) -> None:
         """Handle AI suggestions checkbox change."""
+        code_app = self._get_code_assistant_app()
         if enabled and not self._ai_in_progress:
             self._ai_in_progress = True
             # Show feedback in Chat tab - direct write
-            self.app.chat_display.write(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]")
+            code_app.chat_display.write(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]")
             # Show notification overlay
             self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
             # Trigger AI processing
@@ -231,7 +248,7 @@ class FileEditorPane(Container):
         elif not enabled:
             # User unchecked
             self._ai_in_progress = False
-            self.app.chat_display.write(f"[dim][AI] Analysis cancelled[/]")
+            code_app.chat_display.write(f"[dim][AI] Analysis cancelled[/]")
     
     def on_text_area_changed(self) -> None:
         """Track content changes for dirty state and auto-save."""
