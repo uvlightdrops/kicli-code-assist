@@ -646,7 +646,8 @@ Only suggest changes that are clearly beneficial."""
             
             if suggestion:
                 self._current_ai_suggestion = suggestion
-                self.call_later(lambda: self.chat_display.write(f"[green]✓ AI suggestions generated[/]"))
+                self.call_later(lambda: self.chat_display.write(f"[green]✓ AI suggestions generated ({len(suggestion.approval_session.hunks)} hunks)[/]"))
+                self.call_later(lambda: self._write_background_log(f"DEBUG: About to show approval modal"))
                 # Show approval modal on main thread
                 self.call_later(self._show_ai_approval_modal)
             else:
@@ -658,11 +659,22 @@ Only suggest changes that are clearly beneficial."""
     
     def _show_ai_approval_modal(self) -> None:
         """Show AI approval modal for current suggestion."""
+        self._write_background_log(f"DEBUG: _show_ai_approval_modal called, suggestion: {self._current_ai_suggestion is not None}")
+        
         if not self._current_ai_suggestion:
+            self._write_background_log(f"DEBUG: No suggestion set, returning")
             return
         
-        modal = ApprovalModal(self._current_ai_suggestion.approval_session)
-        self.app.push_screen(modal, callback=self._on_ai_approval_result)
+        try:
+            self._write_background_log(f"DEBUG: Creating ApprovalModal with {len(self._current_ai_suggestion.approval_session.hunks)} hunks")
+            modal = ApprovalModal(self._current_ai_suggestion.approval_session)
+            self._write_background_log(f"DEBUG: Pushing modal to screen")
+            self.app.push_screen(modal, callback=self._on_ai_approval_result)
+            self._write_background_log(f"DEBUG: Modal pushed")
+        except Exception as e:
+            self._write_background_log(f"DEBUG: Modal error: {e}")
+            import traceback
+            self._write_background_log(traceback.format_exc())
     
     def _on_ai_approval_result(self, approved_session) -> None:
         """Handle AI approval result."""
