@@ -65,14 +65,17 @@ class AsyncLLMIntegration:
             try:
                 from ki_core.adapters.openai_compat import OpenAICompatibleClient
                 
-                model = self.config.ollama_model or "llama2"
+                # Use configured model, or reasonable defaults for local Ollama
+                model = self.config.ollama_model or "llama3.2"
                 client = OpenAICompatibleClient(
                     base_url=self.config.ollama_base_url,
                     api_key="not-needed",  # Ollama doesn't require auth
                     model=model,
                 )
                 providers.append(client)
-                logger.info(f"✓ Ollama provider initialized ({model})")
+                logger.info(f"✓ Ollama provider initialized ({model}) at {self.config.ollama_base_url}")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Ollama: {e}")
             except Exception as e:
                 logger.warning(f"Failed to initialize Ollama: {e}")
 
@@ -137,10 +140,15 @@ class AsyncLLMIntegration:
             
         except LLMError as e:
             logger.error(f"LLM error: {e.message}")
-            # Re-raise with original error info
+            if on_progress:
+                on_progress(f"LLM Error: {e.message}")
             raise
         except Exception as e:
-            logger.error(f"Unexpected error during LLM query: {e}")
+            logger.error(f"Unexpected error during LLM query: {type(e).__name__}: {e}")
+            import traceback
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            if on_progress:
+                on_progress(f"Error: {type(e).__name__}: {e}")
             raise
 
     async def stream(
