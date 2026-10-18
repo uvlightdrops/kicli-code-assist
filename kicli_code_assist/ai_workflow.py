@@ -176,30 +176,64 @@ class AIWorkflowManager:
     ) -> List[CodeHunk]:
         """Create CodeHunk objects from parsed response parts.
         
-        Simple strategy: Generate a single hunk with the full file
-        and mark it for user approval (not line-by-line yet).
+        Extracts code blocks from LLM response and creates hunks with
+        actual modifications (not just original content repeated).
         """
         hunks = []
 
-        # For now, create a simple "suggestion" hunk
-        # Real implementation would parse code blocks and do diffs
-        if original_content:
-            # Create a single hunk representing the whole file
-            lines = original_content.split("\n")
+        # Try to find code blocks in parsed response
+        suggested_code = None
+        for part in parsed_parts:
+            if part.type == ResponsePartType.CODE:
+                suggested_code = part.content
+                break
+        
+        # If we found suggested code, use it as modifications
+        if suggested_code:
+            suggested_lines = suggested_code.split("\n")
+            original_lines = original_content.split("\n")
+            
+            # Create hunk with both original and suggested versions
+            lines = []
+            max_lines = max(len(original_lines), len(suggested_lines))
+            
+            for i in range(max_lines):
+                original_line = original_lines[i] if i < len(original_lines) else ""
+                modified_line = suggested_lines[i] if i < len(suggested_lines) else ""
+                
+                lines.append(
+                    LineModification(
+                        line_number=i + 1,
+                        original_line=original_line,
+                        modified_line=modified_line,
+                    )
+                )
+            
             hunk = CodeHunk(
                 file_path=file_path,
                 start_line=1,
-                end_line=len(lines),
-                lines=[
-                    LineModification(
-                        line_number=i + 1,
-                        original_line=line,
-                        modified_line=line,  # Start with no changes
-                    )
-                    for i, line in enumerate(lines)
-                ],
+                end_line=max_lines,
+                lines=lines,
             )
             hunks.append(hunk)
+        else:
+            # Fallback: use original content (no changes)
+            if original_content:
+                lines = original_content.split("\n")
+                hunk = CodeHunk(
+                    file_path=file_path,
+                    start_line=1,
+                    end_line=len(lines),
+                    lines=[
+                        LineModification(
+                            line_number=i + 1,
+                            original_line=line,
+                            modified_line=line,  # No change
+                        )
+                        for i, line in enumerate(lines)
+                    ],
+                )
+                hunks.append(hunk)
         
         return hunks if hunks else [
             CodeHunk(
