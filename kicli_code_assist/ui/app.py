@@ -28,6 +28,7 @@ from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
 from kicli_code_assist.ui.input.chat_input import ChatInput
 from kicli_code_assist.ui.panels.file_editor import FileEditorPane
 from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
+from kicli_code_assist.ui.modals.diff_viewer import DiffViewerModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
 from kicli_code_assist.llm_integration import get_async_integration
 
@@ -672,26 +673,51 @@ Only suggest changes that are clearly beneficial."""
         if not self._current_ai_suggestion:
             return
         
-        # Apply approved changes to editor
-        def apply_to_editor(new_content: str) -> None:
-            # Find the editor tab for this file and update it
-            suggestion = self._current_ai_suggestion
-            for tab in self.open_edit_tabs.values():
-                if hasattr(tab, 'editor_pane') and tab.editor_pane.file_path == suggestion.file_path:
-                    tab.editor_pane.content = new_content
-                    if tab.editor_pane.editor:
-                        tab.editor_pane.editor.text = new_content
-                    break
+        suggestion = self._current_ai_suggestion
         
-        success = self.ai_workflow_manager.apply_approved_changes(
-            self._current_ai_suggestion,
-            apply_to_editor,
+        # Build new content from approved changes
+        new_content_lines = suggestion.original_content.split("\n")
+        
+        # Apply each approved hunk
+        for hunk in suggestion.approval_session.hunks:
+            from kicli_code_assist.approval_workflow import HunkStatus
+            if hunk.status in (HunkStatus.APPROVED, HunkStatus.PARTIAL):
+                for line in hunk.lines:
+                    if line.status == HunkStatus.APPROVED:
+                        idx = line.line_number - 1
+                        if 0 <= idx < len(new_content_lines):
+                            new_content_lines[idx] = line.modified_line
+        
+        new_content = "\n".join(new_content_lines)
+        
+        # Show diff viewer modal before applying
+        def on_diff_result(applied_content):
+            if applied_content is None:
+                self.chat_display.write("[yellow]⊘ Changes rejected by user[/]\n")
+                return
+            
+            # Apply to editor
+            def apply_to_editor():
+                for tab in self.open_edit_tabs.values():
+                    if hasattr(tab, 'editor_pane') and tab.editor_pane.file_path == suggestion.file_path:
+                        if hasattr(tab.editor_pane, 'editor') and tab.editor_pane.editor:
+                            tab.editor_pane.editor.text = applied_content
+                        break
+            
+            apply_to_editor()
+            
+            # Get summary
+            summary = suggestion.approval_session.get_summary()
+            self.chat_display.write(f"""[green]✓ Changes Applied[/green]
+[dim]Approved: {summary['approved']}/{summary['total_hunks']} hunks
+File: {suggestion.file_path}[/dim]
+""")
+            self._current_ai_suggestion = None
+        
+        # Show diff viewer
+        modal = DiffViewerModal(
+            original_content=suggestion.original_content,
+            new_content=new_content,
+            file_path=suggestion.file_path,
         )
-        
-        if success:
-            summary = self.ai_workflow_manager.get_session_summary(approved_session)
-            self.chat_display.write(f"[green]{summary}[/]\n")
-        else:
-            self.chat_display.write("[bold yellow]⚠ No approved changes to apply[/]\n")
-        
-        self._current_ai_suggestion = None
+        self.app.push_screen(modal, callback=on_diff_result)
