@@ -168,7 +168,7 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
             # Hunks container
             with ScrollableContainer(id="hunks-container"):
                 for idx, hunk in enumerate(self.session.hunks):
-                    with Vertical(id=f"hunk-widget"):
+                    with Vertical(id=f"hunk-widget-{idx}"):
                         # Hunk header
                         status_emoji = {
                             HunkStatus.APPROVED: "✓",
