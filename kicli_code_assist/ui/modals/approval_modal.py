@@ -133,7 +133,7 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
         text-align: center;
     }
     
-    ApprovalModal [id*="hunk-content"] {
+    ApprovalModal ScrollableContainer {
         width: 1fr;
         height: auto;
         max-height: 8;
@@ -142,7 +142,7 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
         margin: 1 0;
     }
     
-    ApprovalModal [id*="hunk-text"] {
+    ApprovalModal Static {
         width: 1fr;
         height: auto;
     }
