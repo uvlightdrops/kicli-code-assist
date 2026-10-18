@@ -212,19 +212,15 @@ class CodeAssistantApp(Static):
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
         
-        # Input area - use separate compose to build container
-        input_container = Horizontal(id="input_container", classes="input_container")
+        # Input field and button in horizontal layout (with no extra container, just use compose context)
         self.input_field = ChatInput(self, id="chat_input", language="markdown")
         self.input_field.show_line_numbers = False
         self.input_field.show_cursor_line = False
         self.input_field.can_focus = True
         
-        # Yield container with children inside
-        with input_container:
+        with Horizontal(id="input_container", classes="input_container"):
             yield self.input_field
             yield Button("↵ Send", id="chat-send-btn", variant="primary")
-        
-        yield input_container
         
         # Status bar
         self.status_bar = Static("Curr-focus: B  |  ❌ No context loaded", classes="status_bar")
