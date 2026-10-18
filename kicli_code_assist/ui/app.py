@@ -552,7 +552,8 @@ class CodeAssistantApp(Static):
         self, message: FileEditorPane._AISuggestionsRequested
     ) -> None:
         """Handle AI suggestions request from file editor."""
-        print(f"DEBUG: App received AI suggestions request for {message.file_path}")
+        # Send log message to Chat display
+        self.chat_display.write(f"[dim][AI] Starting analysis of {message.file_path}...[/]")
         # Start async workflow in background worker
         # Use lambda because run_worker doesn't support args directly
         self.run_worker(
@@ -562,13 +563,20 @@ class CodeAssistantApp(Static):
             ),
             thread=True,
         )
-        print(f"DEBUG: Worker started")
+    
+    def on_file_editor_pane_log_message(
+        self, message: FileEditorPane._LogMessage
+    ) -> None:
+        """Handle log messages from file editor - display in chat tab."""
+        self.chat_display.write(message.text)
     
     def _process_ai_suggestions_worker(
         self, file_path: str, file_content: str
     ) -> None:
         """Process AI suggestions (runs in worker thread)."""
-        print(f"DEBUG: Worker processing {file_path}")
+        # Log to chat display (thread-safe)
+        self.call_later(lambda: self.chat_display.write(f"[dim][AI] Processing {Path(file_path).name}...[/]"))
+        
         # Build prompt from file context
         prompt = f"""Please suggest improvements to this file:
 
@@ -586,7 +594,7 @@ Only suggest changes that are clearly beneficial."""
 
         # Run async processing
         try:
-            print(f"DEBUG: Calling AI workflow manager")
+            self.call_later(lambda: self.chat_display.write(f"[dim][AI] Calling AI workflow manager...[/]"))
             suggestion = asyncio.run(
                 self.ai_workflow_manager.process_user_prompt(
                     prompt=prompt,
@@ -596,14 +604,15 @@ Only suggest changes that are clearly beneficial."""
                 )
             )
             
-            print(f"DEBUG: AI returned suggestion: {suggestion is not None}")
             if suggestion:
                 self._current_ai_suggestion = suggestion
+                self.call_later(lambda: self.chat_display.write(f"[green]✓ AI suggestions generated[/]"))
                 # Show approval modal on main thread
                 self.call_later(self._show_ai_approval_modal)
+            else:
+                self.call_later(lambda: self.chat_display.write(f"[yellow]⊘ AI returned no suggestions[/]"))
         except Exception as e:
-            print(f"DEBUG: AI Error: {e}")
-            self.chat_display.write(f"[bold red]✗ AI Processing Error: {str(e)}[/]\n")
+            self.call_later(lambda: self.chat_display.write(f"[bold red]✗ AI Processing Error: {str(e)}[/]\n"))
     
     def _ai_progress_callback(self, status: str) -> None:
         """Callback for AI processing progress updates."""
