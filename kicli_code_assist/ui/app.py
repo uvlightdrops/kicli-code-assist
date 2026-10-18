@@ -52,6 +52,7 @@ class CodeAssistantApp(Static):
         Binding("ctrl+b", "focus_browser", "Browser", show=True),
         Binding("ctrl+f", "focus_preview", "Preview", show=True),
         Binding("ctrl+c", "focus_chat", "Chat", show=True),
+        Binding("ctrl+a", "focus_ai_background", "AI Background", show=True),
         Binding("ctrl+i", "focus_input", "Input", show=True),
         Binding("ctrl+x", "focus_shell", "Shell", show=True),
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
@@ -91,6 +92,7 @@ class CodeAssistantApp(Static):
         self.spinner_index = 0  # For spinner animation
         self.llm_worker = None  # Track worker thread
         self.open_edit_tabs = {}  # Track {file_path: EditTab}
+        self.background_debug_display = None  # AI background/debug log
         
         # Load resolved kicli-code-assist config and LLM client
         from kicli_code_assist.app_config import AppConfig as Config
@@ -154,6 +156,14 @@ class CodeAssistantApp(Static):
         if self.chat_display:
             self.call_after_refresh(self.chat_display.focus)
 
+    def action_focus_ai_background(self) -> None:
+        """Focus the AI Background/Debug tab."""
+        self.current_focus = "ai_background"
+        tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
+        tabs.active = "tab_ai_background"
+        if self.background_debug_display:
+            self.call_after_refresh(self.background_debug_display.focus)
+
     def action_focus_input(self) -> None:
         """Focus the input panel."""
         self.current_focus = "input"
@@ -170,6 +180,11 @@ class CodeAssistantApp(Static):
             self.shell_panel.update_cwd(self.current_cwd)
             if self.shell_panel.input:
                 self.call_after_refresh(self.shell_panel.input.focus)
+    
+    def _write_background_log(self, message: str) -> None:
+        """Write message to AI Background debug tab."""
+        if self.background_debug_display:
+            self.call_later(lambda: self.background_debug_display.write(f"[dim]{message}[/]"))
     
     def set_cwd(self, new_cwd: str) -> None:
         """Change current working directory and update shell panel."""
@@ -197,6 +212,11 @@ class CodeAssistantApp(Static):
                     with TabPane("💬 Chat", id="tab_chat"):
                         self.chat_display = SelectableRichLog(highlight=False, markup=True)
                         yield self.chat_display
+                    
+                    # AI Background / Debug tab
+                    with TabPane("🧠 AI Background", id="tab_ai_background"):
+                        self.background_debug_display = SelectableRichLog(highlight=False, markup=True)
+                        yield self.background_debug_display
                     
                     # Terminal tab
                     with TabPane("🖥️  Terminal", id="tab_terminal"):
@@ -232,6 +252,10 @@ class CodeAssistantApp(Static):
         self.file_list = self.left_panel.query_one("#file-browser", SelectableFileList)
         self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
         self.left_panel.add_preview_pane(self.preview_display)
+        
+        # Set Chat tab as default active tab
+        tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
+        tabs.active = "tab_chat"
         
         if self.input_field:
             self.call_after_refresh(self.input_field.focus)
@@ -586,6 +610,10 @@ Only suggest changes that are clearly beneficial."""
             # Run async processing
             self.call_later(lambda: self.chat_display.write(f"[dim][AI] Calling AI workflow manager...[/]"))
             
+            # Helper to write to background log
+            def on_progress_callback(msg: str):
+                self._write_background_log(msg)
+            
             # Create new event loop for this thread
             try:
                 suggestion = asyncio.run(
@@ -593,7 +621,7 @@ Only suggest changes that are clearly beneficial."""
                         prompt=prompt,
                         file_context=file_content,
                         current_file_path=file_path,
-                        on_progress=lambda s: self.call_later(lambda: self.chat_display.write(f"[dim]⋯ {s}[/]")),
+                        on_progress=on_progress_callback,
                     )
                 )
             except RuntimeError as e:
@@ -608,7 +636,7 @@ Only suggest changes that are clearly beneficial."""
                                 prompt=prompt,
                                 file_context=file_content,
                                 current_file_path=file_path,
-                                on_progress=lambda s: self.call_later(lambda: self.chat_display.write(f"[dim]⋯ {s}[/]")),
+                                on_progress=on_progress_callback,
                             )
                         )
                         suggestion = future.result(timeout=30)
