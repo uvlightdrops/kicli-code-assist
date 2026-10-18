@@ -560,22 +560,6 @@ class CodeAssistantApp(Static):
         except Exception as e:
             self.terminal_panel.write_error(str(e))
     
-    def on_file_editor_pane_ai_suggestions_requested(
-        self, message: FileEditorPane._AISuggestionsRequested
-    ) -> None:
-        """Handle AI suggestions request from file editor."""
-        # Send log message to Chat display
-        self.chat_display.write(f"[dim][AI] Starting analysis of {message.file_path}...[/]")
-        # Start async workflow in background worker
-        # Use lambda because run_worker doesn't support args directly
-        self.run_worker(
-            lambda: self._process_ai_suggestions_worker(
-                message.file_path,
-                message.file_content
-            ),
-            thread=True,
-        )
-    
     def _process_ai_suggestions_worker(
         self, file_path: str, file_content: str
     ) -> None:

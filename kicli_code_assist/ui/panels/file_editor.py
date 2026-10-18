@@ -243,8 +243,14 @@ class FileEditorPane(Container):
             code_app.chat_display.write(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]")
             # Show notification overlay
             self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
-            # Trigger AI processing
-            self.post_message(self._AISuggestionsRequested(self.file_path, self.editor.text))
+            # Trigger AI processing directly via code_app
+            code_app.run_worker(
+                lambda: code_app._process_ai_suggestions_worker(
+                    self.file_path,
+                    self.editor.text
+                ),
+                thread=True,
+            )
         elif not enabled:
             # User unchecked
             self._ai_in_progress = False
@@ -340,9 +346,3 @@ class FileEditorPane(Container):
         elif event.button.id == "btn-discard":
             self.action_discard()
     
-    class _AISuggestionsRequested(Message):
-        """Posted when AI suggestions are requested."""
-        def __init__(self, file_path: str, content: str) -> None:
-            self.file_path = file_path
-            self.content = content
-            super().__init__()
