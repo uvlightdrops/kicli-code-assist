@@ -1,50 +1,12 @@
 """Chat input widget with command history and send button."""
 
-from textual.widgets import TextArea, Button, Static
-from textual.containers import Horizontal
+from textual.widgets import TextArea, Button
 from textual.app import ComposeResult
-
-
-class ChatInputBar(Static):
-    """Chat input bar with TextArea and Send button."""
-    
-    DEFAULT_CSS = """
-    ChatInputBar {
-        height: auto;
-        layout: horizontal;
-        background: $surface;
-        border-top: solid $primary;
-    }
-    
-    ChatInputBar #chat-input-area {
-        width: 1fr;
-        height: auto;
-    }
-    
-    ChatInputBar #chat-send-btn {
-        width: auto;
-        height: auto;
-        margin: 0 1;
-    }
-    """
-    
-    def __init__(self, parent_app, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.parent_app = parent_app
-        self.input_widget = ChatInput(parent_app, id="chat-input-area")
-    
-    def compose(self) -> ComposeResult:
-        yield self.input_widget
-        yield Button("↵ Send", id="chat-send-btn", variant="primary")
-    
-    def on_button_pressed(self, event: Button.Pressed) -> None:
-        """Handle Send button click."""
-        if event.button.id == "chat-send-btn":
-            self.input_widget.send_message()
+from textual.containers import Horizontal
 
 
 class ChatInput(TextArea):
-    """Chat input with command history support (like shell)."""
+    """Chat input with command history support and visual Send button."""
 
     def __init__(self, parent_app, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -54,14 +16,16 @@ class ChatInput(TextArea):
         self.pending_input = ""  # Store current input while browsing history
 
     def send_message(self) -> None:
-        """Send current message."""
+        """Send current message and add to history."""
         text = self.text.strip()
         if text:
             self.command_history.append(text)
             self.history_index = -1
             self.pending_input = ""
+            # Submit to app
             self.parent_app.action_select_cursor()
-            self.text = ""  # Clear input
+            # Clear input after sending
+            self.text = ""
     
     def on_key(self, event) -> None:
         """Handle key events: Ctrl+Enter or Shift+Enter to send, Up/Down for history."""

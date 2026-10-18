@@ -123,9 +123,9 @@ class FileEditorPane(Container):
         """Handle checkbox value change directly via message."""
         if event.control.id == "btn-ai-suggestions":
             self.ai_suggestions_enabled = event.value
-            # Log to app's chat display instead of console
+            # Log directly to app's chat display
             msg = f"[dim][AI] Checkbox {'checked' if event.value else 'unchecked'}[/]"
-            self.post_message(self._LogMessage(msg))
+            self.app.chat_display.write(msg)
     
     def _update_mode_indicator(self) -> None:
         """Update mode indicator from current VimTextArea state.
@@ -222,8 +222,8 @@ class FileEditorPane(Container):
         """Handle AI suggestions checkbox change."""
         if enabled and not self._ai_in_progress:
             self._ai_in_progress = True
-            # Show feedback in Chat tab
-            self.post_message(self._LogMessage(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]"))
+            # Show feedback in Chat tab - direct write
+            self.app.chat_display.write(f"[yellow][AI] Starting analysis of {Path(self.file_path).name}...[/]")
             # Show notification overlay
             self.app.notify(f"🤖 Analyzing code with AI...", timeout=5)
             # Trigger AI processing
@@ -231,7 +231,7 @@ class FileEditorPane(Container):
         elif not enabled:
             # User unchecked
             self._ai_in_progress = False
-            self.post_message(self._LogMessage(f"[dim][AI] Analysis cancelled[/]"))
+            self.app.chat_display.write(f"[dim][AI] Analysis cancelled[/]")
     
     def on_text_area_changed(self) -> None:
         """Track content changes for dirty state and auto-save."""
@@ -328,10 +328,4 @@ class FileEditorPane(Container):
         def __init__(self, file_path: str, content: str) -> None:
             self.file_path = file_path
             self.content = content
-            super().__init__()
-    
-    class _LogMessage(Message):
-        """Posted to send debug/info message to Chat display."""
-        def __init__(self, text: str) -> None:
-            self.text = text
             super().__init__()

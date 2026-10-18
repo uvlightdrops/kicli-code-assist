@@ -5,7 +5,7 @@ import asyncio
 from pathlib import Path
 from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
-from textual.widgets import Static, TabbedContent, TabPane
+from textual.widgets import Static, TabbedContent, TabPane, Button
 from textual.binding import Binding
 from textual.reactive import reactive
 from textual.worker import Worker, WorkerState
@@ -25,7 +25,7 @@ from kicli_code_assist.ui.panels.file_browser import SelectableFileList
 from kicli_code_assist.ui.panels.preview_pane import PreviewPane
 from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
-from kicli_code_assist.ui.input.chat_input import ChatInputBar
+from kicli_code_assist.ui.input.chat_input import ChatInput
 from kicli_code_assist.ui.panels.file_editor import FileEditorPane
 from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
@@ -208,12 +208,25 @@ class CodeAssistantApp(Static):
                         self.shell_panel = ShellPanel(id="shell_panel")
                         yield self.shell_panel
         
-        # Input area
+        # Input area with Send button
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
         yield self.input_title
-        self.input_field = ChatInputBar(self, id="chat_input")
+        
+        input_container = Horizontal(id="input_container")
+        self.input_field = ChatInput(self, id="chat_input", language="markdown")
+        self.input_field.show_line_numbers = False
+        self.input_field.show_cursor_line = False
         self.input_field.can_focus = True
-        yield self.input_field
+        input_container.styles.height = "auto"
+        input_container.styles.layout = "horizontal"
+        input_container.styles.background = "$surface"
+        input_container.styles.border_top = "solid $primary"
+        input_container.add_child(self.input_field)
+        
+        send_btn = Button("↵ Send", id="chat-send-btn", variant="primary")
+        input_container.add_child(send_btn)
+        
+        yield input_container
         
         # Status bar
         self.status_bar = Static("Curr-focus: B  |  ❌ No context loaded", classes="status_bar")
@@ -234,6 +247,13 @@ class CodeAssistantApp(Static):
         # Create editor tab
         editor = self.left_panel.create_editor_tab(str(message.file_path), message.content)
         self.app.notify(f"📝 Editing {message.file_path.name}", timeout=2)
+    
+    def on_button_pressed(self, event: Button.Pressed) -> None:
+        """Handle button clicks."""
+        if event.button.id == "chat-send-btn":
+            # Send button clicked
+            self.input_field.send_message()
+            event.stop()  # Prevent bubbling
     
     def action_open_prompts(self) -> None:
         """Open prompt management UI (Ctrl+O)."""
@@ -367,9 +387,9 @@ class CodeAssistantApp(Static):
                 self.file_list.action_select_cursor()
         elif self.current_focus == "input":
             # Submit chat message
-            text = self.input_field.input_widget.text.strip()
+            text = self.input_field.text.strip()
             if text:
-                self.input_field.input_widget.text = ""
+                self.input_field.text = ""
                 self.run_worker(lambda: self._submit_chat(text), thread=True)
     
     def action_mark_selection_start(self) -> None:
@@ -561,12 +581,6 @@ class CodeAssistantApp(Static):
             ),
             thread=True,
         )
-    
-    def on_file_editor_pane_log_message(
-        self, message: FileEditorPane._LogMessage
-    ) -> None:
-        """Handle log messages from file editor - display in chat tab."""
-        self.chat_display.write(message.text)
     
     def _process_ai_suggestions_worker(
         self, file_path: str, file_content: str
