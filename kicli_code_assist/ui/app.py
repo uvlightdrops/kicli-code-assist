@@ -580,11 +580,12 @@ class CodeAssistantApp(Static):
         self, file_path: str, file_content: str
     ) -> None:
         """Process AI suggestions (runs in worker thread)."""
-        # Log to chat display (thread-safe)
-        self.call_later(lambda: self.chat_display.write(f"[dim][AI] Processing {Path(file_path).name}...[/]"))
-        
-        # Build prompt from file context
-        prompt = f"""Please suggest improvements to this file:
+        try:
+            # Log to chat display (thread-safe)
+            self.call_later(lambda: self.chat_display.write(f"[dim][AI] Processing {Path(file_path).name}...[/]"))
+            
+            # Build prompt from file context
+            prompt = f"""Please suggest improvements to this file:
 
 File: {file_path}
 Language: {Path(file_path).suffix[1:].lower()}
@@ -598,17 +599,37 @@ Analyze for:
 
 Only suggest changes that are clearly beneficial."""
 
-        # Run async processing
-        try:
+            # Run async processing
             self.call_later(lambda: self.chat_display.write(f"[dim][AI] Calling AI workflow manager...[/]"))
-            suggestion = asyncio.run(
-                self.ai_workflow_manager.process_user_prompt(
-                    prompt=prompt,
-                    file_context=file_content,
-                    current_file_path=file_path,
-                    on_progress=self._ai_progress_callback,
+            
+            # Create new event loop for this thread
+            try:
+                suggestion = asyncio.run(
+                    self.ai_workflow_manager.process_user_prompt(
+                        prompt=prompt,
+                        file_context=file_content,
+                        current_file_path=file_path,
+                        on_progress=lambda s: self.call_later(lambda: self.chat_display.write(f"[dim]⋯ {s}[/]")),
+                    )
                 )
-            )
+            except RuntimeError as e:
+                if "asyncio.run() cannot be called from a running event loop" in str(e):
+                    # Already in event loop, call directly
+                    self.call_later(lambda: self.chat_display.write(f"[yellow][AI] Using fallback async mode[/]"))
+                    import concurrent.futures
+                    with concurrent.futures.ThreadPoolExecutor() as executor:
+                        future = executor.submit(
+                            asyncio.run,
+                            self.ai_workflow_manager.process_user_prompt(
+                                prompt=prompt,
+                                file_context=file_content,
+                                current_file_path=file_path,
+                                on_progress=lambda s: self.call_later(lambda: self.chat_display.write(f"[dim]⋯ {s}[/]")),
+                            )
+                        )
+                        suggestion = future.result(timeout=30)
+                else:
+                    raise
             
             if suggestion:
                 self._current_ai_suggestion = suggestion
@@ -618,11 +639,9 @@ Only suggest changes that are clearly beneficial."""
             else:
                 self.call_later(lambda: self.chat_display.write(f"[yellow]⊘ AI returned no suggestions[/]"))
         except Exception as e:
-            self.call_later(lambda: self.chat_display.write(f"[bold red]✗ AI Processing Error: {str(e)}[/]\n"))
-    
-    def _ai_progress_callback(self, status: str) -> None:
-        """Callback for AI processing progress updates."""
-        self.chat_display.write(f"[dim]⋯ {status}[/]\n")
+            import traceback
+            self.call_later(lambda: self.chat_display.write(f"[bold red]✗ AI Error: {str(e)}[/]"))
+            self.call_later(lambda: self.chat_display.write(f"[dim]{traceback.format_exc()}[/]"))
     
     def _show_ai_approval_modal(self) -> None:
         """Show AI approval modal for current suggestion."""
