@@ -134,6 +134,10 @@ class AIWorkflowManager:
             file_context or "",
             current_file_path or "unknown.txt",
         )
+        
+        print(f"DEBUG: Created {len(hunks)} hunks")
+        for i, hunk in enumerate(hunks):
+            print(f"  Hunk {i}: {hunk.file_path}:{hunk.start_line}-{hunk.end_line}, lines={len(hunk.lines)}")
 
         # 3. Create approval session
         approval_session = ApprovalSession(session_id=session_id)

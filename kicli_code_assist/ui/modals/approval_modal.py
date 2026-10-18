@@ -226,7 +226,11 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
             self.dismiss(None)
         elif button_id and button_id.startswith("approve-"):
             idx = int(button_id.split("-")[1])
+            hunk = self.session.hunks[idx]
+            print(f"DEBUG: Approving hunk {idx}: {hunk.file_path}:{hunk.start_line}-{hunk.end_line}")
+            print(f"  Before: status={hunk.status}, lines={len(hunk.lines)}")
             self.session.approve_hunk(idx)
+            print(f"  After: status={hunk.status}")
             self._update_summary()
             self.refresh()
         elif button_id and button_id.startswith("reject-"):
