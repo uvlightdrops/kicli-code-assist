@@ -86,7 +86,7 @@ class ApprovalModal(ModalScreen[Optional[ApprovalSession]]):
 
     ApprovalModal > Vertical {
         width: 120;
-        height: 35;
+        height: 90%;
         border: solid $accent;
         background: $surface;
         layout: vertical;
