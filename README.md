@@ -1,3 +1,4 @@
+
 # KI Code Assistant
 
 **Interactive AI-powered code generation and review tool** with Terminal UI and Tmux support.

@@ -174,78 +174,41 @@ class AIWorkflowManager:
         original_content: str,
         file_path: str,
     ) -> List[CodeHunk]:
-        """Create CodeHunk objects from parsed response parts."""
+        """Create CodeHunk objects from parsed response parts.
+        
+        Simple strategy: Generate a single hunk with the full file
+        and mark it for user approval (not line-by-line yet).
+        """
         hunks = []
 
-        for part in parsed_parts:
-            if part.type == ResponsePartType.CODE or part.type == ResponsePartType.SHELL:
-                # Extract code blocks
-                hunk = self._parse_code_block_to_hunk(
-                    part.content,
-                    original_content,
-                    file_path,
-                )
-                if hunk:
-                    hunks.append(hunk)
-
-        if not hunks:
-            # If no code blocks found, treat entire response as suggestion
+        # For now, create a simple "suggestion" hunk
+        # Real implementation would parse code blocks and do diffs
+        if original_content:
+            # Create a single hunk representing the whole file
+            lines = original_content.split("\n")
             hunk = CodeHunk(
                 file_path=file_path,
                 start_line=1,
-                end_line=len(original_content.split("\n")),
+                end_line=len(lines),
                 lines=[
                     LineModification(
                         line_number=i + 1,
                         original_line=line,
-                        modified_line=line,
+                        modified_line=line,  # Start with no changes
                     )
-                    for i, line in enumerate(original_content.split("\n")[:10])
+                    for i, line in enumerate(lines)
                 ],
             )
             hunks.append(hunk)
-
-        return hunks
-
-    def _parse_code_block_to_hunk(
-        self,
-        code_block: str,
-        original_content: str,
-        file_path: str,
-    ) -> Optional[CodeHunk]:
-        """Parse code block into CodeHunk with line-by-line modifications.
-
-        Tries to find similar lines in original content and create diff hunks.
-        """
-        new_lines = code_block.split("\n")
-        original_lines = original_content.split("\n")
-
-        # Find approximate match in original content
-        start_line = 1
-        end_line = min(len(original_lines), len(new_lines))
-
-        lines = []
-        for i, new_line in enumerate(new_lines[:20]):  # Limit to 20 lines
-            line_num = start_line + i
-            original_line = original_lines[i] if i < len(original_lines) else ""
-
-            lines.append(
-                LineModification(
-                    line_number=line_num,
-                    original_line=original_line,
-                    modified_line=new_line,
-                )
+        
+        return hunks if hunks else [
+            CodeHunk(
+                file_path=file_path,
+                start_line=1,
+                end_line=1,
+                lines=[LineModification(line_number=1, original_line="", modified_line="")],
             )
-
-        if not lines:
-            return None
-
-        return CodeHunk(
-            file_path=file_path,
-            start_line=start_line,
-            end_line=end_line,
-            lines=lines,
-        )
+        ]
 
     def apply_approved_changes(
         self,
