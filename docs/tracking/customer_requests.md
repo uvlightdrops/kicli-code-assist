@@ -17,9 +17,14 @@ The categories below are permanent - add new requests under the appropriate head
 
 ## 🟠 HIGH PRIORITY (Critical for Daily Use)
 
+### MIXED 
+- LLM interaktion mit UI feedback !
+
+
 ### 🔍 LOGGING & DEBUGGING
 
 *(All completed - see FEATURES_IMPLEMENTED #10, #11, #12)*
+- Dringend LLM anbindung debuggen
 
 ---
 
@@ -35,6 +40,8 @@ The categories below are permanent - add new requests under the appropriate head
 - [ ] Code syntax highlighting (Python, JavaScript, Go, YAML, etc.)
 - **Status:** Not yet implemented
 - **Impact:** Better readability of code in editor
+- AI suggestions text view ist nur einige Zeilen hoch, sollte aber mind 3/4 vom viewport haben
+- 
 
 ### 📚 DOCUMENTATION
 

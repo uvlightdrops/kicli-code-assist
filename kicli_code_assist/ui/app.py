@@ -494,32 +494,48 @@ class CodeAssistantApp(Static):
         self.app.exit()
     
     def _submit_chat(self, text: str) -> None:
-        """Submit chat message (worker thread)."""
+        """Submit chat message to LLM with full message history (worker thread)."""
+        import asyncio
+        from kicli_code_assist.llm_integration import get_async_integration
+        
         try:
             self.chat_display.write(f"[bold cyan]You:[/] {text}\n")
             
-            # Get context files
-            context_text = self.chat_session.get_context()
-            prompt = f"{context_text}\n{text}" if context_text else text
+            # Get or create async LLM integration
+            llm = get_async_integration()
+            if not llm or not llm.provider_chain:
+                self.chat_display.write(f"[bold red]❌ No LLM provider configured[/]\n")
+                return
             
-            # Stream response
-            self.chat_display.write("[bold green]KI:[/] ")
-            response_text = ""
+            # Add current message to session
+            self.chat_session.add_message("user", text)
             
-            for chunk in self.client.messages.stream(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=4096,
-            ):
-                if chunk.type == "content_block_delta":
-                    delta_text = chunk.delta.text
-                    response_text += delta_text
-                    self.chat_display.write(delta_text)
+            # Get all messages (including files added via L key and previous messages)
+            # This includes the system prompt automatically
+            api_messages = self.chat_session.get_messages_for_api()
             
-            self.chat_display.write("\n")
+            # Show loading indicator
+            self.chat_display.write("[dim]⏳ Querying LLM...[/]\n")
+            
+            # Run async query in sync context (worker thread)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                response = loop.run_until_complete(
+                    llm.query(messages=api_messages)
+                )
+                self.chat_display.write(f"[bold green]KI:[/] {response}\n")
+                
+                # Add assistant response to session
+                self.chat_session.add_message("assistant", response)
+                
+            finally:
+                loop.close()
             
         except Exception as e:
             self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
+            import traceback
+            self.chat_display.write(f"[dim]{traceback.format_exc()}[/]\n")
     
     def _debug_chat_submit(self, text: str) -> None:
         """Submit debug chat message directly to OpenAI (worker thread)."""
