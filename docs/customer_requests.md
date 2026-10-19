@@ -10,6 +10,14 @@ The categories below are permanent - add new requests under the appropriate head
 
 ## 🔍 LOGGING & DEBUGGING
 
+### Logging Infrastructure Setup ✅ PHASE A COMPLETE
+- [x] Hybrid logfile strategy implemented (5 dedicated logfiles)
+- [x] flowpy.LoggerProxy integration (config-driven levels via logconf.ini)
+- [x] Per-module loggers created (kicli, kicli.llm, kicli.context, kicli.workflow, kicli.errors)
+- [x] Lazy initialization (no files created on import)
+- [x] Thread-safe logging (RLock)
+- **Status:** Infrastructure ready; awaiting TUI integration
+
 ### Logging Tab as Default
 - [ ] Logging tab should be active/visible on app startup (not Chat tab)
 

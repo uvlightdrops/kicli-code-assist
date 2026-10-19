@@ -20,6 +20,7 @@ dependencies = [
     "click>=8.1.7",
     "ki-core>=0.1.0a1",
     "yaml-cfg-wizard>=0.1.0",
+    "flowpy>=0.1.0",
 ]
 
 [project.optional-dependencies]

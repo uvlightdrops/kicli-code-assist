@@ -1,13 +1,58 @@
 # Implemented Features
 
-**Last Updated:** 2026-09-05  
-**Status:** 6 complete features | 1 in-progress feature
+**Last Updated:** 2026-10-19  
+**Status:** 7 complete features | 0 in-progress
 
 ---
 
 ## ✅ COMPLETE FEATURES
 
-### 1. Schema-Based Configuration System
+### 1. Logging Infrastructure (flowpy-based)
+
+**Category:** LOGGING & DEBUGGING
+
+**Completed Tasks:**
+- [x] flowpy.LoggerProxy integration
+- [x] Hybrid logfile strategy (5 dedicated logfiles)
+- [x] Config-driven log levels via logconf.ini
+- [x] Per-module loggers (kicli, kicli.llm, kicli.context, kicli.workflow, kicli.errors)
+- [x] Lazy initialization (no files created on import)
+- [x] Thread-safe logging (RLock)
+- [x] flowpy added as dependency (pyproject.toml)
+
+**What was built:**
+- Pythonic logging using standard Python logging module (via flowpy wrapper)
+- Config file: `logconf.ini` maps module names to DEBUG/INFO/WARNING/ERROR levels
+- Five specialized logfiles:
+  - `kicli.log` - Main log (all events for general debugging)
+  - `kicli-llm.log` - LLM queries, responses, provider, URL, payload
+  - `kicli-context.log` - File loading, cache hits, deduplication events
+  - `kicli-workflow.log` - Approval workflow, user actions
+  - `kicli-errors.log` - Errors only (easy filtering)
+- Lazy initialization: No log files created until first logging call
+- Thread-safe: Uses RLock for concurrent access
+
+**Files:**
+- `logconf.ini` - Logging configuration (module → level mappings)
+- `kicli_code_assist/logging_integration.py` - Logger convenience getters
+- `pyproject.toml` - Added flowpy>=0.1.0 dependency
+
+**Dependencies:**
+- flowpy (v0.1.0+) from `/home/flow/dev_flow/flowpy`
+
+**Next Steps (TUI Integration):**
+- [ ] Create Logging Tab widget in TUI
+- [ ] Display active logfile and path
+- [ ] Auto-scroll to latest entries
+- [ ] Add logging calls to llm_integration.py, ai_workflow.py, approval_workflow.py
+
+**Documentation:**
+- flowpy repo: `/home/flow/dev_flow/flowpy/flowpy/loggerProxy.py`
+- This project: `logconf.ini`, `kicli_code_assist/logging_integration.py`
+
+---
+
+### 2. Schema-Based Configuration System
 
 **Category:** DEPLOYMENT
 
@@ -57,7 +102,7 @@ yaml-cfg config verify config.yaml schema.yaml  # Validate
 
 ---
 
-### 2. Chat History Export & Management
+### 3. Chat History Export & Management
 
 **Category:** I/O FEATURES
 
@@ -99,7 +144,7 @@ kicli-assist chat --export <format>      # Export chat session
 
 ---
 
-### 3. Prompt Management System
+### 4. Prompt Management System
 
 **Category:** KI SETTINGS
 
@@ -238,7 +283,7 @@ prompts:
 
 ---
 
-### 4. Path Restriction & Security
+### 5. Path Restriction & Security
 
 **Category:** SECURITY
 
@@ -332,7 +377,7 @@ python examples/security_examples.py      # 6 examples
 
 ---
 
-### 5. Focus Management (GUI)
+### 6. Focus Management (GUI)
 
 **Category:** GUI
 
@@ -357,7 +402,7 @@ python examples/security_examples.py      # 6 examples
 
 ---
 
-### 6. Settings Page (GUI)
+### 7. Settings Page (GUI)
 
 **Category:** GUI / Configuration
 
@@ -387,7 +432,7 @@ python examples/security_examples.py      # 6 examples
 
 ---
 
-### 7. TLS Certificate Diagnostics
+### 8. TLS Certificate Diagnostics
 
 **Category:** Configuration / Connectivity (lives mostly in ki-core; consumed here)
 
