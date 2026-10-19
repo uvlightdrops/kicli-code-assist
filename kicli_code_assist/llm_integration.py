@@ -7,6 +7,7 @@ Handles error conversion and recovery hints.
 import asyncio
 import logging
 from typing import Optional, Callable
+import json
 
 from ki_core.adapters import ProviderChain
 from ki_core.adapters.openai_async import AsyncOpenAIClient
@@ -23,6 +24,13 @@ from kicli_code_assist.app_config import AppConfig
 from kicli_code_assist.chat_session import ChatSession
 
 logger = logging.getLogger(__name__)
+
+# Import LLM logger for detailed logging
+try:
+    from kicli_code_assist.logging_integration import get_llm_logger
+    llm_logger = get_llm_logger()
+except ImportError:
+    llm_logger = logger
 
 
 class AsyncLLMIntegration:
@@ -42,6 +50,10 @@ class AsyncLLMIntegration:
     def _initialize_providers(self) -> None:
         """Initialize provider chain with configured providers."""
         providers = []
+        llm_logger.info("=" * 60)
+        llm_logger.info("Initializing LLM providers")
+        llm_logger.info(f"OpenAI configured: {bool(self.config.openai_api_key)}")
+        llm_logger.info(f"Ollama configured: {bool(self.config.ollama_base_url)}")
 
         # Try OpenAI if configured
         if self.config.openai_api_key:
@@ -56,9 +68,10 @@ class AsyncLLMIntegration:
                     timeout=30,
                 )
                 providers.append(client)
-                logger.info(f"✓ OpenAI provider initialized ({model})")
+                llm_logger.info(f"✓ OpenAI provider initialized")
+                llm_logger.info(f"  Model: {model}")
             except Exception as e:
-                logger.warning(f"Failed to initialize OpenAI: {e}")
+                llm_logger.warning(f"Failed to initialize OpenAI: {e}")
 
         # Try Ollama if configured
         if self.config.ollama_base_url:
@@ -72,16 +85,17 @@ class AsyncLLMIntegration:
                     model=model,
                 )
                 providers.append(client)
-                logger.info(f"✓ Ollama provider initialized ({model}) at {self.config.ollama_base_url}")
+                llm_logger.info(f"✓ Ollama provider initialized")
+                llm_logger.info(f"  Base URL: {self.config.ollama_base_url}")
+                llm_logger.info(f"  Model: {model}")
             except Exception as e:
-                logger.warning(f"Failed to initialize Ollama: {e}")
-            except Exception as e:
-                logger.warning(f"Failed to initialize Ollama: {e}")
+                llm_logger.warning(f"Failed to initialize Ollama: {e}")
 
         if providers:
             self.provider_chain = ProviderChain(providers)
+            llm_logger.info(f"Provider chain ready: {len(providers)} provider(s)")
         else:
-            logger.warning("No LLM providers configured!")
+            llm_logger.error("No LLM providers configured!")
 
     async def query(
         self,
@@ -103,19 +117,33 @@ class AsyncLLMIntegration:
             AllProvidersFailedError: If all providers fail
             ProviderConfigError: If no providers configured
         """
+        llm_logger.info("-" * 60)
+        llm_logger.info("LLM Query Started")
+        llm_logger.info(f"Message count: {len(messages)}")
+        
         if not self.provider_chain:
+            llm_logger.error("No provider chain configured")
             raise ProviderConfigError(
                 "LLM",
                 "No LLM providers configured. Set OPENAI_API_KEY or OLLAMA_BASE_URL."
             )
 
+        # Log message content summary (with safety)
+        for i, msg in enumerate(messages):
+            role = msg.get("role", "unknown")
+            content = msg.get("content", "")
+            content_preview = content[:100] if isinstance(content, str) else str(content)[:100]
+            llm_logger.info(f"  [{i}] {role}: {content_preview}{'...' if len(str(content)) > 100 else ''}")
+
         # Filter system prompt for secrets
+        original_system = system_prompt
         if system_prompt:
             original_length = len(system_prompt)
             system_prompt = self.secret_filter.filter(system_prompt)
             redactions = self.secret_filter.get_redaction_count()
             if redactions > 0:
-                logger.info(f"Filtered {redactions} secret(s) from system prompt")
+                llm_logger.warning(f"Filtered {redactions} secret(s) from system prompt")
+                llm_logger.info(f"System prompt length: {original_length} → {len(system_prompt)} chars")
 
         # Build ChatRequest with model from active provider
         from ki_core.core.models import ChatRequest, Message, Role
@@ -128,11 +156,13 @@ class AsyncLLMIntegration:
         # Use model from the configured provider
         model = None
         if self.config.openai_api_key:
-            model = self.config.openai_model
+            model = self.config.openai_model or "gpt-4o-mini"
         elif self.config.ollama_base_url:
             model = self.config.ollama_model or "llama3.2"
         else:
             model = "gpt-4o-mini"
+        
+        llm_logger.info(f"Active model: {model}")
         
         request = ChatRequest(
             messages=message_objs,
@@ -143,18 +173,25 @@ class AsyncLLMIntegration:
             if on_progress:
                 on_progress("Querying LLM...")
             
+            llm_logger.info("Sending request to provider chain...")
             response = await self.provider_chain.achat(request)
-            return response.message.content
+            
+            response_text = response.message.content
+            response_length = len(response_text)
+            llm_logger.info(f"Response received: {response_length} chars")
+            llm_logger.info(f"Response preview: {response_text[:200]}{'...' if response_length > 200 else ''}")
+            
+            return response_text
             
         except LLMError as e:
-            logger.error(f"LLM error: {e.message}")
+            llm_logger.error(f"LLM error: {e.message}")
             if on_progress:
                 on_progress(f"LLM Error: {e.message}")
             raise
         except Exception as e:
-            logger.error(f"Unexpected error during LLM query: {type(e).__name__}: {e}")
+            llm_logger.error(f"Unexpected error: {type(e).__name__}: {e}")
             import traceback
-            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            llm_logger.error(f"Traceback:\n{traceback.format_exc()}")
             if on_progress:
                 on_progress(f"Error: {type(e).__name__}: {e}")
             raise
@@ -181,15 +218,31 @@ class AsyncLLMIntegration:
             AllProvidersFailedError: If all providers fail
             ProviderConfigError: If no providers configured
         """
+        llm_logger.info("-" * 60)
+        llm_logger.info("LLM Stream Started")
+        llm_logger.info(f"Message count: {len(messages)}")
+        
         if not self.provider_chain:
+            llm_logger.error("No provider chain configured")
             raise ProviderConfigError(
                 "LLM",
                 "No LLM providers configured"
             )
 
+        # Log message summaries
+        for i, msg in enumerate(messages):
+            role = msg.get("role", "unknown")
+            content = msg.get("content", "")
+            content_preview = content[:100] if isinstance(content, str) else str(content)[:100]
+            llm_logger.info(f"  [{i}] {role}: {content_preview}{'...' if len(str(content)) > 100 else ''}")
+
         # Filter secrets
         if system_prompt:
+            original_length = len(system_prompt)
             system_prompt = self.secret_filter.filter(system_prompt)
+            redactions = self.secret_filter.get_redaction_count()
+            if redactions > 0:
+                llm_logger.warning(f"Filtered {redactions} secret(s) from system prompt")
 
         from ki_core.core.models import ChatRequest, Message, Role
 
@@ -201,24 +254,33 @@ class AsyncLLMIntegration:
         request = ChatRequest(messages=message_objs)
 
         full_response = ""
+        chunk_count = 0
         
         try:
             if on_progress:
                 on_progress("Streaming from LLM...")
             
+            llm_logger.info("Starting stream from provider chain...")
+            
             async for event in self.provider_chain.achat_stream(request):
                 if event.text:
                     full_response += event.text
+                    chunk_count += 1
                     if on_chunk:
                         on_chunk(event.text)
+            
+            llm_logger.info(f"Stream complete: {len(full_response)} chars in {chunk_count} chunks")
+            llm_logger.info(f"Response preview: {full_response[:200]}{'...' if len(full_response) > 200 else ''}")
             
             return full_response
             
         except LLMError as e:
-            logger.error(f"LLM streaming error: {e.message}")
+            llm_logger.error(f"LLM streaming error: {e.message}")
             raise
         except Exception as e:
-            logger.error(f"Unexpected error during streaming: {e}")
+            llm_logger.error(f"Unexpected error during streaming: {type(e).__name__}: {e}")
+            import traceback
+            llm_logger.error(f"Traceback:\n{traceback.format_exc()}")
             raise
 
     def get_stats(self) -> dict:
