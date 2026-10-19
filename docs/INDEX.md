@@ -56,23 +56,28 @@ Welcome to kicli-code-assist documentation. This guide will help you navigate al
 
 ---
 
-## 📊 Development & Refactoring
+## 📊 Development & Tracking
 
-### Tracking & Status
-- **[tracking/IMPLEMENTATION_STATUS.md](tracking/IMPLEMENTATION_STATUS.md)** - Implementation checklist
-- **[tracking/INTEGRATION_STATUS.md](tracking/INTEGRATION_STATUS.md)** - Integration status
-- **[tracking/DEPLOYMENT_READINESS.md](tracking/DEPLOYMENT_READINESS.md)** - Deployment readiness
+### Project Phases & Status
+- **[tracking/PHASE1_COMPLETE.md](tracking/PHASE1_COMPLETE.md)** - Phase 1: Prompt Management
+- **[tracking/PHASE_2_SUMMARY.md](tracking/PHASE_2_SUMMARY.md)** - Phase 2: Config System
+- **[tracking/PHASE3_COMPLETE.md](tracking/PHASE3_COMPLETE.md)** - Phase 3: Error Handling & Validation
+- **[tracking/PHASE_3_STRATEGY.md](tracking/PHASE_3_STRATEGY.md)** - Phase 3 strategy
+- **[tracking/PHASE_4_COMPLETION_REPORT.md](tracking/PHASE_4_COMPLETION_REPORT.md)** - Phase 4: Async LLM & Integration
+- **[tracking/PHASE_4_ROADMAP.md](tracking/PHASE_4_ROADMAP.md)** - Phase 4 roadmap
 - **[tracking/PHASE_A_LOGGING_SUMMARY.md](tracking/PHASE_A_LOGGING_SUMMARY.md)** - Logging implementation
 - **[tracking/PHASE_B_TUI_LOGGING_SUMMARY.md](tracking/PHASE_B_TUI_LOGGING_SUMMARY.md)** - TUI logging progress
-- **[tracking/PHASE3_COMPLETE.md](tracking/PHASE3_COMPLETE.md)** - Phase 3 completion
-- **[tracking/PHASE_3_STRATEGY.md](tracking/PHASE_3_STRATEGY.md)** - Phase 3 strategy
-- **[tracking/PHASE_4_COMPLETION_REPORT.md](tracking/PHASE_4_COMPLETION_REPORT.md)** - Phase 4 report
-- **[tracking/PHASE_4_ROADMAP.md](tracking/PHASE_4_ROADMAP.md)** - Phase 4 roadmap
+
+### Feature & Integration Tracking
+- **[tracking/customer_requests.md](tracking/customer_requests.md)** - Feature backlog & priorities
+- **[tracking/IMPLEMENTATION_STATUS.md](tracking/IMPLEMENTATION_STATUS.md)** - Implementation checklist
+- **[tracking/INTEGRATION_STATUS.md](tracking/INTEGRATION_STATUS.md)** - Integration status
 - **[tracking/PROJECT_STATUS.md](tracking/PROJECT_STATUS.md)** - Current project status
+- **[tracking/DEPLOYMENT_READINESS.md](tracking/DEPLOYMENT_READINESS.md)** - Deployment readiness
 
 ### Bug Fixes & Improvements
-- **[refactorings/SHELL_EXECUTION_FIX.md](refactorings/SHELL_EXECUTION_FIX.md)** - Shell execution fixes
-- **[refactorings/SHELL_EXECUTION_RESEARCH.md](refactorings/SHELL_EXECUTION_RESEARCH.md)** - Research on improvements
+- **[tracking/SHELL_EXECUTION_FIX.md](tracking/SHELL_EXECUTION_FIX.md)** - Shell execution bug fixes
+- **[tracking/SHELL_EXECUTION_RESEARCH.md](tracking/SHELL_EXECUTION_RESEARCH.md)** - Shell execution research
 
 ---
 
@@ -114,11 +119,10 @@ docs/
 ├── architecture/           # System design & architecture patterns
 ├── features/              # Feature documentation & workflows
 ├── guides/                # Admin guides, how-tos, best practices
-├── refactorings/          # Bug fixes & improvements
-├── tracking/              # Phase status, implementation progress
+├── tracking/              # Project phases, status, bug fixes, PRs
 ├── integration/           # Cross-system integration (optional)
 ├── specifications/        # Technical specifications
-├── archive/               # Legacy documentation
+├── archive/               # Legacy documentation (Phase 2, 5, old roadmaps)
 ├── INDEX.md              # This file
 └── PROJECT_CONTEXT.md    # Project overview
 ```
