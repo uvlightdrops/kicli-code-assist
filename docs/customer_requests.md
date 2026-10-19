@@ -24,12 +24,12 @@ The categories below are permanent - add new requests under the appropriate head
 - **Status:** DONE - Moved to ~/dev_data/kicli-code-assist/log via config system
 - **Impact:** Clean project directory, all data in ~/dev_data
 
-#### LLM Request Transparency
-- [ ] Show exactly what is sent to LLM (full payload)
-- [ ] Display: Which provider (OpenAI, Ollama, etc.)
-- [ ] Display: Which URL is being used
-- [ ] Display: System prompt + user prompt verbatim
-- **Status:** UI ready (Logging tab exists); awaiting logging calls in llm_integration.py
+#### ✅ LLM Request Transparency (DONE)
+- [x] Show exactly what is sent to LLM (full payload)
+- [x] Display: Which provider (OpenAI, Ollama, etc.)
+- [x] Display: Which URL is being used
+- [x] Display: System prompt + user prompt verbatim
+- **Status:** DONE - Comprehensive logging added to llm_integration.py
 - **Impact:** Essential for debugging LLM behavior
 
 #### File Context Deduplication
