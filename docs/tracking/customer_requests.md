@@ -19,26 +19,7 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### 🔍 LOGGING & DEBUGGING
 
-#### ✅ Logfile location (DONE)
-- [x] Logfile location is per default DATA_DIR/kicli-code-assist/log - NOT inside the project
-- **Status:** DONE - Moved to ~/dev_data/kicli-code-assist/log via config system
-- **Impact:** Clean project directory, all data in ~/dev_data
-
-#### ✅ LLM Request Transparency (DONE)
-- [x] Show exactly what is sent to LLM (full payload)
-- [x] Display: Which provider (OpenAI, Ollama, etc.)
-- [x] Display: Which URL is being used
-- [x] Display: System prompt + user prompt verbatim
-- **Status:** DONE - Comprehensive logging added to llm_integration.py
-- **Impact:** Essential for debugging LLM behavior
-
-#### ✅ File Context Deduplication (DONE)
-- [x] Check if file already in context before loading
-- [x] Log when dedup check happens (file loaded / cached)
-- [x] Prevent duplicate file loading
-- **Status:** DONE - Full deduplication layer in context/deduplicator.py
-- **Impact:** Token efficiency + transparency logging with emoji prefixes
-- **Tests:** 19 unit tests covering all scenarios
+*(All completed - see FEATURES_IMPLEMENTED #10, #11, #12)*
 
 ---
 
@@ -57,12 +38,7 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### 📚 DOCUMENTATION
 
-#### ✅ Organize Docs Folder Structure (DONE)
-- [x] Create subfolders for docs organization (architecture/, features/, guides/, tracking/, integration/)
-- [x] Move existing docs into appropriate folders
-- [x] Update INDEX.md to reflect new structure
-- **Status:** DONE - 61 docs organized into 6 semantic folders
-- **Impact:** Developer experience + maintainability
+*(Docs Reorganization completed - see FEATURES_IMPLEMENTED #13)*
 
 ---
 

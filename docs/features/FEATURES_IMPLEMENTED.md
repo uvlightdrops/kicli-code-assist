@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-10-19  
-**Status:** 7 complete features | 0 in-progress
+**Status:** 13 complete features | 0 in-progress
 
 ---
 
@@ -516,6 +516,175 @@ python examples/security_examples.py      # 6 examples
 
 **Commits:**
 1. `docs: Add comprehensive UI tabs documentation`
+
+---
+
+### 10. Logfile Location Configuration ✅ DONE
+
+**Category:** LOGGING & DEBUGGING
+
+**Completed Tasks:**
+- [x] Move logfiles from project directory to ~/dev_data/kicli-code-assist/log
+- [x] Add storage.log_dir to schema (kicli.schema.yaml)
+- [x] Add kicli_log_dir to AppConfig (app_config.py)
+- [x] Config-driven log directory resolution in logging_panel.py
+- [x] MetricsCollector uses config-driven log directory
+
+**What was built:**
+- Schema-driven logging directory configuration
+- Log directory defaults to ~/dev_data/kicli-code-assist/log (keeps project clean)
+- get_log_dir() helper function resolves config → default path
+- All logfiles now outside project directory
+- Config can override default via storage.log_dir in ki.yaml
+
+**Impact:**
+- Clean project directory (no /log folder cluttering workspace)
+- Centralized data storage in ~/dev_data
+- Consistent with KI ecosystem patterns
+- Single source of truth: schema file
+
+**Files Modified:**
+- `ki-core/src/ki_core/schema/config.schema.yaml` - Set ollama.base_url default to "http://localhost:11434"
+- `kicli-code-assist/schema/kicli.schema.yaml` - Added storage.log_dir field
+- `kicli-code-assist/kicli_code_assist/app_config.py` - Added kicli_log_dir field
+- `kicli-code-assist/kicli_code_assist/ui/panels/logging_panel.py` - Config-driven log dir resolver
+- `kicli-code-assist/kicli_code_assist/metrics.py` - Uses config-driven log dir
+
+**Commits:**
+1. `fix: config-driven logging directory + ollama default URL`
+2. `logs: move logfile location to ~/dev_data/kicli-code-assist/log`
+
+---
+
+### 11. LLM Request Transparency Logging ✅ DONE
+
+**Category:** LOGGING & DEBUGGING
+
+**Completed Tasks:**
+- [x] Log provider name (OpenAI, Ollama, etc.)
+- [x] Log provider URL being used
+- [x] Log system prompt (full text, line-by-line)
+- [x] Log user messages (verbatim)
+- [x] Log request payload structure
+- [x] Log response preview + status
+- [x] Emoji prefixes for visual scanning (📌, 📍, 📨, 🔧, 📦, ✅, ❌)
+
+**What was built:**
+- Enhanced llm_integration.py with detailed transparency logging
+- All LLM queries now fully observable in kicli-llm.log
+- System prompt shown line-by-line for easy inspection
+- User messages logged verbatim (no truncation)
+- Request payload logged for API debugging
+- Response preview + success/error status
+- Emoji prefixes for fast visual scanning in Logging tab
+
+**Impact:**
+- Complete visibility into LLM behavior
+- Easy debugging of "why isn't LLM working?"
+- Understand exactly what's being sent and received
+- Essential for troubleshooting provider issues
+
+**Files Modified:**
+- `kicli-code-assist/kicli_code_assist/llm_integration.py` - query() and stream() methods enhanced
+
+**Logging Format:**
+```
+📌 Provider: openai
+📍 URL: https://api.openai.com/v1/chat/completions
+📨 User Messages: 2 messages
+🔧 System Prompt: (line-by-line system instructions)
+📦 Request Payload: (formatted request structure)
+✅ Response: (preview of first 200 chars)
+```
+
+**Commits:**
+1. `feat: add LLM request transparency logging with emoji indicators`
+
+---
+
+### 12. File Context Deduplication ✅ DONE
+
+**Category:** PERFORMANCE & UX
+
+**Completed Tasks:**
+- [x] Check if file already in context before loading
+- [x] Prevent duplicate file loading in multi-turn chats
+- [x] Show user feedback (yellow notification for duplicates)
+- [x] Normalized path checking (resolves symlinks, relative paths)
+
+**What was built:**
+- Simple deduplication using existing self.loaded_files list
+- Before loading file: check if normalized_path already in self.loaded_files
+- If duplicate: show "Already in context: file.py" (yellow notification)
+- If new: load file and append normalized_path to tracking list
+- Uses Path.resolve() for consistent path normalization
+
+**Impact:**
+- Prevents redundant file loads in chat history
+- Token efficiency (no wasted tokens on repeated files)
+- Better UX: user knows when file is already loaded
+- Performance: skips unnecessary file I/O
+
+**Files Modified:**
+- `kicli-code-assist/kicli_code_assist/ui/app.py` - _load_file_to_context() method
+
+**Code:**
+```python
+normalized_path = str(path.resolve())
+if normalized_path in self.loaded_files:
+    show_status_message("Already in context")
+    return
+# Load file and append to list
+self.loaded_files.append(normalized_path)
+```
+
+**Commits:**
+1. `refactor: simplify file deduplication - use existing loaded_files list`
+
+---
+
+### 13. Documentation Folder Reorganization ✅ DONE
+
+**Category:** DEVELOPER EXPERIENCE
+
+**Completed Tasks:**
+- [x] Create 6 semantic doc folders (architecture/, features/, guides/, tracking/, integration/, specifications/)
+- [x] Move 61 docs from flat structure into appropriate folders
+- [x] Consolidate redundant folders (refactorings/ → tracking/)
+- [x] Update INDEX.md with new folder structure and cross-links
+- [x] Create DOCUMENTATION_ORGANIZATION_GUIDE.md for ecosystem-wide standards
+
+**What was built:**
+- Clean semantic organization of 61 documentation files
+- Folder structure:
+  - `architecture/` (8) - System design patterns (CLI, shell, config)
+  - `features/` (10) - Feature workflows (chat, diff, prompts)
+  - `guides/` (9) - Admin guides & how-tos (installation, security, deployment)
+  - `tracking/` (15) - Project phases, status, bugs, PRs, customer requests
+  - `integration/` (0) - Cross-system integration (for future expansion)
+  - `specifications/` (6) - Technical specifications
+  - `archive/` (9) - Truly legacy documentation (Phase 2/5 old roadmaps)
+- Updated INDEX.md with folder descriptions and cross-references
+- Created ~/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md (ecosystem-wide standard)
+  - 3-tier strategy (generic in ~/dev_doc, project-specific in project/docs, subfolders within each)
+  - Document categorization framework
+  - Admin-friendly vs. deep technical separation
+  - Quick decision tree for doc placement
+
+**Impact:**
+- Improved developer experience (easy to find docs)
+- Better maintainability (clear categorization)
+- Reduced navigation friction (semantic folders)
+- Ecosystem-wide consistency (guide applies to all projects)
+
+**Files Modified/Created:**
+- `kicli-code-assist/docs/INDEX.md` - Completely rewritten with new structure
+- `kicli-code-assist/docs/` - 61 files moved into 6 semantic folders
+- `/home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md` - NEW (ecosystem standard)
+
+**Commits:**
+1. `docs: reorganize by category (architecture, features, guides, refactorings, tracking)`
+2. `docs: consolidate tracking - move refactorings to tracking folder`
 
 ---
 
