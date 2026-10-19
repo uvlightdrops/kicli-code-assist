@@ -1,0 +1,440 @@
+# Implemented Features
+
+**Last Updated:** 2026-09-05  
+**Status:** 6 complete features | 1 in-progress feature
+
+---
+
+## ✅ COMPLETE FEATURES
+
+### 1. Schema-Based Configuration System
+
+**Category:** DEPLOYMENT
+
+**Completed Tasks:**
+- [x] Base schema in ki-core
+- [x] App-specific schema extension in kicli-code-assist
+- [x] Config skeleton generation
+- [x] Layered config resolution (7 layers)
+- [x] Removed legacy code-based fallbacks
+
+**Pending Tasks:**
+- [ ] Config validation CLI enhancements
+- [ ] Config migration tools (old → new format)
+
+**What was built:**
+- Base schema in ki-core with all config options
+- App-specific schema in kicli-code-assist
+- Config skeleton auto-generation from merged schemas
+- Layered config resolution (7 layers: Env > Runtime > Stages > Profiles > Defaults > Files > Schema)
+- Removed 300+ lines of legacy code-based fallbacks
+- Full schema validation and verification
+
+**Files:**
+- `ki-core/src/ki_core/schema/config.schema.yaml` - Base schema
+- `kicli-code-assist/schema/kicli.schema.yaml` - App-specific schema
+- `yaml-cfg-wizard/src/yaml_cfg_wizard/schema_utils.py` - Schema utilities
+- `yaml-cfg-wizard/src/yaml_cfg_wizard/config_cli.py` - Config CLI
+
+**Documentation:**
+- [KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md) - How the layered config system works
+- [CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md) - Config resolution order
+- [yaml-cfg-wizard/docs/CONFIG_CLI.md](../../yaml_cfg_wizard/docs/CONFIG_CLI.md) - Config CLI reference
+- [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#1-schema-based-configuration-system-deployment)
+
+**Testing:**
+- All config system tests passing
+- Schema validation tests passing
+- Integration tests with real configs
+
+**CLI Commands:**
+```bash
+yaml-cfg config skeleton -o ki.yaml                    # Generate skeleton
+yaml-cfg config show [KEY]                      # View config value
+yaml-cfg config list                            # List all settings
+yaml-cfg config verify config.yaml schema.yaml  # Validate
+```
+
+---
+
+### 2. Chat History Export & Management
+
+**Category:** I/O FEATURES
+
+**Completed Tasks:**
+- [x] Chat history persistence to database/files
+- [x] Manual save/export CLI command
+- [x] Multiple export formats support
+
+**Pending Tasks:**
+- [ ] Chat session organization (folders/tags)
+- [ ] Chat search across history
+- [ ] Chat import from external sources
+- [ ] Automatic backup of chat history
+
+**What was built:**
+- Chat history persistence to database/files
+- Manual save/export CLI command
+- Multiple export formats support
+- Integration with config system
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/executor/chat_history.py`
+- Config: `kicli_chat_history_dir` setting
+
+**Documentation:**
+- [CHAT_HISTORY_AND_PROMPTS.md](CHAT_HISTORY_AND_PROMPTS.md) - Chat sessions and history management
+- [CHAT_WITH_FILES_WORKFLOW.md](CHAT_WITH_FILES_WORKFLOW.md) - Full workflow including chat
+- [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#2-chat-history-management-io-features)
+
+**Testing:**
+- Chat history persistence tests
+- Export format tests
+
+**CLI Commands:**
+```bash
+kicli-assist chat --history              # View chat history
+kicli-assist chat --export <format>      # Export chat session
+```
+
+---
+
+### 3. Prompt Management System
+
+**Category:** KI SETTINGS
+
+**Completed Tasks:**
+- [x] Core dataclasses (CustomTemplate, PromptRole, PromptsConfig)
+- [x] PromptManager orchestration with 5 built-in roles
+- [x] Custom template management (CRUD)
+- [x] Language learning configuration and prompt injection
+- [x] Favorites system for roles and templates
+- [x] Full serialization/deserialization support
+- [x] CLI command group with 13 subcommands
+- [x] Export/import configuration with merge support
+- [x] Complete test coverage (47 core + 22 CLI + 27 TUI tests)
+- [x] TUI components (RoleSelector, LanguageLearningPanel, PromptPreview, TemplateEditor)
+- [x] Message-based component communication
+- [x] Keyboard navigation for all TUI components
+- [x] Integration into main textual_app (Ctrl+O modal, full keyboard navigation)
+
+**Completed Features:**
+- **Phase 1 (Core):** PromptManager class, 5 built-in roles, template system, LL mode
+- **Phase 2 (CLI):** Full command interface via `ki prompts` command group
+- **Phase 3 (TUI):** Interactive UI components with keyboard shortcuts and real-time updates
+- **Phase 4 (Integration):** PromptsModal wired into main app (Ctrl+O), full in-modal keyboard navigation (role select, favorites, active role, escape to close)
+
+**Pending Tasks:**
+- [ ] Template gallery/marketplace
+- [ ] Advanced template editor with live preview
+
+**What was built:**
+
+*Phase 1 - Core Implementation (47 tests):*
+- PromptManager class with role and template management
+- 5 built-in default roles: Developer, Tutor, Translator, Language Learning, Code Reviewer
+- CustomTemplate dataclass with full CRUD operations
+- LanguageLearningConfig with 3 difficulty levels
+- Full serialization to/from YAML
+- Backward compatibility with legacy SystemPrompts
+
+*Phase 2 - CLI Commands (22 tests):*
+- Complete command interface with nested subcommand groups
+- Role management: list, show, set active
+- Template management: create, show, delete, list
+- Favorites management: add, remove
+- Language learning: enable, disable, show config
+- Configuration: export to file/stdout, import with merge
+
+*Phase 3 - TUI Integration (27 tests):*
+- RoleSelector component with navigation and favorites
+- LanguageLearningPanel with toggle functionality
+- PromptStatusBar showing current state
+- PromptPreview with syntax highlighting
+- PromptInfo with detailed metadata display
+- TemplateEditor modal for CRUD operations
+- TemplateList with keyboard navigation
+- Message-based component communication (PromptChanged, LanguageLearningToggled)
+- Full keyboard shortcuts (vim-like navigation, F for favorites, T for LL toggle)
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/prompts/models.py` - Dataclasses (175 LOC)
+- `kicli-code-assist/kicli_code_assist/prompts/manager.py` - PromptManager (380 LOC)
+- `kicli-code-assist/kicli_code_assist/prompts/__init__.py` - Module init
+- `yaml-cfg-wizard/src/yaml_cfg_wizard/prompts_cli.py` - CLI utilities (400 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/prompts_panel.py` - UI components (400 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/template_editor.py` - Template editor modal (350 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/prompt_preview.py` - Prompt preview panel (300 LOC)
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - PromptsModal (Ctrl+O) integration into main app
+- `kicli-code-assist/tests/test_prompt_manager.py` - Core tests (620 LOC)
+- `yaml-cfg-wizard/tests/test_prompts_cli.py` - CLI tests (550 LOC)
+- `kicli-code-assist/tests/test_prompts_tui.py` - TUI tests (450 LOC)
+
+**Documentation:**
+- [PROMPT_MANAGEMENT_DESIGN.md](PROMPT_MANAGEMENT_DESIGN.md) - Complete design specification
+- [../kicli-code-assist/PHASE1_COMPLETE.md](../kicli-code-assist/PHASE1_COMPLETE.md) - Phase 1 details
+- [../kicli-code-assist/PHASE2_COMPLETE.md](../kicli-code-assist/PHASE2_COMPLETE.md) - Phase 2 details
+- [../kicli-code-assist/PHASE3_COMPLETE.md](../kicli-code-assist/PHASE3_COMPLETE.md) - Phase 3 details
+
+**CLI Commands:**
+```bash
+# Role management
+ki prompts list                               # List all roles
+ki prompts show <role-id>                     # Show role details
+ki prompts set <role-id>                      # Set active role
+
+# Template management
+ki prompts templates list                     # List templates
+ki prompts templates create <id> --name NAME --prompt PROMPT
+ki prompts templates delete <id>              # Delete template
+
+# Favorites
+ki prompts favorites add <id>                 # Add to favorites
+ki prompts favorites remove <id>              # Remove from favorites
+
+# Language learning
+ki prompts language-learning enable <lang> [--level LEVEL]
+ki prompts language-learning disable
+ki prompts language-learning show
+
+# Configuration
+ki prompts export [--output FILE]             # Export configuration
+ki prompts import <FILE>                      # Import configuration
+```
+
+**Configuration:**
+```yaml
+prompts:
+  active_role: developer
+  roles:
+    developer:
+      id: developer
+      name: Developer
+      system_prompt: |
+        You are an expert software developer...
+  custom_templates:
+    - id: my-template
+      name: My Custom Role
+      system_prompt: Custom prompt...
+      tags: [python, debugging]
+  language_learning:
+    enabled: true
+    target_language: Español
+    native_language: English
+    level: intermediate
+  favorites: [developer, my-template]
+```
+
+**Testing:**
+- ✅ 47 core tests (Phase 1)
+- ✅ 22 CLI tests (Phase 2)
+- ✅ 27 TUI tests (Phase 3)
+- ✅ 96 total prompt management tests
+
+**Commits:**
+1. `feat: Implement Prompt Management Phase 1 - Core Dataclasses and PromptManager`
+2. `feat: Implement Prompt Management Phase 2 - CLI Commands`
+3. `feat(prompts): Phase 3 - TUI integration complete`
+
+---
+
+### 4. Path Restriction & Security
+
+**Category:** SECURITY
+
+**Progress:** 60% - Core implementation complete, integration pending
+
+**Completed Tasks:**
+- [x] PathValidator class with full API (100 LOC)
+  - `is_allowed()` - check path without raising
+  - `validate()` - enforce or warn based on config
+  - `make_relative()` - convert absolute to relative paths
+  - Full path normalization and symlink resolution
+- [x] Directory traversal prevention
+- [x] Optional enforcement modes (warn vs block)
+- [x] 26 comprehensive tests (all passing)
+  - 13 core validator tests (yaml-cfg-wizard)
+  - 13 integration tests (kicli-code-assist)
+- [x] Security integration module (kicli_code_assist/security.py)
+- [x] Documentation & Examples
+
+**Pending Tasks:**
+- [ ] UI settings panel for security configuration
+- [ ] Integration into file browser (validate on load)
+- [ ] Integration into diff module (validate diff files)
+- [ ] CLI testing commands
+
+**What has been completed:**
+- [x] PathValidator class with full API (100 LOC)
+  - `is_allowed()` - check path without raising
+  - `validate()` - enforce or warn based on config
+  - `make_relative()` - convert absolute to relative paths
+  - Full path normalization and symlink resolution
+  
+- [x] Directory traversal prevention
+  - Blocks `../` escape attempts
+  - Prevents symlink escapes
+  - Full path resolution before comparison
+  
+- [x] Optional enforcement modes
+  - Strict mode (enforce=True) - raises PathSecurityError
+  - Warning mode (enforce=False) - emits warning but continues
+  
+- [x] 26 comprehensive tests (all passing)
+  - 13 core validator tests (yaml-cfg-wizard)
+  - 13 integration tests (kicli-code-assist)
+  
+- [x] Security integration module (kicli_code_assist/security.py)
+  - `validate_file_path()` - validate with operation context
+  - `is_path_allowed()` - check without raising
+  - `get_security_info()` - display config info
+  - `get_path_validator()` - create validator from config
+  
+- [x] Documentation & Examples
+  - [SECURITY.md](SECURITY.md) - 240 lines comprehensive guide
+  - [../examples/security_examples.py](../examples/security_examples.py) - 6 runnable examples
+
+**Still pending:**
+- [ ] UI settings panel for security configuration
+- [ ] Integration into file browser (validate on load)
+- [ ] Integration into diff module (validate diff files)
+- [ ] CLI testing commands
+
+**Files:**
+- `yaml-cfg-wizard/src/yaml_cfg_wizard/path_validator.py` - Core validator (100 LOC)
+- `yaml-cfg-wizard/tests/test_path_validator.py` - 13 tests
+- `kicli-code-assist/kicli_code_assist/security.py` - Integration (90 LOC)
+- `kicli-code-assist/tests/test_security.py` - 13 tests
+- `kicli-code-assist/docs/SECURITY.md` - Comprehensive guide (240 LOC)
+
+**Documentation:**
+- [SECURITY.md](SECURITY.md) - Configuration, API, deployment, testing
+- [../examples/security_examples.py](../examples/security_examples.py) - Usage examples
+- [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md#4-absolute-path-security-setting-security)
+
+**Configuration:**
+```yaml
+security:
+  allowed_base_path: "/data/projects/myapp"    # Restrict to this directory
+  enforce_path_restriction: true               # Enforce (true) or warn (false)
+```
+
+**Testing:**
+```bash
+pytest tests/test_path_validator.py -v    # 13 tests
+pytest tests/test_security.py -v          # 13 tests
+python examples/security_examples.py      # 6 examples
+```
+
+**Commits:**
+1. `feat: Add path validation utilities for security`
+2. `feat: Add security integration module`
+
+---
+
+### 5. Focus Management (GUI)
+
+**Category:** GUI
+
+**Progress:** 90% - Core navigation, scrolling, and visual indicator complete
+
+**Completed Tasks:**
+- [x] Focus manager framework (FocusManager class)
+- [x] Keyboard shortcuts (CTRL+F, CTRL+B, CTRL+I, CTRL+C, CTRL+O)
+- [x] TUI input focus fixes
+- [x] Focus state tracking between panes
+- [x] Scrollable file preview with scroll focus
+- [x] Arrow key navigation in focused preview
+- [x] Visual focus indicator in UI (title highlight via CSS "active" class)
+- [x] Status bar shows global + context-specific active keys per focused pane
+
+**Known remaining gap:**
+- [ ] CTRL+H for chat pane (currently CTRL+C, which conflicts with interrupt)
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/ui/focus_manager.py` - Focus management
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - TUI integration, status bar, PreviewPane scrolling
+
+---
+
+### 6. Settings Page (GUI)
+
+**Category:** GUI / Configuration
+
+**Progress:** 100%
+
+**Completed Tasks:**
+- [x] Schema-driven settings form (Ctrl+S modal) that walks the merged
+  ki-core + kicli JSON schema to discover editable fields instead of a
+  hardcoded field list
+- [x] Widget selection per schema type: `Select` for enum, `Switch` for
+  boolean, `Input` (+ `Integer`/`Number` validators) for string/int/number
+- [x] Current values pre-filled from the already-resolved `AppConfig.raw`
+- [x] Save writes only the edited dotted-paths back onto the active
+  `ki.yaml`, leaving untouched sections (creds, prompts, custom provider
+  keys, ...) exactly as they were
+- [x] Sensitive leaf fields (`api_key`, `password`, `secret`, `token`)
+  are excluded from the editable form wherever they occur in the schema
+- [x] Exposed sections: `llm`, `http`, `security`, `storage`,
+  `apps.kicli` (`prompts` excluded - has its own Ctrl+O modal; `creds`
+  excluded - secrets)
+
+**Files:**
+- `kicli-code-assist/kicli_code_assist/ui/settings_panel.py` - SettingsPanel + SettingsModal
+- `kicli-code-assist/kicli_code_assist/ui/textual_app.py` - Ctrl+S binding, `action_open_settings`
+- `kicli-code-assist/tests/test_settings_tui.py` - Unit tests
+- `ki-core/src/ki_core/config.py` - `find_config_path()` public API (used to know which file to write back to)
+
+---
+
+### 7. TLS Certificate Diagnostics
+
+**Category:** Configuration / Connectivity (lives mostly in ki-core; consumed here)
+
+**Progress:** 100%
+
+**Completed Tasks:**
+- [x] `ki-chat cert-diagnose <host[:port]|url>` command (ki-core) - shows the
+  presented cert's subject/issuer/SAN/validity dates, whether it's trusted
+  by the same CA bundle `requests` uses, and which CA bundle sources
+  (`SSL_CERT_FILE`, `REQUESTS_CA_BUNDLE`, OpenSSL defaults, certifi) are in play
+- [x] Previously-unused `http.verify_ssl` schema field is now actually wired
+  into `OllamaClient`/`OpenAICompatibleClient` via a new `verify` param
+  (`True`/`False`/path-to-CA-bundle, same semantics as `requests`' `verify=`)
+- [x] `create_client()` in kicli-code-assist passes `config.http_verify_ssl`
+  through to both clients
+- [x] SSL errors from either client now raise a `ProviderError` pointing at
+  `ki-chat cert-diagnose <host>` instead of a bare requests traceback
+
+**Files:**
+- `ki-core/src/ki_core/cert_diagnostics.py` - certificate inspection/verification logic
+- `ki-core/src/ki_core/cli.py` - `cert-diagnose` command
+- `ki-core/src/ki_core/adapters/openai_compat.py`, `ollama.py` - `verify` param wiring
+- `ki-core/tests/test_cert_diagnostics.py`, `test_adapter_tls_verify.py` - Unit tests
+- `kicli-code-assist/kicli_code_assist/examples/simple_chat.py` - passes `http_verify_ssl` through
+
+---
+
+**Complete guides for using implemented features:**
+
+- [CHAT_WITH_FILES_WORKFLOW.md](CHAT_WITH_FILES_WORKFLOW.md) - End-to-end workflow
+- [FILE_BROWSER.md](FILE_BROWSER.md) - File navigation and selection
+- [DIFF_USER_GUIDE.md](DIFF_USER_GUIDE.md) - Reviewing and applying diffs
+- [CHAT_HISTORY_AND_PROMPTS.md](CHAT_HISTORY_AND_PROMPTS.md) - Chat management
+- [KI_CORE_INTEGRATION.md](KI_CORE_INTEGRATION.md) - Configuration system
+- [CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md) - Config layers
+- [SECURITY.md](SECURITY.md) - Path restriction and security
+
+---
+
+## 🔗 Related Documentation
+
+**Feature tracking across ecosystem:**
+- [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md) - Complete ecosystem status
+
+**Project context:**
+- [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) - Context detection and management
+- [STRUCTURE.md](STRUCTURE.md) - Documentation organization
+
+**Main navigation:**
+- [INDEX.md](INDEX.md) - Documentation index and quick links

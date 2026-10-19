@@ -2,46 +2,103 @@
 
 **Last Updated:** 2026-10-19
 
-⚠️ **NOTE TO COPILOT:** This file contains ONLY customer requests from @uvlightdrops.  
-Do NOT add your own ideas/suggestions here. Add those to BACKLOG.md or ROADMAP.md instead.
+⚠️ **NOTE TO COPILOT:** This file contains ONLY customer requests from @uvlightdrops.
+Do NOT add your own ideas. Only move items TO FEATURES_IMPLEMENTED when done.
+The categories below are permanent - add new requests under the appropriate heading.
 
 ---
 
-## Requests from @uvlightdrops (2026-10-19)
+## 🔍 LOGGING & DEBUGGING
 
-### Logging & Debugging Infrastructure
+### Logging Tab as Default
+- [ ] Logging tab should be active/visible on app startup (not Chat tab)
 
-1. **Default Logging Tab**
-   - [ ] Tab "Logging" should be active/visible by default on app startup
-   - Currently: Chat tab is default
-   - Target: Logging tab should be foreground
+### Unified Log Display
+- [ ] Single "Logging" tab showing log files
+- [ ] Show which logfile is active (path + filename at top)
+- [ ] Display 1:1 from actual logfile (not reformatted)
+- [ ] Auto-scroll to latest entries
+- **Question:** Which logfiles should exist? (LLM, Context, Approval, System?) - NEED TO CLARIFY
 
-2. **Unified Logging Tab**
-   - [ ] Single tab that shows all logs
-   - [ ] Expandable later into different log sections
-   - [ ] Real-time log display
+### LLM Request Transparency
+- [ ] Show exactly what is sent to LLM (full payload)
+- [ ] Display: Which provider (OpenAI, Ollama, etc.)
+- [ ] Display: Which URL is being used
+- [ ] Display: System prompt + user prompt verbatim
 
-3. **Clarify Tab Purposes**
-   - [ ] Document what "Terminal" tab does currently
-   - [ ] Document what "Shell" tab does currently
-   - [ ] Why are there two? What's the difference?
+### File Context Deduplication
+- [ ] Check if file already in context before loading
+- [ ] Log when dedup check happens (file loaded / cached)
+- [ ] Prevent duplicate file loading
 
-4. **Log File Display**
-   - [ ] Show active logfile path at top of Logging tab
-   - [ ] Display: `/path/to/logfile.log` (full path)
-   - [ ] Log should be 1:1 reflection of the actual logfile
-   - [ ] Auto-scroll to latest entries
+### Tab Documentation
+- [ ] Document: What does "Terminal" tab do currently?
+- [ ] Document: What does "Shell" tab do currently?
+- [ ] Clarify: Why are there two tabs? Difference?
 
-5. **LLM Request Transparency**
-   - [ ] Show EXACTLY what is sent to the LLM
-   - [ ] Display: Which LLM provider (OpenAI, Ollama, etc.)
-   - [ ] Display: Which URL is used
-   - [ ] Display: The exact prompt + payload
+---
 
-6. **Context Deduplication Check**
-   - [ ] Before loading a file into context, check if already loaded
-   - [ ] Prevent duplicate file loading
-   - [ ] Show somewhere in logs/context view when this check happens
+## 🤖 LLM & AI WORKFLOW
+
+*(empty - add requests here)*
+
+---
+
+## 🖥️ USER INTERFACE
+
+### File Editor
+*(add requests here)*
+
+### Input Field
+*(add requests here)*
+
+### Modal & Dialogs
+*(add requests here)*
+
+---
+
+## 📁 FILE MANAGEMENT
+
+*(add requests here)*
+
+---
+
+## ⚙️ CONFIGURATION & SYSTEM
+
+*(add requests here)*
+
+---
+
+## 🔐 SECURITY
+
+*(add requests here)*
+
+---
+
+## 📚 DOCUMENTATION
+
+### Organize Docs Folder Structure
+- [ ] Create subfolders for docs organization
+  - [ ] `docs/refactorings/` - For refactoring documentation
+  - [ ] `docs/features/` - Large feature docs (one folder per major feature)
+  - [ ] `docs/architecture/` - Architecture & design docs
+  - [ ] `docs/guides/` - User guides
+  - [ ] `docs/api/` - API references
+- [ ] Move existing docs into appropriate folders
+- [ ] Update README/INDEX to reflect new structure
+- [ ] Keep top-level docs/ for quick-reference files only
+
+---
+
+## OTHER
+
+*(add requests here)*
+
+---
+
+**Movement:** Items here → FEATURES_IMPLEMENTED when complete.  
+**Never:** Don't move to hidden backlog. Either TODO or DONE.
+
 
 
 
