@@ -163,7 +163,7 @@ class LogViewerModal(Screen):
             self.log_display.clear()
             
             # Write header
-            self.log_display.write(f"📄 {self.current_logfile}  [{len(lines)} lines total]\n", style="bold")
+            self.log_display.write(f"📄 {self.current_logfile}  [{len(lines)} lines total]\n")
             self.log_display.write("─" * 160 + "\n")
             
             # Write all lines (RichLog will handle scrolling)
