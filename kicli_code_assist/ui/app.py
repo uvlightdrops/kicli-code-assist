@@ -27,7 +27,7 @@ from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
 from kicli_code_assist.ui.input.chat_input import ChatInput
 from kicli_code_assist.ui.panels.file_editor import FileEditorPane
-from kicli_code_assist.ui.panels.logging_panel import LoggingPanel
+from kicli_code_assist.ui.panels.logging_panel import LogViewerModal
 from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
 from kicli_code_assist.ui.modals.diff_viewer import DiffViewerModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
@@ -60,7 +60,7 @@ class CodeAssistantApp(Static):
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
         Binding("ctrl+s", "open_settings", "Settings", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
-        Binding("ctrl+g", "focus_logging", "Logging", show=True),
+        Binding("ctrl+g", "open_logs", "Logs [Ctrl+G]", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
@@ -96,7 +96,6 @@ class CodeAssistantApp(Static):
         self.llm_worker = None  # Track worker thread
         self.open_edit_tabs = {}  # Track {file_path: EditTab}
         self.background_debug_display = None  # AI background/debug log
-        self.logging_panel = None  # Logging display panel
         
         # Load resolved kicli-code-assist config and LLM client
         from kicli_code_assist.app_config import AppConfig as Config
@@ -169,13 +168,10 @@ class CodeAssistantApp(Static):
         if self.chat_display:
             self.call_after_refresh(self.chat_display.focus)
 
-    def action_focus_logging(self) -> None:
-        """Focus the logging panel (Ctrl+G)."""
-        self.current_focus = "logging"
-        tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
-        tabs.active = "tab_logging"
-        if self.logging_panel:
-            self.call_after_refresh(self.logging_panel.focus)
+    def action_open_logs(self) -> None:
+        """Open the log viewer modal (Ctrl+G)."""
+        modal = LogViewerModal()
+        self.app.push_screen(modal)
 
     def action_focus_ai_background(self) -> None:
         """Focus the AI Background/Debug tab."""
@@ -229,11 +225,6 @@ class CodeAssistantApp(Static):
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
                 with TabbedContent(id="chat_terminal_tabs"):
-                    # Logging tab (DEFAULT ACTIVE)
-                    with TabPane("📊 Logging", id="tab_logging"):
-                        self.logging_panel = LoggingPanel()
-                        yield self.logging_panel
-                    
                     # Chat tab
                     with TabPane("💬 Chat", id="tab_chat"):
                         self.chat_display = SelectableRichLog(highlight=False, markup=True)
