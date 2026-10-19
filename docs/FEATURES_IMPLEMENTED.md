@@ -493,9 +493,31 @@ python examples/security_examples.py      # 6 examples
 - [CONFIG_INTEGRATION.md](CONFIG_INTEGRATION.md) - Config layers
 - [SECURITY.md](SECURITY.md) - Path restriction and security
 
----
+### 9. Tab Documentation ✅ DONE
 
-## 🔗 Related Documentation
+**Category:** DOCUMENTATION
+
+**Completed Tasks:**
+- [x] Document: "Logging" tab (📊) - Logfile viewer with 5 logfiles, auto-refresh every 2s
+- [x] Document: "Chat" tab (💬) - Chat history with LLM responses
+- [x] Document: "AI Background" tab (🧠) - Debug/workflow logging
+- [x] Document: "Terminal" tab (🖥️) - Output/Console for command execution (stdout/stderr)
+- [x] Document: "Shell" tab (⌨️) - Input prompt for shell commands (command entry)
+- [x] Clarify: Logging/Chat/AI/Terminal/Shell tabs are all essential for IDE workflow
+
+**What was built:**
+- Complete documentation for all 5 main TUI tabs
+- Each tab serves specific workflow purpose
+- Logging tab is default active tab on startup
+- Full keyboard navigation and shortcuts documented
+
+**Files:**
+- `docs/UI_TABS.md` - Tab documentation and navigation guide
+
+**Commits:**
+1. `docs: Add comprehensive UI tabs documentation`
+
+---
 
 **Feature tracking across ecosystem:**
 - [yaml-cfg-wizard/docs/FEATURE_STATUS.md](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md) - Complete ecosystem status
