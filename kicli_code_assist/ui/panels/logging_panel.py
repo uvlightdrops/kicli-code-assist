@@ -163,12 +163,12 @@ class LogViewerModal(Screen):
             self.log_display.clear()
             
             # Write header
-            self.log_display.write(f"📄 {self.current_logfile}  [{len(lines)} lines total]\n")
-            self.log_display.write("─" * 160 + "\n")
+            self.log_display.write(f"📄 {self.current_logfile}  [{len(lines)} lines total]")
+            self.log_display.write("─" * 160)
             
             # Write all lines (RichLog will handle scrolling)
             for line in lines:
-                self.log_display.write(line.rstrip('\n') + "\n")
+                self.log_display.write(line.rstrip('\n'))
         
         except (OSError, IOError) as e:
             self.log_display.write(f"❌ Error reading {self.current_logfile}\n{e}")
