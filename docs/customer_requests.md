@@ -18,36 +18,44 @@ The categories below are permanent - add new requests under the appropriate head
 - [x] Thread-safe logging (RLock)
 - **Status:** Infrastructure ready; awaiting TUI integration
 
-### Logging Tab as Default
-- [ ] Logging tab should be active/visible on app startup (not Chat tab)
+### Logging Tab as Default ✅ DONE
+- [x] Logging tab is active/visible on app startup (before Chat tab)
+- [x] Tab ID: tab_logging, default active in TabbedContent
+- [x] Keybinding: Ctrl+G to focus Logging tab
 
-### Unified Log Display
-- [ ] Single "Logging" tab showing log files
-- [ ] Show which logfile is active (path + filename at top)
-- [ ] Display 1:1 from actual logfile (not reformatted)
-- [ ] Auto-scroll to latest entries
-- **Logfile Strategy:** Hybrid (Main + Specialized)
-  - [ ] `kicli.log` - Main log (all events)
-  - [ ] `kicli-llm.log` - LLM queries + responses only
-  - [ ] `kicli-context.log` - File loading, cache, dedup events
-  - [ ] `kicli-workflow.log` - Approval workflow, user actions
-  - [ ] `kicli-errors.log` - Errors only
+### Unified Log Display ✅ DONE
+- [x] Single "Logging" tab showing log files
+- [x] Logfile selector dropdown (5 options)
+- [x] Show which logfile is active (path + filename at top)
+- [x] Display 1:1 from actual logfile (not reformatted, just with color-coding)
+- [x] Auto-scroll to latest 100 lines (refreshes every 2 seconds)
+- **Logfile Strategy:** Hybrid (Main + Specialized) ✅ WORKING
+  - [x] `kicli.log` - Main log (all events)
+  - [x] `kicli-llm.log` - LLM queries + responses only
+  - [x] `kicli-context.log` - File loading, cache, dedup events
+  - [x] `kicli-workflow.log` - Approval workflow, user actions
+  - [x] `kicli-errors.log` - Errors only
 
 ### LLM Request Transparency
 - [ ] Show exactly what is sent to LLM (full payload)
 - [ ] Display: Which provider (OpenAI, Ollama, etc.)
 - [ ] Display: Which URL is being used
 - [ ] Display: System prompt + user prompt verbatim
+- **Status:** UI ready (Logging tab exists); awaiting logging calls in llm_integration.py
 
 ### File Context Deduplication
 - [ ] Check if file already in context before loading
 - [ ] Log when dedup check happens (file loaded / cached)
 - [ ] Prevent duplicate file loading
+- **Status:** UI ready (Logging tab exists); awaiting logging calls in context_manager.py
 
-### Tab Documentation
-- [ ] Document: "Terminal" tab - Output/Console for command execution (stdout/stderr)
-- [ ] Document: "Shell" tab - Input prompt for shell commands (command entry)
-- [ ] Clarify: Both tabs are essential for IDE workflow (can't remove)
+### Tab Documentation ✅ DONE
+- [x] Document: "Logging" tab (📊) - Logfile viewer with 5 logfiles, auto-refresh every 2s
+- [x] Document: "Chat" tab (💬) - Chat history with LLM responses
+- [x] Document: "AI Background" tab (🧠) - Debug/workflow logging
+- [x] Document: "Terminal" tab (🖥️) - Output/Console for command execution (stdout/stderr)
+- [x] Document: "Shell" tab (⌨️) - Input prompt for shell commands (command entry)
+- [x] Clarify: Logging/Chat/AI/Terminal/Shell tabs are all essential for IDE workflow
 
 ---
 

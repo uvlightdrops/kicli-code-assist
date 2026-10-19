@@ -7,7 +7,7 @@
 
 ## ✅ COMPLETE FEATURES
 
-### 1. Logging Infrastructure (flowpy-based)
+### 1. Logging Infrastructure (flowpy-based) + TUI Integration
 
 **Category:** LOGGING & DEBUGGING
 
@@ -19,6 +19,10 @@
 - [x] Lazy initialization (no files created on import)
 - [x] Thread-safe logging (RLock)
 - [x] flowpy added as dependency (pyproject.toml)
+- [x] **TUI Integration: Logging Tab (DEFAULT ACTIVE)**
+- [x] Logfile dropdown selector in TUI
+- [x] Auto-refresh every 2 seconds
+- [x] Color-coded output (Red=ERROR, Yellow=WARN, Cyan=DEBUG)
 
 **What was built:**
 - Pythonic logging using standard Python logging module (via flowpy wrapper)
@@ -31,24 +35,43 @@
   - `kicli-errors.log` - Errors only (easy filtering)
 - Lazy initialization: No log files created until first logging call
 - Thread-safe: Uses RLock for concurrent access
+- **TUI LoggingPanel widget:**
+  - Displays logfiles with 1:1 content (not reformatted)
+  - Dropdown to select between 5 logfiles
+  - Shows logfile path, line count, size at top
+  - Auto-scrolls to latest 100 lines every 2 seconds
+  - Color-coded by log level (RED/YELLOW/CYAN)
+  - Default active tab on startup
 
 **Files:**
-- `logconf.ini` - Logging configuration (module → level mappings)
+- `logconf.ini` - Logging configuration
 - `kicli_code_assist/logging_integration.py` - Logger convenience getters
+- `kicli_code_assist/ui/panels/logging_panel.py` - Logging Tab widget (new)
+- `kicli_code_assist/ui/app.py` - Integrated LoggingPanel into main app
+- `demo_logging.py` - Demo script showing logging in action
 - `pyproject.toml` - Added flowpy>=0.1.0 dependency
 
-**Dependencies:**
-- flowpy (v0.1.0+) from `/home/flow/dev_flow/flowpy`
+**Keybindings:**
+- `Ctrl+G` - Focus Logging tab
+- Tab is DEFAULT ACTIVE on app startup (not Chat)
 
-**Next Steps (TUI Integration):**
-- [ ] Create Logging Tab widget in TUI
-- [ ] Display active logfile and path
-- [ ] Auto-scroll to latest entries
-- [ ] Add logging calls to llm_integration.py, ai_workflow.py, approval_workflow.py
+**Usage:**
+1. Launch app: `kicli-assist tui`
+2. Logging tab opens automatically
+3. Switch logfiles with dropdown
+4. Logs auto-refresh every 2 seconds
+5. Color-coded by severity level
 
-**Documentation:**
-- flowpy repo: `/home/flow/dev_flow/flowpy/flowpy/loggerProxy.py`
-- This project: `logconf.ini`, `kicli_code_assist/logging_integration.py`
+**Testing:**
+- Demo script: `python3 demo_logging.py`
+- Creates sample log entries and shows preview
+- All 5 logfiles successfully created and displayed
+
+**Next Steps:**
+- [ ] Add logging calls to llm_integration.py (LLM queries/responses)
+- [ ] Add logging calls to ai_workflow.py (file context, caching)
+- [ ] Add logging calls to approval_workflow.py (approval events)
+- [ ] Manual logfile cleanup/archiving if needed
 
 ---
 
