@@ -1,10 +1,9 @@
 llm:
   providers:
     openai:
-      api_key: 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
+      api_key: ${OPENAI_API_KEY}
       model: gpt-4o-mini
       base_url: https://api.openai.com/v1
-
 apps:
   kicli:
     workspace_root: ''
