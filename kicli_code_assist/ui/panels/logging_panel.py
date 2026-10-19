@@ -93,8 +93,11 @@ class LoggingPanel(Static):
         
         # Check if log file exists
         if not logfile_path.exists():
-            display.update(f"[dim]Log file not yet created:[/dim] {logfile_path}")
-            status.update(f"⏳ Waiting for log entries... (file: {logfile_path})")
+            output = f"\n[dim]Log file not yet created:[/dim]\n[yellow]{logfile_path}[/yellow]\n\n"
+            output += "[cyan]Waiting for first log entry...[/cyan]\n\n"
+            output += "[dim]This logfile will be created when the first message is logged.[/dim]"
+            display.update(output)
+            status.update(f"⏳ Waiting for entries ({logfile_path.name})")
             return
         
         try:

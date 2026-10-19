@@ -10,32 +10,6 @@ The categories below are permanent - add new requests under the appropriate head
 
 ## 🔍 LOGGING & DEBUGGING
 
-### Logging Infrastructure Setup ✅ PHASE A COMPLETE
-- [x] Hybrid logfile strategy implemented (5 dedicated logfiles)
-- [x] flowpy.LoggerProxy integration (config-driven levels via logconf.ini)
-- [x] Per-module loggers created (kicli, kicli.llm, kicli.context, kicli.workflow, kicli.errors)
-- [x] Lazy initialization (no files created on import)
-- [x] Thread-safe logging (RLock)
-- **Status:** Infrastructure ready; awaiting TUI integration
-
-### Logging Tab as Default ✅ DONE
-- [x] Logging tab is active/visible on app startup (before Chat tab)
-- [x] Tab ID: tab_logging, default active in TabbedContent
-- [x] Keybinding: Ctrl+G to focus Logging tab
-
-### Unified Log Display ✅ DONE
-- [x] Single "Logging" tab showing log files
-- [x] Logfile selector dropdown (5 options)
-- [x] Show which logfile is active (path + filename at top)
-- [x] Display 1:1 from actual logfile (not reformatted, just with color-coding)
-- [x] Auto-scroll to latest 100 lines (refreshes every 2 seconds)
-- **Logfile Strategy:** Hybrid (Main + Specialized) ✅ WORKING
-  - [x] `kicli.log` - Main log (all events)
-  - [x] `kicli-llm.log` - LLM queries + responses only
-  - [x] `kicli-context.log` - File loading, cache, dedup events
-  - [x] `kicli-workflow.log` - Approval workflow, user actions
-  - [x] `kicli-errors.log` - Errors only
-
 ### LLM Request Transparency
 - [ ] Show exactly what is sent to LLM (full payload)
 - [ ] Display: Which provider (OpenAI, Ollama, etc.)

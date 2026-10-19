@@ -108,6 +108,15 @@ class CodeAssistantApp(Static):
         provider = _detect_best_provider()
         self.client = create_client(self.config, provider)
         
+        # Initialize logging - log app startup
+        from kicli_code_assist.logging_integration import get_main_logger, get_llm_logger
+        main_logger = get_main_logger()
+        llm_logger = get_llm_logger()
+        main_logger.info("═" * 60)
+        main_logger.info("KI Code Assistant TUI started")
+        main_logger.info(f"Workspace: {self.allowed_base_path}")
+        llm_logger.info(f"LLM Provider: {provider}")
+        
         # Initialize prompt manager with the full raw config dict (needed
         # for the top-level "prompts" section, which AppConfig doesn't
         # flatten into its own attributes).
