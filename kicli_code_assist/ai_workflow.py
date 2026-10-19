@@ -128,16 +128,23 @@ class AIWorkflowManager:
             on_progress("Parsing response...")
 
         # 2. Parse response into hunks
+        if on_progress:
+            on_progress(f"[dim]Parsing response...[/]")
+        
         parsed_parts = self.parser.parse(llm_response)
+        if on_progress:
+            on_progress(f"[dim]Parsing {len(parsed_parts)} response parts...[/]")
+        
         hunks = self._create_hunks_from_response(
             parsed_parts,
             file_context or "",
             current_file_path or "unknown.txt",
         )
         
-        print(f"DEBUG: Created {len(hunks)} hunks")
-        for i, hunk in enumerate(hunks):
-            print(f"  Hunk {i}: {hunk.file_path}:{hunk.start_line}-{hunk.end_line}, lines={len(hunk.lines)}")
+        if on_progress:
+            on_progress(f"[cyan]✓ Created {len(hunks)} hunks:[/]")
+            for i, hunk in enumerate(hunks):
+                on_progress(f"  [{i}] {hunk.file_path}:{hunk.start_line}-{hunk.end_line} ({len(hunk.lines)} lines)")
 
         # 3. Create approval session
         approval_session = ApprovalSession(session_id=session_id)
