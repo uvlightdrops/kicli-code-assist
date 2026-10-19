@@ -3,7 +3,7 @@
 from pathlib import Path
 from textual.app import ComposeResult, Screen
 from textual.containers import Container, Vertical, Horizontal
-from textual.widgets import Static, Button, Select
+from textual.widgets import Static, Button, Select, RichLog
 from textual.reactive import reactive
 
 
@@ -24,8 +24,8 @@ class LogViewerModal(Screen):
         align: center middle;
     }
     #log_container {
-        width: 120;
-        height: 32;
+        width: 160;
+        height: 48;
         border: double $accent;
         background: $panel;
         layout: vertical;
@@ -82,7 +82,10 @@ class LogViewerModal(Screen):
             log_options = [(f"{name} - {label}", name) for name, label in self.LOGFILES]
             yield Select(log_options, value=self.current_logfile, id="log_selector")
             
-            yield Static("Loading...", id="log_content")
+            # Use RichLog for better scrolling and content display
+            self.log_display = RichLog(id="log_content")
+            yield self.log_display
+            
             with Container(id="log_buttons"):
                 yield Button("◀ Prev", id="prev_btn", variant="primary")
                 yield Button("🔄 Refresh", id="refresh_btn")
@@ -140,10 +143,12 @@ class LogViewerModal(Screen):
     def _load_logs(self) -> None:
         """Load and display the selected log file."""
         logfile = self.LOG_DIR / self.current_logfile
-        content_widget = self.query_one("#log_content", Static)
+        
+        if not hasattr(self, 'log_display'):
+            return
         
         if not logfile.exists():
-            content_widget.update(f"⏳ Waiting for {self.current_logfile}...")
+            self.log_display.write(f"⏳ Waiting for {self.current_logfile}...")
             return
         
         try:
@@ -151,18 +156,21 @@ class LogViewerModal(Screen):
                 lines = f.readlines()
             
             if not lines:
-                content_widget.update(f"📄 {self.current_logfile}\n(empty file)")
+                self.log_display.write(f"📄 {self.current_logfile}\n(empty file)")
                 return
             
-            # Show last 20 lines
-            tail = lines[-20:] if len(lines) > 20 else lines
-            output = f"\n[{len(lines)} lines total]\n"
-            output += "─" * 60 + "\n"
-            output += "".join(tail)
+            # Clear and reload all content
+            self.log_display.clear()
             
-            content_widget.update(output)
+            # Write header
+            self.log_display.write(f"📄 {self.current_logfile}  [{len(lines)} lines total]\n", style="bold")
+            self.log_display.write("─" * 160 + "\n")
+            
+            # Write all lines (RichLog will handle scrolling)
+            for line in lines:
+                self.log_display.write(line.rstrip('\n') + "\n")
         
         except (OSError, IOError) as e:
-            content_widget.update(f"❌ Error reading {self.current_logfile}\n{e}")
+            self.log_display.write(f"❌ Error reading {self.current_logfile}\n{e}")
 
 
