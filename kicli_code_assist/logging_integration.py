@@ -84,15 +84,36 @@ def _get_or_create_logger(name: str, logfile_basename: str):
     
     key = (name, full_logfile)
     if key not in _loggers:
-        log_config = _get_log_config()
-        
-        # Check for per-module level override
-        per_module_levels = log_config.get("per_module", {})
-        level = per_module_levels.get(name, log_config.get("level", "INFO"))
-        
-        # Setup with config-driven format and level
-        fmt = log_config.get("format", LOG_FORMAT)
-        _loggers[key] = setup_logger(name, full_logfile, fmt=fmt)
+        try:
+            log_config = _get_log_config()
+            
+            # Check for per-module level override
+            per_module_levels = log_config.get("per_module", {})
+            level = per_module_levels.get(name, log_config.get("level", "INFO"))
+            
+            # Setup with config-driven format and level
+            fmt = log_config.get("format", LOG_FORMAT)
+            
+            # Ensure parent directory exists before creating logger
+            Path(full_logfile).parent.mkdir(parents=True, exist_ok=True)
+            
+            logger_obj = setup_logger(name, full_logfile, fmt=fmt)
+            
+            # Verify logger was created
+            if logger_obj is None:
+                import sys
+                print(f"WARNING: setup_logger returned None for {name}", file=sys.stderr)
+                # Fallback to print-based logging
+                import logging
+                logger_obj = logging.getLogger(name)
+            
+            _loggers[key] = logger_obj
+        except Exception as e:
+            import sys
+            print(f"ERROR creating logger {name}: {e}", file=sys.stderr)
+            import traceback
+            traceback.print_exc(file=sys.stderr)
+            raise
     
     return _loggers[key]
 

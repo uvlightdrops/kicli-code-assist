@@ -297,13 +297,28 @@ class CodeAssistantApp(Static):
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
-        if event.button.id == "chat-send-btn":
-            # Send button clicked - get text from input and submit
-            text = self.input_field.text.strip()
-            if text:
-                self.input_field.text = ""
-                self.run_worker(lambda: self._submit_chat(text), thread=True)
-            event.stop()  # Prevent bubbling
+        from kicli_code_assist.logging_integration import get_main_logger
+        logger = get_main_logger()
+        
+        try:
+            logger.info(f"Button pressed: {event.button.id}")
+            
+            if event.button.id == "chat-send-btn":
+                logger.info("🔘 Chat Send button clicked")
+                # Send button clicked - get text from input and submit
+                text = self.input_field.text.strip()
+                logger.info(f"Input text length: {len(text)}")
+                if text:
+                    self.input_field.text = ""
+                    logger.info("Queueing _submit_chat worker...")
+                    self.run_worker(lambda: self._submit_chat(text), thread=True)
+                    logger.info("Worker queued successfully")
+                event.stop()  # Prevent bubbling
+        except Exception as e:
+            from kicli_code_assist.logging_integration import get_error_logger
+            err_logger = get_error_logger()
+            err_logger.exception(f"ERROR in on_button_pressed: {e}")
+            raise
     
     def action_open_prompts(self) -> None:
         """Open prompt management UI (Ctrl+O)."""
@@ -500,6 +515,12 @@ class CodeAssistantApp(Static):
         """Submit chat message to LLM with full message history (worker thread)."""
         import asyncio
         from kicli_code_assist.llm_integration import get_async_integration
+        from kicli_code_assist.logging_integration import get_llm_logger
+        
+        llm_logger = get_llm_logger()
+        llm_logger.info("=" * 60)
+        llm_logger.info("📨 CHAT SUBMISSION STARTED")
+        llm_logger.info(f"User message: {text[:100]}...")
         
         try:
             self.chat_display.write(f"[bold cyan]You:[/] {text}\n")
@@ -508,10 +529,15 @@ class CodeAssistantApp(Static):
             llm = get_async_integration()
             if not llm or not llm.provider_chain:
                 self.chat_display.write(f"[bold red]❌ No LLM provider configured[/]\n")
+                llm_logger.error("No LLM provider chain available")
                 return
+            
+            llm_logger.info("✓ LLM integration ready")
             
             # Add current message to session
             self.chat_session.add_message("user", text)
+            llm_logger.info(f"✓ Message added to session")
+            
             
             # Get all messages (including files added via L key and previous messages)
             # This includes the system prompt automatically
