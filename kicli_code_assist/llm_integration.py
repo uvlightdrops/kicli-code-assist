@@ -61,7 +61,7 @@ class AsyncLLMIntegration:
         
         # Check if providers are actually configured
         openai_enabled = self.config.openai_api_key and not self.config.openai_api_key.startswith("${")
-        # Ollama is enabled if base_url is set (includes localhost default)
+        # Ollama is enabled if base_url is set
         ollama_enabled = bool(self.config.ollama_base_url)
         
         llm_logger.info(f"OpenAI enabled: {openai_enabled}")
@@ -85,7 +85,7 @@ class AsyncLLMIntegration:
             except Exception as e:
                 llm_logger.warning(f"Failed to initialize OpenAI: {e}")
 
-        # Try Ollama if explicitly configured
+        # Try Ollama (uses schema default: localhost:11434)
         if ollama_enabled:
             try:
                 from ki_core.adapters.ollama import OllamaClient
@@ -102,29 +102,11 @@ class AsyncLLMIntegration:
             except Exception as e:
                 llm_logger.warning(f"Failed to initialize Ollama: {e}")
 
-        # Fallback: If no providers configured, try Ollama on localhost
-        if not providers:
-            llm_logger.info("No providers explicitly configured, trying Ollama on localhost:11434...")
-            try:
-                from ki_core.adapters.ollama import OllamaClient
-                
-                model = self.config.ollama_model or "llama3.2"
-                client = OllamaClient(
-                    base_url="http://localhost:11434",
-                    model=model,
-                )
-                providers.append(client)
-                llm_logger.info(f"✓ Ollama fallback initialized (localhost:11434)")
-                llm_logger.info(f"  Model: {model}")
-                llm_logger.info("  NOTE: Using localhost fallback. To use different provider, set config values.")
-            except Exception as e:
-                llm_logger.warning(f"Failed to initialize Ollama fallback: {e}")
-
         if providers:
             self.provider_chain = ProviderChain(providers)
             llm_logger.info(f"Provider chain ready: {len(providers)} provider(s)")
         else:
-            llm_logger.error("No LLM providers available (no config + Ollama localhost not responding)")
+            llm_logger.error("No LLM providers configured")
 
     async def query(
         self,
