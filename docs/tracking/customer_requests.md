@@ -32,12 +32,13 @@ The categories below are permanent - add new requests under the appropriate head
 - **Status:** DONE - Comprehensive logging added to llm_integration.py
 - **Impact:** Essential for debugging LLM behavior
 
-#### File Context Deduplication
-- [ ] Check if file already in context before loading
-- [ ] Log when dedup check happens (file loaded / cached)
-- [ ] Prevent duplicate file loading
-- **Status:** UI ready (Logging tab exists); awaiting logging calls in context_manager.py
-- **Impact:** Performance + transparency
+#### ✅ File Context Deduplication (DONE)
+- [x] Check if file already in context before loading
+- [x] Log when dedup check happens (file loaded / cached)
+- [x] Prevent duplicate file loading
+- **Status:** DONE - Full deduplication layer in context/deduplicator.py
+- **Impact:** Token efficiency + transparency logging with emoji prefixes
+- **Tests:** 19 unit tests covering all scenarios
 
 ---
 
@@ -56,17 +57,11 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### 📚 DOCUMENTATION
 
-#### Organize Docs Folder Structure
-- [ ] Create subfolders for docs organization
-  - [ ] `docs/refactorings/` - For refactoring documentation
-  - [ ] `docs/features/` - Large feature docs (one folder per major feature)
-  - [ ] `docs/architecture/` - Architecture & design docs
-  - [ ] `docs/guides/` - User guides
-  - [ ] `docs/api/` - API references
-- [ ] Move existing docs into appropriate folders
-- [ ] Update README/INDEX to reflect new structure
-- [ ] Keep top-level docs/ for quick-reference files only
-- **Status:** Not yet started
+#### ✅ Organize Docs Folder Structure (DONE)
+- [x] Create subfolders for docs organization (architecture/, features/, guides/, tracking/, integration/)
+- [x] Move existing docs into appropriate folders
+- [x] Update INDEX.md to reflect new structure
+- **Status:** DONE - 61 docs organized into 6 semantic folders
 - **Impact:** Developer experience + maintainability
 
 ---
