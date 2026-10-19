@@ -45,28 +45,33 @@
 ### Weaknesses & Gaps ⚠️
 
 1. **Testing**
-   - ❌ No unit tests (no test/ directory)
-   - ❌ No integration tests
+   - ✅ `tests/` directory created (test_config_loading.py, test_context_selection.py)
+   - ⚠️ 11/14 config tests passing (layer merge integration TBD)
+   - ⚠️ 13/18 context selection tests passing (entry point detection TBD)
+   - ❌ No integration tests (end-to-end workflows)
    - ❌ No CI/CD pipeline validation
-   - Manual smoke testing only
+   - Manual smoke testing + automated unit tests (partial)
 
 2. **Error Handling**
-   - ⚠️ Minimal exception handling in LLM calls
-   - ⚠️ TUI crashes silently on network errors
-   - ⚠️ No retry logic for transient failures
-   - ⚠️ API errors not user-friendly
+   - ✅ Error handling module created (error_handling.py, 320 lines)
+   - ✅ LLMError + provider-specific mappings + ErrorBoundary context manager
+   - ✅ Recovery hints for user guidance
+   - ⚠️ TUI error modal integration pending (ready to wire up)
+   - ⚠️ Retry logic exists but not yet wired into async queries
 
 3. **Documentation in Code**
-   - ⚠️ Many modules lack docstrings
-   - ⚠️ Complex workflows (ai_workflow.py) need inline comments
-   - ⚠️ UI component tree not documented
-   - ⚠️ Shell executor protocol undocumented
+   - ✅ Module docstrings added (ui/__init__.py, ui/actions/__init__.py)
+   - ✅ AppConfig, AsyncLLMIntegration, streaming, validation fully documented
+   - ⚠️ ai_workflow.py needs inline comments for complex flows
+   - ⚠️ Shell executor protocol still undocumented
+   - ⚠️ UI component tree structure now explained in docstrings
 
 4. **Performance**
-   - ⚠️ No caching strategy for AI responses
-   - ⚠️ Full file re-reading on every context load
-   - ⚠️ No lazy loading for large projects
-   - ⚠️ Logging writes every message synchronously
+   - ✅ Streaming support implemented (TokenCounter, StreamBuffer)
+   - ✅ User can see tokens arrive in real-time
+   - ⚠️ No caching strategy yet for AI responses (P2 item)
+   - ⚠️ Full file re-reading on every context load (can use caching)
+   - ⚠️ Logging writes synchronously (acceptable for now, monitor)
 
 5. **UI Usability**
    - ⚠️ No visual feedback for long operations (AI queries)
