@@ -52,6 +52,7 @@ class AppConfig:
     kicli_cache_dir: str = ""
     kicli_session_dir: str = ""
     kicli_chat_history_dir: str = ""
+    kicli_log_dir: str = ""
     kicli_allowed_base_path: str = ""
 
     # Context selection (apps.kicli.context.*)
@@ -108,6 +109,7 @@ class AppConfig:
                 payload.get_path("apps.kicli.prompt_history_dir")
                 or payload.get_path("storage.history_dir", "")
             ),
+            kicli_log_dir=payload.get_path("storage.log_dir", ""),
             kicli_allowed_base_path=payload.get_path("apps.kicli.workspace_root", ""),
             context_max_files=payload.get_path("apps.kicli.context.max_files", 10),
             context_max_size_mb=payload.get_path("apps.kicli.context.max_size_mb", 5),

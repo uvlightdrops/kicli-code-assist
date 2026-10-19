@@ -7,10 +7,27 @@ from textual.widgets import Static, Button, Select, RichLog
 from textual.reactive import reactive
 
 
+def get_log_dir() -> Path:
+    """Get the log directory, using configured path or default."""
+    from kicli_code_assist.app_config import AppConfig
+    
+    config = AppConfig.from_env()
+    if config.kicli_log_dir:
+        return Path(config.kicli_log_dir)
+    
+    # Default: ~/dev_data/kicli-code-assist/log
+    default_data_dir = Path.home() / "dev_data" / "kicli-code-assist"
+    return default_data_dir / "log"
+
+
 class LogViewerModal(Screen):
     """Modal screen to view logs."""
     
-    LOG_DIR = Path("log")
+    @property
+    def LOG_DIR(self) -> Path:
+        """Get configured log directory."""
+        return get_log_dir()
+    
     LOGFILES = [
         ("kicli.log", "📋 Main"),
         ("kicli-llm.log", "🤖 LLM"),
