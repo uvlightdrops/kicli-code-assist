@@ -52,11 +52,16 @@ class AsyncLLMIntegration:
         providers = []
         llm_logger.info("=" * 60)
         llm_logger.info("Initializing LLM providers")
-        llm_logger.info(f"OpenAI configured: {bool(self.config.openai_api_key)}")
-        llm_logger.info(f"Ollama configured: {bool(self.config.ollama_base_url)}")
+        
+        # Only add provider if explicitly configured (not schema defaults)
+        openai_enabled = self.config.openai_api_key and not self.config.openai_api_key.startswith("${")
+        ollama_enabled = self.config.ollama_base_url and self.config.ollama_base_url != "http://localhost:11434"
+        
+        llm_logger.info(f"OpenAI enabled: {openai_enabled}")
+        llm_logger.info(f"Ollama enabled: {ollama_enabled}")
 
         # Try OpenAI if configured
-        if self.config.openai_api_key:
+        if openai_enabled:
             try:
                 from ki_core.adapters.openai_async import AsyncOpenAIClient
                 from ki_core.core.models import ChatRequest
@@ -73,12 +78,11 @@ class AsyncLLMIntegration:
             except Exception as e:
                 llm_logger.warning(f"Failed to initialize OpenAI: {e}")
 
-        # Try Ollama if configured
-        if self.config.ollama_base_url:
+        # Try Ollama if EXPLICITLY configured (not schema default)
+        if ollama_enabled:
             try:
                 from ki_core.adapters.ollama import OllamaClient
                 
-                # Use configured model, or reasonable defaults for local Ollama
                 model = self.config.ollama_model or "llama3.2"
                 client = OllamaClient(
                     base_url=self.config.ollama_base_url,
