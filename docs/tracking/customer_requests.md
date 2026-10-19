@@ -19,6 +19,8 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### MIXED 
 - LLM interaktion mit UI feedback !
+- [ ] BUGFIX: Send button does not send message but opens new edit tab
+- [ ] check if file already exists in file editor before creating new fileEsa
 
 
 ### 🔍 LOGGING & DEBUGGING
