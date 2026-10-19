@@ -129,7 +129,7 @@ class AsyncLLMIntegration:
             ProviderConfigError: If no providers configured
         """
         llm_logger.info("-" * 60)
-        llm_logger.info("LLM Query Started")
+        llm_logger.info("🤖 LLM QUERY STARTED")
         llm_logger.info(f"Message count: {len(messages)}")
         
         if not self.provider_chain:
@@ -139,7 +139,22 @@ class AsyncLLMIntegration:
                 "No LLM providers configured. Set OPENAI_API_KEY or OLLAMA_BASE_URL."
             )
 
+        # Determine active provider & log provider info
+        provider_name = "unknown"
+        provider_url = "unknown"
+        
+        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
+            provider_name = "OpenAI"
+            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
+        elif self.config.ollama_base_url:
+            provider_name = "Ollama"
+            provider_url = self.config.ollama_base_url
+        
+        llm_logger.info(f"📌 Active Provider: {provider_name}")
+        llm_logger.info(f"📍 Provider URL: {provider_url}")
+
         # Log message content summary (with safety)
+        llm_logger.info("📨 User Messages:")
         for i, msg in enumerate(messages):
             role = msg.get("role", "unknown")
             content = msg.get("content", "")
@@ -153,8 +168,14 @@ class AsyncLLMIntegration:
             system_prompt = self.secret_filter.filter(system_prompt)
             redactions = self.secret_filter.get_redaction_count()
             if redactions > 0:
-                llm_logger.warning(f"Filtered {redactions} secret(s) from system prompt")
-                llm_logger.info(f"System prompt length: {original_length} → {len(system_prompt)} chars")
+                llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
+                llm_logger.info(f"   System prompt length: {original_length} → {len(system_prompt)} chars")
+            
+            # Log complete system prompt (after filtering)
+            llm_logger.info("🔧 System Prompt (complete):")
+            for line in system_prompt.split('\n'):
+                if line.strip():
+                    llm_logger.info(f"   {line}")
 
         # Build ChatRequest with model from active provider
         from ki_core.core.models import ChatRequest, Message, Role
@@ -173,7 +194,13 @@ class AsyncLLMIntegration:
         else:
             model = "gpt-4o-mini"
         
-        llm_logger.info(f"Active model: {model}")
+        llm_logger.info(f"🔤 Active Model: {model}")
+        
+        # Log request payload summary (sanitized)
+        llm_logger.info("📦 Request Payload:")
+        llm_logger.info(f"   Model: {model}")
+        llm_logger.info(f"   Messages: {len(message_objs)}")
+        llm_logger.info(f"   Total message chars: {sum(len(m.content) for m in message_objs)}")
         
         request = ChatRequest(
             messages=message_objs,
@@ -184,23 +211,23 @@ class AsyncLLMIntegration:
             if on_progress:
                 on_progress("Querying LLM...")
             
-            llm_logger.info("Sending request to provider chain...")
+            llm_logger.info("⏳ Sending request to provider chain...")
             response = await self.provider_chain.achat(request)
             
             response_text = response.message.content
             response_length = len(response_text)
-            llm_logger.info(f"Response received: {response_length} chars")
-            llm_logger.info(f"Response preview: {response_text[:200]}{'...' if response_length > 200 else ''}")
+            llm_logger.info(f"✅ Response received: {response_length} chars")
+            llm_logger.info(f"📄 Response preview: {response_text[:200]}{'...' if response_length > 200 else ''}")
             
             return response_text
             
         except LLMError as e:
-            llm_logger.error(f"LLM error: {e.message}")
+            llm_logger.error(f"❌ LLM error: {e.message}")
             if on_progress:
                 on_progress(f"LLM Error: {e.message}")
             raise
         except Exception as e:
-            llm_logger.error(f"Unexpected error: {type(e).__name__}: {e}")
+            llm_logger.error(f"❌ Unexpected error: {type(e).__name__}: {e}")
             import traceback
             llm_logger.error(f"Traceback:\n{traceback.format_exc()}")
             if on_progress:
@@ -234,7 +261,7 @@ class AsyncLLMIntegration:
             ProviderConfigError: If no providers configured
         """
         llm_logger.info("-" * 60)
-        llm_logger.info("LLM Stream Started")
+        llm_logger.info("🤖 LLM STREAM STARTED")
         llm_logger.info(f"Message count: {len(messages)}")
         
         if not self.provider_chain:
@@ -244,20 +271,41 @@ class AsyncLLMIntegration:
                 "No LLM providers configured"
             )
 
+        # Determine active provider & log provider info
+        provider_name = "unknown"
+        provider_url = "unknown"
+        
+        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
+            provider_name = "OpenAI"
+            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
+        elif self.config.ollama_base_url:
+            provider_name = "Ollama"
+            provider_url = self.config.ollama_base_url
+        
+        llm_logger.info(f"📌 Active Provider: {provider_name}")
+        llm_logger.info(f"📍 Provider URL: {provider_url}")
+
         # Log message summaries
+        llm_logger.info("📨 User Messages:")
         for i, msg in enumerate(messages):
             role = msg.get("role", "unknown")
             content = msg.get("content", "")
             content_preview = content[:100] if isinstance(content, str) else str(content)[:100]
             llm_logger.info(f"  [{i}] {role}: {content_preview}{'...' if len(str(content)) > 100 else ''}")
 
-        # Filter secrets
+        # Filter secrets & log system prompt
         if system_prompt:
             original_length = len(system_prompt)
             system_prompt = self.secret_filter.filter(system_prompt)
             redactions = self.secret_filter.get_redaction_count()
             if redactions > 0:
-                llm_logger.warning(f"Filtered {redactions} secret(s) from system prompt")
+                llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
+            
+            # Log complete system prompt (after filtering)
+            llm_logger.info("🔧 System Prompt (complete):")
+            for line in system_prompt.split('\n'):
+                if line.strip():
+                    llm_logger.info(f"   {line}")
 
         from ki_core.core.models import ChatRequest, Message, Role
 
@@ -267,6 +315,8 @@ class AsyncLLMIntegration:
         ]
         
         request = ChatRequest(messages=message_objs)
+        
+        llm_logger.info(f"📦 Stream Request: {len(message_objs)} messages, total {sum(len(m.content) for m in message_objs)} chars")
 
         full_response = ""
         chunk_count = 0
@@ -280,6 +330,8 @@ class AsyncLLMIntegration:
         try:
             if on_progress:
                 on_progress("Streaming from LLM...")
+            
+            llm_logger.info("⏳ Starting stream from provider chain...")
             
             llm_logger.info("Starting stream from provider chain...")
             
