@@ -19,6 +19,10 @@ properties:
         type: string
         default: ""
         description: "Directory for chat history persistence"
+      log_dir:
+        type: string
+        default: ""
+        description: "Directory for application logs (defaults to ~/dev_data/kicli-code-assist/log)"
     additionalProperties: true
   security:
     type: object

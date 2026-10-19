@@ -125,9 +125,20 @@ class MetricsCollector:
         """Initialize metrics collector.
         
         Args:
-            metrics_dir: Directory to write metrics files (default: ./log/)
+            metrics_dir: Directory to write metrics files (defaults to configured log dir)
         """
-        self.metrics_dir = Path(metrics_dir or "./log")
+        if metrics_dir:
+            self.metrics_dir = Path(metrics_dir)
+        else:
+            from kicli_code_assist.app_config import AppConfig
+            config = AppConfig.from_env()
+            if config.kicli_log_dir:
+                self.metrics_dir = Path(config.kicli_log_dir)
+            else:
+                # Default: ~/dev_data/kicli-code-assist/log
+                default_data_dir = Path.home() / "dev_data" / "kicli-code-assist"
+                self.metrics_dir = default_data_dir / "log"
+        
         self.metrics_dir.mkdir(parents=True, exist_ok=True)
         
         self.logger = logging.getLogger("kicli.metrics")
