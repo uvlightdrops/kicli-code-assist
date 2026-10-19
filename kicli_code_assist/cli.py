@@ -12,8 +12,8 @@ def _detect_best_provider():
     """Detect best available LLM provider based on config.
 
     Priority:
-    1. Ollama (if running locally)
-    2. OpenAI (if API key available)
+    1. OpenAI (if API key available)
+    2. Ollama (if running locally)
     3. Company KI (if configured)
     4. Mock (fallback for testing)
     """
@@ -21,6 +21,11 @@ def _detect_best_provider():
 
     config = Config.from_env()
 
+    # Prefer OpenAI if key is configured (and not a placeholder)
+    if config.openai_api_key and not config.openai_api_key.startswith("${"):
+        return "openai"
+
+    # Fall back to Ollama if running
     if config.ollama_base_url:
         try:
             import requests
@@ -28,9 +33,6 @@ def _detect_best_provider():
             return "ollama"
         except Exception:
             pass
-
-    if config.openai_api_key:
-        return "openai"
 
     if config.ki_api_key:
         return "ki"

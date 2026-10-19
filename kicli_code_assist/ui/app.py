@@ -85,6 +85,7 @@ class CodeAssistantApp(Static):
         self.preview_display = None
         self.preview_title = None
         self.chat_display = None
+        self.debug_chat_display = None  # Debug chat display (direct OpenAI)
         self.terminal_panel = None  # Terminal output panel
         self.shell_panel = None  # Shell input panel
         self.input_field = None
@@ -229,6 +230,11 @@ class CodeAssistantApp(Static):
                     with TabPane("💬 Chat", id="tab_chat"):
                         self.chat_display = SelectableRichLog(highlight=False, markup=True)
                         yield self.chat_display
+                    
+                    # Debug Chat tab (direct OpenAI access)
+                    with TabPane("💻 Debug", id="tab_debug_chat"):
+                        self.debug_chat_display = SelectableRichLog(highlight=False, markup=True)
+                        yield self.debug_chat_display
                     
                     # AI Background / Debug tab
                     with TabPane("🧠 AI Background", id="tab_ai_background"):
@@ -421,10 +427,21 @@ class CodeAssistantApp(Static):
             if self.file_list:
                 self.file_list.action_select_cursor()
         elif self.current_focus == "input":
-            # Submit chat message
+            # Check which tab is active and handle accordingly
+            tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
+            active_tab = tabs.active
+            
             text = self.input_field.text.strip()
-            if text:
-                self.input_field.text = ""
+            if not text:
+                return
+                
+            self.input_field.text = ""
+            
+            if active_tab == "tab_debug_chat":
+                # Debug chat: direct OpenAI query
+                self.run_worker(lambda: self._debug_chat_submit(text), thread=True)
+            else:
+                # Regular chat: AI workflow
                 self.run_worker(lambda: self._submit_chat(text), thread=True)
     
     def action_mark_selection_start(self) -> None:
@@ -497,6 +514,42 @@ class CodeAssistantApp(Static):
             
         except Exception as e:
             self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
+    
+    def _debug_chat_submit(self, text: str) -> None:
+        """Submit debug chat message directly to OpenAI (worker thread)."""
+        import asyncio
+        from kicli_code_assist.llm_integration import AsyncLLMIntegration
+        
+        try:
+            self.debug_chat_display.write(f"[bold cyan]You:[/] {text}\n")
+            self.debug_chat_display.write("[dim]⏳ Querying OpenAI...[/]\n")
+            
+            # Get or create async LLM integration
+            llm = get_async_integration()
+            if not llm or not llm.provider_chain:
+                self.debug_chat_display.write(f"[bold red]❌ No LLM provider configured[/]\n")
+                return
+            
+            # Run async query in sync context
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                response = loop.run_until_complete(
+                    llm.query(
+                        messages=[{"role": "user", "content": text}],
+                        system_prompt="You are a helpful assistant for debugging. Provide clear, concise responses."
+                    )
+                )
+                self.debug_chat_display.write(f"[bold green]OpenAI:[/] {response}\n")
+                self.debug_chat_display.write("[dim]" + "─" * 80 + "[/]\n\n")
+                
+            finally:
+                loop.close()
+            
+        except Exception as e:
+            self.debug_chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
+            import traceback
+            self.debug_chat_display.write(f"[dim]{traceback.format_exc()}[/]\n")
     
     def _load_file_to_context(self, file_path: str) -> None:
         """Load file to context (worker thread)."""
