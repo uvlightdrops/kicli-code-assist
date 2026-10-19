@@ -174,3 +174,4 @@ class LogViewerModal(Screen):
             self.log_display.write(f"❌ Error reading {self.current_logfile}\n{e}")
 
 
+

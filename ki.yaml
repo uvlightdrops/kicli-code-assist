@@ -1,7 +1,7 @@
 llm:
   providers:
     openai:
-      api_key: ${OPENAI_API_KEY}
+      api_key: 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
       model: gpt-4o-mini
       base_url: https://api.openai.com/v1
 apps:
