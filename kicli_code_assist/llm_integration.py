@@ -2,6 +2,7 @@
 
 Bridges between ChatSession (sync) and async LLM providers.
 Handles error conversion and recovery hints.
+Supports token-by-token streaming with cancellation.
 """
 
 import asyncio
@@ -22,6 +23,11 @@ from ki_core.security import SensitiveDataFilter
 
 from kicli_code_assist.app_config import AppConfig
 from kicli_code_assist.chat_session import ChatSession
+from kicli_code_assist.streaming import (
+    StreamCancellation,
+    TokenCounter,
+    StreamDisplayFormatter,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -206,17 +212,21 @@ class AsyncLLMIntegration:
         system_prompt: Optional[str] = None,
         on_chunk: Optional[Callable[[str], None]] = None,
         on_progress: Optional[Callable[[str], None]] = None,
+        on_token_count: Optional[Callable[[int], None]] = None,
+        cancellation: Optional[StreamCancellation] = None,
     ) -> str:
-        """Stream LLM response asynchronously (non-blocking).
+        """Stream LLM response asynchronously with cancellation support.
         
         Args:
             messages: List of chat messages
             system_prompt: Optional system prompt (filtered for secrets)
             on_chunk: Callback for each response chunk
             on_progress: Callback for progress updates
+            on_token_count: Callback for token count updates (called after each token)
+            cancellation: Optional StreamCancellation to allow user to cancel mid-stream
             
         Returns:
-            Complete response text
+            Complete response text (empty string if cancelled)
             
         Raises:
             AllProvidersFailedError: If all providers fail
@@ -259,6 +269,12 @@ class AsyncLLMIntegration:
 
         full_response = ""
         chunk_count = 0
+        token_counter = TokenCounter()
+        formatter = StreamDisplayFormatter()
+        
+        # Create cancellation context if not provided
+        if cancellation is None:
+            cancellation = StreamCancellation()
         
         try:
             if on_progress:
@@ -267,13 +283,32 @@ class AsyncLLMIntegration:
             llm_logger.info("Starting stream from provider chain...")
             
             async for event in self.provider_chain.achat_stream(request):
+                # Check if user requested cancellation
+                if cancellation.cancelled:
+                    llm_logger.warning("Stream cancelled by user")
+                    if on_progress:
+                        on_progress("Streaming cancelled")
+                    break
+                
                 if event.text:
                     full_response += event.text
                     chunk_count += 1
+                    
+                    # Update token count
+                    token_counter.add_token(event.text)
+                    if on_token_count:
+                        on_token_count(token_counter.get_count())
+                    
+                    # Format and display token
+                    formatted_token = formatter.format_token(event.text)
+                    
                     if on_chunk:
-                        on_chunk(event.text)
+                        on_chunk(formatted_token)
+                    
+                    llm_logger.debug(f"Chunk {chunk_count}: {len(event.text)} chars → {token_counter.get_count()} tokens")
             
-            llm_logger.info(f"Stream complete: {len(full_response)} chars in {chunk_count} chunks")
+            final_token_count = token_counter.get_count()
+            llm_logger.info(f"Stream complete: {len(full_response)} chars in {chunk_count} chunks ({final_token_count} tokens)")
             llm_logger.info(f"Response preview: {full_response[:200]}{'...' if len(full_response) > 200 else ''}")
             
             return full_response
