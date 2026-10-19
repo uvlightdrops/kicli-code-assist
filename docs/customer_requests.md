@@ -65,15 +65,7 @@ The categories below are permanent - add new requests under the appropriate head
 
 ## ⚪ LOW PRIORITY (Nice-to-Have)
 
-### ✅ Completed Items
-
-#### Tab Documentation ✅ DONE
-- [x] Document: "Logging" tab (📊) - Logfile viewer with 5 logfiles, auto-refresh every 2s
-- [x] Document: "Chat" tab (💬) - Chat history with LLM responses
-- [x] Document: "AI Background" tab (🧠) - Debug/workflow logging
-- [x] Document: "Terminal" tab (🖥️) - Output/Console for command execution (stdout/stderr)
-- [x] Document: "Shell" tab (⌨️) - Input prompt for shell commands (command entry)
-- [x] Clarify: Logging/Chat/AI/Terminal/Shell tabs are all essential for IDE workflow
+*(no low-priority items currently)*
 
 ---
 
