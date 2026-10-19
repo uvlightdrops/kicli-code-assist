@@ -19,12 +19,17 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional, Union
 
-from ki_core import ConfigDict, load_config
+from ki_core import ConfigDict, ConfigManager
 
 
 @dataclass
 class AppConfig:
-    """Resolved kicli-code-assist configuration."""
+    """Resolved kicli-code-assist configuration.
+    
+    Built on top of ConfigManager, which handles the 9-layer
+    precedence model and schema validation. This dataclass
+    provides ergonomic attribute access to settings this app cares about.
+    """
 
     # LLM providers (ki-core base schema: llm.providers.*)
     ki_base_url: str = ""
@@ -72,8 +77,13 @@ class AppConfig:
 
     @classmethod
     def from_yaml(cls, path: Optional[Union[str, Path]] = None) -> "AppConfig":
-        """Load and resolve config from YAML + environment variables."""
-        payload = load_config(path)
+        """Load and resolve config from YAML + environment variables.
+        
+        Uses ConfigManager for single source of truth on config resolution,
+        following the 9-layer precedence model exactly.
+        """
+        manager = ConfigManager(config_path=path)
+        payload = manager.load()
 
         providers = payload.get_path("llm.providers", {}) or {}
         ki_cfg = providers.get("ki", {}) or {}
@@ -125,5 +135,8 @@ class AppConfig:
 
     @classmethod
     def from_env(cls) -> "AppConfig":
-        """Load config from environment variables (KI_CFG_* prefix) plus any discovered YAML."""
+        """Load config from environment variables (KI_CFG_* prefix) plus any discovered YAML.
+        
+        Convenience method that calls from_yaml(None) to auto-discover config file.
+        """
         return cls.from_yaml(None)

@@ -5,39 +5,18 @@ from typing import Any, Callable, Dict, Iterable, List
 import click
 import yaml
 
-from ki_core import find_config_path
+from ki_core import ConfigManager, find_config_path
 
 
-def _detect_best_provider():
-    """Detect best available LLM provider based on config.
+def _get_llm_provider(echo_fn: Callable[[str], None] = click.echo) -> str:
+    """Get best available LLM provider using ConfigManager.
 
-    Priority:
-    1. OpenAI (if API key available)
-    2. Ollama (if running locally)
-    3. Company KI (if configured)
-    4. Mock (fallback for testing)
+    ConfigManager.get_llm_provider() is the SINGLE SOURCE OF TRUTH for
+    provider detection, consolidating logic that was previously scattered
+    across multiple files (cli.py, llm_integration.py, etc.).
     """
-    from kicli_code_assist.app_config import AppConfig as Config
-
-    config = Config.from_env()
-
-    # Prefer OpenAI if key is configured (and not a placeholder)
-    if config.openai_api_key and not config.openai_api_key.startswith("${"):
-        return "openai"
-
-    # Fall back to Ollama if running
-    if config.ollama_base_url:
-        try:
-            import requests
-            requests.head(config.ollama_base_url, timeout=2)
-            return "ollama"
-        except Exception:
-            pass
-
-    if config.ki_api_key:
-        return "ki"
-
-    return "mock"
+    mgr = ConfigManager(echo_fn=echo_fn)
+    return mgr.get_llm_provider()
 
 
 def run_tui(config: str | None = None, provider: str | None = None) -> None:
@@ -60,7 +39,7 @@ def run_tmux(simple: bool = False, session: str = "ki-assist") -> None:
 def run_chat(model: str | None = None, provider: str | None = None) -> None:
     """Run the simple chat flow."""
     from kicli_code_assist.examples.simple_chat import run_chat as run_chat_flow
-    run_chat_flow(model=model, provider=provider or _detect_best_provider())
+    run_chat_flow(model=model, provider=provider or _get_llm_provider())
 
 
 def run_openinterpreter(auto_run: bool = False, model: str | None = None) -> None:

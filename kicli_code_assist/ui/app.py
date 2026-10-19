@@ -101,15 +101,21 @@ class CodeAssistantApp(Static):
         # Load resolved kicli-code-assist config and LLM client
         from kicli_code_assist.app_config import AppConfig as Config
         from kicli_code_assist.examples.simple_chat import create_client
+        from ki_core import ConfigManager
+        
+        # Initialize ConfigManager (single source of truth for all config)
+        config_mgr = ConfigManager()
+        
+        # Bind ConfigManager to logging system before creating loggers
+        from kicli_code_assist.logging_integration import set_config_manager, get_main_logger, get_llm_logger
+        set_config_manager(config_mgr)
         
         self.config = Config.from_env()
         self.allowed_base_path = self._resolve_allowed_base_path()
-        from kicli_code_assist.cli import _detect_best_provider
-        provider = _detect_best_provider()
+        provider = config_mgr.get_llm_provider()
         self.client = create_client(self.config, provider)
         
         # Initialize logging - log app startup
-        from kicli_code_assist.logging_integration import get_main_logger, get_llm_logger
         main_logger = get_main_logger()
         llm_logger = get_llm_logger()
         main_logger.info("═" * 60)
