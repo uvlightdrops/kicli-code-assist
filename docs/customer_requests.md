@@ -42,7 +42,8 @@ The categories below are permanent - add new requests under the appropriate head
 ## 🖥️ USER INTERFACE
 
 ### File Editor
-*(add requests here)*
+- [ ] Code syntax highlighting (Python, JavaScript, Go, YAML, etc.)
+- **Status:** Not yet implemented
 
 ### Input Field
 *(add requests here)*
