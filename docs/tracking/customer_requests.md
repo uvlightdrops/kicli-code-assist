@@ -45,6 +45,10 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### 🖥️ USER INTERFACE
 
+#### Chat 
+- [ ] BUGFIX: chat messages are not posted and apparently not being sent to LLM
+- 
+
 #### File Editor
 - [ ] Code syntax highlighting (Python, JavaScript, Go, YAML, etc.)
 - **Status:** Not yet implemented
