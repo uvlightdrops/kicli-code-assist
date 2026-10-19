@@ -37,9 +37,9 @@ The categories below are permanent - add new requests under the appropriate head
 - [ ] Prevent duplicate file loading
 
 ### Tab Documentation
-- [ ] Document: What does "Terminal" tab do currently?
-- [ ] Document: What does "Shell" tab do currently?
-- [ ] Clarify: Why are there two tabs? Difference?
+- [ ] Document: "Terminal" tab - Output/Console for command execution (stdout/stderr)
+- [ ] Document: "Shell" tab - Input prompt for shell commands (command entry)
+- [ ] Clarify: Both tabs are essential for IDE workflow (can't remove)
 
 ---
 

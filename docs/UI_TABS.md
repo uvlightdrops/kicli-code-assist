@@ -38,17 +38,30 @@ Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische F
   - Status-Messages
 - **Zugriff:** `Ctrl+2` oder Tab-Navigation
 
-### 3. **Terminal Tab**
-- **Funktion:** ???  (aktuell unklar)
-- **Inhalt:** 
-- **Zugriff:** `Ctrl+3`
-- **TODO:** Bitte klären - was ist der Unterschied zu Shell Tab?
+### 3. **Terminal Tab** (Output/Console)
+- **Funktion:** Show output from shell commands
+- **Inhalt:**
+  - stdout/stderr from executed commands
+  - Command results (like running `python script.py`)
+  - Error messages
+  - Real-time output stream
+- **Zugriff:** `Ctrl+3` or Tab navigation
+- **Related:** Commands entered in Shell Tab
 
-### 4. **Shell Tab**
-- **Funktion:** ???  (aktuell unklar)
-- **Inhalt:** 
-- **Zugriff:** `Ctrl+X` oder `Ctrl+4`
-- **TODO:** Bitte klären - was ist der Unterschied zu Terminal Tab?
+### 4. **Shell Tab** (Input Prompt)
+- **Funktion:** Enter shell commands
+- **Inhalt:**
+  - Shell prompt (e.g., `$ `, `> `)
+  - Command input field
+  - Command history (Up/Down arrows)
+  - Auto-completion (Tab)
+- **Zugriff:** `Ctrl+X` or `Ctrl+4`
+- **Output appears in:** Terminal Tab
+- **Example workflow:**
+  ```
+  Shell Tab:  $ python test.py
+  Terminal Tab: (shows output)
+  ```
 
 ### 5. **File Browser / Editor Tabs**
 - **Dynamisch:** Ein Tab pro offener Datei
