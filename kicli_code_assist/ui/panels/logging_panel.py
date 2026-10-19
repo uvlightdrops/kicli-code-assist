@@ -1,14 +1,14 @@
 """Modal logging viewer as a workaround for TabPane rendering issues."""
 
 from pathlib import Path
-from textual.app import ComposeResult
+from textual.app import ComposeResult, Screen
 from textual.containers import Container, Vertical
-from textual.widgets import Static, Header, Footer, Button
+from textual.widgets import Static, Button
 from textual.reactive import reactive
 
 
-class LogViewerModal(Container):
-    """Modal dialog to view logs."""
+class LogViewerModal(Screen):
+    """Modal screen to view logs."""
     
     LOG_DIR = Path("log")
     LOGFILES = [
@@ -21,21 +21,35 @@ class LogViewerModal(Container):
     
     CSS = """
     LogViewerModal {
-        width: 100%;
-        height: auto;
+        align: center middle;
+    }
+    #log_container {
+        width: 120;
+        height: 30;
         border: double $accent;
         background: $panel;
+        layout: vertical;
+    }
+    #log_header {
+        dock: top;
+        height: 1;
+        background: $boost;
+        color: $text;
     }
     #log_content {
-        width: 100%;
-        height: auto;
+        width: 1fr;
+        height: 1fr;
         border: solid $primary;
         background: $surface;
+        overflow: auto;
     }
     #log_buttons {
-        width: 100%;
+        dock: bottom;
         height: auto;
         layout: horizontal;
+    }
+    Button {
+        margin: 0 1;
     }
     """
     
@@ -44,16 +58,26 @@ class LogViewerModal(Container):
         self.current_logfile = logfile
         self._current_log_idx = 0
     
+    BINDINGS = [
+        ("escape", "close_modal", "Close Modal [Esc]"),
+        ("n", "next_log", "Next Log [N]"),
+        ("p", "prev_log", "Prev Log [P]"),
+    ]
+    
+    def action_close_modal(self) -> None:
+        """Close the modal screen."""
+        self.app.pop_screen()
+    
     def compose(self) -> ComposeResult:
         """Create modal layout."""
-        with Vertical(id="log_container"):
+        with Container(id="log_container"):
             yield Static(f"📋 Log Viewer - {self.current_logfile}", id="log_header")
-            yield Static("", id="log_content")
+            yield Static("Loading...", id="log_content")
             with Container(id="log_buttons"):
                 yield Button("◀ Prev", id="prev_btn", variant="primary")
                 yield Button("🔄 Refresh", id="refresh_btn")
                 yield Button("Next ▶", id="next_btn", variant="primary")
-                yield Button("Close", id="close_btn", variant="warning")
+                yield Button("Close [Esc]", id="close_btn", variant="warning")
     
     def on_mount(self) -> None:
         """Load initial logs."""
