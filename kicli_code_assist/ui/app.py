@@ -32,6 +32,7 @@ from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
 from kicli_code_assist.ui.modals.diff_viewer import DiffViewerModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
 from kicli_code_assist.llm_integration import get_async_integration
+from kicli_code_assist.context.deduplicator import get_deduplicator
 
 
 class CodeAssistantApp(Static):
@@ -565,6 +566,19 @@ class CodeAssistantApp(Static):
                 self.show_status_message(f"[bold red]✗ Path not allowed: {file_path}[/]", duration_ms=2000)
                 return
             
+            # Check deduplication
+            deduplicator = get_deduplicator()
+            file_size = path.stat().st_size if path.exists() else 0
+            
+            if not deduplicator.check_and_register(str(path), file_size):
+                # File already loaded - skip
+                self.show_status_message(
+                    f"[bold yellow]ⓘ File already in context: {path.name}[/]",
+                    duration_ms=2000
+                )
+                return
+            
+            # File is new - load it
             with open(path, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
             
