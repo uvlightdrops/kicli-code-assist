@@ -18,7 +18,12 @@ The categories below are permanent - add new requests under the appropriate head
 - [ ] Show which logfile is active (path + filename at top)
 - [ ] Display 1:1 from actual logfile (not reformatted)
 - [ ] Auto-scroll to latest entries
-- **Question:** Which logfiles should exist? (LLM, Context, Approval, System?) - NEED TO CLARIFY
+- **Logfile Strategy:** Hybrid (Main + Specialized)
+  - [ ] `kicli.log` - Main log (all events)
+  - [ ] `kicli-llm.log` - LLM queries + responses only
+  - [ ] `kicli-context.log` - File loading, cache, dedup events
+  - [ ] `kicli-workflow.log` - Approval workflow, user actions
+  - [ ] `kicli-errors.log` - Errors only
 
 ### LLM Request Transparency
 - [ ] Show exactly what is sent to LLM (full payload)
