@@ -4,26 +4,60 @@ Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische F
 
 ## Tab-Übersicht
 
-### 1. **Chat Tab** (Standard, aktiv beim Start)
-- **Funktion:** Haupt-Kommunikation mit der App
+### 1. **Logging Tab** ⭐ (Default active)
+- **Funktion:** Real-time logs und debugging
 - **Inhalt:**
-  - Deine Prompts (Anfragen an die KI)
-  - AI-Vorschläge Status ("Sending to LLM...", "Ready for approval", etc.)
-  - Approval-Ergebnisse ("✓ Changes Applied" oder "⊘ Changes rejected")
-- **Interaktion:** Tippe hier deine Anfragen ein (wenn Chat-Eingabe aktiv)
+  - **Oben:** Aktives Logfile + Pfad
+    ```
+    📄 Logfile: /home/flow/.cache/kicli/kicli.log (75.2 KB)
+    ```
+  - **Filter-Buttons:** ERROR | WARN | INFO | DEBUG | ALL
+  - **Logs:** Alle Events chronologisch
+    ```
+    [2026-10-19 11:25:34] INFO  LLM Query to OpenAI
+      Model: gpt-4o-mini
+      URL: https://api.openai.com/v1/chat/completions
+      Tokens: 234 (est.)
+    
+    [2026-10-19 11:25:36] DEBUG Hunk creation
+      Found 1 code block in response
+      Created hunk: file.py:1-10 (5 lines)
+    
+    [2026-10-19 11:25:37] ERROR All providers exhausted
+      Provider: OpenAI
+      Error: Invalid API key
+    ```
+- **Zugriff:** Automatisch aktiv beim Start, oder `Ctrl+1`
+- **Wichtig:** Hier sehen wir EXAKT was zur KI geht und was zurückkommt
 
-### 2. **AI Background Tab** (Debug & Logs)
-- **Funktion:** Detaillierte LLM-Verarbeitung und technische Logs
+### 2. **Chat Tab**
+- **Funktion:** Interaktion mit KI
 - **Inhalt:**
-  - LLM-Query Details ("Sending to LLM..." → Progress)
-  - Response-Parsing ("Created N hunks: ...")
-  - Approval-Workflow Debug-Info
-  - Error Messages (rot)
-- **Zugriff:** `Ctrl+A` um zum Tab zu wechseln
-- **Wann ansehen:**
-  - KI liefert keine Vorschläge ("returned no suggestions")
-  - Approval funktioniert nicht
-  - Errors beim Anwenden von Changes
+  - Deine Prompts
+  - KI-Responses (wenn inline chat enabled)
+  - Status-Messages
+- **Zugriff:** `Ctrl+2` oder Tab-Navigation
+
+### 3. **Terminal Tab**
+- **Funktion:** ???  (aktuell unklar)
+- **Inhalt:** 
+- **Zugriff:** `Ctrl+3`
+- **TODO:** Bitte klären - was ist der Unterschied zu Shell Tab?
+
+### 4. **Shell Tab**
+- **Funktion:** ???  (aktuell unklar)
+- **Inhalt:** 
+- **Zugriff:** `Ctrl+X` oder `Ctrl+4`
+- **TODO:** Bitte klären - was ist der Unterschied zu Terminal Tab?
+
+### 5. **File Browser / Editor Tabs**
+- **Dynamisch:** Ein Tab pro offener Datei
+- **Funktion:** Dateiinhalt anschauen & bearbeiten
+- **Zugriff:** `Ctrl+Tab` / `Ctrl+Shift+Tab` zum Wechseln
+
+---
+
+## LLM Query Transparency (Was der Log zeigt)
 
 ## Workflow-Übersicht
 
