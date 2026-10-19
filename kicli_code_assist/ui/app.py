@@ -298,8 +298,11 @@ class CodeAssistantApp(Static):
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
         if event.button.id == "chat-send-btn":
-            # Send button clicked - use same flow as ENTER key
-            self.action_select_cursor()
+            # Send button clicked - get text from input and submit
+            text = self.input_field.text.strip()
+            if text:
+                self.input_field.text = ""
+                self.run_worker(lambda: self._submit_chat(text), thread=True)
             event.stop()  # Prevent bubbling
     
     def action_open_prompts(self) -> None:
