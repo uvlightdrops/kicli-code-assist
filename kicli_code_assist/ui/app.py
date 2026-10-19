@@ -32,7 +32,6 @@ from kicli_code_assist.ui.modals.approval_modal import ApprovalModal
 from kicli_code_assist.ui.modals.diff_viewer import DiffViewerModal
 from kicli_code_assist.ai_workflow import AIWorkflowManager
 from kicli_code_assist.llm_integration import get_async_integration
-from kicli_code_assist.context.deduplicator import get_deduplicator
 
 
 class CodeAssistantApp(Static):
@@ -566,14 +565,11 @@ class CodeAssistantApp(Static):
                 self.show_status_message(f"[bold red]✗ Path not allowed: {file_path}[/]", duration_ms=2000)
                 return
             
-            # Check deduplication
-            deduplicator = get_deduplicator()
-            file_size = path.stat().st_size if path.exists() else 0
-            
-            if not deduplicator.check_and_register(str(path), file_size):
-                # File already loaded - skip
+            # Simple dedup: check if already in context
+            normalized_path = str(path.resolve())
+            if normalized_path in self.loaded_files:
                 self.show_status_message(
-                    f"[bold yellow]ⓘ File already in context: {path.name}[/]",
+                    f"[bold yellow]ⓘ Already in context: {path.name}[/]",
                     duration_ms=2000
                 )
                 return
@@ -585,7 +581,7 @@ class CodeAssistantApp(Static):
             # Add file as a message to include in chat context
             msg_content = f"<file path=\"{path}\">\n{content}\n</file>"
             self.chat_session.add_message("user", msg_content, include_context=True)
-            self.loaded_files.append(str(path))
+            self.loaded_files.append(normalized_path)
             self.project_loaded = True
             
             # Refresh file browser display to show loaded file in color
@@ -594,7 +590,7 @@ class CodeAssistantApp(Static):
                     self.file_list.update_display()
                 self.app.call_from_thread(refresh_display)
             
-            # Show success message, then update to show loaded files
+            # Show success message
             self.show_status_message(f"[bold green]✓ Loaded: {path.name}[/]", duration_ms=2000)
             
         except Exception as e:
