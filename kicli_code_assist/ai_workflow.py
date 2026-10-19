@@ -11,6 +11,7 @@ from typing import Optional, Callable, List
 from dataclasses import dataclass
 from enum import Enum
 import re
+import logging
 
 from ki_core.core.response_parser import ResponseParser, ResponsePartType
 from ki_core.adapters.provider_chain import ProviderChain
@@ -21,6 +22,9 @@ from kicli_code_assist.approval_workflow import (
     ApprovalSession,
     HunkStatus,
 )
+from kicli_code_assist.error_handling import ErrorBoundary, LLMError, RetryConfig
+
+logger = logging.getLogger(__name__)
 
 
 class DiffType(str, Enum):
@@ -114,14 +118,28 @@ class AIWorkflowManager:
                 {"role": "user", "content": self._build_context(prompt, file_context, current_file_path)}
             ]
             
-            llm_response = await self.llm_integration.query(
-                messages=messages,
-                system_prompt=system_prompt,
-                on_progress=on_progress,
-            )
+            # Use error boundary for LLM call with retry support
+            def llm_error_handler(error: LLMError):
+                if on_progress:
+                    on_progress(f"ERROR: {error.user_message()}")
+            
+            with ErrorBoundary(
+                provider="openai",  # TODO: Get from config
+                operation="LLM query",
+                on_error=llm_error_handler,
+            ):
+                llm_response = await self.llm_integration.query(
+                    messages=messages,
+                    system_prompt=system_prompt,
+                    on_progress=on_progress,
+                )
+        except LLMError as e:
+            logger.error(f"LLM error in workflow: {e.user_message()}")
+            return None
         except Exception as e:
+            logger.exception(f"Unexpected error in LLM call: {e}")
             if on_progress:
-                on_progress(f"ERROR: LLM call failed: {e}")
+                on_progress(f"ERROR: Unexpected error: {e}")
             return None
 
         if on_progress:
