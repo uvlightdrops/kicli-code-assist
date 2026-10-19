@@ -6,12 +6,7 @@ The logging section in ki.yaml controls:
   - per_module: dict mapping module names to override levels
   - handlers: list of handler definitions (file paths, etc.)
 
-Default setup (from schema):
-  - kicli.log              Main log
-  - kicli-llm.log          LLM queries/responses
-  - kicli-context.log      File loading/cache events
-  - kicli-workflow.log     Approval workflow/user actions
-  - kicli-errors.log       Errors only
+Log directory: Resolved from storage.log_dir in config, defaults to ~/dev_data/kicli-code-assist/log
 """
 
 from __future__ import annotations
@@ -26,15 +21,6 @@ if TYPE_CHECKING:
 
 # Default format with timestamps (ISO 8601: HH:MM:SS.mmm)
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(message)s"
-
-# Default handlers (if config doesn't specify any)
-DEFAULT_HANDLERS = [
-    "kicli.log",
-    "kicli-llm.log",
-    "kicli-context.log",
-    "kicli-workflow.log",
-    "kicli-errors.log",
-]
 
 # Cache loggers to avoid multiple handler setup
 _loggers: dict[tuple[str, str], object] = {}
@@ -51,6 +37,27 @@ def set_config_manager(mgr: ConfigManager) -> None:
     _config_manager = mgr
 
 
+def _get_log_dir() -> Path:
+    """Get log directory from config, with intelligent defaults.
+    
+    Tries to resolve from storage.log_dir in config; falls back to
+    ~/dev_data/kicli-code-assist/log if not configured or config not available.
+    """
+    # Try config-based resolution
+    if _config_manager:
+        try:
+            log_dir_str = _config_manager.get("storage.log_dir", "")
+            if log_dir_str:
+                return Path(log_dir_str).expanduser()
+        except Exception:
+            pass
+    
+    # Default fallback
+    default_log_dir = Path.home() / "dev_data" / "kicli-code-assist" / "log"
+    default_log_dir.mkdir(parents=True, exist_ok=True)
+    return default_log_dir
+
+
 def _get_log_config() -> dict:
     """Get logging config from ConfigManager (or defaults if not set)."""
     if _config_manager is None:
@@ -58,18 +65,24 @@ def _get_log_config() -> dict:
             "level": "INFO",
             "format": LOG_FORMAT,
             "per_module": {},
-            "handlers": DEFAULT_HANDLERS,
         }
     return _config_manager.get_logging_config()
 
 
-def _get_or_create_logger(name: str, logfile: str):
+def _get_or_create_logger(name: str, logfile_basename: str):
     """Get cached logger or create new one.
     
+    Args:
+        name: Logger name
+        logfile_basename: Just the filename (e.g. 'kicli.log'), not full path
+        
     Prevents duplicate handlers when setup_logger is called multiple times.
     Respects per-module log level overrides from config.
     """
-    key = (name, logfile)
+    log_dir = _get_log_dir()
+    full_logfile = str(log_dir / logfile_basename)
+    
+    key = (name, full_logfile)
     if key not in _loggers:
         log_config = _get_log_config()
         
@@ -79,7 +92,7 @@ def _get_or_create_logger(name: str, logfile: str):
         
         # Setup with config-driven format and level
         fmt = log_config.get("format", LOG_FORMAT)
-        _loggers[key] = setup_logger(name, logfile, fmt=fmt)
+        _loggers[key] = setup_logger(name, full_logfile, fmt=fmt)
     
     return _loggers[key]
 
