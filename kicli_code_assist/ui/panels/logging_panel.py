@@ -2,8 +2,8 @@
 
 from pathlib import Path
 from textual.app import ComposeResult, Screen
-from textual.containers import Container, Vertical
-from textual.widgets import Static, Button
+from textual.containers import Container, Vertical, Horizontal
+from textual.widgets import Static, Button, Select
 from textual.reactive import reactive
 
 
@@ -25,7 +25,7 @@ class LogViewerModal(Screen):
     }
     #log_container {
         width: 120;
-        height: 30;
+        height: 32;
         border: double $accent;
         background: $panel;
         layout: vertical;
@@ -35,6 +35,11 @@ class LogViewerModal(Screen):
         height: 1;
         background: $boost;
         color: $text;
+    }
+    #log_selector {
+        dock: top;
+        height: 3;
+        margin: 0 1;
     }
     #log_content {
         width: 1fr;
@@ -71,7 +76,12 @@ class LogViewerModal(Screen):
     def compose(self) -> ComposeResult:
         """Create modal layout."""
         with Container(id="log_container"):
-            yield Static(f"📋 Log Viewer - {self.current_logfile}", id="log_header")
+            yield Static(f"📋 Log Viewer", id="log_header")
+            
+            # Select widget for logfile switching
+            log_options = [(f"{name} - {label}", name) for name, label in self.LOGFILES]
+            yield Select(log_options, value=self.current_logfile, id="log_selector")
+            
             yield Static("Loading...", id="log_content")
             with Container(id="log_buttons"):
                 yield Button("◀ Prev", id="prev_btn", variant="primary")
@@ -83,6 +93,16 @@ class LogViewerModal(Screen):
         """Load initial logs."""
         self._load_logs()
         self.set_interval(self._load_logs, 2.0)
+    
+    def on_select_changed(self, event: Select.Changed) -> None:
+        """Handle logfile selection from dropdown."""
+        self.current_logfile = event.value
+        # Find index for consistent state
+        for idx, (name, _) in enumerate(self.LOGFILES):
+            if name == event.value:
+                self._current_log_idx = idx
+                break
+        self._load_logs()
     
     def on_button_pressed(self, event) -> None:
         """Handle button presses."""
@@ -99,21 +119,23 @@ class LogViewerModal(Screen):
         """Switch to next log file."""
         self._current_log_idx = (self._current_log_idx + 1) % len(self.LOGFILES)
         self.current_logfile = self.LOGFILES[self._current_log_idx][0]
-        self._update_header()
+        self._update_select()
         self._load_logs()
     
     def action_prev_log(self) -> None:
         """Switch to previous log file."""
         self._current_log_idx = (self._current_log_idx - 1) % len(self.LOGFILES)
         self.current_logfile = self.LOGFILES[self._current_log_idx][0]
-        self._update_header()
+        self._update_select()
         self._load_logs()
     
-    def _update_header(self) -> None:
-        """Update header with current logfile name."""
-        header = self.query_one("#log_header", Static)
-        idx_display = f"[{self._current_log_idx + 1}/{len(self.LOGFILES)}]"
-        header.update(f"📋 Log Viewer - {self.current_logfile} {idx_display}")
+    def _update_select(self) -> None:
+        """Update select widget to match current logfile."""
+        try:
+            select = self.query_one("#log_selector", Select)
+            select.value = self.current_logfile
+        except:
+            pass
     
     def _load_logs(self) -> None:
         """Load and display the selected log file."""
