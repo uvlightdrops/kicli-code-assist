@@ -18,7 +18,11 @@ The categories below are permanent - add new requests under the appropriate head
 ## 🟠 HIGH PRIORITY (Critical for Daily Use)
 
 ### 🔍 LOGGING & DEBUGGING
-- [ ] Logfile location is per default DATA_DIR/kicli-code-assist/log - Do not log inside the project we are working on
+
+#### ✅ Logfile location (DONE)
+- [x] Logfile location is per default DATA_DIR/kicli-code-assist/log - NOT inside the project
+- **Status:** DONE - Moved to ~/dev_data/kicli-code-assist/log via config system
+- **Impact:** Clean project directory, all data in ~/dev_data
 
 #### LLM Request Transparency
 - [ ] Show exactly what is sent to LLM (full payload)
