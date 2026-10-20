@@ -34,7 +34,6 @@ The categories below are permanent - add new requests under the appropriate head
 
 ### 🖥️ USER INTERFACE
 
-- [ ] headline und sub header weglassen um platz zu sparen
 - 
 
 #### Chat 
