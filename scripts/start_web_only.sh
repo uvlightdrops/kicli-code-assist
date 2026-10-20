@@ -38,9 +38,9 @@ python -m kicli_code_assist.web.server > /tmp/kicli-web-backend.log 2>&1 &
 BACKEND_PID=$!
 sleep 2
 
-echo "🎨 Starting frontend on http://localhost:3000"
+echo "🎨 Starting frontend on http://0.0.0.0:3000"
 cd web/frontend
-npm run dev > /tmp/kicli-web-frontend.log 2>&1 &
+HOST=0.0.0.0 npm run dev > /tmp/kicli-web-frontend.log 2>&1 &
 FRONTEND_PID=$!
 sleep 3
 
