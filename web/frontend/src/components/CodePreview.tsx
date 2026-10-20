@@ -25,12 +25,36 @@ const CodePreview: React.FC<CodePreviewProps> = ({
   const [showCreateFile, setShowCreateFile] = useState(false)
   const [newFileName, setNewFileName] = useState('')
   const [createError, setCreateError] = useState('')
+  const [autoSave, setAutoSave] = useState(() => localStorage.getItem('autoSave') === 'true')
+  const [showDiff, setShowDiff] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [autoSaveTimer, setAutoSaveTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
   const editorRef = useRef<any>(null)
   const statusRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setCurrentContent(content)
+    setLastSaved(new Date())
   }, [content, filePath])
+
+  // Auto-save effect
+  useEffect(() => {
+    if (!autoSave || !isEditMode || !isDirty) return
+
+    if (autoSaveTimer) clearTimeout(autoSaveTimer)
+
+    const timer = setTimeout(() => {
+      if (isDirty && currentContent !== content) {
+        handleSave()
+      }
+    }, 10000) // 10 seconds
+
+    setAutoSaveTimer(timer)
+
+    return () => {
+      if (timer) clearTimeout(timer)
+    }
+  }, [autoSave, isEditMode, isDirty, currentContent, content])
 
   const getLanguageFromPath = (path: string): string => {
     const ext = path.split('.').pop()?.toLowerCase() || ''
@@ -130,6 +154,37 @@ const CodePreview: React.FC<CodePreviewProps> = ({
     }
   }
 
+  const toggleAutoSave = () => {
+    const newAutoSave = !autoSave
+    setAutoSave(newAutoSave)
+    localStorage.setItem('autoSave', newAutoSave ? 'true' : 'false')
+  }
+
+  const handleRevert = () => {
+    setCurrentContent(content)
+    onContentChange?.(content)
+  }
+
+  const formatDiffLines = (original: string, current: string) => {
+    const origLines = original.split('\n')
+    const currLines = current.split('\n')
+    const maxLines = Math.max(origLines.length, currLines.length)
+    
+    const diffs = []
+    for (let i = 0; i < maxLines; i++) {
+      const origLine = origLines[i] || ''
+      const currLine = currLines[i] || ''
+      
+      if (origLine === currLine) {
+        diffs.push({ type: 'same', line: `${i + 1}`, content: origLine })
+      } else {
+        if (origLine) diffs.push({ type: 'removed', line: `${i + 1}`, content: origLine })
+        if (currLine) diffs.push({ type: 'added', line: `${i + 1}`, content: currLine })
+      }
+    }
+    return diffs
+  }
+
   const handleEditorChange = (value: string | undefined) => {
     if (value !== undefined) {
       setCurrentContent(value)
@@ -202,6 +257,39 @@ const CodePreview: React.FC<CodePreviewProps> = ({
               >
                 🔄
               </button>
+              
+              {/* Tier 3 Buttons */}
+              <div className="w-px h-5 bg-gray-600 mx-1"></div>
+              
+              <button
+                onClick={toggleAutoSave}
+                title="Auto-save every 10 seconds"
+                className={`px-2 py-1 text-xs rounded transition ${
+                  autoSave
+                    ? 'bg-green-600 hover:bg-green-700 text-white'
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                💾 Auto
+              </button>
+              
+              <button
+                onClick={() => setShowDiff(!showDiff)}
+                disabled={!isDirty}
+                title="Show diff (Original vs Current)"
+                className="px-2 py-1 text-xs rounded transition disabled:opacity-50 bg-gray-700 hover:bg-gray-600 text-gray-300"
+              >
+                📊 Diff
+              </button>
+              
+              <button
+                onClick={handleRevert}
+                disabled={!isDirty}
+                title="Revert to original"
+                className="px-2 py-1 text-xs rounded transition disabled:opacity-50 bg-orange-700 hover:bg-orange-600 text-white"
+              >
+                ↶ Revert
+              </button>
             </>
           )}
           {!isEditMode ? (
@@ -272,6 +360,53 @@ const CodePreview: React.FC<CodePreviewProps> = ({
           />
         )}
       </div>
+
+      {/* Diff Viewer Modal (Tier 3) */}
+      {showDiff && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-600 rounded shadow-lg p-4 max-w-2xl w-full mx-4 max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-white">Diff: Original vs Current</h3>
+              <button
+                onClick={() => setShowDiff(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-auto bg-gray-900 rounded border border-gray-700 p-2 font-mono text-xs">
+              {formatDiffLines(content, currentContent).map((diff, idx) => (
+                <div
+                  key={idx}
+                  className={`${
+                    diff.type === 'added'
+                      ? 'bg-green-900 text-green-300'
+                      : diff.type === 'removed'
+                      ? 'bg-red-900 text-red-300'
+                      : 'text-gray-400'
+                  }`}
+                >
+                  <span className="inline-block w-8 text-right mr-2 text-gray-600">{diff.line}</span>
+                  <span className="mr-2">
+                    {diff.type === 'added' ? '+' : diff.type === 'removed' ? '-' : ' '}
+                  </span>
+                  <span className="break-all">{diff.content || '(empty line)'}</span>
+                </div>
+              ))}
+            </div>
+            
+            <div className="mt-3 flex gap-2 justify-end">
+              <button
+                onClick={() => setShowDiff(false)}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Create File Modal */}
       {showCreateFile && (
