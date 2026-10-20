@@ -333,6 +333,43 @@ def register_routes(app: Flask):
             app.logger.error(f"File save error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
     
+    @app.route("/api/files/create", methods=["POST"])
+    def create_file():
+        """Create a new file with provided content."""
+        try:
+            data = request.get_json() or {}
+            name = data.get("name", "").strip()
+            content = data.get("content", "")
+            
+            if not name:
+                return jsonify({"error": "File name is required"}), 400
+            
+            # Security: prevent directory traversal
+            file_path = Path.cwd() / name
+            try:
+                file_path.resolve().relative_to(Path.cwd().resolve())
+            except ValueError:
+                return jsonify({"error": "Invalid file path"}), 400
+            
+            # Create parent directories
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write file
+            file_path.write_text(content, encoding='utf-8')
+            
+            return jsonify({
+                "status": "created",
+                "path": str(file_path),
+                "size_bytes": len(content.encode('utf-8')),
+                "timestamp": datetime.now().isoformat(),
+            }), 201
+        
+        except PermissionError:
+            return jsonify({"error": "Permission denied"}), 403
+        except Exception as e:
+            app.logger.error(f"File create error: {e}\n{traceback.format_exc()}")
+            return jsonify({"error": str(e)}), 500
+    
     # ============================================================================
     # Static Files (Option 1: single-port deployment)
     # ============================================================================
