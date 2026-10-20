@@ -246,11 +246,8 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-      {/* Header */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
-        <h1 className="text-2xl font-bold">kicli-assist WebIDE</h1>
-        <p className="text-xs text-gray-400">AI-powered code assistant with file browser & preview</p>
-      </div>
+      {/* Header - Title removed per customer request */}
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2"></div>
 
       {/* Main Tabs */}
       <div className="flex border-b border-gray-700 bg-gray-800">
