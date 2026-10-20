@@ -1,7 +1,7 @@
 # Implemented Features
 
 **Last Updated:** 2026-10-19  
-**Status:** 13 complete features | 0 in-progress
+**Status:** 14 complete features | 0 in-progress
 
 ---
 
@@ -769,7 +769,70 @@ self.loaded_files.append(normalized_path)
 
 ---
 
-### 15. Semi-Prod Deployment Preparation ✅ DONE
+### 15. Monaco Editor Web IDE - Tier 3 Complete ✅ DONE
+
+**Category:** WEB EDITOR & IDE
+
+**Completed Tasks:**
+- [x] Implement auto-save mechanism (10s debounce)
+- [x] Add auto-save toggle button (💾 Auto) with localStorage persistence
+- [x] Implement file revert (↶ Revert) - discard all changes
+- [x] Implement diff viewer modal (📊 Diff)
+- [x] Display diff with removed (red), added (green), unchanged (gray) lines
+- [x] Add line numbering and diff indicators (+, -, space)
+- [x] Wire Revert button to handle/disable when file clean
+- [x] Auto-save persistence and status tracking
+- [x] Fix TypeScript NodeJS.Timeout type issue
+
+**What was built:**
+
+**Frontend (CodePreview.tsx - 350+ lines now):**
+- Auto-save mechanism: 10s debounce timer, fires when isDirty && autoSave enabled && editMode
+- Auto-save toggle (💾 Auto button) - persists preference to localStorage
+- File revert button (↶ Revert) - sets currentContent back to original, disabled when clean
+- lastSaved timestamp tracking for UI feedback
+- Diff viewer modal with:
+  - Unified diff display (removed lines red, added lines green, unchanged gray)
+  - Line numbering
+  - Diff indicators (+/- for added/removed)
+  - Close button with modal background
+  - formatDiffLines() helper function (calculates line-by-line diffs)
+- All state properly initialized and managed
+
+**Diff Algorithm:**
+- `formatDiffLines()` compares original vs current content
+- Splits both into lines
+- Computes longest common subsequence (LCS) to identify diffs
+- Returns array of {type, line, content} objects
+- Types: 'added', 'removed', 'unchanged'
+
+**Build & Testing:**
+- Build successful: 477 KB JS (gzipped 154 KB)
+- TypeScript compile clean (no errors)
+- Server starts successfully (import chain verified)
+- All 3 Tier 3 features implemented and wired to UI
+
+**Impact:**
+- Full code review workflow in browser (view changes, revert if needed)
+- Automatic save reduces data loss risk
+- Diff viewer essential for understanding changes before save
+- Professional IDE feature set complete
+
+**Files Modified:**
+- `web/frontend/src/components/CodePreview.tsx` - Complete Tier 3 implementation
+  - Auto-save effect hook (lines 40-60)
+  - handleRevert function (lines 135-138)
+  - toggleAutoSave function (lines 129-133)
+  - formatDiffLines helper (lines 140-180)
+  - Diff viewer modal JSX (lines 368-410)
+  - Toolbar buttons for all 3 features (lines 230-290)
+
+**Commits:**
+1. `feat: Complete diff viewer modal UI for Tier 3 Monaco features` (55a90ec)
+
+---
+
+### 16. Semi-Prod Deployment Preparation ✅ DONE
 
 **Category:** DEPLOYMENT & INFRASTRUCTURE
 
