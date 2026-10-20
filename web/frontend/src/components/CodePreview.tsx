@@ -22,6 +22,9 @@ const CodePreview: React.FC<CodePreviewProps> = ({
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentContent, setCurrentContent] = useState(content)
   const [vimMode, setVimMode] = useState(() => localStorage.getItem('vimMode') === 'true')
+  const [showCreateFile, setShowCreateFile] = useState(false)
+  const [newFileName, setNewFileName] = useState('')
+  const [createError, setCreateError] = useState('')
   const editorRef = useRef<any>(null)
   const statusRef = useRef<HTMLDivElement>(null)
 
@@ -75,9 +78,55 @@ const CodePreview: React.FC<CodePreviewProps> = ({
       if (newVimMode) {
         initVimMode(editorRef.current, statusRef.current)
       } else {
-        // Restart editor to disable vim mode
         editorRef.current.getModel()?.setValue(currentContent)
       }
+    }
+  }
+
+  const handleOpenFind = () => {
+    if (editorRef.current) {
+      editorRef.current.getAction('editor.action.find')?.run()
+    }
+  }
+
+  const handleOpenReplace = () => {
+    if (editorRef.current) {
+      editorRef.current.getAction('editor.action.replace')?.run()
+    }
+  }
+
+  const handleCreateFile = async () => {
+    if (!newFileName.trim()) {
+      setCreateError('File name cannot be empty')
+      return
+    }
+
+    try {
+      const response = await fetch('/api/files/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newFileName,
+          content: currentContent,
+        }),
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        setCreateError(error.error || 'Failed to create file')
+        return
+      }
+
+      const data = await response.json()
+      setShowCreateFile(false)
+      setNewFileName('')
+      setCreateError('')
+      
+      if (onSave) {
+        await onSave(currentContent)
+      }
+    } catch (error) {
+      setCreateError(error instanceof Error ? error.message : 'Unknown error')
     }
   }
 
@@ -127,25 +176,50 @@ const CodePreview: React.FC<CodePreviewProps> = ({
 
         <div className="flex items-center gap-2">
           {isEditMode && (
-            <button
-              onClick={toggleVimMode}
-              title={vimMode ? 'Vim Mode: ON (press :q to exit)' : 'Vim Mode: OFF (Vi keybindings disabled)'}
-              className={`px-2 py-1 text-xs rounded transition font-mono ${
-                vimMode
-                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-              }`}
-            >
-              {vimMode ? '⌨ Vim' : '⌨'}
-            </button>
+            <>
+              <button
+                onClick={toggleVimMode}
+                title={vimMode ? 'Vim Mode: ON (press :q to exit)' : 'Vim Mode: OFF (Vi keybindings disabled)'}
+                className={`px-2 py-1 text-xs rounded transition font-mono ${
+                  vimMode
+                    ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                }`}
+              >
+                {vimMode ? '⌨ Vim' : '⌨'}
+              </button>
+              <button
+                onClick={handleOpenFind}
+                title="Find (Ctrl+F)"
+                className="px-2 py-1 text-xs rounded transition bg-gray-700 hover:bg-gray-600 text-gray-300"
+              >
+                🔍
+              </button>
+              <button
+                onClick={handleOpenReplace}
+                title="Find & Replace (Ctrl+H)"
+                className="px-2 py-1 text-xs rounded transition bg-gray-700 hover:bg-gray-600 text-gray-300"
+              >
+                🔄
+              </button>
+            </>
           )}
           {!isEditMode ? (
-            <button
-              onClick={() => setIsEditMode(true)}
-              className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition"
-            >
-              Edit
-            </button>
+            <>
+              <button
+                onClick={() => setIsEditMode(true)}
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded transition"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setShowCreateFile(true)}
+                title="Create new file from current content"
+                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition"
+              >
+                💾 Save As
+              </button>
+            </>
           ) : (
             <>
               <button
@@ -185,11 +259,6 @@ const CodePreview: React.FC<CodePreviewProps> = ({
               automaticLayout: true,
               padding: { top: 10, bottom: 10 },
               scrollBeyondLastLine: false,
-              // Find & Replace
-              find: {
-                seedSearchStringFromSelection: true,
-                autoFindInSelection: 'never',
-              },
             }}
           />
         </div>
@@ -203,6 +272,53 @@ const CodePreview: React.FC<CodePreviewProps> = ({
           />
         )}
       </div>
+
+      {/* Create File Modal */}
+      {showCreateFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-800 border border-gray-600 rounded shadow-lg p-4 max-w-md w-full mx-4">
+            <h3 className="text-sm font-semibold text-white mb-3">Save File As</h3>
+            
+            <input
+              type="text"
+              placeholder="Enter filename (e.g., newfile.py)"
+              value={newFileName}
+              onChange={(e) => {
+                setNewFileName(e.target.value)
+                setCreateError('')
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreateFile()
+                if (e.key === 'Escape') setShowCreateFile(false)
+              }}
+              autoFocus
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-sm text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 mb-3"
+            />
+            
+            {createError && (
+              <div className="text-red-400 text-xs mb-3">{createError}</div>
+            )}
+            
+            <div className="flex gap-2 justify-end">
+              <button
+                onClick={() => {
+                  setShowCreateFile(false)
+                  setCreateError('')
+                }}
+                className="px-3 py-1 bg-gray-700 hover:bg-gray-600 text-white text-xs rounded transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleCreateFile}
+                className="px-3 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-xs rounded transition"
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
