@@ -4,6 +4,9 @@ import { io } from 'socket.io-client'
 import ChatInput from './components/ChatInput'
 import ChatHistory from './components/ChatHistory'
 import FileList from './components/FileList'
+import FileBrowser from './components/FileBrowser'
+import CodePreview from './components/CodePreview'
+import EditorTabs from './components/EditorTabs'
 import TerminalLog from './components/TerminalLog'
 import StatusBar from './components/StatusBar'
 
@@ -21,12 +24,21 @@ interface UploadedFile {
   size: number
 }
 
+interface TabFile {
+  path: string
+  content: string
+  active: boolean
+}
+
 const App: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([])
   const [files, setFiles] = useState<UploadedFile[]>([])
+  const [openTabs, setOpenTabs] = useState<TabFile[]>([])
+  const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'chat' | 'logs' | 'config'>('chat')
+  const [leftPanelTab, setLeftPanelTab] = useState<'files' | 'browser'>('files')
   const [connected, setConnected] = useState(false)
   const socketRef = useRef<any>(null)
 
@@ -49,9 +61,7 @@ const App: React.FC = () => {
     })
 
     socketRef.current.on('chat.response', (data: any) => {
-      console.log('Chat response:', data)
       if (data.type === 'chunk') {
-        // Append to last message or create new one
         setMessages((prev) => {
           const updated = [...prev]
           if (updated.length === 0) {
@@ -89,11 +99,41 @@ const App: React.FC = () => {
     }
   }, [])
 
+  // Handle file selection from browser
+  const handleSelectFile = (path: string, content: string) => {
+    // Check if already open
+    const existing = openTabs.find((t) => t.path === path)
+    if (existing) {
+      setSelectedFile({ path, content })
+      setOpenTabs(openTabs.map((t) => ({ ...t, active: t.path === path })))
+    } else {
+      // Add new tab
+      const newTab: TabFile = { path, content, active: true }
+      setOpenTabs([...openTabs.map((t) => ({ ...t, active: false })), newTab])
+      setSelectedFile({ path, content })
+    }
+  }
+
+  const handleSelectTab = (path: string) => {
+    const tab = openTabs.find((t) => t.path === path)
+    if (tab) {
+      setSelectedFile({ path: tab.path, content: tab.content })
+      setOpenTabs(openTabs.map((t) => ({ ...t, active: t.path === path })))
+    }
+  }
+
+  const handleCloseTab = (path: string) => {
+    const remaining = openTabs.filter((t) => t.path !== path)
+    setOpenTabs(remaining)
+    if (selectedFile?.path === path) {
+      setSelectedFile(remaining.length > 0 ? { path: remaining[0].path, content: remaining[0].content } : null)
+    }
+  }
+
   // Send message to backend
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return
 
-    // Add user message
     const userMsg: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -105,15 +145,15 @@ const App: React.FC = () => {
     setError(null)
 
     try {
-      // Submit to backend
       const response = await axios.post('/api/chat', {
         message: text,
-        files: files.map((f) => ({ path: f.path, id: f.id })),
+        files: [
+          ...files.map((f) => ({ path: f.path, id: f.id })),
+          ...(selectedFile ? [{ path: selectedFile.path, content: selectedFile.content }] : []),
+        ],
       })
 
       const { request_id } = response.data
-
-      // Subscribe to WebSocket updates
       socketRef.current.emit('subscribe', { channel: request_id })
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to send message')
@@ -154,10 +194,10 @@ const App: React.FC = () => {
       {/* Header */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-3">
         <h1 className="text-2xl font-bold">kicli-assist WebIDE</h1>
-        <p className="text-xs text-gray-400">Web-based code assistant IDE</p>
+        <p className="text-xs text-gray-400">AI-powered code assistant with file browser & preview</p>
       </div>
 
-      {/* Tabs */}
+      {/* Main Tabs */}
       <div className="flex border-b border-gray-700 bg-gray-800">
         {(['chat', 'logs', 'config'] as const).map((tab) => (
           <button
@@ -174,14 +214,59 @@ const App: React.FC = () => {
         ))}
       </div>
 
-      {/* Main Content */}
+      {/* Main Content Area */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Panel: Chat or Logs */}
+        {/* Left Sidebar: Files + Browser */}
+        <div className="w-64 border-r border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
+          {/* Sidebar Tabs */}
+          <div className="flex border-b border-gray-700">
+            {(['files', 'browser'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setLeftPanelTab(tab)}
+                className={`flex-1 px-2 py-2 text-xs font-medium capitalize ${
+                  leftPanelTab === tab
+                    ? 'border-b-2 border-blue-500 text-blue-400 bg-gray-700'
+                    : 'text-gray-400 hover:text-gray-300'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 overflow-hidden">
+            {leftPanelTab === 'files' && (
+              <FileList files={files} onDeleteFile={handleDeleteFile} onUploadFile={handleFileUpload} />
+            )}
+            {leftPanelTab === 'browser' && <FileBrowser onSelectFile={handleSelectFile} />}
+          </div>
+        </div>
+
+        {/* Center: Chat or Logs or Config */}
         <div className="flex-1 flex flex-col overflow-hidden">
           {activeTab === 'chat' && (
             <>
-              <ChatHistory messages={messages} loading={loading} />
-              <ChatInput onSend={handleSendMessage} disabled={loading} />
+              {/* Editor Area: Tabs + Preview */}
+              {selectedFile && (
+                <>
+                  <EditorTabs
+                    tabs={openTabs}
+                    onSelectTab={handleSelectTab}
+                    onCloseTab={handleCloseTab}
+                  />
+                  <div className="flex-1 overflow-auto">
+                    <CodePreview filePath={selectedFile.path} content={selectedFile.content} />
+                  </div>
+                </>
+              )}
+
+              {/* Chat Area */}
+              <div className={`${selectedFile ? 'h-64 border-t border-gray-700' : 'flex-1'} flex flex-col`}>
+                <ChatHistory messages={messages} loading={loading} />
+                <ChatInput onSend={handleSendMessage} disabled={loading} />
+              </div>
             </>
           )}
           {activeTab === 'logs' && <TerminalLog />}
@@ -192,9 +277,8 @@ const App: React.FC = () => {
           )}
         </div>
 
-        {/* Right Sidebar: Files & Status */}
-        <div className="w-64 border-l border-gray-700 bg-gray-800 flex flex-col">
-          <FileList files={files} onDeleteFile={handleDeleteFile} onUploadFile={handleFileUpload} />
+        {/* Right Sidebar: Status */}
+        <div className="w-64 border-l border-gray-700 bg-gray-800">
           <StatusBar connected={connected} error={error} />
         </div>
       </div>
