@@ -1,7 +1,6 @@
-import { defineConfig } from 'tailwindcss/defaultConfig'
-
-export default defineConfig({
+module.exports = {
   darkMode: 'class',
+  content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -11,4 +10,5 @@ export default defineConfig({
       },
     },
   },
-})
+  plugins: [],
+}

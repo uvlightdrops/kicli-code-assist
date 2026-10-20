@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/components/ChatHistory.tsx","./src/components/ChatInput.tsx","./src/components/CodePreview.tsx","./src/components/EditorTabs.tsx","./src/components/FileBrowser.tsx","./src/components/FileList.tsx","./src/components/StatusBar.tsx","./src/components/TerminalLog.tsx"],"version":"5.9.3"}
