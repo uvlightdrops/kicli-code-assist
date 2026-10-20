@@ -1,8 +1,8 @@
 {
   "session_name": "default",
-  "created": 1792400752.744936,
-  "updated": 1792400767.568381,
-  "message_count": 2,
+  "created": 1792449003.096168,
+  "updated": 1792449003.096286,
+  "message_count": 4,
   "messages": [
     {
       "role": "user",
@@ -19,6 +19,19 @@
       "metadata": {
         "context_included": true
       }
+    },
+    {
+      "role": "user",
+      "content": "<file path=\"/test/hello.py\">\ndef hello():\n    return 'world'\n</file>",
+      "timestamp": "2026-10-20T00:30:03.095906",
+      "metadata": {
+        "context_included": true
+      }
+    },
+    {
+      "role": "user",
+      "content": "What does this file do?",
+      "timestamp": "2026-10-20T00:30:03.096266"
     }
   ]
 }
