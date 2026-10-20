@@ -39,10 +39,10 @@ The categories below are permanent - add new requests under the appropriate head
 - 
 
 #### File Editor
-- [ ] Code syntax highlighting (Python, JavaScript, Go, YAML, etc.)
-- **Status:** Implemented via Monaco Editor (FEATURES_IMPLEMENTED #14, #15)
-- **Impact:** Full syntax highlighting + professional IDE features now available
-- AI suggestions text view ist nur einige Zeilen hoch, sollte aber mind 3/4 vom viewport haben
+- ✅ **Code syntax highlighting (Python, JavaScript, Go, YAML, etc.)** - **DONE**
+  - Implemented via Monaco Editor (FEATURES_IMPLEMENTED #14, #15)
+  - Full syntax highlighting + professional IDE features now available
+- [ ] AI suggestions text view ist nur einige Zeilen hoch, sollte aber mind 3/4 vom viewport haben
 
 ### 📚 DOCUMENTATION
 
