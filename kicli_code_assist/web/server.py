@@ -108,6 +108,102 @@ def register_routes(app: Flask):
             app.logger.error(f"Config endpoint error: {e}")
             return jsonify({"error": str(e)}), 500
     
+    @app.route("/api/project/files", methods=["GET"])
+    def get_project_files():
+        """List project files/folders. Root: ~/dev_flow"""
+        try:
+            # Max root = ~/dev_flow
+            root = Path.home() / "dev_flow"
+            
+            # Get requested path (relative to root)
+            rel_path = request.args.get("path", "").strip()
+            if not rel_path:
+                target_dir = root
+            else:
+                target_dir = root / rel_path
+            
+            # Security: prevent directory traversal
+            try:
+                target_dir.resolve().relative_to(root.resolve())
+            except ValueError:
+                return jsonify({"error": "Invalid path"}), 400
+            
+            # Check if directory exists
+            if not target_dir.exists():
+                return jsonify({"error": "Path not found"}), 404
+            
+            if not target_dir.is_dir():
+                return jsonify({"error": "Not a directory"}), 400
+            
+            # List contents
+            items = []
+            try:
+                for entry in sorted(target_dir.iterdir()):
+                    # Skip hidden files and common ignored dirs
+                    if entry.name.startswith('.'):
+                        continue
+                    
+                    rel = entry.relative_to(root)
+                    items.append({
+                        "name": entry.name,
+                        "type": "folder" if entry.is_dir() else "file",
+                        "path": str(rel),
+                        "size_bytes": entry.stat().st_size if entry.is_file() else None,
+                    })
+            except PermissionError:
+                return jsonify({"error": "Permission denied"}), 403
+            
+            return jsonify({
+                "root": str(root),
+                "current": str(rel_path) if rel_path else "/",
+                "items": items,
+            })
+        
+        except Exception as e:
+            app.logger.error(f"Project files error: {e}\n{traceback.format_exc()}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/api/files/<path:file_path>", methods=["GET"])
+    def get_file(file_path: str):
+        """Get file content. Path is relative to ~/dev_flow"""
+        try:
+            root = Path.home() / "dev_flow"
+            target_file = root / file_path
+            
+            # Security: prevent directory traversal
+            try:
+                target_file.resolve().relative_to(root.resolve())
+            except ValueError:
+                return jsonify({"error": "Invalid path"}), 400
+            
+            if not target_file.exists():
+                return jsonify({"error": "File not found"}), 404
+            
+            if not target_file.is_file():
+                return jsonify({"error": "Not a file"}), 400
+            
+            # Read file (limit to 5MB)
+            max_size = 5 * 1024 * 1024
+            file_size = target_file.stat().st_size
+            
+            if file_size > max_size:
+                return jsonify({
+                    "error": f"File too large ({file_size / 1024 / 1024:.1f}MB, max 5MB)"
+                }), 413
+            
+            content = target_file.read_text(encoding='utf-8', errors='replace')
+            
+            return jsonify({
+                "path": file_path,
+                "content": content,
+                "size_bytes": file_size,
+            })
+        
+        except Exception as e:
+            app.logger.error(f"File read error: {e}\n{traceback.format_exc()}")
+            return jsonify({"error": str(e)}), 500
+
+    
     @app.route("/api/chat", methods=["POST"])
     def submit_chat():
         """Submit chat message with optional files."""
