@@ -332,6 +332,36 @@ def register_routes(app: Flask):
         except Exception as e:
             app.logger.error(f"File save error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
+    
+    # ============================================================================
+    # Static Files (Option 1: single-port deployment)
+    # ============================================================================
+    
+    static_dir = Path(__file__).parent / "static"
+    
+    @app.route("/", methods=["GET"])
+    def serve_index():
+        """Serve index.html (SPA root)."""
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return send_from_directory(static_dir, "index.html")
+        return jsonify({"error": "Frontend not built. Run: npm run build && collect_static.sh"}), 404
+    
+    @app.route("/<path:filename>", methods=["GET"])
+    def serve_static(filename: str):
+        """Serve static files or fallback to index.html (SPA routing)."""
+        file_path = static_dir / filename
+        
+        # Check if file exists in static/
+        if file_path.exists() and file_path.is_file():
+            return send_from_directory(static_dir, filename)
+        
+        # Fallback to index.html for client-side routing
+        index_file = static_dir / "index.html"
+        if index_file.exists():
+            return send_from_directory(static_dir, "index.html")
+        
+        return jsonify({"error": "Not found"}), 404
 
 
 # ============================================================================
