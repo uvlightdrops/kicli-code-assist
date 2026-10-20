@@ -697,3 +697,140 @@ self.loaded_files.append(normalized_path)
 
 **Main navigation:**
 - [INDEX.md](INDEX.md) - Documentation index and quick links
+
+---
+
+### 14. Monaco Editor Web IDE - Tier 2 Complete ✅ DONE
+
+**Category:** WEB EDITOR & IDE
+
+**Completed Tasks:**
+- [x] Replace Prism.js with Monaco Editor (@monaco-editor/react)
+- [x] Implement Edit/View mode toggle
+- [x] Add Vim keybindings (monaco-vim@0.4.4)
+- [x] Implement Find (Ctrl+F) with Monaco built-in
+- [x] Implement Find & Replace (Ctrl+H) with Monaco built-in
+- [x] Implement File Creation ("Save As" dialog)
+- [x] Backend PUT /api/files/save endpoint
+- [x] Backend POST /api/files/create endpoint
+- [x] Unsaved changes indicator (● dot)
+- [x] Keyboard shortcuts (Ctrl+S, Ctrl+F, Ctrl+H)
+- [x] Vim status line (purple, bottom of editor)
+- [x] Persist Vim mode preference (localStorage)
+
+**What was built:**
+
+**Frontend (CodePreview.tsx - 300+ lines):**
+- Monaco Editor with full IDE features (syntax highlight, line numbers, word wrap)
+- Edit/View mode toggle with visual button
+- Vim keybindings toggle (⌨ Vim button, purple highlight when active)
+- Vim status line appears below editor when active
+- Find button (🔍) triggers Ctrl+F Monaco built-in
+- Replace button (🔄) triggers Ctrl+H Monaco built-in
+- "Save As" button opens modal dialog for file creation
+- Modal with filename input, error handling, keyboard support (Enter/Escape)
+- Dirty state tracking (content !== originalContent)
+- Unsaved changes indicator (● yellow dot)
+- Keyboard handler for Ctrl+S save
+- Language auto-detection from file extension
+
+**Backend (server.py - 60+ lines new):**
+- PUT /api/files/save - Save existing file with path traversal protection
+- POST /api/files/create - Create new file with auto-mkdir, UTF-8 encoding
+- Both endpoints return {status, path, size_bytes, timestamp}
+- Security: resolve().is_relative_to() prevents directory traversal
+- Permission error handling (403 Forbidden)
+
+**Build & Config:**
+- npm install @monaco-editor/react@4.7.0
+- npm install monaco-vim@0.4.4
+- Fixed ESM/CommonJS conflicts (postcss.config.cjs, tailwind.config.cjs)
+- Build size: 474 KB JS (gzipped 154 KB)
+
+**Impact:**
+- Professional code editing experience (VSCode-like)
+- Vim users fully supported (hot-toggle, persistent preference)
+- Fast find/replace workflow (Monaco native)
+- New file creation without leaving editor
+- Production-ready Editor component
+
+**Files Modified/Created:**
+- `web/frontend/src/components/CodePreview.tsx` - Complete rewrite (~300 lines)
+- `web/frontend/src/App.tsx` - State management (isSaving, originalContent, handlers)
+- `kicli_code_assist/web/server.py` - Added save + create endpoints
+- `web/frontend/package.json` - Added monaco-editor, monaco-vim
+- `postcss.config.cjs` - ESM fix (CommonJS for PostCSS)
+- `tailwind.config.cjs` - ESM fix (CommonJS for Tailwind)
+
+**Commits:**
+1. `feat: integrate Monaco Editor with full edit capabilities` (5daa0fb)
+2. `feat: add Vim keybindings + Find/Replace to Monaco Editor` (cf909a8)
+3. `feat: complete Monaco Tier 2 features - Find, Replace, File Creation` (b2cc54a)
+
+---
+
+### 15. Semi-Prod Deployment Preparation ✅ DONE
+
+**Category:** DEPLOYMENT & INFRASTRUCTURE
+
+**Completed Tasks:**
+- [x] Create Apache2 vhost config - Option 1 (single-port)
+- [x] Create Apache2 vhost config - Option 2 (dual-port)
+- [x] Write collect_static.sh (frontend build → Flask static/)
+- [x] Write deploy_semi_prod.sh (interactive Apache2 setup)
+- [x] Write test_deployment_local.sh (local testing scenarios)
+- [x] Update server.py with static file serving (index.html SPA fallback)
+- [x] Comprehensive deployment guide (SEMI_PROD_DEPLOYMENT.md)
+- [x] Document both Firewall strategies (single vs dual port)
+
+**What was built:**
+
+**Option 1 (Single-Port, Recommended):**
+- Flask serves API + static files on port 8000
+- Firewall-friendly (one port)
+- No Node.js needed on prod
+- `collect_static.sh` automates build + copy
+
+**Option 2 (Dual-Port, Flexible):**
+- Vite :3000 + Flask :8000 separated
+- Better for dev workflow (hot-reload)
+- Requires Node.js on prod
+- More Firewall-risky
+
+**Backend Changes:**
+- Added `/` route serving index.html
+- Added `/<path>` fallback to index.html (SPA routing)
+- Serves static files from `kicli_code_assist/web/static/`
+
+**Scripts:**
+- `collect_static.sh` - Build frontend, copy dist/ to static/
+- `deploy_semi_prod.sh` - Interactive root setup (modules, vhost, config)
+- `test_deployment_local.sh` - Local testing (no root needed)
+
+**Documentation:**
+- `SEMI_PROD_DEPLOYMENT.md` - Complete guide with Firewall strategy
+- `kicli-web-option1.conf` - Apache2 vhost template (single-port)
+- `kicli-web-option2.conf` - Apache2 vhost template (dual-port)
+
+**Impact:**
+- Ready for semi-prod testing
+- Clear decision path for Firewall constraints
+- Automated deployment setup
+- Production-ready static file serving
+
+**Files Created:**
+- `docs/deployment/SEMI_PROD_DEPLOYMENT.md`
+- `docs/deployment/kicli-web-option1.conf`
+- `docs/deployment/kicli-web-option2.conf`
+- `scripts/collect_static.sh`
+- `scripts/deploy_semi_prod.sh`
+- `scripts/test_deployment_local.sh`
+
+**Files Modified:**
+- `kicli_code_assist/web/server.py` - Added static serving routes
+
+**Commits:**
+1. `feat: add Vim keybindings + Find/Replace to Monaco Editor` (cf909a8 - includes deployment prep)
+
+---
+
