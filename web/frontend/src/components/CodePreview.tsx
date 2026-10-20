@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
-import { initVimMode } from 'monaco-vim'
+// TODO: Fix monaco-vim ESM compatibility issue - temporarily disabled for dev
+// import { initVimMode } from 'monaco-vim'
 
 interface CodePreviewProps {
   filePath: string
@@ -86,9 +87,10 @@ const CodePreview: React.FC<CodePreviewProps> = ({
   const handleEditorMount = (editor: any) => {
     editorRef.current = editor
     
-    if (vimMode) {
-      initVimMode(editor, statusRef.current)
-    }
+    // TODO: Re-enable Vim mode after fixing ESM compatibility
+    // if (vimMode) {
+    //   initVimMode(editor, statusRef.current)
+    // }
     
     editor.focus()
   }
@@ -98,13 +100,14 @@ const CodePreview: React.FC<CodePreviewProps> = ({
     setVimMode(newVimMode)
     localStorage.setItem('vimMode', newVimMode ? 'true' : 'false')
     
-    if (editorRef.current) {
-      if (newVimMode) {
-        initVimMode(editorRef.current, statusRef.current)
-      } else {
-        editorRef.current.getModel()?.setValue(currentContent)
-      }
-    }
+    // TODO: Re-enable Vim mode after fixing ESM compatibility
+    // if (editorRef.current) {
+    //   if (newVimMode) {
+    //     initVimMode(editorRef.current, statusRef.current)
+    //   } else {
+    //     editorRef.current.getModel()?.setValue(currentContent)
+    //   }
+    // }
   }
 
   const handleOpenFind = () => {
