@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import Editor from '@monaco-editor/react'
+import { initVimMode } from 'monaco-vim'
 
 interface CodePreviewProps {
   filePath: string
@@ -20,7 +21,9 @@ const CodePreview: React.FC<CodePreviewProps> = ({
 }) => {
   const [isEditMode, setIsEditMode] = useState(false)
   const [currentContent, setCurrentContent] = useState(content)
+  const [vimMode, setVimMode] = useState(() => localStorage.getItem('vimMode') === 'true')
   const editorRef = useRef<any>(null)
+  const statusRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setCurrentContent(content)
@@ -55,7 +58,27 @@ const CodePreview: React.FC<CodePreviewProps> = ({
 
   const handleEditorMount = (editor: any) => {
     editorRef.current = editor
+    
+    if (vimMode) {
+      initVimMode(editor, statusRef.current)
+    }
+    
     editor.focus()
+  }
+
+  const toggleVimMode = () => {
+    const newVimMode = !vimMode
+    setVimMode(newVimMode)
+    localStorage.setItem('vimMode', newVimMode ? 'true' : 'false')
+    
+    if (editorRef.current) {
+      if (newVimMode) {
+        initVimMode(editorRef.current, statusRef.current)
+      } else {
+        // Restart editor to disable vim mode
+        editorRef.current.getModel()?.setValue(currentContent)
+      }
+    }
   }
 
   const handleEditorChange = (value: string | undefined) => {
@@ -103,6 +126,19 @@ const CodePreview: React.FC<CodePreviewProps> = ({
         </div>
 
         <div className="flex items-center gap-2">
+          {isEditMode && (
+            <button
+              onClick={toggleVimMode}
+              title={vimMode ? 'Vim Mode: ON (press :q to exit)' : 'Vim Mode: OFF (Vi keybindings disabled)'}
+              className={`px-2 py-1 text-xs rounded transition font-mono ${
+                vimMode
+                  ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              }`}
+            >
+              {vimMode ? '⌨ Vim' : '⌨'}
+            </button>
+          )}
           {!isEditMode ? (
             <button
               onClick={() => setIsEditMode(true)}
@@ -131,36 +167,42 @@ const CodePreview: React.FC<CodePreviewProps> = ({
       </div>
 
       {/* Editor */}
-      <div className="flex-1 overflow-hidden">
-        <Editor
-          height="100%"
-          language={language}
-          value={currentContent}
-          onChange={handleEditorChange}
-          onMount={handleEditorMount}
-          theme="vs-dark"
-          options={{
-            readOnly: !isEditMode,
-            minimap: { enabled: false },
-            fontSize: 13,
-            lineNumbers: 'on',
-            wordWrap: 'on',
-            automaticLayout: true,
-            padding: { top: 10, bottom: 10 },
-            scrollBeyondLastLine: false,
-          }}
-        />
-      </div>
-
-      {/* Footer */}
-      {isEditMode && (
-        <div className="bg-gray-800 border-t border-gray-700 px-3 py-2 text-xs text-gray-400">
-          <div className="flex justify-between">
-            <span>Vim keybindings enabled</span>
-            <span>Line {editorRef.current?.getPosition?.()?.lineNumber || 1}</span>
-          </div>
+      <div className="flex-1 overflow-hidden flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          <Editor
+            height="100%"
+            language={language}
+            value={currentContent}
+            onChange={handleEditorChange}
+            onMount={handleEditorMount}
+            theme="vs-dark"
+            options={{
+              readOnly: !isEditMode,
+              minimap: { enabled: false },
+              fontSize: 13,
+              lineNumbers: 'on',
+              wordWrap: 'on',
+              automaticLayout: true,
+              padding: { top: 10, bottom: 10 },
+              scrollBeyondLastLine: false,
+              // Find & Replace
+              find: {
+                seedSearchStringFromSelection: true,
+                autoFindInSelection: 'never',
+              },
+            }}
+          />
         </div>
-      )}
+
+        {/* Vim Status Line (only when vim mode active) */}
+        {isEditMode && vimMode && (
+          <div
+            ref={statusRef}
+            className="bg-gray-950 border-t border-purple-600 px-3 py-1 text-xs text-purple-400 font-mono"
+            style={{ minHeight: '20px' }}
+          />
+        )}
+      </div>
     </div>
   )
 }
