@@ -14,6 +14,7 @@ import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 from threading import Thread
+from datetime import datetime
 import traceback
 
 from flask import Flask, request, jsonify, send_from_directory
@@ -285,6 +286,51 @@ def register_routes(app: Flask):
             return jsonify({"status": "deleted"})
         except Exception as e:
             app.logger.error(f"File delete error: {e}")
+            return jsonify({"error": str(e)}), 500
+    
+    @app.route("/api/files/save", methods=["PUT"])
+    def save_file():
+        """Save file content to filesystem."""
+        try:
+            data = request.json or {}
+            file_path = data.get("path", "").strip()
+            content = data.get("content", "")
+            
+            if not file_path:
+                return jsonify({"error": "No file path provided"}), 400
+            
+            # Resolve project root
+            from pathlib import Path
+            project_root = Path.cwd()
+            full_path = project_root / file_path
+            
+            # Security: prevent directory traversal
+            if not full_path.resolve().is_relative_to(project_root.resolve()):
+                app.logger.warning(f"Attempted path traversal: {file_path}")
+                return jsonify({"error": "Invalid file path"}), 403
+            
+            # Create parent directories if needed
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write file
+            with open(full_path, "w", encoding="utf-8") as f:
+                f.write(content)
+            
+            app.logger.info(f"File saved: {file_path} ({len(content)} bytes)")
+            
+            return jsonify({
+                "status": "saved",
+                "path": file_path,
+                "size_bytes": len(content),
+                "timestamp": datetime.now().isoformat(),
+            })
+        
+        except PermissionError:
+            app.logger.error(f"Permission denied saving file: {file_path}")
+            return jsonify({"error": "Permission denied"}), 403
+        
+        except Exception as e:
+            app.logger.error(f"File save error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
 
 

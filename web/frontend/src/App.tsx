@@ -28,6 +28,7 @@ interface TabFile {
   path: string
   content: string
   active: boolean
+  originalContent?: string // Track original for dirty checking
 }
 
 const App: React.FC = () => {
@@ -40,6 +41,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'chat' | 'logs' | 'config'>('chat')
   const [leftPanelTab, setLeftPanelTab] = useState<'files' | 'browser'>('files')
   const [connected, setConnected] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
   const socketRef = useRef<any>(null)
 
   // Initialize WebSocket
@@ -107,8 +109,8 @@ const App: React.FC = () => {
       setSelectedFile({ path, content })
       setOpenTabs(openTabs.map((t) => ({ ...t, active: t.path === path })))
     } else {
-      // Add new tab
-      const newTab: TabFile = { path, content, active: true }
+      // Add new tab with originalContent for dirty tracking
+      const newTab: TabFile = { path, content, active: true, originalContent: content }
       setOpenTabs([...openTabs.map((t) => ({ ...t, active: false })), newTab])
       setSelectedFile({ path, content })
     }
@@ -129,6 +131,59 @@ const App: React.FC = () => {
       setSelectedFile(remaining.length > 0 ? { path: remaining[0].path, content: remaining[0].content } : null)
     }
   }
+
+  // Handle content changes in editor
+  const handleContentChange = (newContent: string) => {
+    if (!selectedFile) return
+    
+    // Update selected file
+    setSelectedFile({ ...selectedFile, content: newContent })
+    
+    // Update tab with new content
+    setOpenTabs(
+      openTabs.map((t) =>
+        t.path === selectedFile.path ? { ...t, content: newContent } : t
+      )
+    )
+  }
+
+  // Save file to backend
+  const handleSaveFile = async (content: string) => {
+    if (!selectedFile) return
+    
+    setIsSaving(true)
+    try {
+      const response = await axios.put(`/api/files/save`, {
+        path: selectedFile.path,
+        content: content,
+      })
+      
+      // Update tab's originalContent to mark as saved
+      setOpenTabs(
+        openTabs.map((t) =>
+          t.path === selectedFile.path
+            ? { ...t, originalContent: content }
+            : t
+        )
+      )
+      
+      setError(null)
+      // Show brief success message
+      console.log('File saved:', selectedFile.path)
+    } catch (err: any) {
+      const errorMsg = err.response?.data?.error || 'Failed to save file'
+      setError(errorMsg)
+      console.error('Save error:', errorMsg)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Check if current file has unsaved changes
+  const currentTabIsDirty = selectedFile
+    ? openTabs.find((t) => t.path === selectedFile.path)?.content !==
+      openTabs.find((t) => t.path === selectedFile.path)?.originalContent
+    : false
 
   // Send message to backend
   const handleSendMessage = async (text: string) => {
@@ -257,7 +312,14 @@ const App: React.FC = () => {
                     onCloseTab={handleCloseTab}
                   />
                   <div className="flex-1 overflow-auto">
-                    <CodePreview filePath={selectedFile.path} content={selectedFile.content} />
+                    <CodePreview 
+                      filePath={selectedFile.path} 
+                      content={selectedFile.content}
+                      isDirty={currentTabIsDirty}
+                      onContentChange={handleContentChange}
+                      onSave={handleSaveFile}
+                      isSaving={isSaving}
+                    />
                   </div>
                 </>
               )}

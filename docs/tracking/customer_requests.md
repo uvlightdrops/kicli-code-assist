@@ -43,6 +43,34 @@ The categories below are permanent - add new requests under the appropriate head
 - **Status:** Not yet implemented
 - **Impact:** Better readability of code in editor
 - AI suggestions text view ist nur einige Zeilen hoch, sollte aber mind 3/4 vom viewport haben
+
+#### Web Editor - Keyboard Shortcuts & Editing
+- [ ] **MVP Shortcuts** (Tier 1 - Essential)
+  - `Ctrl+S` / `Cmd+S` - Speichern
+  - `Ctrl+Z` / `Cmd+Z` - Undo
+  - `Ctrl+Y` / `Cmd+Shift+Z` - Redo
+  - `Ctrl+/` / `Cmd+/` - Zeile kommentieren
+  - `Ctrl+F` / `Cmd+F` - Suchen in Datei
+  - `Ctrl+H` / `Cmd+H` - Suchen & Ersetzen
+
+- [ ] **Extended Shortcuts** (Tier 2 - Nice-to-Have)
+  - `Ctrl+Shift+P` / `Cmd+Shift+P` - Command Palette
+  - `Ctrl+G` / `Cmd+G` - Gehe zu Zeile
+  - `Alt+↑/↓` / `Option+↑/↓` - Zeile verschieben
+  - `Ctrl+K Z` - Zen-Mode (Fullscreen)
+  - `Ctrl+\` - Split-View
+
+- [ ] **Advanced Features** (Tier 3 - Later)
+  - Multi-cursor editing (`Ctrl+D`)
+  - Vim-Mode toggle
+  - Bracket matching & auto-close
+  - Snippet expansion
+
+#### Web Editor - Monaco Editor Integration (Optional Upgrade)
+- [ ] Replace Prism.js with Monaco Editor for professional code editing
+  - **Benefits:** All VSCode shortcuts built-in, Intellisense, Language Server Protocol
+  - **NPM:** `@monaco-editor/react`
+  - **Status:** Design option, not urgent
 - 
 
 ### 📚 DOCUMENTATION
@@ -63,6 +91,7 @@ The categories below are permanent - add new requests under the appropriate head
 - **📁 FILE MANAGEMENT** - Add new requests here
 - **⚙️ CONFIGURATION & SYSTEM** - Add new requests here
 - **🔐 SECURITY** - Add new requests here
+- **🌐 WEB EDITOR & IDE** - Add new web-specific requests here (Shortcuts, Editing, UI Layout, etc.)
 - **OTHER** - Add new requests here
 
 ---
