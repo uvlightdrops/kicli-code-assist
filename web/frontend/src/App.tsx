@@ -9,6 +9,10 @@ import CodePreview from './components/CodePreview'
 import EditorTabs from './components/EditorTabs'
 import AgentPanel from './components/AgentPanel'
 import TerminalLog from './components/TerminalLog'
+import { FeatureNav } from './components/FeatureNav'
+import { ReasoningPanel } from './components/ReasoningPanel'
+import { EnsemblePanel } from './components/EnsemblePanel'
+import { ToolsPanel } from './components/ToolsPanel'
 
 interface Message {
   id: string
@@ -43,6 +47,7 @@ const App: React.FC = () => {
   const [connected, setConnected] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAgentPanel, setShowAgentPanel] = useState(false)
+  const [currentFeature, setCurrentFeature] = useState<'explain' | 'reasoning' | 'ensemble' | 'tools'>('explain')
   const socketRef = useRef<any>(null)
 
   // Initialize WebSocket
@@ -312,11 +317,11 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Center + Right: Editor on left, Chat/Agent on right */}
+        {/* Center + Right: Editor on left, Chat/Agent on right (equal width) */}
         <div className="flex-1 flex overflow-hidden">
           {activeTab === 'chat' && (
             <>
-              {/* Main Editor Area (Left) */}
+              {/* Main Editor Area (Left) - flex-1 for equal width */}
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Editor Area: Tabs + Preview */}
                 {selectedFile && (
@@ -347,30 +352,40 @@ const App: React.FC = () => {
                 )}
               </div>
 
-              {/* Right Sidebar: Chat or Agent */}
-              <div className="w-96 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
-                {/* Tab selector */}
-                <div className="flex border-b border-gray-700">
-                  <button
-                    onClick={() => setShowAgentPanel(false)}
-                    className={`flex-1 px-3 py-2 text-xs font-medium transition ${
-                      !showAgentPanel
-                        ? 'border-b-2 border-blue-500 text-blue-400 bg-gray-700'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
-                  >
-                    💬 Chat
-                  </button>
-                  <button
-                    onClick={() => setShowAgentPanel(true)}
-                    className={`flex-1 px-3 py-2 text-xs font-medium transition ${
-                      showAgentPanel
-                        ? 'border-b-2 border-yellow-500 text-yellow-400 bg-gray-700'
-                        : 'text-gray-400 hover:text-gray-300'
-                    }`}
-                  >
-                    🤖 Agent
-                  </button>
+              {/* Right Sidebar: Chat or Agent with Feature Nav - flex-1 for equal width */}
+              <div className="flex-1 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
+                {/* Tab selector with Feature Navigation */}
+                <div className="border-b border-gray-700 p-2 space-y-2">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setShowAgentPanel(false)}
+                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
+                        !showAgentPanel
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      💬 Chat
+                    </button>
+                    <button
+                      onClick={() => setShowAgentPanel(true)}
+                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
+                        showAgentPanel
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                      }`}
+                    >
+                      🤖 Agent
+                    </button>
+                  </div>
+                  
+                  {/* Feature Navigation (only shown when Agent tab is active) */}
+                  {showAgentPanel && (
+                    <FeatureNav 
+                      currentFeature={currentFeature as any}
+                      onFeatureChange={(f) => setCurrentFeature(f as any)}
+                    />
+                  )}
                 </div>
 
                 {/* Content */}
@@ -381,10 +396,37 @@ const App: React.FC = () => {
                       <ChatInput onSend={handleSendMessage} disabled={loading} />
                     </>
                   ) : (
-                    <AgentPanel 
-                      filePath={selectedFile?.path || null}
-                      onClose={() => setShowAgentPanel(false)}
-                    />
+                    <>
+                      {/* Explain Panel (default AgentPanel) */}
+                      {currentFeature === 'explain' && (
+                        <AgentPanel 
+                          filePath={selectedFile?.path || null}
+                          onClose={() => setShowAgentPanel(false)}
+                        />
+                      )}
+                      
+                      {/* Reasoning Panel */}
+                      {currentFeature === 'reasoning' && (
+                        <ReasoningPanel
+                          file={selectedFile?.path}
+                          isVisible={true}
+                        />
+                      )}
+                      
+                      {/* Ensemble Panel */}
+                      {currentFeature === 'ensemble' && (
+                        <EnsemblePanel
+                          file={selectedFile?.path}
+                          selectedCode={selectedFile?.content}
+                          isVisible={true}
+                        />
+                      )}
+                      
+                      {/* Tools Panel */}
+                      {currentFeature === 'tools' && (
+                        <ToolsPanel isVisible={true} />
+                      )}
+                    </>
                   )}
                 </div>
               </div>
