@@ -233,13 +233,16 @@ def register_routes(app: Flask):
                 try:
                     chat_session: ChatSession = app.config["CHAT_SESSION"]
                     
+                    # Add user message to session
+                    chat_session.add_message(message, role="user")
+                    
                     # Add files to session as context
                     for file_obj in files:
                         if "path" in file_obj and "content" in file_obj:
                             chat_session.add_file(file_obj["path"], file_obj["content"])
                     
                     # Get formatted messages for API
-                    messages = chat_session.get_messages_for_api(message)
+                    messages = chat_session.get_messages_for_api()
                     
                     app.logger.info(f"Request {request_id}: {len(messages)} messages prepared")
                     
