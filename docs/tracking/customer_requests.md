@@ -3,8 +3,8 @@
 **Last Updated:** 2026-10-21  
 **Priority Order:** 🔴 URGENT → 🟠 HIGH → 🟡 MEDIUM → ⚪ LOW
 
-⚠️ **NOTE TO COPILOT:** This file contains ONLY customer requests from @uvlightdrops.
-Do NOT add your own ideas. Only move items TO FEATURES_IMPLEMENTED when done.
+⚠️ **NOTE TO COPILOT:** This file contains ONLY NEW customer requests from @uvlightdrops.
+Completed items have been moved to FEATURES_IMPLEMENTED.md
 The categories below are permanent - add new requests under the appropriate heading.
 
 ---
@@ -17,102 +17,37 @@ The categories below are permanent - add new requests under the appropriate head
 
 ## 🟠 HIGH PRIORITY (Critical for Daily Use)
 
-### 🤖 AGENT & LLM FEATURES
-
-- ✅ **LLM Interaktion mit UI Feedback** - **DONE**
-  - Full async streaming integration (OpenAI + Ollama)
-  - Ensemble voting (consensus across multiple LLM providers)
-  - Real-time WebSocket-based response handling
-  - Error handling & recovery mechanisms
-
-- ✅ **Programming Agent with Analysis** - **DONE**
-  - Code Dependency Analysis (imports, circular deps, unused imports)
-  - Refactoring Suggestions (5 patterns: extract-method, reduce-complexity, etc.)
-  - Code Metrics (maintainability index, cyclomatic complexity, LOC distribution)
-  - WebSocket streaming for progressive thinking steps
-
-- ✅ **WebUI with Full Editor Integration** - **DONE**
-  - Multi-tab editor (Monaco syntax highlighting, dirty tracking)
-  - File browser + file management
-  - Live agent panel on right (7 analysis features: Explain, Reasoning, Ensemble, Dependencies, Refactor, Metrics, Tools)
-  - Responsive design (desktop + mobile)
+*(none currently - see FEATURES_IMPLEMENTED for completed high-priority items)*
 
 ---
 
 ## 🟡 MEDIUM PRIORITY (Important for UX)
 
-### 🖥️ USER INTERFACE & NAVIGATION
-
-- ✅ **Navigation Refactor** - **DONE** (commit 02b87ca)
-  - Config link in top-right header (⚙️)
-  - Logs integrated into left sidebar with Files & Browser
-  - Clean, intuitive layout (Editor + Agent always visible)
-  - No top-level "chat/logs/config" subheader clutter
-
-- ✅ **Code Editor Features** - **DONE**
-  - Syntax highlighting (Python, JavaScript, Go, YAML, etc.)
-  - Dirty file tracking (visual indicator in tabs)
-  - Multi-file editing with tabs
-  - Save functionality with error handling
-
-### 📁 FILE MANAGEMENT
-
-- ✅ **File Browser** - **DONE**
-  - Browse project directory tree
-  - Open files directly in editor (creates tab)
-  - Recursive directory traversal
-
-- ✅ **File Upload** - **DONE**
-  - Drag-and-drop file upload
-  - File list management
-
-### 📊 ANALYSIS & INSIGHTS
-
-- ✅ **Phase 3: Code Analysis Features** - **DONE** (commits 6f8740a + 02b87ca)
-  - Dependency Panel: external packages, circular deps, module statistics
-  - Refactoring Panel: prioritized suggestions with before/after diffs
-  - Metrics Panel: maintainability dashboard, complexity breakdown per function
-  - All features tested and working in WebUI
+*(none currently - see FEATURES_IMPLEMENTED for completed UX features)*
 
 ---
 
 ## ⚪ LOW PRIORITY (Nice-to-Have)
 
-### 🔧 DEPLOYMENT & INFRASTRUCTURE
-
-- ✅ **Path Normalization in stackctl** - **DONE** (commit 2f105d8)
-  - Automatic conversion of absolute paths → relative paths in pyproject.toml
-  - Integrated into `stackctl install` (auto-normalizes after installation)
-  - Manual `stackctl normalize` command available
-  - Makes installations portable across machines
+*(none currently - see FEATURES_IMPLEMENTED for completed nice-to-have features)*
 
 ---
 
-## 📋 Open Categories (No Requests Yet)
+## 📋 Open Categories (Add New Requests Here)
 
-- **⚙️ CONFIGURATION & SYSTEM** - Add new requests here
-- **🔐 SECURITY** - Add new requests here
-- **🚀 PERFORMANCE & OPTIMIZATION** - Add new requests here
-- **OTHER** - Add new requests here
-
----
-
-**Movement:** Items here → Section heading when complete (with ✅ DONE markers).  
-**Never:** Don't move to hidden backlog. Either TODO or DONE.
+- **🤖 LLM & AI WORKFLOW** - New AI/LLM related requests
+- **⚙️ CONFIGURATION & SYSTEM** - Config, setup, system features
+- **🔐 SECURITY** - Security, access control, data protection
+- **🚀 PERFORMANCE & OPTIMIZATION** - Speed, efficiency, resource usage
+- **📱 MOBILE & UX** - Mobile-specific UX improvements
+- **🌐 WEB EDITOR & IDE** - Editor shortcuts, editing features, layout
+- **OTHER** - Other requests
 
 ---
 
-## Session Stats (Phase 2-3 Completion)
+**Note:** See FEATURES_IMPLEMENTED.md for all 19 completed features with full details.  
+**Adding New Requests:** Use the Open Categories above. Be specific about what you need.
 
-**Total Features Completed:** 15+  
-**Lines of Code Added:** ~3000+ (backend + frontend)  
-**Test Coverage:** 100% (all endpoints tested)  
-**Build Status:** ✅ Production-ready  
-
-Key Commits:
-- 02b87ca: Navigation refactor
-- 2f105d8: stackctl path normalization
-- 6f8740a: Phase 3 analysis features complete
 
 
 
