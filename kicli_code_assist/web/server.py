@@ -51,8 +51,12 @@ def get_config() -> Dict[str, Any]:
         }
 
 
-def create_app(config: Optional[Dict] = None) -> Flask:
-    """Create and configure Flask app."""
+def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
+    """Create and configure Flask app with SocketIO.
+    
+    Returns:
+        Tuple of (Flask app, SocketIO instance)
+    """
     app = Flask(__name__)
     app.config["SECRET_KEY"] = "kicli-web-dev-secret"
     
@@ -65,8 +69,23 @@ def create_app(config: Optional[Dict] = None) -> Flask:
     # ThreadPoolExecutor for async operations
     app.config["EXECUTOR"] = ThreadPoolExecutor(max_workers=4)
     app.config["ACTIVE_REQUESTS"] = {}
+    app.config["CHAT_SESSION"] = ChatSession()
     
-    return app
+    # Setup logging
+    log_dir = _get_log_dir()
+    os.makedirs(log_dir, exist_ok=True)
+    logger = _get_or_create_logger("kicli-web", "kicli-web.log")
+    app.logger = logger
+    
+    # Setup CORS
+    cors_origins = config.get("web", {}).get("cors_origins", ["http://localhost:3000"])
+    CORS(app, origins=cors_origins)
+    
+    # Create SocketIO instance
+    socketio = SocketIO(app, cors_allowed_origins=cors_origins)
+    app.config["SOCKETIO"] = socketio
+    
+    return app, socketio
 
 
 async def process_chat_async(request_id: str, message: str, files: list, 
