@@ -293,44 +293,45 @@ def register_routes(app: Flask):
     
     @app.route("/api/project/files", methods=["GET"])
     def get_project_files():
-        """Get project file tree structure."""
+        """Get project file tree structure (flat list for current directory)."""
         try:
             config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", "."))
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
             
-            def build_tree(path, max_depth=3, current_depth=0):
-                if current_depth >= max_depth or not path.is_dir():
-                    return None
-                
-                items = []
-                try:
-                    for item in sorted(path.iterdir()):
-                        if item.name.startswith("."):
-                            continue
-                        
-                        if item.is_file():
-                            items.append({
-                                "type": "file",
-                                "name": item.name,
-                                "path": str(item.relative_to(project_root)),
-                                "size": item.stat().st_size,
-                            })
-                        elif item.is_dir():
-                            children = build_tree(item, max_depth, current_depth + 1)
-                            if children is not None:
-                                items.append({
-                                    "type": "folder",
-                                    "name": item.name,
-                                    "path": str(item.relative_to(project_root)),
-                                    "children": children,
-                                })
-                except PermissionError:
-                    pass
-                
-                return items
+            # Get requested path from query parameter
+            requested_path = request.args.get("path", "")
+            target_path = (project_root / requested_path).resolve()
             
-            tree = build_tree(project_root)
-            return jsonify({"files": tree or []}), 200
+            # Security: ensure path is within project_root
+            if not target_path.is_relative_to(project_root):
+                return jsonify({"error": "Access denied: path outside project"}), 403
+            
+            if not target_path.is_dir():
+                return jsonify({"error": "Path is not a directory"}), 400
+            
+            items = []
+            try:
+                for item in sorted(target_path.iterdir()):
+                    if item.name.startswith("."):
+                        continue
+                    
+                    if item.is_file():
+                        items.append({
+                            "type": "file",
+                            "name": item.name,
+                            "path": str(item.relative_to(project_root)),
+                            "size_bytes": item.stat().st_size,
+                        })
+                    elif item.is_dir():
+                        items.append({
+                            "type": "folder",
+                            "name": item.name,
+                            "path": str(item.relative_to(project_root)),
+                        })
+            except PermissionError:
+                return jsonify({"error": "Permission denied"}), 403
+            
+            return jsonify({"items": items}), 200
             
         except Exception as e:
             app.logger.error(f"Project files error: {e}\n{traceback.format_exc()}")
@@ -341,11 +342,11 @@ def register_routes(app: Flask):
         """Read file contents."""
         try:
             config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", "."))
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
             full_path = (project_root / file_path).resolve()
             
             # Security: ensure file is within project_root
-            if not full_path.is_relative_to(project_root.resolve()):
+            if not full_path.is_relative_to(project_root):
                 return jsonify({"error": "Access denied: file outside project"}), 403
             
             if not full_path.is_file():
