@@ -45,8 +45,8 @@ const App: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<{ path: string; content: string } | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'chat' | 'logs' | 'config'>('chat')
-  const [leftPanelTab, setLeftPanelTab] = useState<'files' | 'browser'>('files')
+  const [leftPanelTab, setLeftPanelTab] = useState<'files' | 'browser' | 'logs'>('files')
+  const [showConfig, setShowConfig] = useState(false)
   const [connected, setConnected] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAgentPanel, setShowAgentPanel] = useState(false)
@@ -255,10 +255,10 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-      {/* Header - Status + Tabs */}
+      {/* Header - Status + Config Link */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
         <div></div>
-        <div className="flex items-center gap-3 text-xs">
+        <div className="flex items-center gap-4 text-xs">
           {/* Connection Status */}
           <div className="flex items-center gap-2">
             <div
@@ -270,24 +270,15 @@ const App: React.FC = () => {
           </div>
           {/* Server Info */}
           <div className="text-gray-500">localhost:8000</div>
-        </div>
-      </div>
-
-      {/* Main Tabs */}
-      <div className="flex border-b border-gray-700 bg-gray-800">
-        {(['chat', 'logs', 'config'] as const).map((tab) => (
+          {/* Config Link */}
           <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium capitalize ${
-              activeTab === tab
-                ? 'border-b-2 border-blue-500 text-blue-400'
-                : 'text-gray-400 hover:text-gray-300'
-            }`}
+            onClick={() => setShowConfig(!showConfig)}
+            className="px-2 py-1 text-gray-400 hover:text-gray-200 hover:bg-gray-700 rounded transition"
+            title="Settings"
           >
-            {tab}
+            ⚙️ Config
           </button>
-        ))}
+        </div>
       </div>
 
       {/* Main Content Area */}
@@ -296,7 +287,7 @@ const App: React.FC = () => {
         <div className="w-64 border-r border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
           {/* Sidebar Tabs */}
           <div className="flex border-b border-gray-700">
-            {(['files', 'browser'] as const).map((tab) => (
+            {(['files', 'browser', 'logs'] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setLeftPanelTab(tab)}
@@ -306,7 +297,9 @@ const App: React.FC = () => {
                     : 'text-gray-400 hover:text-gray-300'
                 }`}
               >
-                {tab}
+                {tab === 'files' && '📁 Files'}
+                {tab === 'browser' && '🗂️ Browser'}
+                {tab === 'logs' && '📝 Logs'}
               </button>
             ))}
           </div>
@@ -317,54 +310,54 @@ const App: React.FC = () => {
               <FileList files={files} onDeleteFile={handleDeleteFile} onUploadFile={handleFileUpload} />
             )}
             {leftPanelTab === 'browser' && <FileBrowser onSelectFile={handleSelectFile} />}
+            {leftPanelTab === 'logs' && <TerminalLog />}
           </div>
         </div>
 
         {/* Center + Right: Editor on left, Chat/Agent on right (equal width) */}
         <div className="flex-1 flex overflow-hidden">
-          {activeTab === 'chat' && (
-            <>
-              {/* Main Editor Area (Left) - flex-1 for equal width */}
-              <div className="flex-1 flex flex-col overflow-hidden">
-                {/* Editor Area: Tabs + Preview */}
-                {selectedFile && (
-                  <>
-                    <EditorTabs
-                      tabs={openTabs}
-                      onSelectTab={handleSelectTab}
-                      onCloseTab={handleCloseTab}
-                      onAskAgent={() => setShowAgentPanel(!showAgentPanel)}
+          <>
+            {/* Main Editor Area (Left) - flex-1 for equal width */}
+            <div className="flex-1 flex flex-col overflow-hidden">
+              {/* Editor Area: Tabs + Preview */}
+              {selectedFile && (
+                <>
+                  <EditorTabs
+                    tabs={openTabs}
+                    onSelectTab={handleSelectTab}
+                    onCloseTab={handleCloseTab}
+                    onAskAgent={() => setShowAgentPanel(!showAgentPanel)}
+                  />
+                  <div className="flex-1 overflow-auto">
+                    <CodePreview 
+                      filePath={selectedFile.path} 
+                      content={selectedFile.content}
+                      isDirty={currentTabIsDirty}
+                      onContentChange={handleContentChange}
+                      onSave={handleSaveFile}
+                      isSaving={isSaving}
                     />
-                    <div className="flex-1 overflow-auto">
-                      <CodePreview 
-                        filePath={selectedFile.path} 
-                        content={selectedFile.content}
-                        isDirty={currentTabIsDirty}
-                        onContentChange={handleContentChange}
-                        onSave={handleSaveFile}
-                        isSaving={isSaving}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {!selectedFile && (
-                  <div className="flex-1 flex items-center justify-center text-gray-500">
-                    <p>Select a file to start editing</p>
                   </div>
-                )}
-              </div>
+                </>
+              )}
 
-              {/* Right Sidebar: Chat or Agent with Feature Nav - flex-1 for equal width */}
-              <div className="flex-1 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
-                {/* Tab selector with Feature Navigation */}
-                <div className="border-b border-gray-700 p-2 space-y-2">
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setShowAgentPanel(false)}
-                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
-                        !showAgentPanel
-                          ? 'bg-blue-600 text-white'
+              {!selectedFile && (
+                <div className="flex-1 flex items-center justify-center text-gray-500">
+                  <p>Select a file to start editing</p>
+                </div>
+              )}
+            </div>
+
+            {/* Right Sidebar: Chat or Agent with Feature Nav - flex-1 for equal width */}
+            <div className="flex-1 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
+              {/* Tab selector with Feature Navigation */}
+              <div className="border-b border-gray-700 p-2 space-y-2">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setShowAgentPanel(false)}
+                    className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
+                      !showAgentPanel
+                        ? 'bg-blue-600 text-white'
                           : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
@@ -449,14 +442,7 @@ const App: React.FC = () => {
                 </div>
               </div>
             </>
-          )}
-          {activeTab === 'logs' && <TerminalLog />}
-          {activeTab === 'config' && (
-            <div className="flex-1 overflow-auto p-4">
-              <ConfigDisplay />
-            </div>
-          )}
-        </div>
+          </div>
       </div>
     </div>
   )
