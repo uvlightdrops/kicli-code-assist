@@ -363,6 +363,66 @@ def register_routes(app: Flask):
             app.logger.error(f"File read error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
     
+    @app.route("/api/agent/explain", methods=["POST"])
+    def agent_explain():
+        """Agent: Explain code at specific file/line."""
+        try:
+            from kicli_code_assist.agent import ProgrammingAgent
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            line_no = data.get("line")
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize agent
+            agent = ProgrammingAgent(project_root)
+            
+            # Get explanation
+            result = agent.explain_code(
+                file_path=project_root / file_path,
+                line_no=line_no,
+            )
+            
+            return jsonify(result), 200 if result.get("status") == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent explain error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+    
+    @app.route("/api/agent/suggest", methods=["POST"])
+    def agent_suggest():
+        """Agent: Suggest refactorings for a file."""
+        try:
+            from kicli_code_assist.agent import ProgrammingAgent
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize agent
+            agent = ProgrammingAgent(project_root)
+            
+            # Get suggestions
+            result = agent.suggest_refactoring(
+                file_path=project_root / file_path,
+            )
+            
+            return jsonify(result), 200 if result.get("status") == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent suggest error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
     @app.route("/api/chat", methods=["POST"])
     def chat():
         """Chat endpoint with streaming response via WebSocket."""
