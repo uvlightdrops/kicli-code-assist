@@ -233,8 +233,8 @@ def register_routes(app: Flask):
                 try:
                     chat_session: ChatSession = app.config["CHAT_SESSION"]
                     
-                    # Add user message to session
-                    chat_session.add_message(message, role="user")
+                    # Add user message to session (role first, then content)
+                    chat_session.add_message("user", message)
                     
                     # Add files to session as context
                     for file_obj in files:
