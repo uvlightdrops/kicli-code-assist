@@ -423,6 +423,86 @@ def register_routes(app: Flask):
             app.logger.error(f"Agent suggest error: {e}\n{traceback.format_exc()}")
             return jsonify({"status": "error", "error": str(e)}), 500
 
+    @app.route("/api/agent/reason", methods=["POST"])
+    def agent_reason():
+        """Agent: Multi-step reasoning about code."""
+        try:
+            from kicli_code_assist.agent.reasoning import ReasoningAgent
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            query = data.get("query", "How can this code be improved?")
+            request_id = data.get("request_id", str(uuid.uuid4()))
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize reasoning agent
+            agent = ReasoningAgent(project_root)
+            
+            # Run reasoning (sync wrapper for async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(
+                    agent.reason_about_code(
+                        file_path=project_root / file_path,
+                        query=query,
+                        request_id=request_id,
+                    )
+                )
+            finally:
+                loop.close()
+            
+            return jsonify(result.to_dict()), 200 if result.status == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent reason error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
+    @app.route("/api/agent/ensemble", methods=["POST"])
+    def agent_ensemble():
+        """Agent: LLM ensemble voting (OpenAI + Ollama)."""
+        try:
+            from kicli_code_assist.agent.ensemble import LLMEnsemble
+            
+            data = request.json or {}
+            code_snippet = data.get("code", "")
+            question = data.get("question", "What is this code doing?")
+            request_id = data.get("request_id", str(uuid.uuid4()))
+            
+            if not code_snippet:
+                return jsonify({"error": "Missing 'code' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize ensemble
+            ensemble = LLMEnsemble(project_root)
+            
+            # Run ensemble voting (sync wrapper for async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(
+                    ensemble.vote_on_code(
+                        code_snippet=code_snippet,
+                        question=question,
+                        request_id=request_id,
+                    )
+                )
+            finally:
+                loop.close()
+            
+            return jsonify(result.to_dict()), 200 if result.status == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent ensemble error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
     @app.route("/api/chat", methods=["POST"])
     def chat():
         """Chat endpoint with streaming response via WebSocket."""
