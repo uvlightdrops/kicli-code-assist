@@ -29,7 +29,7 @@ from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.logging_integration import _get_or_create_logger, _get_log_dir
 from ki_core.config import ConfigManager
 from ki_core.adapters import AsyncOpenAIClient, ProviderChain
-from ki_core.core.models import ChatRequest, Message, Role
+from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
 
 
 # ============================================================================
@@ -88,9 +88,13 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     return app, socketio
 
 
+# ============================================================================
+# Async Chat Processing
+# ============================================================================
+
 async def process_chat_async(request_id: str, message: str, files: list, 
                              chat_session: ChatSession, config: Dict,
-                             socketio: SocketIO) -> None:
+                             socketio: SocketIO, app: Flask) -> None:
     """Async chat processing with LLM provider chain.
     
     Args:
@@ -100,6 +104,7 @@ async def process_chat_async(request_id: str, message: str, files: list,
         chat_session: ChatSession instance
         config: App configuration
         socketio: SocketIO instance for WebSocket emit
+        app: Flask app instance
     """
     logger = logging.getLogger("kicli-web")
     
@@ -133,8 +138,6 @@ async def process_chat_async(request_id: str, message: str, files: list,
                 )
                 
                 # Build ChatRequest for LLM
-                from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
-                
                 chat_request = ChatRequest(
                     messages=[
                         Message(role=Role.USER if msg.get("role") == "user" else Role.ASSISTANT, 
@@ -214,25 +217,46 @@ async def process_chat_async(request_id: str, message: str, files: list,
             "type": "error",
             "error": f"Error: {type(e).__name__}: {str(e)}",
         }, room=request_id)
-    app.config["CHAT_SESSION"] = ChatSession()
-    app.config["ACTIVE_REQUESTS"] = {}
+
+
+def process_chat_sync(request_id: str, message: str, files: list,
+                      app: Flask, socketio: SocketIO) -> None:
+    """Synchronous wrapper for async chat processing.
     
-    # Setup logging
-    log_dir = _get_log_dir()
-    os.makedirs(log_dir, exist_ok=True)
+    Runs async chat in new event loop in separate thread.
+    """
+    logger = logging.getLogger("kicli-web")
     
-    logger = _get_or_create_logger("kicli-web", "kicli-web.log")
-    app.logger = logger
-    
-    # Setup CORS
-    cors_origins = config.get("web", {}).get("cors_origins", ["http://localhost:3000"])
-    CORS(app, origins=cors_origins)
-    
-    # Setup WebSocket
-    socketio = SocketIO(app, cors_allowed_origins=cors_origins)
-    app.config["SOCKETIO"] = socketio
-    
-    return app, socketio
+    try:
+        chat_session = app.config["CHAT_SESSION"]
+        config = app.config["KICLI_CONFIG"]
+        
+        # Create new event loop in thread
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            loop.run_until_complete(
+                process_chat_async(
+                    request_id=request_id,
+                    message=message,
+                    files=files,
+                    chat_session=chat_session,
+                    config=config,
+                    socketio=socketio,
+                    app=app,
+                )
+            )
+        finally:
+            loop.close()
+            
+    except Exception as e:
+        logger.error(f"Sync wrapper error {request_id}: {e}\n{traceback.format_exc()}")
+        socketio.emit("chat.response", {
+            "request_id": request_id,
+            "type": "error",
+            "error": f"Error: {type(e).__name__}: {str(e)}",
+        }, room=request_id)
 
 
 # ============================================================================
@@ -240,400 +264,127 @@ async def process_chat_async(request_id: str, message: str, files: list,
 # ============================================================================
 
 def register_routes(app: Flask):
-    """Register REST API endpoints."""
+    """Register all REST API routes."""
     
     @app.route("/api/health", methods=["GET"])
     def health():
         """Health check endpoint."""
-        return jsonify({
-            "status": "ok",
-            "version": "1.0.0",
-        })
+        return jsonify({"status": "ok", "service": "kicli-web"}), 200
     
     @app.route("/api/config", methods=["GET"])
-    def get_config_endpoint():
-        """Return current configuration."""
+    def get_app_config():
+        """Get app configuration (non-sensitive)."""
         try:
             config = app.config["KICLI_CONFIG"]
             return jsonify({
                 "web": config.get("web", {}),
-                "storage": config.get("storage", {}),
-                "llm": config.get("llm", {}),
-            })
+                "openai": {"configured": bool(config.get("openai", {}).get("api_key"))},
+                "ollama": config.get("ollama", {}),
+            }), 200
         except Exception as e:
             app.logger.error(f"Config endpoint error: {e}")
             return jsonify({"error": str(e)}), 500
     
     @app.route("/api/project/files", methods=["GET"])
     def get_project_files():
-        """List project files/folders. Root: ~/dev_flow"""
+        """Get project file tree structure."""
         try:
-            # Max root = ~/dev_flow
-            root = Path.home() / "dev_flow"
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", "."))
             
-            # Get requested path (relative to root)
-            rel_path = request.args.get("path", "").strip()
-            if not rel_path:
-                target_dir = root
-            else:
-                target_dir = root / rel_path
+            def build_tree(path, max_depth=3, current_depth=0):
+                if current_depth >= max_depth or not path.is_dir():
+                    return None
+                
+                items = []
+                try:
+                    for item in sorted(path.iterdir()):
+                        if item.name.startswith("."):
+                            continue
+                        
+                        if item.is_file():
+                            items.append({
+                                "type": "file",
+                                "name": item.name,
+                                "path": str(item.relative_to(project_root)),
+                                "size": item.stat().st_size,
+                            })
+                        elif item.is_dir():
+                            children = build_tree(item, max_depth, current_depth + 1)
+                            if children is not None:
+                                items.append({
+                                    "type": "folder",
+                                    "name": item.name,
+                                    "path": str(item.relative_to(project_root)),
+                                    "children": children,
+                                })
+                except PermissionError:
+                    pass
+                
+                return items
             
-            # Security: prevent directory traversal
-            try:
-                target_dir.resolve().relative_to(root.resolve())
-            except ValueError:
-                return jsonify({"error": "Invalid path"}), 400
+            tree = build_tree(project_root)
+            return jsonify({"files": tree or []}), 200
             
-            # Check if directory exists
-            if not target_dir.exists():
-                return jsonify({"error": "Path not found"}), 404
-            
-            if not target_dir.is_dir():
-                return jsonify({"error": "Not a directory"}), 400
-            
-            # List contents
-            items = []
-            try:
-                for entry in sorted(target_dir.iterdir()):
-                    # Skip hidden files and common ignored dirs
-                    if entry.name.startswith('.'):
-                        continue
-                    
-                    rel = entry.relative_to(root)
-                    items.append({
-                        "name": entry.name,
-                        "type": "folder" if entry.is_dir() else "file",
-                        "path": str(rel),
-                        "size_bytes": entry.stat().st_size if entry.is_file() else None,
-                    })
-            except PermissionError:
-                return jsonify({"error": "Permission denied"}), 403
-            
-            return jsonify({
-                "root": str(root),
-                "current": str(rel_path) if rel_path else "/",
-                "items": items,
-            })
-        
         except Exception as e:
             app.logger.error(f"Project files error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
     
     @app.route("/api/files/<path:file_path>", methods=["GET"])
-    def get_file(file_path: str):
-        """Get file content. Path is relative to ~/dev_flow"""
+    def read_file(file_path):
+        """Read file contents."""
         try:
-            root = Path.home() / "dev_flow"
-            target_file = root / file_path
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", "."))
+            full_path = (project_root / file_path).resolve()
             
-            # Security: prevent directory traversal
-            try:
-                target_file.resolve().relative_to(root.resolve())
-            except ValueError:
-                return jsonify({"error": "Invalid path"}), 400
+            # Security: ensure file is within project_root
+            if not full_path.is_relative_to(project_root.resolve()):
+                return jsonify({"error": "Access denied: file outside project"}), 403
             
-            if not target_file.exists():
+            if not full_path.is_file():
                 return jsonify({"error": "File not found"}), 404
             
-            if not target_file.is_file():
-                return jsonify({"error": "Not a file"}), 400
-            
-            # Read file (limit to 5MB)
-            max_size = 5 * 1024 * 1024
-            file_size = target_file.stat().st_size
-            
-            if file_size > max_size:
-                return jsonify({
-                    "error": f"File too large ({file_size / 1024 / 1024:.1f}MB, max 5MB)"
-                }), 413
-            
-            content = target_file.read_text(encoding='utf-8', errors='replace')
-            
+            content = full_path.read_text(errors="replace")
             return jsonify({
                 "path": file_path,
                 "content": content,
-                "size_bytes": file_size,
-            })
-        
+                "size": len(content),
+            }), 200
+            
         except Exception as e:
             app.logger.error(f"File read error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
-
     
     @app.route("/api/chat", methods=["POST"])
-    def submit_chat():
-        """Submit chat message with optional files."""
+    def chat():
+        """Chat endpoint with streaming response via WebSocket."""
         try:
-            data = request.get_json() or {}
-            message = data.get("message", "").strip()
+            data = request.json or {}
+            message = data.get("message", "")
             files = data.get("files", [])
             
-            if not message:
-                return jsonify({"error": "Message cannot be empty"}), 400
-            
-            # Create request ID
             request_id = str(uuid.uuid4())
-            
-            # Store request info for WebSocket updates
-            app.config["ACTIVE_REQUESTS"][request_id] = {
-                "status": "processing",
-                "message": message,
-                "files": files,
-            }
-            
-            # Log the request
             app.logger.info(f"Chat request {request_id}: message={len(message)} chars, files={len(files)}")
             
-            # Process asynchronously using executor + async
-            def process_chat_sync():
-                """Wrapper to run async function in thread."""
-                try:
-                    # Get or create event loop for this thread
-                    try:
-                        loop = asyncio.get_event_loop()
-                    except RuntimeError:
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                    
-                    # Run async processing
-                    chat_session: ChatSession = app.config["CHAT_SESSION"]
-                    config = app.config["KICLI_CONFIG"]
-                    socketio = app.config["SOCKETIO"]
-                    
-                    loop.run_until_complete(
-                        process_chat_async(
-                            request_id=request_id,
-                            message=message,
-                            files=files,
-                            chat_session=chat_session,
-                            config=config,
-                            socketio=socketio
-                        )
-                    )
-                    
-                except Exception as e:
-                    app.logger.error(f"Chat processing error {request_id}: {e}\n{traceback.format_exc()}")
-                    socketio = app.config["SOCKETIO"]
-                    socketio.emit(
-                        "chat.response",
-                        {
-                            "request_id": request_id,
-                            "type": "error",
-                            "error": str(e),
-                        },
-                        room=request_id
-                    )
-                    app.config["ACTIVE_REQUESTS"][request_id]["status"] = "error"
-            
-            # Start processing in background thread (async-enabled)
-            thread = Thread(target=process_chat_sync, daemon=True)
+            # Spawn thread to handle async chat
+            socketio = app.config["SOCKETIO"]
+            thread = Thread(
+                target=process_chat_sync,
+                args=(request_id, message, files, app, socketio),
+                daemon=True,
+            )
             thread.start()
             
-            return jsonify({
-                "request_id": request_id,
-                "status": "processing",
-            })
-        
+            return jsonify({"request_id": request_id}), 202
+            
         except Exception as e:
             app.logger.error(f"Chat endpoint error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
-    
-    @app.route("/api/logs", methods=["GET"])
-    def get_logs():
-        """Return recent log entries."""
-        try:
-            lines = int(request.args.get("lines", 100))
-            level = request.args.get("level", "INFO").upper()
-            
-            log_dir = app.config["KICLI_CONFIG"].get("storage", {}).get("log_dir", "log")
-            log_file = Path(log_dir) / "kicli-web.log"
-            
-            if not log_file.exists():
-                return jsonify({"logs": []})
-            
-            with open(log_file, "r") as f:
-                log_lines = f.readlines()
-            
-            # Return last N lines
-            recent_logs = log_lines[-lines:]
-            
-            return jsonify({
-                "logs": recent_logs,
-                "total_lines": len(log_lines),
-            })
-        
-        except Exception as e:
-            app.logger.error(f"Logs endpoint error: {e}")
-            return jsonify({"error": str(e)}), 500
-    
-    @app.route("/api/files/upload", methods=["POST"])
-    def upload_file():
-        """Upload file to chat context."""
-        try:
-            if "file" not in request.files:
-                app.logger.warning("No file in request")
-                return jsonify({"error": "No file provided"}), 400
-            
-            file = request.files["file"]
-            if file.filename == "":
-                app.logger.warning("Empty filename")
-                return jsonify({"error": "No filename"}), 400
-            
-            # Read file content
-            try:
-                content = file.read().decode("utf-8", errors="replace")
-            except Exception as e:
-                app.logger.error(f"Failed to read file: {e}")
-                content = str(file.read())
-            
-            file_id = str(uuid.uuid4())
-            
-            # Add to session
-            try:
-                chat_session: ChatSession = app.config["CHAT_SESSION"]
-                chat_session.add_file(file.filename, content)
-            except Exception as e:
-                app.logger.warning(f"Failed to add file to chat session: {e}")
-                # Don't fail, just log it
-            
-            app.logger.info(f"File uploaded: {file.filename} ({len(content)} bytes)")
-            
-            return jsonify({
-                "file_id": file_id,
-                "path": file.filename,
-                "size_bytes": len(content),
-            })
-        
-        except Exception as e:
-            app.logger.error(f"File upload error: {e}\n{traceback.format_exc()}")
-            return jsonify({"error": str(e)}), 500
-    
-    @app.route("/api/files/<file_id>", methods=["DELETE"])
-    def delete_file(file_id: str):
-        """Remove file from context."""
-        try:
-            # TODO: implement file tracking by ID
-            app.logger.info(f"File deleted: {file_id}")
-            return jsonify({"status": "deleted"})
-        except Exception as e:
-            app.logger.error(f"File delete error: {e}")
-            return jsonify({"error": str(e)}), 500
-    
-    @app.route("/api/files/save", methods=["PUT"])
-    def save_file():
-        """Save file content to filesystem."""
-        try:
-            data = request.json or {}
-            file_path = data.get("path", "").strip()
-            content = data.get("content", "")
-            
-            if not file_path:
-                return jsonify({"error": "No file path provided"}), 400
-            
-            # Resolve project root
-            from pathlib import Path
-            project_root = Path.cwd()
-            full_path = project_root / file_path
-            
-            # Security: prevent directory traversal
-            if not full_path.resolve().is_relative_to(project_root.resolve()):
-                app.logger.warning(f"Attempted path traversal: {file_path}")
-                return jsonify({"error": "Invalid file path"}), 403
-            
-            # Create parent directories if needed
-            full_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            # Write file
-            with open(full_path, "w", encoding="utf-8") as f:
-                f.write(content)
-            
-            app.logger.info(f"File saved: {file_path} ({len(content)} bytes)")
-            
-            return jsonify({
-                "status": "saved",
-                "path": file_path,
-                "size_bytes": len(content),
-                "timestamp": datetime.now().isoformat(),
-            })
-        
-        except PermissionError:
-            app.logger.error(f"Permission denied saving file: {file_path}")
-            return jsonify({"error": "Permission denied"}), 403
-        
-        except Exception as e:
-            app.logger.error(f"File save error: {e}\n{traceback.format_exc()}")
-            return jsonify({"error": str(e)}), 500
-    
-    @app.route("/api/files/create", methods=["POST"])
-    def create_file():
-        """Create a new file with provided content."""
-        try:
-            data = request.get_json() or {}
-            name = data.get("name", "").strip()
-            content = data.get("content", "")
-            
-            if not name:
-                return jsonify({"error": "File name is required"}), 400
-            
-            # Security: prevent directory traversal
-            file_path = Path.cwd() / name
-            try:
-                file_path.resolve().relative_to(Path.cwd().resolve())
-            except ValueError:
-                return jsonify({"error": "Invalid file path"}), 400
-            
-            # Create parent directories
-            file_path.parent.mkdir(parents=True, exist_ok=True)
-            
-            # Write file
-            file_path.write_text(content, encoding='utf-8')
-            
-            return jsonify({
-                "status": "created",
-                "path": str(file_path),
-                "size_bytes": len(content.encode('utf-8')),
-                "timestamp": datetime.now().isoformat(),
-            }), 201
-        
-        except PermissionError:
-            return jsonify({"error": "Permission denied"}), 403
-        except Exception as e:
-            app.logger.error(f"File create error: {e}\n{traceback.format_exc()}")
-            return jsonify({"error": str(e)}), 500
-    
-    # ============================================================================
-    # Static Files (Option 1: single-port deployment)
-    # ============================================================================
-    
-    static_dir = Path(__file__).parent / "static"
-    
-    @app.route("/", methods=["GET"])
-    def serve_index():
-        """Serve index.html (SPA root)."""
-        index_file = static_dir / "index.html"
-        if index_file.exists():
-            return send_from_directory(static_dir, "index.html")
-        return jsonify({"error": "Frontend not built. Run: npm run build && collect_static.sh"}), 404
-    
-    @app.route("/<path:filename>", methods=["GET"])
-    def serve_static(filename: str):
-        """Serve static files or fallback to index.html (SPA routing)."""
-        file_path = static_dir / filename
-        
-        # Check if file exists in static/
-        if file_path.exists() and file_path.is_file():
-            return send_from_directory(static_dir, filename)
-        
-        # Fallback to index.html for client-side routing
-        index_file = static_dir / "index.html"
-        if index_file.exists():
-            return send_from_directory(static_dir, "index.html")
-        
-        return jsonify({"error": "Not found"}), 404
 
 
 # ============================================================================
-# WebSocket Events
+# WebSocket Event Handlers
 # ============================================================================
 
 def register_websocket(app: Flask, socketio: SocketIO):
@@ -692,9 +443,7 @@ def main():
         host=host,
         port=port,
         debug=False,
-        use_reloader=False,
         allow_unsafe_werkzeug=True,
-        log_output=False,
     )
 
 
