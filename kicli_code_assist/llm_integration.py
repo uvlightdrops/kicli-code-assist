@@ -356,7 +356,10 @@ class AsyncLLMIntegration:
                     formatted_token = formatter.format_token(event.text)
                     
                     if on_chunk:
-                        on_chunk(formatted_token)
+                        if asyncio.iscoroutinefunction(on_chunk):
+                            await on_chunk(formatted_token)
+                        else:
+                            on_chunk(formatted_token)
                     
                     llm_logger.debug(f"Chunk {chunk_count}: {len(event.text)} chars → {token_counter.get_count()} tokens")
             
