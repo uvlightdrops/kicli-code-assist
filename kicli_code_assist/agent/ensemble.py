@@ -175,13 +175,13 @@ Please provide a concise analysis (2-3 sentences)."""
             )
             
             response = await client.achat(request)
-            text = response.content
+            text = response.message.content
 
             return LLMResponse(
                 provider="openai",
                 text=text,
                 duration_ms=int((time.time() - start_time) * 1000),
-                tokens_used=response.tokens_used or 0,
+                tokens_used=0,  # Not available in ChatResponse
             )
         except Exception as e:
             return LLMResponse(
