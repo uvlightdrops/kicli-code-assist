@@ -1,8 +1,8 @@
 {
   "session_name": "default",
-  "created": 1792585055.1643615,
-  "updated": 1792585262.433016,
-  "message_count": 10,
+  "created": 1792590073.8421397,
+  "updated": 1792590076.852875,
+  "message_count": 13,
   "messages": [
     {
       "role": "user",
@@ -62,6 +62,21 @@
       "role": "user",
       "content": "test",
       "timestamp": "2026-10-21T14:21:02.432929"
+    },
+    {
+      "role": "user",
+      "content": "sxsxs",
+      "timestamp": "2026-10-21T15:37:48.434591"
+    },
+    {
+      "role": "user",
+      "content": "Hello from WebUI!",
+      "timestamp": "2026-10-21T15:41:13.838776"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! How can I assist you today? If you have any questions or need help with code, feel free to ask!",
+      "timestamp": "2026-10-21T15:41:16.852841"
     }
   ]
 }

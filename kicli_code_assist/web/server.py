@@ -123,11 +123,13 @@ async def process_chat_async(request_id: str, message: str, files: list,
         
         # Try to use LLM provider if configured
         try:
-            # Extract OpenAI config from ki.yaml
-            openai_config = config.get("openai", {})
+            # Extract OpenAI config from ki.yaml (nested under llm.providers.openai)
+            llm_config = config.get("llm", {})
+            providers = llm_config.get("providers", {})
+            openai_config = providers.get("openai", {})
             api_key = openai_config.get("api_key")
             model = openai_config.get("model", "gpt-4o-mini")
-            base_url = openai_config.get("base_url")
+            base_url = openai_config.get("base_url", "https://api.openai.com/v1")
             
             if api_key:
                 # Create async OpenAI client
@@ -276,10 +278,14 @@ def register_routes(app: Flask):
         """Get app configuration (non-sensitive)."""
         try:
             config = app.config["KICLI_CONFIG"]
+            llm_config = config.get("llm", {})
+            providers = llm_config.get("providers", {})
+            openai_config = providers.get("openai", {})
+            ollama_config = providers.get("ollama", {})
             return jsonify({
                 "web": config.get("web", {}),
-                "openai": {"configured": bool(config.get("openai", {}).get("api_key"))},
-                "ollama": config.get("ollama", {}),
+                "openai": {"configured": bool(openai_config.get("api_key"))},
+                "ollama": {"configured": bool(ollama_config.get("base_url"))},
             }), 200
         except Exception as e:
             app.logger.error(f"Config endpoint error: {e}")
