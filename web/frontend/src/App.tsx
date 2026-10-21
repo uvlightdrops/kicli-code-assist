@@ -9,7 +9,6 @@ import CodePreview from './components/CodePreview'
 import EditorTabs from './components/EditorTabs'
 import AgentPanel from './components/AgentPanel'
 import TerminalLog from './components/TerminalLog'
-import StatusBar from './components/StatusBar'
 
 interface Message {
   id: string
@@ -248,8 +247,23 @@ const App: React.FC = () => {
 
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-      {/* Header - Title removed per customer request */}
-      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2"></div>
+      {/* Header - Status + Tabs */}
+      <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
+        <div></div>
+        <div className="flex items-center gap-3 text-xs">
+          {/* Connection Status */}
+          <div className="flex items-center gap-2">
+            <div
+              className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500' : 'bg-red-500'} animate-pulse`}
+            ></div>
+            <span className="text-gray-400">
+              {connected ? 'Connected' : 'Disconnected'}
+            </span>
+          </div>
+          {/* Server Info */}
+          <div className="text-gray-500">localhost:8000</div>
+        </div>
+      </div>
 
       {/* Main Tabs */}
       <div className="flex border-b border-gray-700 bg-gray-800">
@@ -298,20 +312,21 @@ const App: React.FC = () => {
           </div>
         </div>
 
-        {/* Center: Chat or Logs or Config */}
-        <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Center + Right: Editor on left, Chat/Agent on right */}
+        <div className="flex-1 flex overflow-hidden">
           {activeTab === 'chat' && (
             <>
-              {/* Editor Area: Tabs + Preview + Agent Panel */}
-              {selectedFile && (
-                <>
-                  <EditorTabs
-                    tabs={openTabs}
-                    onSelectTab={handleSelectTab}
-                    onCloseTab={handleCloseTab}
-                    onAskAgent={() => setShowAgentPanel(!showAgentPanel)}
-                  />
-                  <div className={`${showAgentPanel ? 'flex-1 flex gap-1' : 'flex-1'} overflow-hidden`}>
+              {/* Main Editor Area (Left) */}
+              <div className="flex-1 flex flex-col overflow-hidden">
+                {/* Editor Area: Tabs + Preview */}
+                {selectedFile && (
+                  <>
+                    <EditorTabs
+                      tabs={openTabs}
+                      onSelectTab={handleSelectTab}
+                      onCloseTab={handleCloseTab}
+                      onAskAgent={() => setShowAgentPanel(!showAgentPanel)}
+                    />
                     <div className="flex-1 overflow-auto">
                       <CodePreview 
                         filePath={selectedFile.path} 
@@ -322,22 +337,56 @@ const App: React.FC = () => {
                         isSaving={isSaving}
                       />
                     </div>
-                    {showAgentPanel && (
-                      <div className="w-96 border-l border-gray-700 overflow-hidden">
-                        <AgentPanel 
-                          filePath={selectedFile.path}
-                          onClose={() => setShowAgentPanel(false)}
-                        />
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
+                  </>
+                )}
 
-              {/* Chat Area */}
-              <div className={`${selectedFile ? 'h-64 border-t border-gray-700' : 'flex-1'} flex flex-col`}>
-                <ChatHistory messages={messages} loading={loading} />
-                <ChatInput onSend={handleSendMessage} disabled={loading} />
+                {!selectedFile && (
+                  <div className="flex-1 flex items-center justify-center text-gray-500">
+                    <p>Select a file to start editing</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Right Sidebar: Chat or Agent */}
+              <div className="w-96 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
+                {/* Tab selector */}
+                <div className="flex border-b border-gray-700">
+                  <button
+                    onClick={() => setShowAgentPanel(false)}
+                    className={`flex-1 px-3 py-2 text-xs font-medium transition ${
+                      !showAgentPanel
+                        ? 'border-b-2 border-blue-500 text-blue-400 bg-gray-700'
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    💬 Chat
+                  </button>
+                  <button
+                    onClick={() => setShowAgentPanel(true)}
+                    className={`flex-1 px-3 py-2 text-xs font-medium transition ${
+                      showAgentPanel
+                        ? 'border-b-2 border-yellow-500 text-yellow-400 bg-gray-700'
+                        : 'text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    🤖 Agent
+                  </button>
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 flex flex-col overflow-hidden">
+                  {!showAgentPanel ? (
+                    <>
+                      <ChatHistory messages={messages} loading={loading} />
+                      <ChatInput onSend={handleSendMessage} disabled={loading} />
+                    </>
+                  ) : (
+                    <AgentPanel 
+                      filePath={selectedFile?.path || null}
+                      onClose={() => setShowAgentPanel(false)}
+                    />
+                  )}
+                </div>
               </div>
             </>
           )}
@@ -347,11 +396,6 @@ const App: React.FC = () => {
               <ConfigDisplay />
             </div>
           )}
-        </div>
-
-        {/* Right Sidebar: Status */}
-        <div className="w-64 border-l border-gray-700 bg-gray-800">
-          <StatusBar connected={connected} error={error} />
         </div>
       </div>
     </div>
