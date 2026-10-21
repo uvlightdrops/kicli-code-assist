@@ -13,6 +13,9 @@ import { FeatureNav } from './components/FeatureNav'
 import { ReasoningPanel } from './components/ReasoningPanel'
 import { EnsemblePanel } from './components/EnsemblePanel'
 import { ToolsPanel } from './components/ToolsPanel'
+import { DependencyPanel } from './components/DependencyPanel'
+import { RefactoringPanel } from './components/RefactoringPanel'
+import { MetricsPanel } from './components/MetricsPanel'
 
 interface Message {
   id: string
@@ -47,7 +50,7 @@ const App: React.FC = () => {
   const [connected, setConnected] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAgentPanel, setShowAgentPanel] = useState(false)
-  const [currentFeature, setCurrentFeature] = useState<'explain' | 'reasoning' | 'ensemble' | 'tools'>('explain')
+  const [currentFeature, setCurrentFeature] = useState<'explain' | 'reasoning' | 'ensemble' | 'dependencies' | 'refactor' | 'metrics' | 'tools'>('explain')
   const socketRef = useRef<any>(null)
 
   // Initialize WebSocket
@@ -420,6 +423,21 @@ const App: React.FC = () => {
                           selectedCode={selectedFile?.content}
                           isVisible={true}
                         />
+                      )}
+                      
+                      {/* Dependencies Panel */}
+                      {currentFeature === 'dependencies' && (
+                        <DependencyPanel selectedFile={selectedFile?.path || null} />
+                      )}
+                      
+                      {/* Refactoring Panel */}
+                      {currentFeature === 'refactor' && (
+                        <RefactoringPanel selectedFile={selectedFile?.path || null} />
+                      )}
+                      
+                      {/* Metrics Panel */}
+                      {currentFeature === 'metrics' && (
+                        <MetricsPanel selectedFile={selectedFile?.path || null} />
                       )}
                       
                       {/* Tools Panel */}
