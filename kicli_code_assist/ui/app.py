@@ -512,9 +512,7 @@ class CodeAssistantApp(Static):
         self.app.exit()
     
     def _submit_chat(self, text: str) -> None:
-        """Submit chat message to LLM with full message history (worker thread)."""
-        import asyncio
-        from kicli_code_assist.llm_integration import get_async_integration
+        """Submit chat message to LLM (trigger async worker)."""
         from kicli_code_assist.logging_integration import get_llm_logger
         
         llm_logger = get_llm_logger()
@@ -522,14 +520,28 @@ class CodeAssistantApp(Static):
         llm_logger.info("📨 CHAT SUBMISSION STARTED")
         llm_logger.info(f"User message: {text[:100]}...")
         
+        # Display user message immediately
+        self.chat_display.write(f"[bold cyan]You:[/] {text}\n")
+        self.chat_display.write("[dim]⏳ Querying LLM...[/]\n")
+        
+        # Start async worker (non-blocking)
+        self.run_worker(self._submit_chat_async(text), exclusive=True)
+    
+    async def _submit_chat_async(self, text: str) -> None:
+        """Async worker for LLM query (non-blocking)."""
+        from kicli_code_assist.llm_integration import get_async_integration
+        from kicli_code_assist.logging_integration import get_llm_logger
+        from ki_core.errors import LLMError, AllProvidersFailedError
+        
+        llm_logger = get_llm_logger()
+        
         try:
-            self.chat_display.write(f"[bold cyan]You:[/] {text}\n")
-            
             # Get or create async LLM integration
             llm = get_async_integration()
             if not llm or not llm.provider_chain:
-                self.chat_display.write(f"[bold red]❌ No LLM provider configured[/]\n")
-                llm_logger.error("No LLM provider chain available")
+                error_msg = "❌ No LLM provider configured"
+                self.chat_display.write(f"[bold red]{error_msg}[/]\n")
+                llm_logger.error(error_msg)
                 return
             
             llm_logger.info("✓ LLM integration ready")
@@ -538,33 +550,50 @@ class CodeAssistantApp(Static):
             self.chat_session.add_message("user", text)
             llm_logger.info(f"✓ Message added to session")
             
-            
             # Get all messages (including files added via L key and previous messages)
             # This includes the system prompt automatically
             api_messages = self.chat_session.get_messages_for_api()
             
-            # Show loading indicator
-            self.chat_display.write("[dim]⏳ Querying LLM...[/]\n")
+            # Call async query (non-blocking)
+            response = await llm.query(messages=api_messages)
             
-            # Run async query in sync context (worker thread)
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                response = loop.run_until_complete(
-                    llm.query(messages=api_messages)
-                )
-                self.chat_display.write(f"[bold green]KI:[/] {response}\n")
-                
-                # Add assistant response to session
-                self.chat_session.add_message("assistant", response)
-                
-            finally:
-                loop.close()
+            # Display response
+            self.chat_display.write(f"[bold green]KI:[/] {response}\n")
             
+            # Add assistant response to session
+            self.chat_session.add_message("assistant", response)
+            
+            llm_logger.info(f"✓ Response received: {len(response)} chars")
+            
+        except AllProvidersFailedError as e:
+            error_msg = f"❌ All LLM providers failed: {e.message}"
+            self.chat_display.write(f"[bold red]{error_msg}[/]\n")
+            llm_logger.error(error_msg)
+            
+            # Show recovery hints if available
+            if hasattr(e, 'recovery_hints') and e.recovery_hints:
+                for hint in e.recovery_hints:
+                    self.chat_display.write(f"[yellow]💡 {hint.description}[/]\n")
+                    llm_logger.info(f"Recovery hint: {hint.action} - {hint.description}")
+                    
+        except LLMError as e:
+            error_msg = f"❌ LLM Error: {e.message}"
+            self.chat_display.write(f"[bold red]{error_msg}[/]\n")
+            llm_logger.error(error_msg)
+            
+            # Show recovery hints
+            if hasattr(e, 'recovery_hints') and e.recovery_hints:
+                for hint in e.recovery_hints:
+                    self.chat_display.write(f"[yellow]💡 {hint.description}[/]\n")
+                    llm_logger.info(f"Recovery hint: {hint.action} - {hint.description}")
+                    
         except Exception as e:
-            self.chat_display.write(f"[bold red]❌ Error: {str(e)}[/]\n")
+            error_msg = f"❌ Error: {type(e).__name__}: {str(e)}"
+            self.chat_display.write(f"[bold red]{error_msg}[/]\n")
+            llm_logger.error(error_msg)
             import traceback
             self.chat_display.write(f"[dim]{traceback.format_exc()}[/]\n")
+            llm_logger.error(f"Traceback:\n{traceback.format_exc()}")
     
     def _debug_chat_submit(self, text: str) -> None:
         """Submit debug chat message directly to OpenAI (worker thread)."""
