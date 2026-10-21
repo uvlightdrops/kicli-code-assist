@@ -16,7 +16,7 @@ export default defineConfig({
         },
     },
     build: {
-        outDir: '../../../kicli_code_assist/web/static',
+        outDir: '../../../kicli-code-assist/web/static',
         emptyOutDir: true,
     },
     optimizeDeps: {
