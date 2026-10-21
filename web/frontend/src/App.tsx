@@ -7,6 +7,7 @@ import FileList from './components/FileList'
 import FileBrowser from './components/FileBrowser'
 import CodePreview from './components/CodePreview'
 import EditorTabs from './components/EditorTabs'
+import AgentPanel from './components/AgentPanel'
 import TerminalLog from './components/TerminalLog'
 import StatusBar from './components/StatusBar'
 
@@ -42,6 +43,7 @@ const App: React.FC = () => {
   const [leftPanelTab, setLeftPanelTab] = useState<'files' | 'browser'>('files')
   const [connected, setConnected] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [showAgentPanel, setShowAgentPanel] = useState(false)
   const socketRef = useRef<any>(null)
 
   // Initialize WebSocket
@@ -300,23 +302,34 @@ const App: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden">
           {activeTab === 'chat' && (
             <>
-              {/* Editor Area: Tabs + Preview */}
+              {/* Editor Area: Tabs + Preview + Agent Panel */}
               {selectedFile && (
                 <>
                   <EditorTabs
                     tabs={openTabs}
                     onSelectTab={handleSelectTab}
                     onCloseTab={handleCloseTab}
+                    onAskAgent={() => setShowAgentPanel(!showAgentPanel)}
                   />
-                  <div className="flex-1 overflow-auto">
-                    <CodePreview 
-                      filePath={selectedFile.path} 
-                      content={selectedFile.content}
-                      isDirty={currentTabIsDirty}
-                      onContentChange={handleContentChange}
-                      onSave={handleSaveFile}
-                      isSaving={isSaving}
-                    />
+                  <div className={`${showAgentPanel ? 'flex-1 flex gap-1' : 'flex-1'} overflow-hidden`}>
+                    <div className="flex-1 overflow-auto">
+                      <CodePreview 
+                        filePath={selectedFile.path} 
+                        content={selectedFile.content}
+                        isDirty={currentTabIsDirty}
+                        onContentChange={handleContentChange}
+                        onSave={handleSaveFile}
+                        isSaving={isSaving}
+                      />
+                    </div>
+                    {showAgentPanel && (
+                      <div className="w-96 border-l border-gray-700 overflow-hidden">
+                        <AgentPanel 
+                          filePath={selectedFile.path}
+                          onClose={() => setShowAgentPanel(false)}
+                        />
+                      </div>
+                    )}
                   </div>
                 </>
               )}

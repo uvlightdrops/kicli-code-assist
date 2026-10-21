@@ -19,4 +19,7 @@ export default defineConfig({
         outDir: '../../../kicli_code_assist/web/static',
         emptyOutDir: true,
     },
+    optimizeDeps: {
+        exclude: ['monaco-vim'],
+    },
 });
