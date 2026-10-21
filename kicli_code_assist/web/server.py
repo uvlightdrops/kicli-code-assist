@@ -85,6 +85,21 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     socketio = SocketIO(app, cors_allowed_origins=cors_origins)
     app.config["SOCKETIO"] = socketio
     
+    # Register root route before SocketIO takes over
+    @app.route("/", methods=["GET"])
+    @app.route("/index.html", methods=["GET"])
+    def index():
+        """Serve main index.html from static folder."""
+        try:
+            index_path = Path(__file__).parent / "static" / "index.html"
+            if index_path.exists():
+                with open(index_path, "r") as f:
+                    return f.read()
+            return "<!DOCTYPE html><html><body>404: index.html not found</body></html>", 404
+        except Exception as e:
+            app.logger.error(f"Failed to serve index.html: {e}")
+            return "<!DOCTYPE html><html><body>500: Server error</body></html>", 500
+    
     return app, socketio
 
 
@@ -110,12 +125,8 @@ async def process_chat_async(request_id: str, message: str, files: list,
     
     try:
         # Add user message to session
-        chat_session.add_message("user", message)
-        
-        # Add files to session as context
-        for file_obj in files:
-            if "path" in file_obj and "content" in file_obj:
-                chat_session.add_file(file_obj["path"], file_obj["content"])
+        # Note: files are passed directly in the message, not stored in session
+        chat_session.add_message("user", message, include_context=bool(files))
         
         # Get formatted messages for API
         messages = chat_session.get_messages_for_api()

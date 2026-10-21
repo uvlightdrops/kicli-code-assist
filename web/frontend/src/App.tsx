@@ -16,6 +16,7 @@ import { ToolsPanel } from './components/ToolsPanel'
 import { DependencyPanel } from './components/DependencyPanel'
 import { RefactoringPanel } from './components/RefactoringPanel'
 import { MetricsPanel } from './components/MetricsPanel'
+import { ThinkingStepsPanel } from './components/ThinkingStepsPanel'
 
 interface Message {
   id: string
@@ -393,12 +394,19 @@ const App: React.FC = () => {
                     </>
                   ) : (
                     <>
-                      {/* Explain Panel (default AgentPanel) */}
+                      {/* Explain Panel (with Thinking Steps below) */}
                       {currentFeature === 'explain' && (
-                        <AgentPanel 
-                          filePath={selectedFile?.path || null}
-                          onClose={() => setShowAgentPanel(false)}
-                        />
+                        <div className="flex flex-col h-full">
+                          <div className="flex-1 overflow-hidden min-h-0">
+                            <AgentPanel 
+                              filePath={selectedFile?.path || null}
+                              onClose={() => setShowAgentPanel(false)}
+                            />
+                          </div>
+                          <div className="h-1/3 overflow-hidden min-h-0">
+                            <ThinkingStepsPanel selectedFile={selectedFile?.path || null} />
+                          </div>
+                        </div>
                       )}
                       
                       {/* Reasoning Panel */}
