@@ -64,3 +64,4 @@ Thumbs.db
 *.db
 
 tmp_*
+web/static/
