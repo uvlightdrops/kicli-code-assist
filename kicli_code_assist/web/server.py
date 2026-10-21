@@ -503,6 +503,181 @@ def register_routes(app: Flask):
             app.logger.error(f"Agent ensemble error: {e}\n{traceback.format_exc()}")
             return jsonify({"status": "error", "error": str(e)}), 500
 
+    @app.route("/api/agent/dependencies", methods=["POST"])
+    def agent_dependencies():
+        """Agent: Analyze dependencies and imports for a file or directory."""
+        try:
+            from kicli_code_assist.agent.dependencies import DependencyAnalyzer
+            
+            data = request.json or {}
+            path = data.get("path")
+            is_dir = data.get("is_dir", False)
+            
+            if not path:
+                return jsonify({"error": "Missing 'path' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize dependency analyzer
+            analyzer = DependencyAnalyzer(project_root)
+            
+            # Run analysis (sync wrapper for async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                if is_dir:
+                    graph = loop.run_until_complete(
+                        analyzer.analyze_directory(Path(path))
+                    )
+                else:
+                    graph = loop.run_until_complete(
+                        analyzer.analyze_file(Path(path))
+                    )
+            finally:
+                loop.close()
+            
+            return jsonify(graph.to_dict()), 200 if graph.status == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent dependencies error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
+    @app.route("/api/agent/refactor", methods=["POST"])
+    def agent_refactor():
+        """Agent: Suggest refactorings for a file."""
+        try:
+            from kicli_code_assist.agent.refactoring import RefactoringAnalyzer
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize refactoring analyzer
+            analyzer = RefactoringAnalyzer(project_root)
+            
+            # Run analysis (sync wrapper for async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(
+                    analyzer.analyze_file(Path(file_path))
+                )
+            finally:
+                loop.close()
+            
+            return jsonify(result.to_dict()), 200 if result.status == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent refactor error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
+    @app.route("/api/agent/metrics", methods=["POST"])
+    def agent_metrics():
+        """Agent: Analyze code metrics for a file."""
+        try:
+            from kicli_code_assist.agent.metrics import CodeMetricsAnalyzer
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            
+            # Initialize metrics analyzer
+            analyzer = CodeMetricsAnalyzer(project_root)
+            
+            # Run analysis (sync wrapper for async)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                result = loop.run_until_complete(
+                    analyzer.analyze_file(Path(file_path))
+                )
+            finally:
+                loop.close()
+            
+            return jsonify(result.to_dict()), 200 if result.status == "ok" else 500
+            
+        except Exception as e:
+            app.logger.error(f"Agent metrics error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
+    @app.route("/api/agent/stream-reason", methods=["POST"])
+    def agent_stream_reason():
+        """Agent: Reasoning with WebSocket streaming for real-time thinking steps."""
+        try:
+            from kicli_code_assist.agent.streaming import StreamingReasoningAgent
+            
+            data = request.json or {}
+            file_path = data.get("file")
+            query = data.get("query", "How can this code be improved?")
+            request_id = data.get("request_id", str(uuid.uuid4()))
+            
+            if not file_path:
+                return jsonify({"error": "Missing 'file' parameter"}), 400
+            
+            config = app.config["KICLI_CONFIG"]
+            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            socketio = app.config["SOCKETIO"]
+            
+            # Spawn thread to handle async streaming
+            def stream_reasoning():
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    agent = StreamingReasoningAgent(project_root)
+                    
+                    def on_step(step):
+                        """Emit step via WebSocket."""
+                        socketio.emit(
+                            "reasoning:step_complete",
+                            {
+                                "request_id": request_id,
+                                "step": step.__dict__,
+                            },
+                            room=f"reasoning:{request_id}",
+                        )
+                    
+                    # Run reasoning with streaming callback
+                    result = loop.run_until_complete(
+                        agent.reason_about_code_streaming(
+                            file_path=project_root / file_path,
+                            query=query,
+                            request_id=request_id,
+                            on_step_complete=on_step,
+                        )
+                    )
+                    
+                    # Emit final result
+                    socketio.emit(
+                        "reasoning:complete",
+                        {
+                            "request_id": request_id,
+                            "result": result.to_dict(),
+                        },
+                        room=f"reasoning:{request_id}",
+                    )
+                finally:
+                    loop.close()
+            
+            thread = Thread(target=stream_reasoning, daemon=True)
+            thread.start()
+            
+            return jsonify({"request_id": request_id, "status": "streaming"}), 202
+            
+        except Exception as e:
+            app.logger.error(f"Stream reason error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
+
     @app.route("/api/chat", methods=["POST"])
     def chat():
         """Chat endpoint with streaming response via WebSocket."""
@@ -564,6 +739,25 @@ def register_websocket(app: Flask, socketio: SocketIO):
         if channel:
             leave_room(channel)
             app.logger.debug(f"Client unsubscribed from {channel}")
+    
+    @socketio.on("reasoning:subscribe")
+    def handle_reasoning_subscribe(data):
+        """Subscribe to reasoning stream for a request_id."""
+        request_id = data.get("request_id", "")
+        if request_id:
+            room = f"reasoning:{request_id}"
+            join_room(room)
+            app.logger.debug(f"Client subscribed to {room}")
+            emit("reasoning:subscribed", {"request_id": request_id})
+    
+    @socketio.on("reasoning:unsubscribe")
+    def handle_reasoning_unsubscribe(data):
+        """Unsubscribe from reasoning stream."""
+        request_id = data.get("request_id", "")
+        if request_id:
+            room = f"reasoning:{request_id}"
+            leave_room(room)
+            app.logger.debug(f"Client unsubscribed from {room}")
 
 
 # ============================================================================

@@ -33,6 +33,24 @@ const FEATURES: Feature[] = [
     description: 'OpenAI + Ollama consensus voting',
   },
   {
+    id: 'dependencies',
+    label: 'Dependencies',
+    icon: '🔗',
+    description: 'Analyze imports and dependencies',
+  },
+  {
+    id: 'refactor',
+    label: 'Refactor',
+    icon: '⚡',
+    description: 'Get refactoring suggestions',
+  },
+  {
+    id: 'metrics',
+    label: 'Metrics',
+    icon: '📊',
+    description: 'Code health and complexity metrics',
+  },
+  {
     id: 'tools',
     label: 'Tools',
     icon: '⚙️',
