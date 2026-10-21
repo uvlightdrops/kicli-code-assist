@@ -16,6 +16,7 @@ from typing import Dict, Any, Optional
 from threading import Thread
 from datetime import datetime
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
@@ -27,6 +28,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.logging_integration import _get_or_create_logger, _get_log_dir
 from ki_core.config import ConfigManager
+from ki_core.adapters import AsyncOpenAIClient, ProviderChain
+from ki_core.core.models import ChatRequest, Message, Role
 
 
 # ============================================================================
@@ -58,6 +61,140 @@ def create_app(config: Optional[Dict] = None) -> Flask:
     
     # Store config in app context
     app.config["KICLI_CONFIG"] = config
+    
+    # ThreadPoolExecutor for async operations
+    app.config["EXECUTOR"] = ThreadPoolExecutor(max_workers=4)
+    app.config["ACTIVE_REQUESTS"] = {}
+    
+    return app
+
+
+async def process_chat_async(request_id: str, message: str, files: list, 
+                             chat_session: ChatSession, config: Dict,
+                             socketio: SocketIO) -> None:
+    """Async chat processing with LLM provider chain.
+    
+    Args:
+        request_id: Unique request identifier
+        message: User message text
+        files: List of file objects {path, content}
+        chat_session: ChatSession instance
+        config: App configuration
+        socketio: SocketIO instance for WebSocket emit
+    """
+    logger = logging.getLogger("kicli-web")
+    
+    try:
+        # Add user message to session
+        chat_session.add_message("user", message)
+        
+        # Add files to session as context
+        for file_obj in files:
+            if "path" in file_obj and "content" in file_obj:
+                chat_session.add_file(file_obj["path"], file_obj["content"])
+        
+        # Get formatted messages for API
+        messages = chat_session.get_messages_for_api()
+        logger.info(f"Request {request_id}: {len(messages)} messages prepared")
+        
+        # Try to use LLM provider if configured
+        try:
+            # Extract OpenAI config from ki.yaml
+            openai_config = config.get("openai", {})
+            api_key = openai_config.get("api_key")
+            model = openai_config.get("model", "gpt-4o-mini")
+            base_url = openai_config.get("base_url")
+            
+            if api_key:
+                # Create async OpenAI client
+                client = AsyncOpenAIClient(
+                    api_key=api_key,
+                    model=model,
+                    base_url=base_url,
+                )
+                
+                # Build ChatRequest for LLM
+                from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
+                
+                chat_request = ChatRequest(
+                    messages=[
+                        Message(role=Role.USER if msg.get("role") == "user" else Role.ASSISTANT, 
+                               content=msg.get("content", ""))
+                        for msg in messages
+                    ],
+                    model=model,
+                    temperature=0.7,
+                )
+                
+                # Stream response from LLM
+                logger.info(f"Request {request_id}: Streaming from OpenAI ({model})")
+                socketio.emit("chat.response", {
+                    "request_id": request_id,
+                    "type": "status",
+                    "content": f"🤖 Querying LLM: {model}...",
+                }, room=request_id)
+                
+                response_text = ""
+                chunk_count = 0
+                
+                async for stream_event in client.achat_stream(chat_request):
+                    # Check if this is a content token
+                    if stream_event.type == StreamEventType.TOKEN:
+                        chunk = stream_event.text
+                        response_text += chunk
+                        chunk_count += 1
+                        
+                        # Emit chunk via WebSocket (real-time streaming)
+                        socketio.emit("chat.response", {
+                            "request_id": request_id,
+                            "type": "chunk",
+                            "content": chunk,
+                        }, room=request_id)
+                        
+                        logger.debug(f"Request {request_id}: Chunk {chunk_count} ({len(chunk)} chars)")
+                    
+                    elif stream_event.type == StreamEventType.DONE:
+                        logger.info(f"Request {request_id}: Stream completed")
+                        break
+                
+                # Add assistant response to chat history
+                chat_session.add_message("assistant", response_text)
+                logger.info(f"Request {request_id}: Response complete ({len(response_text)} chars, {chunk_count} chunks)")
+                
+                # Emit completion
+                socketio.emit("chat.response", {
+                    "request_id": request_id,
+                    "type": "complete",
+                    "status": "success",
+                }, room=request_id)
+                
+            else:
+                # No API key configured - show error
+                logger.warning(f"Request {request_id}: No OpenAI API key configured")
+                error_msg = "❌ OpenAI API key not configured in ki.yaml. Please add openai.api_key to enable LLM."
+                socketio.emit("chat.response", {
+                    "request_id": request_id,
+                    "type": "error",
+                    "error": error_msg,
+                }, room=request_id)
+                
+        except ImportError as e:
+            # AsyncOpenAI not installed
+            logger.error(f"Request {request_id}: ImportError: {e}")
+            error_msg = f"❌ Missing dependency: {str(e)}. Install: pip install openai"
+            socketio.emit("chat.response", {
+                "request_id": request_id,
+                "type": "error",
+                "error": error_msg,
+            }, room=request_id)
+        
+    except Exception as e:
+        logger.error(f"Chat processing error {request_id}: {type(e).__name__}: {e}\n{traceback.format_exc()}")
+        socketio.emit("chat.response", {
+            "request_id": request_id,
+            "type": "error",
+            "error": f"Error: {type(e).__name__}: {str(e)}",
+        }, room=request_id)
     app.config["CHAT_SESSION"] = ChatSession()
     app.config["ACTIVE_REQUESTS"] = {}
     
@@ -228,56 +365,32 @@ def register_routes(app: Flask):
             # Log the request
             app.logger.info(f"Chat request {request_id}: message={len(message)} chars, files={len(files)}")
             
-            # Process asynchronously in thread
-            def process_chat():
+            # Process asynchronously using executor + async
+            def process_chat_sync():
+                """Wrapper to run async function in thread."""
                 try:
+                    # Get or create event loop for this thread
+                    try:
+                        loop = asyncio.get_event_loop()
+                    except RuntimeError:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                    
+                    # Run async processing
                     chat_session: ChatSession = app.config["CHAT_SESSION"]
-                    
-                    # Add user message to session (role first, then content)
-                    chat_session.add_message("user", message)
-                    
-                    # Add files to session as context
-                    for file_obj in files:
-                        if "path" in file_obj and "content" in file_obj:
-                            chat_session.add_file(file_obj["path"], file_obj["content"])
-                    
-                    # Get formatted messages for API
-                    messages = chat_session.get_messages_for_api()
-                    
-                    app.logger.info(f"Request {request_id}: {len(messages)} messages prepared")
-                    
-                    # Call LLM (this will fail without AsyncOllamaClient, expected)
-                    from ki_core.adapters import ProviderChain
-                    provider_chain = ProviderChain.from_config(app.config["KICLI_CONFIG"])
-                    
-                    # For now, simulate streaming response
-                    app.config["ACTIVE_REQUESTS"][request_id]["status"] = "streaming"
-                    
-                    response_text = "Mock response: AsyncOllamaClient not yet implemented. Please use OpenAI provider for testing."
-                    
-                    # Emit via WebSocket
+                    config = app.config["KICLI_CONFIG"]
                     socketio = app.config["SOCKETIO"]
-                    socketio.emit(
-                        "chat.response",
-                        {
-                            "request_id": request_id,
-                            "type": "chunk",
-                            "content": response_text,
-                        },
-                        room=request_id
-                    )
                     
-                    socketio.emit(
-                        "chat.response",
-                        {
-                            "request_id": request_id,
-                            "type": "complete",
-                            "status": "success",
-                        },
-                        room=request_id
+                    loop.run_until_complete(
+                        process_chat_async(
+                            request_id=request_id,
+                            message=message,
+                            files=files,
+                            chat_session=chat_session,
+                            config=config,
+                            socketio=socketio
+                        )
                     )
-                    
-                    app.config["ACTIVE_REQUESTS"][request_id]["status"] = "complete"
                     
                 except Exception as e:
                     app.logger.error(f"Chat processing error {request_id}: {e}\n{traceback.format_exc()}")
@@ -293,8 +406,8 @@ def register_routes(app: Flask):
                     )
                     app.config["ACTIVE_REQUESTS"][request_id]["status"] = "error"
             
-            # Start processing in background thread
-            thread = Thread(target=process_chat, daemon=True)
+            # Start processing in background thread (async-enabled)
+            thread = Thread(target=process_chat_sync, daemon=True)
             thread.start()
             
             return jsonify({

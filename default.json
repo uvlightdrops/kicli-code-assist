@@ -1,8 +1,8 @@
 {
   "session_name": "default",
-  "created": 1792449003.096168,
-  "updated": 1792449003.096286,
-  "message_count": 4,
+  "created": 1792566814.685089,
+  "updated": 1792566871.684612,
+  "message_count": 8,
   "messages": [
     {
       "role": "user",
@@ -32,6 +32,26 @@
       "role": "user",
       "content": "What does this file do?",
       "timestamp": "2026-10-20T00:30:03.096266"
+    },
+    {
+      "role": "user",
+      "content": "asdad",
+      "timestamp": "2026-10-21T08:57:07.390844"
+    },
+    {
+      "role": "user",
+      "content": "wtwt",
+      "timestamp": "2026-10-21T09:07:52.900064"
+    },
+    {
+      "role": "user",
+      "content": "hej",
+      "timestamp": "2026-10-21T09:13:34.684284"
+    },
+    {
+      "role": "user",
+      "content": "gheghehg",
+      "timestamp": "2026-10-21T09:14:31.684569"
     }
   ]
 }
