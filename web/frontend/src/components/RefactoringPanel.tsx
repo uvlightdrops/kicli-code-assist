@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { AlertCircle, Zap, Lightbulb } from 'lucide-react';
+import { useProject } from '../hooks/useProject';
 
 export const RefactoringPanel: React.FC<{ selectedFile: string | null }> = ({ selectedFile }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const { current: currentProject } = useProject();
 
   const analyzeRefactoring = async () => {
     if (!selectedFile) return;
@@ -16,6 +18,7 @@ export const RefactoringPanel: React.FC<{ selectedFile: string | null }> = ({ se
     try {
       const response = await axios.post('/api/agent/refactor', {
         file: selectedFile,
+        project: currentProject?.path || '',
       });
       setResult(response.data);
     } catch (err) {

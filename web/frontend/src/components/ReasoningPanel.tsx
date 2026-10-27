@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
+import { useProject } from '../hooks/useProject';
 
 interface ThinkingStep {
   step: number;
@@ -32,6 +33,7 @@ export function ReasoningPanel({ file, isVisible }: ReasoningPanelProps) {
   const [query, setQuery] = useState('How can this code be improved?');
   const [error, setError] = useState('');
   const stepsEndRef = useRef<HTMLDivElement>(null);
+  const { current: currentProject } = useProject();
 
   // Auto-scroll to latest thinking step
   useEffect(() => {
@@ -54,6 +56,7 @@ export function ReasoningPanel({ file, isVisible }: ReasoningPanelProps) {
       const response = await axios.post('/api/agent/reason', {
         file,
         query,
+        project: currentProject?.path || '',
       });
 
       if (response.data.status === 'ok') {

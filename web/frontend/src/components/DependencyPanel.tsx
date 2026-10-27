@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { AlertCircle, Package, Link2 } from 'lucide-react';
+import { useProject } from '../hooks/useProject';
 
 export const DependencyPanel: React.FC<{ selectedFile: string | null }> = ({ selectedFile }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const { current: currentProject } = useProject();
 
   const analyzeDependencies = async () => {
     if (!selectedFile) return;
@@ -17,6 +19,7 @@ export const DependencyPanel: React.FC<{ selectedFile: string | null }> = ({ sel
       const response = await axios.post('/api/agent/dependencies', {
         path: selectedFile,
         is_dir: false,
+        project: currentProject?.path || '',
       });
       setResult(response.data);
     } catch (err) {

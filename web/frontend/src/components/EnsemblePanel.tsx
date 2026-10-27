@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useProject } from '../hooks/useProject';
 
 interface LLMResponse {
   provider: string;
@@ -31,6 +32,7 @@ export function EnsemblePanel({ file, selectedCode, isVisible }: EnsemblePanelPr
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState('What is this code doing?');
   const [error, setError] = useState('');
+  const { current: currentProject } = useProject();
 
   const handleEnsemble = async () => {
     if (!selectedCode && !file) {
@@ -46,6 +48,7 @@ export function EnsemblePanel({ file, selectedCode, isVisible }: EnsemblePanelPr
       const response = await axios.post('/api/agent/ensemble', {
         code: selectedCode || '',
         question,
+        project: currentProject?.path || '',
       });
 
       if (response.data.status === 'ok') {
