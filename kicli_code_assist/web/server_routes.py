@@ -152,8 +152,8 @@ def register_routes(app: Flask):
                 "query": coord_result.query,
                 "answer": coord_result.answer,
                 "intent": {
-                    "type": coord_result.intent.type,
-                    "confidence": coord_result.intent.confidence
+                    "type": coord_result.intent.get("type", "unknown") if isinstance(coord_result.intent, dict) else coord_result.intent.type,
+                    "confidence": coord_result.intent.get("confidence", 0.0) if isinstance(coord_result.intent, dict) else coord_result.intent.confidence
                 },
                 "workflow": coord_result.workflow,
                 "agents_used": coord_result.agents_used,
