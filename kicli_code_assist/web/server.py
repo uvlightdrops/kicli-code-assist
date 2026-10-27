@@ -28,88 +28,17 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.logging_integration import _get_or_create_logger, _get_log_dir
-from kicli_code_assist.agent.intent_detector import AgentIntentDetector
-from kicli_code_assist.agent.executor import AgentExecutor
-from kicli_code_assist.agent.aggregator import ResultAggregator
-from kicli_code_assist.agent.answer_generator import AnswerGenerator, AnalysisContext
-from ki_core.config import ConfigManager
+from kicli_code_assist.agent.answer_generator import AnalysisContext
 from ki_core.adapters import AsyncOpenAIClient, ProviderChain
 from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
 
-
-# ============================================================================
-# Configuration & Setup
-# ============================================================================
-
-def get_config() -> Dict[str, Any]:
-    """Load configuration from ki.yaml via ConfigManager."""
-    try:
-        config_manager = ConfigManager()
-        config = config_manager.load()
-        return config
-    except Exception as e:
-        logger = logging.getLogger("kicli-web")
-        logger.error(f"Failed to load config: {e}")
-        return {
-            "web": {"host": "127.0.0.1", "port": 8000},
-            "storage": {"log_dir": str(Path.home() / "dev_data" / "kicli-code-assist" / "log")},
-        }
-
-
-# ============================================================================
-# Phase 2D: Singleton Instances for Phase 2 Components
-# ============================================================================
-
-_intent_detector: Optional[AgentIntentDetector] = None
-_executor: Optional[AgentExecutor] = None
-_aggregator: Optional[ResultAggregator] = None
-_answer_generator: Optional[AnswerGenerator] = None
-
-
-def get_intent_detector(project_root: Optional[Path] = None) -> AgentIntentDetector:
-    """Get or create singleton AgentIntentDetector instance."""
-    global _intent_detector
-    if _intent_detector is None:
-        _intent_detector = AgentIntentDetector()
-        logging.getLogger("kicli-web").info("Initialized AgentIntentDetector (Phase 2A)")
-    return _intent_detector
-
-
-def get_executor(project_root: Optional[Path] = None) -> AgentExecutor:
-    """Get or create singleton AgentExecutor instance."""
-    global _executor
-    if _executor is None:
-        if project_root is None:
-            project_root = Path.cwd()
-        _executor = AgentExecutor(
-            project_root=project_root,
-            intent_detector=get_intent_detector(),
-            enable_cache=True
-        )
-        logging.getLogger("kicli-web").info("Initialized AgentExecutor (Phase 2B)")
-    return _executor
-
-
-def get_aggregator(provider_chain: Optional[ProviderChain] = None) -> ResultAggregator:
-    """Get or create singleton ResultAggregator instance."""
-    global _aggregator
-    if _aggregator is None:
-        _aggregator = ResultAggregator(
-            provider="openai",
-            provider_chain=provider_chain,
-            enable_llm=True
-        )
-        logging.getLogger("kicli-web").info("Initialized ResultAggregator (Phase 2C)")
-    return _aggregator
-
-
-def get_answer_generator(provider_chain: Optional[ProviderChain] = None) -> AnswerGenerator:
-    """Get or create singleton AnswerGenerator instance."""
-    global _answer_generator
-    if _answer_generator is None:
-        _answer_generator = AnswerGenerator(provider_chain=provider_chain)
-        logging.getLogger("kicli-web").info("Initialized AnswerGenerator (Phase 2E)")
-    return _answer_generator
+# Import refactored modules
+from kicli_code_assist.web.server_config import (
+    get_config, setup_logging, get_cors_origins, get_web_settings
+)
+from kicli_code_assist.web.server_instances import (
+    get_intent_detector, get_executor, get_aggregator, get_answer_generator
+)
 
 
 def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
@@ -1433,6 +1362,17 @@ def register_websocket(app: Flask, socketio: SocketIO):
             room = f"reasoning:{request_id}"
             leave_room(room)
             app.logger.debug(f"Client unsubscribed from {room}")
+
+
+# ============================================================================
+# Global App Instances (for WSGI/production deployment)
+# ============================================================================
+
+_config = get_config()
+app, socketio = create_app(_config)
+register_routes(app)
+register_project_routes(app)
+register_websocket(app, socketio)
 
 
 # ============================================================================

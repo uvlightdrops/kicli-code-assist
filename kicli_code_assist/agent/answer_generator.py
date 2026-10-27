@@ -1,8 +1,8 @@
 """LLM-based answer generator for conversational responses (Phase 2E).
 
-This module generates natural language answers to user queries based on
-analysis results, creating true conversational responses instead of just
-technical summaries.
+This module generates detailed, conversational natural language answers to user 
+queries based on analysis results, creating true conversational responses instead 
+of just technical summaries.
 """
 
 from __future__ import annotations
@@ -31,8 +31,8 @@ class AnalysisContext:
 class AnswerGenerator:
     """Generate conversational answers based on analysis results.
     
-    Uses LLM to synthesize technical analysis into natural language
-    responses that directly answer user questions.
+    Uses LLM to synthesize technical analysis into detailed natural language
+    responses that directly answer user questions in 3-5+ sentences.
     """
     
     def __init__(self, provider_chain=None):
@@ -48,154 +48,197 @@ class AnswerGenerator:
         query: str,
         context: AnalysisContext,
     ) -> str:
-        """Generate a conversational answer to the user query.
+        """Generate a detailed conversational answer to the user query.
         
         Args:
             query: Original user query
             context: AnalysisContext with analysis results
             
         Returns:
-            Natural language answer in the user's language (German/English)
+            Detailed natural language answer (3-5+ sentences) in user's language
         """
         if not self.provider_chain:
-            return self._fallback_answer(query, context)
+            return self._fallback_answer_detailed(query, context)
         
         try:
-            prompt = self._build_answer_prompt(query, context)
+            prompt = self._build_answer_prompt_detailed(query, context)
             request = ChatRequest(
                 messages=[
                     Message(
                         role=Role.SYSTEM,
-                        content=self._build_system_prompt(),
+                        content=self._build_system_prompt_detailed(),
                     ),
                     Message(role=Role.USER, content=prompt),
                 ],
-                temperature=0.7,  # More creative than classification
-                max_tokens=500,
+                temperature=0.7,
+                max_tokens=1000,
             )
             
             response = await self.provider_chain.achat(request)
             answer = response.message.content
             
-            logger.debug(f"Generated answer ({len(answer)} chars)")
+            logger.debug(f"Generated detailed answer ({len(answer)} chars)")
             return answer
             
         except Exception as e:
             logger.warning(f"LLM answer generation failed: {e}, using fallback")
-            return self._fallback_answer(query, context)
+            return self._fallback_answer_detailed(query, context)
     
-    def _build_system_prompt(self) -> str:
-        """Build system prompt for answer generation."""
-        return """You are a helpful code analysis assistant that explains code to developers.
-Your answers should be:
-- Direct and conversational (not just listing facts)
-- In the same language as the query (German or English)
-- Focused on answering the specific question asked
-- Concise but informative (2-4 sentences typically)
-- Technical but accessible
+    def _build_system_prompt_detailed(self) -> str:
+        """Build system prompt for detailed answer generation."""
+        return """You are an expert code analysis assistant that provides detailed, thorough explanations of code to developers.
 
-If the query is in German, respond in German.
-If the query is in English, respond in English."""
-    
-    def _build_answer_prompt(
-        self,
-        query: str,
-        context: AnalysisContext,
-    ) -> str:
-        """Build the prompt for generating an answer.
-        
-        Args:
-            query: Original user query
-            context: Analysis results
-            
-        Returns:
-            Formatted prompt for the LLM
-        """
+Your response guidelines:
+- Write 3-5+ detailed sentences minimum (be comprehensive)
+- Use the same language as the user's query (German or English)
+- Focus directly on answering the specific question
+- Be technical but accessible
+- Include specific details about structure, purpose, quality, complexity
+- For "Explain": describe what the code does, its purpose, key functions/classes
+- For "Optimize": focus on performance issues and improvement opportunities
+- For "Review": highlight quality issues and best practice violations
+- Provide actionable insights and recommendations
+
+Response style:
+- Start with a clear statement of what the code does
+- Explain the structure and key components
+- Discuss quality and complexity metrics
+- Mention notable characteristics or issues
+- Suggest improvements if relevant
+- Be thorough, specific, and helpful
+
+If German: Antworte auf Deutsch
+If English: Respond in English"""
+
+    def _build_answer_prompt_detailed(self, query: str, context: AnalysisContext) -> str:
+        """Build a detailed prompt for comprehensive answers."""
         file_name = context.file_path.split('/')[-1]
-        
         prompt = f"""User question: {query}
+File: {file_name}
 
-File being analyzed: {file_name}
-
-Analysis results:
+Analysis data to synthesize:
 """
         
         if context.structure:
             s = context.structure
             classes_count = len(s.get('classes', {}))
             functions_count = len(s.get('functions', {}))
-            prompt += f"\n- Structure: {functions_count} functions, {classes_count} classes"
+            imports_count = len(s.get('imports', []))
+            
+            prompt += f"\nSTRUCTURE:\n"
+            prompt += f"- {functions_count} functions, {classes_count} classes, {imports_count} imports\n"
+            
+            if classes_count > 0:
+                classes = list(s.get('classes', {}).keys())[:5]
+                prompt += f"- Classes: {', '.join(classes)}\n"
+            
             if functions_count > 0:
-                funcs = list(s.get('functions', {}).keys())[:3]
-                prompt += f" (main: {', '.join(funcs)})"
+                funcs = list(s.get('functions', {}).keys())[:10]
+                prompt += f"- Functions: {', '.join(funcs)}\n"
         
         if context.metrics:
             m = context.metrics
+            prompt += f"\nQUALITY METRICS:\n"
+            
             if 'maintainability_index' in m:
-                prompt += f"\n- Maintainability: {m['maintainability_index']:.0f}/100"
+                mi = m['maintainability_index']
+                quality = "high (>80)" if mi > 80 else "medium (50-80)" if mi > 50 else "low (<50)"
+                prompt += f"- Maintainability Index: {mi:.0f}/100 ({quality})\n"
+            
             if 'average_complexity' in m:
-                prompt += f"\n- Complexity: {m['average_complexity']:.1f} (average)"
-            if 'issues' in m:
-                prompt += f"\n- Issues found: {len(m['issues'])}"
+                ac = m['average_complexity']
+                level = "low" if ac < 3 else "medium" if ac < 7 else "high"
+                prompt += f"- Avg Cyclomatic Complexity: {ac:.1f} ({level})\n"
+            
+            if 'lines_of_code' in m:
+                prompt += f"- Lines of Code: {m['lines_of_code']}\n"
+            
+            if 'issues' in m and m['issues']:
+                prompt += f"- Issues/Warnings: {len(m['issues'])} found\n"
+                for issue in m['issues'][:3]:
+                    prompt += f"  • {issue}\n"
         
         if context.dependencies:
             d = context.dependencies
-            prompt += f"\n- Dependencies: {len(d.get('externals', {}))} external, {len(d.get('internals', {}))} internal"
+            prompt += f"\nDEPENDENCIES:\n"
+            prompt += f"- {len(d.get('externals', {}))} external, {len(d.get('internals', {}))} internal\n"
+            
             if d.get('circular_dependencies'):
-                prompt += f" ({len(d['circular_dependencies'])} circular)"
+                prompt += f"- ⚠️ {len(d['circular_dependencies'])} circular dependencies\n"
         
         if context.refactor_suggestions:
             r = context.refactor_suggestions
             if r.get('recommendations'):
-                prompt += f"\n- Refactoring suggestions: {len(r['recommendations'])} recommendations"
+                prompt += f"\nREFACTORING OPPORTUNITIES:\n"
+                for rec in r['recommendations'][:5]:
+                    prompt += f"- {rec}\n"
         
-        prompt += "\n\nBased on these results, answer the user's question directly."
+        prompt += f"""
+Now write a detailed, conversational answer to the user's question.
+Be thorough (3-5+ sentences), specific (use numbers/names from the analysis), 
+and helpful (provide insights and recommendations).
+Address the specific question they asked."""
+        
         return prompt
     
-    def _fallback_answer(
-        self,
-        query: str,
-        context: AnalysisContext,
-    ) -> str:
-        """Fallback answer generation without LLM.
-        
-        Args:
-            query: Original user query
-            context: Analysis results
-            
-        Returns:
-            Simple templated answer
-        """
+    def _fallback_answer_detailed(self, query: str, context: AnalysisContext) -> str:
+        """Generate detailed fallback answer without LLM."""
         file_name = context.file_path.split('/')[-1]
+        is_german = any(w in query.lower() for w in ['erkläre', 'zeige', 'optimiere', 'überprüfe', 'analyse'])
         
-        # Detect query language (simple heuristic)
-        is_german = any(word in query.lower() for word in ['erkläre', 'zeige', 'optimiere', 'überprüfe', 'diese'])
+        parts = []
         
+        # Opening
+        if is_german:
+            parts.append(f"Die Datei {file_name} ist eine Python-Komponente mit folgender Struktur:")
+        else:
+            parts.append(f"The file {file_name} is a Python component with the following structure:")
+        
+        # Structure details
         if context.structure:
-            funcs = len(context.structure.get('functions', {}))
-            classes = len(context.structure.get('classes', {}))
+            s = context.structure
+            funcs = len(s.get('functions', {}))
+            classes = len(s.get('classes', {}))
             
             if is_german:
-                base = f"Die Datei {file_name} enthält {funcs} Funktionen"
-                if classes > 0:
-                    base += f" und {classes} Klassen"
-                base += "."
+                parts.append(f"Sie enthält {funcs} Funktionen{'und ' + str(classes) + ' Klassen' if classes > 0 else ''}.")
+                if funcs > 0:
+                    func_names = list(s.get('functions', {}).keys())[:3]
+                    parts.append(f"Die Hauptfunktionen sind: {', '.join(func_names)}.")
             else:
-                base = f"The file {file_name} contains {funcs} functions"
-                if classes > 0:
-                    base += f" and {classes} classes"
-                base += "."
-            
-            if context.metrics and 'maintainability_index' in context.metrics:
-                mi = context.metrics['maintainability_index']
-                if is_german:
-                    base += f" Die Wartbarkeit liegt bei {mi:.0f}/100."
-                else:
-                    base += f" Maintainability: {mi:.0f}/100."
-            
-            return base
+                parts.append(f"It contains {funcs} functions{' and ' + str(classes) + ' classes' if classes > 0 else ''}.")
+                if funcs > 0:
+                    func_names = list(s.get('functions', {}).keys())[:3]
+                    parts.append(f"Key functions include: {', '.join(func_names)}.")
         
-        if is_german:
-            return f"Die Analyse der Datei {file_name} ist abgeschlossen. Siehe die Registerkarten für Details."
-        else:
-            return f"Analysis of {file_name} complete. See the tabs for details."
+        # Quality metrics
+        if context.metrics:
+            m = context.metrics
+            if 'maintainability_index' in m:
+                mi = m['maintainability_index']
+                if is_german:
+                    quality_de = "gut" if mi > 80 else "befriedigend" if mi > 50 else "verbesserungsbedürftig"
+                    parts.append(f"Die Wartbarkeit liegt bei {mi:.0f}/100 ({quality_de}).")
+                else:
+                    quality_en = "good" if mi > 80 else "fair" if mi > 50 else "needs improvement"
+                    parts.append(f"Maintainability score: {mi:.0f}/100 ({quality_en}).")
+        
+        # Issues
+        if context.metrics and context.metrics.get('issues'):
+            if is_german:
+                parts.append(f"Es wurden {len(context.metrics['issues'])} Code-Probleme identifiziert, die beachtet werden sollten.")
+            else:
+                parts.append(f"There are {len(context.metrics['issues'])} code issues identified that should be addressed.")
+        
+        # Suggestions
+        if context.refactor_suggestions and context.refactor_suggestions.get('recommendations'):
+            if is_german:
+                parts.append(f"Für Verbesserungen siehe die Registerkarten 'Structure', 'Metrics' und 'Refactor' für detaillierte Empfehlungen.")
+            else:
+                parts.append(f"For improvement details, see the 'Structure', 'Metrics', and 'Refactor' tabs for specific recommendations.")
+        
+        return " ".join(parts) if parts else (
+            "Die Analyse ist abgeschlossen. Siehe die Registerkarten für detaillierte Ergebnisse."
+            if is_german
+            else "Analysis complete. See the tabs for detailed results."
+        )
