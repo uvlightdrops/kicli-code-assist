@@ -286,4 +286,104 @@ class CodeImplementationAgent:
         except Exception as e:
             logger.error(f"Code generation failed: {e}")
             return None
+    
+    def apply_generated_code(self, generated_code: GeneratedCode, dry_run: bool = True) -> Dict[str, Any]:
+        """Apply generated code to project files.
+        
+        Args:
+            generated_code: GeneratedCode object from LLM
+            dry_run: If True, don't actually write files, just show what would happen
+            
+        Returns:
+            Dict with success status, file written, changes made
+        """
+        result = {
+            "success": False,
+            "file": str(generated_code.target_file),
+            "dry_run": dry_run,
+            "changes_made": [],
+            "error": None
+        }
+        
+        try:
+            # Check if target file exists
+            if generated_code.target_file.exists():
+                # Append to existing file
+                existing_content = generated_code.target_file.read_text(encoding="utf-8")
+                
+                # Extract function/class names from generated code
+                generated_lines = generated_code.code_content.split("\n")
+                
+                # Only append new definitions (not duplicates)
+                new_lines = []
+                for line in generated_lines:
+                    if line.startswith("def ") or line.startswith("class "):
+                        # Check if this is already in the file
+                        if line not in existing_content:
+                            new_lines.append(line)
+                
+                if new_lines:
+                    combined_content = existing_content + "\n\n# Generated implementation\n" + generated_code.code_content
+                    
+                    if not dry_run:
+                        generated_code.target_file.write_text(combined_content, encoding="utf-8")
+                    
+                    result["success"] = True
+                    result["changes_made"].append(f"Appended code to {generated_code.target_file.name}")
+                else:
+                    result["error"] = "No new code to add (definitions already exist)"
+            else:
+                # Create new file
+                generated_code.target_file.parent.mkdir(parents=True, exist_ok=True)
+                
+                if not dry_run:
+                    generated_code.target_file.write_text(generated_code.code_content, encoding="utf-8")
+                
+                result["success"] = True
+                result["changes_made"].append(f"Created new file: {generated_code.target_file}")
+        
+        except Exception as e:
+            result["error"] = str(e)
+            logger.error(f"Error applying generated code: {e}")
+        
+        return result
+    
+    def verify_implementation(self, goal_title: str, generated_code: GeneratedCode) -> Dict[str, Any]:
+        """Verify that generated code is syntactically correct and imports work.
+        
+        Args:
+            goal_title: Goal name for reference
+            generated_code: GeneratedCode object to verify
+            
+        Returns:
+            Dict with verification results
+        """
+        result = {
+            "goal": goal_title,
+            "valid_syntax": False,
+            "imports_ok": False,
+            "warnings": [],
+            "errors": []
+        }
+        
+        try:
+            # Check syntax
+            ast.parse(generated_code.code_content)
+            result["valid_syntax"] = True
+        except SyntaxError as e:
+            result["errors"].append(f"Syntax error: {e}")
+        
+        # Try to check imports
+        try:
+            for imp in generated_code.imports_to_add:
+                try:
+                    __import__(imp)
+                    result["imports_ok"] = True
+                except ImportError:
+                    result["warnings"].append(f"Import not available: {imp}")
+        except Exception as e:
+            result["warnings"].append(f"Cannot verify imports: {e}")
+        
+        return result
+
 
