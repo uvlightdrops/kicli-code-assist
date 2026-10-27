@@ -23,6 +23,7 @@ from kicli_code_assist.agent.answer_generator import AnswerGenerator
 from kicli_code_assist.agent.external_project_analyzer import (
     get_external_analyzer, ExternalProjectAnalysis
 )
+from kicli_code_assist.agent.code_implementation import CodeImplementationAgent
 
 
 logger = logging.getLogger("kicli-web")
@@ -372,8 +373,29 @@ class MetaCoordinationAgent:
                     for req in goal.get("requirements", [])[:5]:
                         lines.append(f"- {req}")
                 
+                # For implementation tasks, add code analysis
+                if "implement" in request.query.lower() or "coding" in intent_type.lower():
+                    lines.append(f"\n## Code Analysis:")
+                    try:
+                        code_agent = CodeImplementationAgent(request.project_root)
+                        py_files = code_agent.discover_python_files(max_files=20)
+                        structure = code_agent.read_and_analyze_files(py_files)
+                        
+                        lines.append(f"- Project modules: {', '.join(structure.main_modules[:3])}")
+                        lines.append(f"- Python files: {len(structure.python_files)}")
+                        
+                        # Find relevant file for this goal
+                        relevant_file = code_agent.get_file_for_goal(goal.get('title', ''), goal.get('description', ''))
+                        if relevant_file:
+                            rel_path = relevant_file.path.relative_to(request.project_root)
+                            lines.append(f"- Relevant file: `{rel_path}`")
+                            lines.append(f"  - Classes: {', '.join(relevant_file.classes[:3]) if relevant_file.classes else 'None'}")
+                            lines.append(f"  - Functions: {', '.join(relevant_file.functions[:3]) if relevant_file.functions else 'None'}")
+                    except Exception as e:
+                        logger.warning(f"Code analysis failed: {e}")
+                
                 lines.append(f"\n## Implementation Steps:")
-                lines.append("1. Analyze existing code structure")
+                lines.append("1. Analyze existing code structure ✓")
                 lines.append("2. Identify required modules to modify")
                 lines.append("3. Create test cases")
                 lines.append("4. Implement functionality")
