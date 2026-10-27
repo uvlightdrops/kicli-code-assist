@@ -11,6 +11,7 @@ import json
 import uuid
 import asyncio
 import logging
+import time
 from pathlib import Path
 from typing import Dict, Any, Optional
 from threading import Thread
@@ -27,6 +28,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.logging_integration import _get_or_create_logger, _get_log_dir
+from kicli_code_assist.agent.intent_detector import AgentIntentDetector
+from kicli_code_assist.agent.executor import AgentExecutor
+from kicli_code_assist.agent.aggregator import ResultAggregator
 from ki_core.config import ConfigManager
 from ki_core.adapters import AsyncOpenAIClient, ProviderChain
 from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
@@ -49,6 +53,52 @@ def get_config() -> Dict[str, Any]:
             "web": {"host": "127.0.0.1", "port": 8000},
             "storage": {"log_dir": str(Path.home() / "dev_data" / "kicli-code-assist" / "log")},
         }
+
+
+# ============================================================================
+# Phase 2D: Singleton Instances for Phase 2 Components
+# ============================================================================
+
+_intent_detector: Optional[AgentIntentDetector] = None
+_executor: Optional[AgentExecutor] = None
+_aggregator: Optional[ResultAggregator] = None
+
+
+def get_intent_detector(project_root: Optional[Path] = None) -> AgentIntentDetector:
+    """Get or create singleton AgentIntentDetector instance."""
+    global _intent_detector
+    if _intent_detector is None:
+        _intent_detector = AgentIntentDetector()
+        logging.getLogger("kicli-web").info("Initialized AgentIntentDetector (Phase 2A)")
+    return _intent_detector
+
+
+def get_executor(project_root: Optional[Path] = None) -> AgentExecutor:
+    """Get or create singleton AgentExecutor instance."""
+    global _executor
+    if _executor is None:
+        if project_root is None:
+            project_root = Path.cwd()
+        _executor = AgentExecutor(
+            project_root=project_root,
+            intent_detector=get_intent_detector(),
+            enable_cache=True
+        )
+        logging.getLogger("kicli-web").info("Initialized AgentExecutor (Phase 2B)")
+    return _executor
+
+
+def get_aggregator(provider_chain: Optional[ProviderChain] = None) -> ResultAggregator:
+    """Get or create singleton ResultAggregator instance."""
+    global _aggregator
+    if _aggregator is None:
+        _aggregator = ResultAggregator(
+            provider="openai",
+            provider_chain=provider_chain,
+            enable_llm=True
+        )
+        logging.getLogger("kicli-web").info("Initialized ResultAggregator (Phase 2C)")
+    return _aggregator
 
 
 def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
@@ -299,161 +349,174 @@ def register_routes(app: Flask):
     @app.route("/api/agent/route", methods=["POST"])
     def agent_route():
         """
-        Smart agent router: dispatches user query to multiple agents based on intent.
+        Phase 2D: Intelligent Agent Router with Parallel Execution
         
-        Always runs Explain + Metrics together.
-        Optionally runs additional agents based on intent detection.
+        Integrates Phase 2A (Intent Detection), Phase 2B (Parallel Execution),
+        and Phase 2C (Result Aggregation) into a single endpoint.
         
         Request:
         {
-            "query": "Explain this module and show metrics",
-            "file_path": "src/pipeline.py",
-            "scope": "folder" | "project",
-            "project": "ypipe"
+            "query": "Explain this file and show me metrics",
+            "file_path": "/path/to/file.py",
+            "project_root": "/path/to/project",
+            "scope": "folder" or "project",
+            "session_id": "optional-session-uuid"
         }
         
-        Response:
+        Response (Success):
         {
-            "intent": "explain_with_metrics",
-            "agents": [
-                {"type": "explain", "result": {...}},
-                {"type": "metrics", "result": {...}}
-            ],
-            "session_id": "abc123",
-            "scope": "folder"
+            "success": true,
+            "session_id": "session-uuid",
+            "query": "...",
+            "intent": {
+                "type": "EXPLAIN",
+                "confidence": 0.92,
+                "agents": ["explain", "metrics"]
+            },
+            "summary": "Natural language summary from Phase 2C...",
+            "tabs": {
+                "Structure": {...},
+                "Metrics": {...}
+            },
+            "actions": [],
+            "next_steps": ["Add type hints", "Optimize loop"],
+            "timing": {
+                "intent_ms": 1200,
+                "execution_ms": 350,
+                "aggregation_ms": 800,
+                "total_ms": 2350
+            }
         }
         """
-        try:
-            data = request.json or {}
-            query = data.get("query", "").strip()
-            file_path = data.get("file_path", "").strip()
-            scope = data.get("scope", "folder")  # folder | project
-            project_path = data.get("project", "").strip()
+        async def _agent_route_async():
+            """Async implementation of agent_route."""
+            session_id = None
+            total_start = time.time()
             
-            if not query:
-                return jsonify({"error": "Missing 'query' parameter"}), 400
-            if not file_path:
-                return jsonify({"error": "Missing 'file_path' parameter"}), 400
-            
-            # Resolve project root
-            if not project_path:
-                config = app.config["KICLI_CONFIG"]
-                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
-            else:
-                project_root = Path(project_path).resolve()
+            try:
+                data = request.get_json() or {}
+                query = data.get("query", "").strip()
+                file_path = data.get("file_path", "").strip()
+                project_root_str = data.get("project_root", "").strip()
+                scope = data.get("scope", "folder")
+                session_id = data.get("session_id") or str(uuid.uuid4())
+                
+                # Validation
+                if not query:
+                    return jsonify({"success": False, "error": "Missing 'query' parameter", "session_id": session_id}), 400
+                if not file_path:
+                    return jsonify({"success": False, "error": "Missing 'file_path' parameter", "session_id": session_id}), 400
+                
+                # Resolve project_root
+                if not project_root_str:
+                    config = app.config["KICLI_CONFIG"]
+                    project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+                else:
+                    project_root = Path(project_root_str).resolve()
+                    try:
+                        ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                        project_root.relative_to(ALLOWED_ROOT)
+                    except ValueError:
+                        return jsonify({
+                            "success": False,
+                            "error": "Access denied: path outside allowed root",
+                            "session_id": session_id
+                        }), 403
+                
+                # Resolve and validate file path
+                file_path_obj = Path(file_path).resolve() if Path(file_path).is_absolute() else (project_root / file_path).resolve()
                 try:
-                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
-                    project_root.relative_to(ALLOWED_ROOT)
+                    file_path_obj.relative_to(project_root)
                 except ValueError:
-                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
-            
-            # Construct and validate file path
-            full_file_path = (project_root / file_path).resolve()
-            try:
-                full_file_path.relative_to(project_root)
-            except ValueError:
-                return jsonify({"error": "Access denied: file outside project"}), 403
-            
-            # Detect intent from query - determines which agents to run
-            intent = "explain_with_metrics"  # default
-            agents_to_run = ["explain", "metrics"]  # always run these two together
-            
-            # Simple heuristic intent detection (can be upgraded to LLM later)
-            query_lower = query.lower()
-            if any(w in query_lower for w in ["refactor", "improve", "optimize", "clean", "smell"]):
-                agents_to_run.append("refactor")
-                intent = "explain_with_refactor"
-            if any(w in query_lower for w in ["depend", "import", "circular", "coupling"]):
-                agents_to_run.append("dependencies")
-                intent = "explain_with_dependencies"
-            if any(w in query_lower for w in ["error", "bug", "issue", "fix", "suggest"]):
-                agents_to_run.append("suggest")
-                intent = "explain_with_suggestions"
-            
-            # Run agents directly (not via HTTP, for efficiency)
-            results = []
-            
-            from kicli_code_assist.agent import ProgrammingAgent
-            try:
-                from kicli_code_assist.agent.metrics import CodeMetricsAnalyzer
-            except ImportError:
-                CodeMetricsAnalyzer = None
-            try:
-                from kicli_code_assist.agent.refactoring import RefactoringAnalyzer
-            except ImportError:
-                RefactoringAnalyzer = None
-            try:
-                from kicli_code_assist.agent.dependencies import DependencyAnalyzer
-            except ImportError:
-                DependencyAnalyzer = None
-            
-            if "explain" in agents_to_run:
-                try:
-                    agent = ProgrammingAgent(project_root)
-                    result = agent.explain_code(file_path=full_file_path, line_no=None)
-                    results.append({"type": "explain", "result": result})
-                except Exception as e:
-                    app.logger.warning(f"Explain agent failed: {e}")
-                    results.append({"type": "explain", "result": {"status": "error", "error": str(e)}})
-            
-            if "metrics" in agents_to_run:
-                try:
-                    if CodeMetricsAnalyzer:
-                        analyzer = CodeMetricsAnalyzer(project_root=project_root)
-                        result = analyzer.analyze(file_path=full_file_path)
-                        results.append({"type": "metrics", "result": result})
-                    else:
-                        raise ImportError("CodeMetricsAnalyzer not available")
-                except Exception as e:
-                    app.logger.warning(f"Metrics agent failed: {e}")
-                    results.append({"type": "metrics", "result": {"status": "error", "error": str(e)}})
-            
-            if "refactor" in agents_to_run:
-                try:
-                    if RefactoringAnalyzer:
-                        analyzer = RefactoringAnalyzer(project_root=project_root)
-                        result = analyzer.analyze(file_path=full_file_path)
-                        results.append({"type": "refactor", "result": result})
-                    else:
-                        raise ImportError("RefactoringAnalyzer not available")
-                except Exception as e:
-                    app.logger.warning(f"Refactor agent failed: {e}")
-                    results.append({"type": "refactor", "result": {"status": "error", "error": str(e)}})
-            
-            if "dependencies" in agents_to_run:
-                try:
-                    if DependencyAnalyzer:
-                        analyzer = DependencyAnalyzer(project_root=project_root)
-                        result = analyzer.analyze(file_path=full_file_path)
-                        results.append({"type": "dependencies", "result": result})
-                    else:
-                        raise ImportError("DependencyAnalyzer not available")
-                except Exception as e:
-                    app.logger.warning(f"Dependencies agent failed: {e}")
-                    results.append({"type": "dependencies", "result": {"status": "error", "error": str(e)}})
-            
-            if "suggest" in agents_to_run:
-                try:
-                    agent = ProgrammingAgent(project_root)
-                    result = agent.suggest_refactoring(file_path=full_file_path)
-                    results.append({"type": "suggest", "result": result})
-                except Exception as e:
-                    app.logger.warning(f"Suggest agent failed: {e}")
-                    results.append({"type": "suggest", "result": {"status": "error", "error": str(e)}})
-            
-            # Generate session ID for follow-ups
-            session_id = str(uuid.uuid4())
-            
-            return jsonify({
-                "intent": intent,
-                "agents": results,
-                "session_id": session_id,
-                "scope": scope,
-            }), 200
-            
-        except Exception as e:
-            app.logger.error(f"Agent route error: {e}\n{traceback.format_exc()}")
-            return jsonify({"error": str(e)}), 500
+                    return jsonify({
+                        "success": False,
+                        "error": "Access denied: file outside project",
+                        "session_id": session_id
+                    }), 403
+                
+                app.logger.info(f"[{session_id}] Processing query: '{query}' on {file_path_obj.name}")
+                
+                # Phase 2A: Detect Intent
+                intent_start = time.time()
+                intent_detector = get_intent_detector()
+                agent_intent = await intent_detector.detect_intent(
+                    query,
+                    file_context={"file": str(file_path_obj), "scope": scope}
+                )
+                intent_ms = (time.time() - intent_start) * 1000
+                app.logger.info(
+                    f"[{session_id}] Intent: {agent_intent.intent_type.value} "
+                    f"(confidence: {agent_intent.confidence:.2f}) → agents: {agent_intent.agents_to_run}"
+                )
+                
+                # Phase 2B: Execute Agents in Parallel
+                executor_start = time.time()
+                executor = get_executor(project_root)
+                executor_result = await executor.execute(
+                    query=query,
+                    file_path=file_path_obj,
+                    scope=scope,
+                    session_id=session_id
+                )
+                execution_ms = (time.time() - executor_start) * 1000
+                app.logger.info(f"[{session_id}] Execution complete: {execution_ms:.1f}ms")
+                
+                # Phase 2C: Aggregate Results
+                aggregation_start = time.time()
+                aggregator = get_aggregator()
+                aggregated = await aggregator.aggregate(
+                    executor_result=executor_result,
+                    file_path=file_path_obj,
+                    query=query
+                )
+                aggregation_ms = (time.time() - aggregation_start) * 1000
+                app.logger.info(f"[{session_id}] Aggregation complete: {aggregation_ms:.1f}ms")
+                
+                # Calculate total timing
+                total_ms = (time.time() - total_start) * 1000
+                
+                # Build response
+                response = {
+                    "success": True,
+                    "session_id": session_id,
+                    "query": query,
+                    "intent": {
+                        "type": agent_intent.intent_type.value,
+                        "confidence": agent_intent.confidence,
+                        "agents": agent_intent.agents_to_run,
+                        "reasoning": agent_intent.reasoning
+                    },
+                    "summary": aggregated.summary,
+                    "tabs": {name: tab.to_dict() for name, tab in aggregated.tabs.items()},
+                    "actions": [action.to_dict() for action in aggregated.actions],
+                    "next_steps": aggregated.next_steps,
+                    "timing": {
+                        "intent_ms": round(intent_ms, 1),
+                        "execution_ms": round(execution_ms, 1),
+                        "aggregation_ms": round(aggregation_ms, 1),
+                        "total_ms": round(total_ms, 1)
+                    },
+                    "synthesis_method": aggregated.synthesis_method
+                }
+                
+                app.logger.info(f"[{session_id}] Response complete: {total_ms:.1f}ms total")
+                return jsonify(response), 200
+                
+            except Exception as e:
+                app.logger.error(f"[{session_id}] Agent route error: {e}\n{traceback.format_exc()}")
+                return jsonify({
+                    "success": False,
+                    "error": str(e),
+                    "session_id": session_id
+                }), 500
+        
+        # Run async implementation using event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            return loop.run_until_complete(_agent_route_async())
+        finally:
+            loop.close()
     
     # Helper function for resolving project root
     def resolve_project_root(project_path: Optional[str] = None) -> tuple[Path, Optional[str]]:

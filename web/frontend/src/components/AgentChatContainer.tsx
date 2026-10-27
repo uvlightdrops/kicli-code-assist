@@ -5,9 +5,26 @@ import { SettingsPanel } from './SettingsPanel';
 import { useAnalysisSettings } from '../hooks/useAnalysisSettings';
 import './AgentChatContainer.css';
 
-export interface AgentResult {
-  type: string;
-  result: any;
+// Phase 2D Response Structure from /api/agent/route
+export interface Phase2DResponse {
+  success: boolean;
+  session_id: string;
+  query: string;
+  intent: {
+    type: string;
+    confidence: number;
+    agents: string[];
+  };
+  summary: string;
+  tabs: Record<string, any>;  // Structure, Metrics, Dependencies, Refactor, etc.
+  actions: Array<any>;
+  next_steps: string[];
+  timing: {
+    intent_ms: number;
+    execution_ms: number;
+    aggregation_ms: number;
+    total_ms: number;
+  };
 }
 
 interface AgentChatContainerProps {
@@ -19,157 +36,258 @@ type MainPanel = 'chat' | 'analysis' | 'diffs' | 'settings';
 
 export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentFile, projectPath }) => {
   const [activePanel, setActivePanel] = useState<MainPanel>('chat');
-  const [agentResults, setAgentResults] = useState<AgentResult[]>([]);
-  const [activeAnalysisTab, setActiveAnalysisTab] = useState<string>('explain');
+  const [latestResponse, setLatestResponse] = useState<Phase2DResponse | null>(null);
+  const [activeAnalysisTab, setActiveAnalysisTab] = useState<string>('');
   const [diffs, setDiffs] = useState<FileDiff[]>([]);
   const [thinkingProcess, setThinkingProcess] = useState<string>('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { settings } = useAnalysisSettings();
 
   const handleResultsReceived = (results: any) => {
-    // Process results but DON'T auto-switch panels
-    const newResults = results.agents || [];
-    setAgentResults(newResults);
+    // Process Phase 2D response structure
+    const response = results as Phase2DResponse;
+    if (!response.success) return;
 
-    // Extract any diffs from results
-    const newDiffs: FileDiff[] = [];
-    newResults.forEach((agent: AgentResult) => {
-      if (agent.result?.diffs) {
-        newDiffs.push(...agent.result.diffs);
-      }
-    });
+    setLatestResponse(response);
 
-    if (newDiffs.length > 0) {
-      setDiffs(newDiffs);
-    }
+    // Build thinking process text
+    const thinkingText =
+      `🎯 Intent: ${response.intent.type} (${(response.intent.confidence * 100).toFixed(0)}% confidence)\n` +
+      `🔧 Agents: ${response.intent.agents.join(', ')}\n` +
+      `⏱️  Timing: ${response.timing.total_ms}ms (Intent: ${response.timing.intent_ms}ms, Execution: ${response.timing.execution_ms}ms, Aggregation: ${response.timing.aggregation_ms}ms)\n\n` +
+      `📋 Summary:\n${response.summary}`;
 
-    // Set first successful result as active
-    if (newResults.length > 0) {
-      const firstSuccessful = newResults.find((r: AgentResult) => r.result?.status !== 'error');
-      if (firstSuccessful) {
-        setActiveAnalysisTab(firstSuccessful.type);
-      }
+    setThinkingProcess(thinkingText);
+
+    // Set first available tab as active
+    const tabKeys = Object.keys(response.tabs || {});
+    if (tabKeys.length > 0) {
+      setActiveAnalysisTab(tabKeys[0]);
     }
   };
 
-  const handleThinkingProcessUpdate = (text: string) => {
-    setThinkingProcess(text);
-  };
-
-  const handleAnalysisStart = (agentType: string) => {
-    setIsAnalyzing(true);
-    setThinkingProcess(`Starting ${agentType} analysis...`);
-    // The actual execution will be triggered by clicking buttons
-    // This is just UI state management
-  };
-
-  const renderAnalysisContent = () => {
-    const result = agentResults.find(r => r.type === activeAnalysisTab);
-    
-    if (!result) {
-      return <div className="no-result">Select an analysis to view results</div>;
+  const renderAnalysisTabContent = () => {
+    if (!latestResponse || !latestResponse.tabs) {
+      return <div className="no-result">No analysis results yet. Send a query to get started.</div>;
     }
 
-    if (result.result?.status === 'error') {
-      return (
-        <div className="error-panel">
-          <div className="error-icon">⚠️</div>
-          <div className="error-message">{result.result.error}</div>
-        </div>
-      );
+    if (!activeAnalysisTab || !latestResponse.tabs[activeAnalysisTab]) {
+      return <div className="no-result">Select a result tab above</div>;
     }
 
-    // Render appropriate panel based on agent type
-    switch (result.type) {
-      case 'explain':
-        return (
-          <div className="explain-result">
-            {result.result.summary && (
+    const tabData = latestResponse.tabs[activeAnalysisTab];
+
+    return (
+      <div className="tab-content">
+        {/* Structure Tab */}
+        {activeAnalysisTab === 'Structure' && (
+          <div className="structure-result">
+            {tabData.description && <div className="description">{tabData.description}</div>}
+
+            {tabData.classes && Object.keys(tabData.classes).length > 0 && (
               <div className="section">
-                <h4>Summary</h4>
-                <pre>{result.result.summary}</pre>
-              </div>
-            )}
-            {result.result.classes && (
-              <div className="section">
-                <h4>Classes ({result.result.classes.length})</h4>
-                <div className="classes-list">
-                  {result.result.classes.map((cls: any) => (
-                    <div key={cls.name} className="class-item">
-                      <strong>{cls.name}</strong>
-                      <span className="badge">{cls.methods.length} methods</span>
-                      {cls.methods.length > 0 && (
-                        <ul>
-                          {cls.methods.map((m: string) => (
-                            <li key={m}>{m}</li>
+                <h4>Classes ({Object.keys(tabData.classes).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.classes).map(className => (
+                    <li key={className}>
+                      <strong>{className}</strong>
+                      {tabData.classes[className]?.methods && (
+                        <ul className="sub-items">
+                          {Object.keys(tabData.classes[className].methods).map(method => (
+                            <li key={method}>{method}</li>
                           ))}
                         </ul>
                       )}
-                    </div>
+                    </li>
                   ))}
-                </div>
+                </ul>
               </div>
             )}
-            {result.result.functions && (
+
+            {tabData.functions && Object.keys(tabData.functions).length > 0 && (
               <div className="section">
-                <h4>Functions ({result.result.functions.length})</h4>
-                <div className="functions-list">
-                  {result.result.functions.slice(0, 20).map((fn: any) => (
-                    <div key={`${fn.line}-${fn.name}`} className="function-item">
-                      <span className="name">{fn.name}</span>
-                      <span className="complexity">complexity: {fn.complexity}</span>
-                      {fn.docstring && <div className="docstring">{fn.docstring}</div>}
-                    </div>
+                <h4>Functions ({Object.keys(tabData.functions).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.functions).slice(0, 30).map(funcName => (
+                    <li key={funcName}>{funcName}</li>
                   ))}
-                  {result.result.functions.length > 20 && (
-                    <div className="more">... and {result.result.functions.length - 20} more functions</div>
+                  {Object.keys(tabData.functions).length > 30 && (
+                    <li className="more">... and {Object.keys(tabData.functions).length - 30} more</li>
                   )}
-                </div>
+                </ul>
+              </div>
+            )}
+
+            {tabData.imports && Object.keys(tabData.imports).length > 0 && (
+              <div className="section">
+                <h4>Imports ({Object.keys(tabData.imports).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.imports).map(imp => (
+                    <li key={imp}>{imp}</li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>
-        );
+        )}
 
-      case 'metrics':
-        return (
+        {/* Metrics Tab */}
+        {activeAnalysisTab === 'Metrics' && (
           <div className="metrics-result">
-            {result.result.maintainability_index !== undefined && (
+            {tabData.maintainability_index !== undefined && (
               <div className="metric-item">
-                <strong>Maintainability Index:</strong>
-                <span className="value">{result.result.maintainability_index.toFixed(1)}</span>
+                <strong>Maintainability Index</strong>
+                <span className="value">{tabData.maintainability_index.toFixed(1)}/100</span>
               </div>
             )}
-            {result.result.average_complexity !== undefined && (
-              <div className="metric-item">
-                <strong>Average Complexity:</strong>
-                <span className="value">{result.result.average_complexity.toFixed(2)}</span>
-              </div>
-            )}
-            {result.result.number_of_functions !== undefined && (
-              <div className="metric-item">
-                <strong>Functions:</strong>
-                <span className="value">{result.result.number_of_functions}</span>
-              </div>
-            )}
-            {result.result.number_of_classes !== undefined && (
-              <div className="metric-item">
-                <strong>Classes:</strong>
-                <span className="value">{result.result.number_of_classes}</span>
-              </div>
-            )}
-            <pre>{JSON.stringify(result.result, null, 2)}</pre>
-          </div>
-        );
 
-      case 'dependencies':
-      case 'refactor':
-      default:
-        return (
-          <div className="generic-result">
-            <pre>{JSON.stringify(result.result, null, 2)}</pre>
+            {tabData.complexity && (
+              <div className="metric-item">
+                <strong>Complexity Level</strong>
+                <span className="value">{tabData.complexity}</span>
+              </div>
+            )}
+
+            {tabData.average_complexity !== undefined && (
+              <div className="metric-item">
+                <strong>Average Complexity</strong>
+                <span className="value">{tabData.average_complexity.toFixed(2)}</span>
+              </div>
+            )}
+
+            {tabData.number_of_classes !== undefined && (
+              <div className="metric-item">
+                <strong>Classes</strong>
+                <span className="value">{tabData.number_of_classes}</span>
+              </div>
+            )}
+
+            {tabData.number_of_functions !== undefined && (
+              <div className="metric-item">
+                <strong>Functions</strong>
+                <span className="value">{tabData.number_of_functions}</span>
+              </div>
+            )}
+
+            {tabData.lines_of_code !== undefined && (
+              <div className="metric-item">
+                <strong>Lines of Code</strong>
+                <span className="value">{tabData.lines_of_code}</span>
+              </div>
+            )}
+
+            {tabData.issues && tabData.issues.length > 0 && (
+              <div className="section">
+                <h4>Issues ({tabData.issues.length})</h4>
+                <ul className="issues-list">
+                  {tabData.issues.map((issue: string, i: number) => (
+                    <li key={i} className="issue">⚠️ {issue}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.improvements && tabData.improvements.length > 0 && (
+              <div className="section">
+                <h4>Suggestions</h4>
+                <ul className="improvements-list">
+                  {tabData.improvements.map((suggestion: string, i: number) => (
+                    <li key={i} className="suggestion">💡 {suggestion}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
-        );
-    }
+        )}
+
+        {/* Dependencies Tab */}
+        {activeAnalysisTab === 'Dependencies' && (
+          <div className="dependencies-result">
+            {tabData.imports && Object.keys(tabData.imports).length > 0 && (
+              <div className="section">
+                <h4>External Imports ({Object.keys(tabData.imports).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.imports).map(imp => (
+                    <li key={imp}>{imp}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.internals && Object.keys(tabData.internals).length > 0 && (
+              <div className="section">
+                <h4>Internal Dependencies ({Object.keys(tabData.internals).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.internals).map(dep => (
+                    <li key={dep}>{dep}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.externals && Object.keys(tabData.externals).length > 0 && (
+              <div className="section">
+                <h4>External Dependencies ({Object.keys(tabData.externals).length})</h4>
+                <ul className="items-list">
+                  {Object.keys(tabData.externals).map(ext => (
+                    <li key={ext}>{ext}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.circular_dependencies && tabData.circular_dependencies.length > 0 && (
+              <div className="section">
+                <h4>⚠️ Circular Dependencies ({tabData.circular_dependencies.length})</h4>
+                <ul className="items-list">
+                  {tabData.circular_dependencies.map((cycle: any, i: number) => (
+                    <li key={i}>{Array.isArray(cycle) ? cycle.join(' → ') : cycle}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Refactor Tab */}
+        {activeAnalysisTab === 'Refactor' && (
+          <div className="refactor-result">
+            {tabData.recommendations && tabData.recommendations.length > 0 && (
+              <div className="section">
+                <h4>Recommendations</h4>
+                <ul className="recommendations-list">
+                  {tabData.recommendations.map((rec: string, i: number) => (
+                    <li key={i}>{rec}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.patterns && tabData.patterns.length > 0 && (
+              <div className="section">
+                <h4>Suggested Patterns</h4>
+                <ul className="patterns-list">
+                  {tabData.patterns.map((pattern: string, i: number) => (
+                    <li key={i}>{pattern}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {tabData.priority && (
+              <div className="metric-item">
+                <strong>Priority</strong>
+                <span className="value">{tabData.priority}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Generic fallback for other tabs */}
+        {!['Structure', 'Metrics', 'Dependencies', 'Refactor'].includes(activeAnalysisTab) && (
+          <pre className="generic-content">{JSON.stringify(tabData, null, 2)}</pre>
+        )}
+      </div>
+    );
   };
 
   const renderPanelContent = () => {
@@ -182,16 +300,14 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
                 currentFile={currentFile || ''}
                 projectPath={projectPath || ''}
                 onResultsReceived={handleResultsReceived}
-                onThinkingUpdate={handleThinkingProcessUpdate}
               />
             </div>
             <div className="chat-lower">
               <div className="thinking-header">
-                <span>🤔 Thinking Process</span>
-                {isAnalyzing && <span className="spinner"></span>}
+                <span>🤔 Analysis Process</span>
               </div>
               <div className="thinking-content">
-                {thinkingProcess || 'Analysis results will appear here...'}
+                {thinkingProcess || 'Send a query to see analysis details...'}
               </div>
             </div>
           </div>
@@ -200,87 +316,48 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
       case 'analysis':
         return (
           <div className="analysis-panel">
-            <div className="analysis-toolbar">
-              <div className="analysis-buttons">
-                <button
-                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
-                  onClick={() => handleAnalysisStart('explain')}
-                  disabled={!currentFile}
-                  title={!currentFile ? 'Select a file first' : 'Run structure & metrics analysis'}
-                >
-                  📊 Explain
-                </button>
-                <button
-                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
-                  onClick={() => handleAnalysisStart('refactor')}
-                  disabled={!currentFile}
-                  title={!currentFile ? 'Select a file first' : 'Get refactoring suggestions'}
-                >
-                  🔧 Refactor
-                </button>
-                <button
-                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
-                  onClick={() => handleAnalysisStart('dependencies')}
-                  disabled={!currentFile}
-                  title={!currentFile ? 'Select a file first' : 'Analyze dependencies'}
-                >
-                  🔗 Dependencies
-                </button>
-              </div>
-              <div className="analysis-tabs">
-                {agentResults.map((result) => (
-                  <button
-                    key={result.type}
-                    className={`analysis-tab ${activeAnalysisTab === result.type ? 'active' : ''} ${
-                      result.result?.status === 'error' ? 'error' : ''
-                    }`}
-                    onClick={() => setActiveAnalysisTab(result.type)}
-                    title={result.result?.status === 'error' ? result.result.error : result.type}
-                  >
-                    {result.type === 'explain' && '📊'}
-                    {result.type === 'metrics' && '📈'}
-                    {result.type === 'dependencies' && '🔗'}
-                    {result.type === 'refactor' && '🔧'}
-                    {result.type === 'suggest' && '💡'}
-                    {' '}
-                    {result.type}
-                    {result.result?.status === 'error' && ' ⚠️'}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="analysis-content">
-              {renderAnalysisContent()}
-            </div>
+            {latestResponse && (
+              <>
+                <div className="analysis-summary">
+                  <strong>Summary:</strong> {latestResponse.summary}
+                </div>
+
+                <div className="analysis-tabs">
+                  {Object.keys(latestResponse.tabs || {}).map(tabName => (
+                    <button
+                      key={tabName}
+                      className={`analysis-tab ${activeAnalysisTab === tabName ? 'active' : ''}`}
+                      onClick={() => setActiveAnalysisTab(tabName)}
+                    >
+                      {tabName}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="analysis-content">
+                  {renderAnalysisTabContent()}
+                </div>
+
+                {latestResponse.next_steps && latestResponse.next_steps.length > 0 && (
+                  <div className="next-steps">
+                    <h4>Suggested Next Steps:</h4>
+                    <ul>
+                      {latestResponse.next_steps.map((step: string, i: number) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </>
+            )}
+            {!latestResponse && (
+              <div className="no-result">No analysis results. Send a query in the Chat tab to get started.</div>
+            )}
           </div>
         );
 
       case 'diffs':
-        return (
-          <div className="diffs-panel">
-            {diffs.length > 0 ? (
-              <DiffViewer
-                diffs={diffs}
-                onAccept={(filePath) => {
-                  console.log('Accept:', filePath);
-                }}
-                onReject={(filePath) => {
-                  console.log('Reject:', filePath);
-                }}
-                onAcceptAll={() => {
-                  console.log('Accept all');
-                }}
-                onRejectAll={() => {
-                  console.log('Reject all');
-                }}
-              />
-            ) : (
-              <div className="no-diffs">
-                <p>No changes to review</p>
-              </div>
-            )}
-          </div>
-        );
+        return <DiffViewer diffs={diffs} />;
 
       case 'settings':
         return <SettingsPanel />;
@@ -290,49 +367,30 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
     }
   };
 
+  const panelTitles: Record<MainPanel, string> = {
+    chat: 'Chat',
+    analysis: 'Analysis',
+    diffs: 'Diffs',
+    settings: 'Settings',
+  };
+
   return (
     <div className="agent-chat-container">
-      <div className="container-header">
-        <h2>Agent Assistant</h2>
-        <div className="header-controls">
+      <div className="panel-tabs">
+        {(Object.keys(panelTitles) as MainPanel[]).map(panel => (
           <button
-            className={`tab-button ${activePanel === 'chat' ? 'active' : ''}`}
-            onClick={() => setActivePanel('chat')}
-            title="Chat with agents"
+            key={panel}
+            className={`panel-tab ${activePanel === panel ? 'active' : ''}`}
+            onClick={() => setActivePanel(panel)}
           >
-            💬 Chat
+            {panelTitles[panel]}
+            {panel === 'analysis' && latestResponse && (
+              <span className="badge">{Object.keys(latestResponse.tabs || {}).length}</span>
+            )}
           </button>
-          {agentResults.length > 0 && (
-            <button
-              className={`tab-button ${activePanel === 'analysis' ? 'active' : ''}`}
-              onClick={() => setActivePanel('analysis')}
-              title={`View ${agentResults.length} analysis result(s)`}
-            >
-              📋 Analysis ({agentResults.length})
-            </button>
-          )}
-          {diffs.length > 0 && (
-            <button
-              className={`tab-button ${activePanel === 'diffs' ? 'active' : ''}`}
-              onClick={() => setActivePanel('diffs')}
-              title={`Review ${diffs.length} diff(s)`}
-            >
-              📝 Diffs ({diffs.length})
-            </button>
-          )}
-          <button
-            className={`tab-button ${activePanel === 'settings' ? 'active' : ''}`}
-            onClick={() => setActivePanel('settings')}
-            title="Analysis settings"
-          >
-            ⚙️ Settings
-          </button>
-        </div>
+        ))}
       </div>
-
-      <div className="container-content">
-        {renderPanelContent()}
-      </div>
+      <div className="panel-content">{renderPanelContent()}</div>
     </div>
   );
 };
