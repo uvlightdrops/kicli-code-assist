@@ -631,7 +631,6 @@ def register_routes(app: Flask):
         except Exception as e:
             app.logger.error(f"Agent ensemble error: {e}\n{traceback.format_exc()}")
             return jsonify({"status": "error", "error": str(e)}), 500
-            return jsonify({"status": "error", "error": str(e)}), 500
 
     @app.route("/api/agent/dependencies", methods=["POST"])
     def agent_dependencies():
