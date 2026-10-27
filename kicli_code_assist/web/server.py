@@ -89,28 +89,28 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     @app.route("/", methods=["GET"])
     @app.route("/index.html", methods=["GET"])
     def index():
-        """Serve main index.html from static folder."""
-        try:
-            # server.py: kicli_code_assist/web/server.py
-            # target: kicli-code-assist/web/static/index.html
-            index_path = Path(__file__).parent.parent.parent / "web" / "static" / "index.html"
-            if index_path.exists():
-                with open(index_path, "r") as f:
-                    return f.read()
-            return "<!DOCTYPE html><html><body>404: index.html not found</body></html>", 404
-        except Exception as e:
-            app.logger.error(f"Failed to serve index.html: {e}")
-            return "<!DOCTYPE html><html><body>500: Server error</body></html>", 500
+        """Serve main index.html from static folder (Production only).
+        
+        In development, Vite Dev Server on port 3000 handles the UI.
+        This route only serves static builds for production deployments.
+        """
+        # In development mode, redirect to Vite Dev Server
+        return jsonify({
+            "error": "Development mode detected",
+            "message": "Use http://localhost:3000 for UI (Vite Dev Server)",
+            "production_usage": "Set FLASK_ENV=production to serve static builds from this port"
+        }), 400
     
     @app.route("/assets/<path:filename>", methods=["GET"])
     def serve_assets(filename):
-        """Serve static assets."""
-        try:
-            static_dir = Path(__file__).parent.parent.parent / "web" / "static"
-            return send_from_directory(static_dir, f"assets/{filename}")
-        except Exception as e:
-            app.logger.error(f"Failed to serve asset {filename}: {e}")
-            return "404: Asset not found", 404
+        """Serve static assets (Production only).
+        
+        In development, Vite Dev Server handles asset serving.
+        """
+        return jsonify({
+            "error": "Development mode detected",
+            "message": "Use http://localhost:3000 for assets (Vite Dev Server)"
+        }), 400
     
     return app, socketio
 
