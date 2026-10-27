@@ -1,0 +1,350 @@
+.diff-viewer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--bg-secondary, #1e1e1e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.diff-viewer.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary, #a0a0a0);
+}
+
+.diff-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-color, #333);
+  background: var(--bg-primary, #252526);
+  gap: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.tabs::-webkit-scrollbar {
+  height: 4px;
+}
+
+.tabs::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tabs::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #555);
+  border-radius: 2px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--bg-secondary, #2a2a2a);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px 4px 0 0;
+  color: var(--text-secondary, #a0a0a0);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  background: var(--bg-hover, #333);
+  border-color: var(--border-hover, #555);
+}
+
+.tab.active {
+  background: var(--bg-primary, #252526);
+  border-color: var(--accent-color, #0088ff);
+  color: var(--text-primary, #e0e0e0);
+  border-bottom-color: var(--bg-primary, #252526);
+}
+
+.tab.accepted {
+  border-left: 2px solid var(--success-color, #288228);
+}
+
+.tab.rejected {
+  border-left: 2px solid var(--error-color, #ff4444);
+}
+
+.status-icon {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.filename {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-block;
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  opacity: 0.7;
+}
+
+.tab.active .badge {
+  opacity: 1;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stats {
+  font-size: 11px;
+  color: var(--text-secondary, #a0a0a0);
+  padding: 0 8px;
+  border-right: 1px solid var(--border-color, #444);
+}
+
+.action-button {
+  padding: 5px 10px;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 3px;
+  background: var(--bg-secondary, #2a2a2a);
+  color: var(--text-primary, #e0e0e0);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.action-button:hover {
+  background: var(--bg-hover, #333);
+}
+
+.action-button.accept-all {
+  color: var(--success-color, #288228);
+}
+
+.action-button.reject-all {
+  color: var(--error-color, #ff4444);
+}
+
+.diff-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.file-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border-color, #333);
+  background: var(--bg-secondary, #1e1e1e);
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.status {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status.created {
+  background: var(--success-color, #28822820);
+  color: var(--success-color, #5cd65c);
+}
+
+.status.modified {
+  background: var(--warning-color, #88822820);
+  color: var(--warning-color, #ffdd33);
+}
+
+.status.deleted {
+  background: var(--error-color, #88222220);
+  color: var(--error-color, #ff6666);
+}
+
+.filepath {
+  font-size: 13px;
+  color: var(--text-primary, #e0e0e0);
+  font-family: 'Courier New', monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btn-accept,
+.btn-reject {
+  padding: 6px 12px;
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-accept {
+  background: var(--success-color, #288228);
+  color: white;
+  border-color: var(--success-color, #288228);
+}
+
+.btn-accept:hover:not(:disabled) {
+  background: var(--success-color-hover, #3aa83a);
+  box-shadow: 0 2px 8px var(--success-color, #28822830);
+}
+
+.btn-reject {
+  background: var(--error-color, #ff4444);
+  color: white;
+  border-color: var(--error-color, #ff4444);
+}
+
+.btn-reject:hover:not(:disabled) {
+  background: var(--error-color-hover, #ff6666);
+  box-shadow: 0 2px 8px var(--error-color, #ff444430);
+}
+
+.btn-accept:disabled,
+.btn-reject:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.diff-lines {
+  flex: 1;
+  overflow-y: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.diff-lines::-webkit-scrollbar {
+  width: 8px;
+}
+
+.diff-lines::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.diff-lines::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb, #555);
+  border-radius: 4px;
+}
+
+.diff-line {
+  display: flex;
+  background: var(--diff-line-bg, #1e1e1e);
+  border-bottom: 1px solid var(--border-subtle, #2a2a2a);
+  transition: background 0.15s;
+}
+
+.diff-line:hover {
+  background: var(--diff-line-hover, #2a2a2a);
+}
+
+.diff-line.line-added {
+  background: var(--diff-added-bg, #28822815);
+}
+
+.diff-line.line-added:hover {
+  background: var(--diff-added-hover, #28822825);
+}
+
+.diff-line.line-removed {
+  background: var(--diff-removed-bg, #88222215);
+}
+
+.diff-line.line-removed:hover {
+  background: var(--diff-removed-hover, #88222225);
+}
+
+.diff-line.line-context {
+  background: var(--diff-context-bg, #44444410);
+}
+
+.line-number {
+  display: inline-block;
+  width: 50px;
+  padding: 0 12px;
+  text-align: right;
+  color: var(--text-secondary, #666);
+  border-right: 1px solid var(--border-subtle, #2a2a2a);
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.diff-marker {
+  display: inline-block;
+  width: 24px;
+  text-align: center;
+  flex-shrink: 0;
+  font-weight: bold;
+}
+
+.line-added .diff-marker {
+  color: var(--success-color, #5cd65c);
+}
+
+.line-removed .diff-marker {
+  color: var(--error-color, #ff6666);
+}
+
+.line-unchanged .diff-marker {
+  color: var(--text-secondary, #666);
+}
+
+.line-context .diff-marker {
+  color: var(--text-secondary, #666);
+}
+
+.line-content {
+  flex: 1;
+  padding: 0 8px;
+  color: var(--text-primary, #e0e0e0);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: transparent;
+  border: none;
+  font-family: 'Courier New', monospace;
+}
+
+.line-added .line-content {
+  color: var(--success-text, #90ee90);
+}
+
+.line-removed .line-content {
+  color: var(--error-text, #ff9999);
+}

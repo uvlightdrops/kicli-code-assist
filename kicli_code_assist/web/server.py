@@ -283,6 +283,165 @@ def register_routes(app: Flask):
     def health():
         """Health check endpoint."""
         return jsonify({"status": "ok", "service": "kicli-web"}), 200
+
+    @app.route("/api/agent/route", methods=["POST"])
+    def agent_route():
+        """
+        Smart agent router: dispatches user query to multiple agents based on intent.
+        
+        Always runs Explain + Metrics together.
+        Optionally runs additional agents based on intent detection.
+        
+        Request:
+        {
+            "query": "Explain this module and show metrics",
+            "file_path": "src/pipeline.py",
+            "scope": "folder" | "project",
+            "project": "ypipe"
+        }
+        
+        Response:
+        {
+            "intent": "explain_with_metrics",
+            "agents": [
+                {"type": "explain", "result": {...}},
+                {"type": "metrics", "result": {...}}
+            ],
+            "session_id": "abc123",
+            "scope": "folder"
+        }
+        """
+        try:
+            data = request.json or {}
+            query = data.get("query", "").strip()
+            file_path = data.get("file_path", "").strip()
+            scope = data.get("scope", "folder")  # folder | project
+            project_path = data.get("project", "").strip()
+            
+            if not query:
+                return jsonify({"error": "Missing 'query' parameter"}), 400
+            if not file_path:
+                return jsonify({"error": "Missing 'file_path' parameter"}), 400
+            
+            # Resolve project root
+            if not project_path:
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                project_root = Path(project_path).resolve()
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
+            
+            # Construct and validate file path
+            full_file_path = (project_root / file_path).resolve()
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
+            
+            # Detect intent from query - determines which agents to run
+            intent = "explain_with_metrics"  # default
+            agents_to_run = ["explain", "metrics"]  # always run these two together
+            
+            # Simple heuristic intent detection (can be upgraded to LLM later)
+            query_lower = query.lower()
+            if any(w in query_lower for w in ["refactor", "improve", "optimize", "clean", "smell"]):
+                agents_to_run.append("refactor")
+                intent = "explain_with_refactor"
+            if any(w in query_lower for w in ["depend", "import", "circular", "coupling"]):
+                agents_to_run.append("dependencies")
+                intent = "explain_with_dependencies"
+            if any(w in query_lower for w in ["error", "bug", "issue", "fix", "suggest"]):
+                agents_to_run.append("suggest")
+                intent = "explain_with_suggestions"
+            
+            # Run agents directly (not via HTTP, for efficiency)
+            results = []
+            
+            from kicli_code_assist.agent import ProgrammingAgent
+            try:
+                from kicli_code_assist.agent.metrics import CodeMetricsAnalyzer
+            except ImportError:
+                CodeMetricsAnalyzer = None
+            try:
+                from kicli_code_assist.agent.refactoring import RefactoringAnalyzer
+            except ImportError:
+                RefactoringAnalyzer = None
+            try:
+                from kicli_code_assist.agent.dependencies import DependencyAnalyzer
+            except ImportError:
+                DependencyAnalyzer = None
+            
+            if "explain" in agents_to_run:
+                try:
+                    agent = ProgrammingAgent(project_root)
+                    result = agent.explain_code(file_path=full_file_path, line_no=None)
+                    results.append({"type": "explain", "result": result})
+                except Exception as e:
+                    app.logger.warning(f"Explain agent failed: {e}")
+                    results.append({"type": "explain", "result": {"status": "error", "error": str(e)}})
+            
+            if "metrics" in agents_to_run:
+                try:
+                    if CodeMetricsAnalyzer:
+                        analyzer = CodeMetricsAnalyzer(project_root=project_root)
+                        result = analyzer.analyze(file_path=full_file_path)
+                        results.append({"type": "metrics", "result": result})
+                    else:
+                        raise ImportError("CodeMetricsAnalyzer not available")
+                except Exception as e:
+                    app.logger.warning(f"Metrics agent failed: {e}")
+                    results.append({"type": "metrics", "result": {"status": "error", "error": str(e)}})
+            
+            if "refactor" in agents_to_run:
+                try:
+                    if RefactoringAnalyzer:
+                        analyzer = RefactoringAnalyzer(project_root=project_root)
+                        result = analyzer.analyze(file_path=full_file_path)
+                        results.append({"type": "refactor", "result": result})
+                    else:
+                        raise ImportError("RefactoringAnalyzer not available")
+                except Exception as e:
+                    app.logger.warning(f"Refactor agent failed: {e}")
+                    results.append({"type": "refactor", "result": {"status": "error", "error": str(e)}})
+            
+            if "dependencies" in agents_to_run:
+                try:
+                    if DependencyAnalyzer:
+                        analyzer = DependencyAnalyzer(project_root=project_root)
+                        result = analyzer.analyze(file_path=full_file_path)
+                        results.append({"type": "dependencies", "result": result})
+                    else:
+                        raise ImportError("DependencyAnalyzer not available")
+                except Exception as e:
+                    app.logger.warning(f"Dependencies agent failed: {e}")
+                    results.append({"type": "dependencies", "result": {"status": "error", "error": str(e)}})
+            
+            if "suggest" in agents_to_run:
+                try:
+                    agent = ProgrammingAgent(project_root)
+                    result = agent.suggest_refactoring(file_path=full_file_path)
+                    results.append({"type": "suggest", "result": result})
+                except Exception as e:
+                    app.logger.warning(f"Suggest agent failed: {e}")
+                    results.append({"type": "suggest", "result": {"status": "error", "error": str(e)}})
+            
+            # Generate session ID for follow-ups
+            session_id = str(uuid.uuid4())
+            
+            return jsonify({
+                "intent": intent,
+                "agents": results,
+                "session_id": session_id,
+                "scope": scope,
+            }), 200
+            
+        except Exception as e:
+            app.logger.error(f"Agent route error: {e}\n{traceback.format_exc()}")
+            return jsonify({"error": str(e)}), 500
     
     # Helper function for resolving project root
     def resolve_project_root(project_path: Optional[str] = None) -> tuple[Path, Optional[str]]:
