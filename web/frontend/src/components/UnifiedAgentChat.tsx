@@ -19,8 +19,9 @@ interface AgentSession {
 
 export const UnifiedAgentChat: React.FC<{
   currentFile: string;
+  projectPath?: string;
   onResultsReceived?: (results: any) => void;
-}> = ({ currentFile, onResultsReceived }) => {
+}> = ({ currentFile, projectPath, onResultsReceived }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [scope, setScope] = useState<'folder' | 'project'>('folder');
@@ -57,7 +58,7 @@ export const UnifiedAgentChat: React.FC<{
         query: inputValue,
         file_path: currentFile,
         scope: scope,
-        project: localStorage.getItem('currentProject') || '',
+        project: projectPath || localStorage.getItem('currentProject') || '',
       });
 
       const agentResponse: ChatMessage = {

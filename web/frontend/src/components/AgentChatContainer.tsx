@@ -12,11 +12,12 @@ export interface AgentResult {
 
 interface AgentChatContainerProps {
   currentFile: string | null;
+  projectPath?: string | null;
 }
 
 type PanelType = 'chat' | 'diffs' | 'settings';
 
-export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentFile }) => {
+export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentFile, projectPath }) => {
   const [activePanel, setActivePanel] = useState<PanelType>('chat');
   const [agentResults, setAgentResults] = useState<AgentResult[]>([]);
   const [diffs, setDiffs] = useState<FileDiff[]>([]);
@@ -59,6 +60,7 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
         return (
           <UnifiedAgentChat
             currentFile={currentFile || ''}
+            projectPath={projectPath || ''}
             onResultsReceived={handleResultsReceived}
           />
         );
