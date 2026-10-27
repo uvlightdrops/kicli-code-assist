@@ -306,15 +306,33 @@ def register_routes(app: Flask):
     def get_project_files():
         """Get project file tree structure (flat list for current directory)."""
         try:
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
-            
             # Get requested path from query parameter
-            requested_path = request.args.get("path", "")
+            requested_path = request.args.get("path", "").strip()
+            
+            # Get the active project from query or fallback to config
+            project_path = request.args.get("project", "").strip()
+            
+            if not project_path:
+                # Fallback to config for backwards compatibility
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
+            
             target_path = (project_root / requested_path).resolve()
             
             # Security: ensure path is within project_root
-            if not target_path.is_relative_to(project_root):
+            try:
+                target_path.relative_to(project_root)
+            except ValueError:
                 return jsonify({"error": "Access denied: path outside project"}), 403
             
             if not target_path.is_dir():
@@ -352,12 +370,30 @@ def register_routes(app: Flask):
     def read_file(file_path):
         """Read file contents."""
         try:
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            # Get project from query parameter
+            project_path = request.args.get("project", "").strip()
+            
+            if not project_path:
+                # Fallback to config
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
+            
             full_path = (project_root / file_path).resolve()
             
             # Security: ensure file is within project_root
-            if not full_path.is_relative_to(project_root):
+            try:
+                full_path.relative_to(project_root)
+            except ValueError:
                 return jsonify({"error": "Access denied: file outside project"}), 403
             
             if not full_path.is_file():

@@ -42,7 +42,10 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
     setError('')
     try {
       const response = await axios.get('/api/project/files', {
-        params: { path: path || '' },
+        params: { 
+          path: path || '',
+          project: project?.path || '',
+        },
       })
       setItems(response.data.items)
       
@@ -69,6 +72,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
     setLoadingFile(file.path)
     try {
       const response = await axios.get(`/api/files/${file.path}`, {
+        params: { project: project?.path || '' },
         headers: { 'Range': 'bytes=0-1048576' }, // First 1MB
       })
       onSelectFile(file.path, response.data.content || '')
