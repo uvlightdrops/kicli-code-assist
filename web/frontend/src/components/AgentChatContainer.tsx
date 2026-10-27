@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UnifiedAgentChat } from './UnifiedAgentChat';
-import { DiffViewer, type FileDiff, parseDiffLines } from './DiffViewer';
+import { DiffViewer, type FileDiff } from './DiffViewer';
 import { SettingsPanel } from './SettingsPanel';
 import { useAnalysisSettings } from '../hooks/useAnalysisSettings';
 import './AgentChatContainer.css';
@@ -15,17 +15,19 @@ interface AgentChatContainerProps {
   projectPath?: string | null;
 }
 
-type MainPanel = 'chat' | 'results' | 'diffs' | 'settings';
+type MainPanel = 'chat' | 'analysis' | 'diffs' | 'settings';
 
 export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentFile, projectPath }) => {
   const [activePanel, setActivePanel] = useState<MainPanel>('chat');
   const [agentResults, setAgentResults] = useState<AgentResult[]>([]);
-  const [activeResultTab, setActiveResultTab] = useState<string>('explain');
+  const [activeAnalysisTab, setActiveAnalysisTab] = useState<string>('explain');
   const [diffs, setDiffs] = useState<FileDiff[]>([]);
+  const [thinkingProcess, setThinkingProcess] = useState<string>('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const { settings } = useAnalysisSettings();
 
   const handleResultsReceived = (results: any) => {
-    // Process results
+    // Process results but DON'T auto-switch panels
     const newResults = results.agents || [];
     setAgentResults(newResults);
 
@@ -41,22 +43,31 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
       setDiffs(newDiffs);
     }
 
-    // Auto-switch to results if we have them
+    // Set first successful result as active
     if (newResults.length > 0) {
-      setActivePanel('results');
-      // Find first successful result to show
       const firstSuccessful = newResults.find((r: AgentResult) => r.result?.status !== 'error');
       if (firstSuccessful) {
-        setActiveResultTab(firstSuccessful.type);
+        setActiveAnalysisTab(firstSuccessful.type);
       }
     }
   };
 
-  const renderResultContent = () => {
-    const result = agentResults.find(r => r.type === activeResultTab);
+  const handleThinkingProcessUpdate = (text: string) => {
+    setThinkingProcess(text);
+  };
+
+  const handleAnalysisStart = (agentType: string) => {
+    setIsAnalyzing(true);
+    setThinkingProcess(`Starting ${agentType} analysis...`);
+    // The actual execution will be triggered by clicking buttons
+    // This is just UI state management
+  };
+
+  const renderAnalysisContent = () => {
+    const result = agentResults.find(r => r.type === activeAnalysisTab);
     
     if (!result) {
-      return <div className="no-result">Select a result to view</div>;
+      return <div className="no-result">Select an analysis to view results</div>;
     }
 
     if (result.result?.status === 'error') {
@@ -122,6 +133,30 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
       case 'metrics':
         return (
           <div className="metrics-result">
+            {result.result.maintainability_index !== undefined && (
+              <div className="metric-item">
+                <strong>Maintainability Index:</strong>
+                <span className="value">{result.result.maintainability_index.toFixed(1)}</span>
+              </div>
+            )}
+            {result.result.average_complexity !== undefined && (
+              <div className="metric-item">
+                <strong>Average Complexity:</strong>
+                <span className="value">{result.result.average_complexity.toFixed(2)}</span>
+              </div>
+            )}
+            {result.result.number_of_functions !== undefined && (
+              <div className="metric-item">
+                <strong>Functions:</strong>
+                <span className="value">{result.result.number_of_functions}</span>
+              </div>
+            )}
+            {result.result.number_of_classes !== undefined && (
+              <div className="metric-item">
+                <strong>Classes:</strong>
+                <span className="value">{result.result.number_of_classes}</span>
+              </div>
+            )}
             <pre>{JSON.stringify(result.result, null, 2)}</pre>
           </div>
         );
@@ -141,39 +176,81 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
     switch (activePanel) {
       case 'chat':
         return (
-          <UnifiedAgentChat
-            currentFile={currentFile || ''}
-            projectPath={projectPath || ''}
-            onResultsReceived={handleResultsReceived}
-          />
+          <div className="chat-panel-layout">
+            <div className="chat-upper">
+              <UnifiedAgentChat
+                currentFile={currentFile || ''}
+                projectPath={projectPath || ''}
+                onResultsReceived={handleResultsReceived}
+                onThinkingUpdate={handleThinkingProcessUpdate}
+              />
+            </div>
+            <div className="chat-lower">
+              <div className="thinking-header">
+                <span>🤔 Thinking Process</span>
+                {isAnalyzing && <span className="spinner"></span>}
+              </div>
+              <div className="thinking-content">
+                {thinkingProcess || 'Analysis results will appear here...'}
+              </div>
+            </div>
+          </div>
         );
 
-      case 'results':
+      case 'analysis':
         return (
-          <div className="results-panel">
-            <div className="results-tabs">
-              {agentResults.map((result) => (
+          <div className="analysis-panel">
+            <div className="analysis-toolbar">
+              <div className="analysis-buttons">
                 <button
-                  key={result.type}
-                  className={`result-tab ${activeResultTab === result.type ? 'active' : ''} ${
-                    result.result?.status === 'error' ? 'error' : ''
-                  }`}
-                  onClick={() => setActiveResultTab(result.type)}
-                  title={result.result?.status === 'error' ? result.result.error : result.type}
+                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
+                  onClick={() => handleAnalysisStart('explain')}
+                  disabled={!currentFile}
+                  title={!currentFile ? 'Select a file first' : 'Run structure & metrics analysis'}
                 >
-                  {result.type === 'explain' && '📊'}
-                  {result.type === 'metrics' && '📈'}
-                  {result.type === 'dependencies' && '🔗'}
-                  {result.type === 'refactor' && '🔧'}
-                  {result.type === 'suggest' && '💡'}
-                  {' '}
-                  {result.type}
-                  {result.result?.status === 'error' && ' ⚠️'}
+                  📊 Explain
                 </button>
-              ))}
+                <button
+                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
+                  onClick={() => handleAnalysisStart('refactor')}
+                  disabled={!currentFile}
+                  title={!currentFile ? 'Select a file first' : 'Get refactoring suggestions'}
+                >
+                  🔧 Refactor
+                </button>
+                <button
+                  className={`analysis-btn ${!currentFile ? 'disabled' : ''}`}
+                  onClick={() => handleAnalysisStart('dependencies')}
+                  disabled={!currentFile}
+                  title={!currentFile ? 'Select a file first' : 'Analyze dependencies'}
+                >
+                  🔗 Dependencies
+                </button>
+              </div>
+              <div className="analysis-tabs">
+                {agentResults.map((result) => (
+                  <button
+                    key={result.type}
+                    className={`analysis-tab ${activeAnalysisTab === result.type ? 'active' : ''} ${
+                      result.result?.status === 'error' ? 'error' : ''
+                    }`}
+                    onClick={() => setActiveAnalysisTab(result.type)}
+                    title={result.result?.status === 'error' ? result.result.error : result.type}
+                  >
+                    {result.type === 'explain' && '📊'}
+                    {result.type === 'metrics' && '📈'}
+                    {result.type === 'dependencies' && '🔗'}
+                    {result.type === 'refactor' && '🔧'}
+                    {result.type === 'suggest' && '💡'}
+                    {' '}
+                    {result.type}
+                    {result.result?.status === 'error' && ' ⚠️'}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="results-content">
-              {renderResultContent()}
+            <div className="analysis-content">
+              {renderAnalysisContent()}
             </div>
           </div>
         );
@@ -216,7 +293,7 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
   return (
     <div className="agent-chat-container">
       <div className="container-header">
-        <h2>Agent Analysis</h2>
+        <h2>Agent Assistant</h2>
         <div className="header-controls">
           <button
             className={`tab-button ${activePanel === 'chat' ? 'active' : ''}`}
@@ -227,11 +304,11 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
           </button>
           {agentResults.length > 0 && (
             <button
-              className={`tab-button ${activePanel === 'results' ? 'active' : ''}`}
-              onClick={() => setActivePanel('results')}
-              title={`View ${agentResults.length} result(s)`}
+              className={`tab-button ${activePanel === 'analysis' ? 'active' : ''}`}
+              onClick={() => setActivePanel('analysis')}
+              title={`View ${agentResults.length} analysis result(s)`}
             >
-              📋 Results ({agentResults.length})
+              📋 Analysis ({agentResults.length})
             </button>
           )}
           {diffs.length > 0 && (

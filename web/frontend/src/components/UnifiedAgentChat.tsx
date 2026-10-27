@@ -21,7 +21,8 @@ export const UnifiedAgentChat: React.FC<{
   currentFile: string;
   projectPath?: string;
   onResultsReceived?: (results: any) => void;
-}> = ({ currentFile, projectPath, onResultsReceived }) => {
+  onThinkingUpdate?: (text: string) => void;
+}> = ({ currentFile, projectPath, onResultsReceived, onThinkingUpdate }) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [scope, setScope] = useState<'folder' | 'project'>('folder');

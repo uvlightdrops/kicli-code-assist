@@ -91,7 +91,9 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     def index():
         """Serve main index.html from static folder."""
         try:
-            index_path = Path(__file__).parent / "static" / "index.html"
+            # server.py: kicli_code_assist/web/server.py
+            # target: kicli-code-assist/web/static/index.html
+            index_path = Path(__file__).parent.parent.parent / "web" / "static" / "index.html"
             if index_path.exists():
                 with open(index_path, "r") as f:
                     return f.read()
@@ -99,6 +101,16 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
         except Exception as e:
             app.logger.error(f"Failed to serve index.html: {e}")
             return "<!DOCTYPE html><html><body>500: Server error</body></html>", 500
+    
+    @app.route("/assets/<path:filename>", methods=["GET"])
+    def serve_assets(filename):
+        """Serve static assets."""
+        try:
+            static_dir = Path(__file__).parent.parent.parent / "web" / "static"
+            return send_from_directory(static_dir, f"assets/{filename}")
+        except Exception as e:
+            app.logger.error(f"Failed to serve asset {filename}: {e}")
+            return "404: Asset not found", 404
     
     return app, socketio
 
