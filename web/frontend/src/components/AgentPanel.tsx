@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import axios from 'axios'
+import { useProject } from '../hooks/useProject'
 
 interface AgentExplanation {
   status: string
@@ -46,6 +47,7 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ filePath, onClose }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState<'explain' | 'suggest'>('explain')
+  const { current: currentProject } = useProject()
 
   const handleExplain = async () => {
     if (!filePath) {
@@ -59,7 +61,8 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ filePath, onClose }) => {
     try {
       const response = await axios.post('/api/agent/explain', {
         file: filePath,
-        line: 1, // Default to line 1; could be enhanced
+        line: 1,
+        project: currentProject?.path || '',
       })
 
       if (response.status === 200) {
@@ -85,6 +88,7 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ filePath, onClose }) => {
     try {
       const response = await axios.post('/api/agent/suggest', {
         file: filePath,
+        project: currentProject?.path || '',
       })
 
       if (response.status === 200) {

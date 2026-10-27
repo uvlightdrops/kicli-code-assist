@@ -284,6 +284,30 @@ def register_routes(app: Flask):
         """Health check endpoint."""
         return jsonify({"status": "ok", "service": "kicli-web"}), 200
     
+    # Helper function for resolving project root
+    def resolve_project_root(project_path: Optional[str] = None) -> tuple[Path, Optional[str]]:
+        """
+        Resolve project root path from project parameter or config fallback.
+        
+        Returns:
+            Tuple of (resolved project path, error message if any)
+        """
+        if not project_path or not project_path.strip():
+            # Fallback to config
+            config = app.config["KICLI_CONFIG"]
+            return Path(config.get("storage", {}).get("project_root", ".")).resolve(), None
+        
+        # Use provided project path
+        project_root = Path(project_path.strip()).resolve()
+        
+        # Verify path is safe (within /home/flow/dev_flow)
+        try:
+            ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+            project_root.relative_to(ALLOWED_ROOT)
+            return project_root, None
+        except ValueError:
+            return None, "Access denied: path outside allowed root"
+    
     @app.route("/api/config", methods=["GET"])
     def get_app_config():
         """Get app configuration (non-sensitive)."""
@@ -419,19 +443,41 @@ def register_routes(app: Flask):
             data = request.json or {}
             file_path = data.get("file")
             line_no = data.get("line")
+            project_path = data.get("project", "").strip()
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            if not project_path:
+                # Fallback to config
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
             
-            # Initialize agent
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
+            
+            # Initialize agent with project root
             agent = ProgrammingAgent(project_root)
             
             # Get explanation
             result = agent.explain_code(
-                file_path=project_root / file_path,
+                file_path=full_file_path,
                 line_no=line_no,
             )
             
@@ -449,25 +495,48 @@ def register_routes(app: Flask):
             
             data = request.json or {}
             file_path = data.get("file")
+            project_path = data.get("project", "").strip()
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            if not project_path:
+                # Fallback to config
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"error": "Access denied: path outside allowed root"}), 403
             
-            # Initialize agent
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
+            
+            # Initialize agent with project root
             agent = ProgrammingAgent(project_root)
             
             # Get suggestions
             result = agent.suggest_refactoring(
-                file_path=project_root / file_path,
+                file_path=full_file_path,
             )
             
             return jsonify(result), 200 if result.get("status") == "ok" else 500
             
         except Exception as e:
             app.logger.error(f"Agent suggest error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
             return jsonify({"status": "error", "error": str(e)}), 500
 
     @app.route("/api/agent/reason", methods=["POST"])
@@ -480,12 +549,23 @@ def register_routes(app: Flask):
             file_path = data.get("file")
             query = data.get("query", "How can this code be improved?")
             request_id = data.get("request_id", str(uuid.uuid4()))
+            project_path = data.get("project", "").strip()
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
+            
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
             
             # Initialize reasoning agent
             agent = ReasoningAgent(project_root)
@@ -496,7 +576,7 @@ def register_routes(app: Flask):
             try:
                 result = loop.run_until_complete(
                     agent.reason_about_code(
-                        file_path=project_root / file_path,
+                        file_path=full_file_path,
                         query=query,
                         request_id=request_id,
                     )
@@ -559,12 +639,23 @@ def register_routes(app: Flask):
             data = request.json or {}
             path = data.get("path")
             is_dir = data.get("is_dir", False)
+            project_path = data.get("project", "").strip()
             
             if not path:
                 return jsonify({"error": "Missing 'path' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
+            
+            # Construct absolute path
+            full_path = (project_root / path).resolve()
+            
+            # Security: ensure path is within project_root
+            try:
+                full_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: path outside project"}), 403
             
             # Initialize dependency analyzer
             analyzer = DependencyAnalyzer(project_root)
@@ -575,11 +666,11 @@ def register_routes(app: Flask):
             try:
                 if is_dir:
                     graph = loop.run_until_complete(
-                        analyzer.analyze_directory(Path(path))
+                        analyzer.analyze_directory(full_path)
                     )
                 else:
                     graph = loop.run_until_complete(
-                        analyzer.analyze_file(Path(path))
+                        analyzer.analyze_file(full_path)
                     )
             finally:
                 loop.close()
@@ -598,12 +689,23 @@ def register_routes(app: Flask):
             
             data = request.json or {}
             file_path = data.get("file")
+            project_path = data.get("project", "").strip()
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
+            
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
             
             # Initialize refactoring analyzer
             analyzer = RefactoringAnalyzer(project_root)
@@ -613,7 +715,7 @@ def register_routes(app: Flask):
             asyncio.set_event_loop(loop)
             try:
                 result = loop.run_until_complete(
-                    analyzer.analyze_file(Path(file_path))
+                    analyzer.analyze_file(full_file_path)
                 )
             finally:
                 loop.close()
@@ -632,12 +734,23 @@ def register_routes(app: Flask):
             
             data = request.json or {}
             file_path = data.get("file")
+            project_path = data.get("project", "").strip()
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
+            
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
             
             # Initialize metrics analyzer
             analyzer = CodeMetricsAnalyzer(project_root)
@@ -647,7 +760,7 @@ def register_routes(app: Flask):
             asyncio.set_event_loop(loop)
             try:
                 result = loop.run_until_complete(
-                    analyzer.analyze_file(Path(file_path))
+                    analyzer.analyze_file(full_file_path)
                 )
             finally:
                 loop.close()
@@ -667,13 +780,25 @@ def register_routes(app: Flask):
             data = request.json or {}
             file_path = data.get("file")
             query = data.get("query", "How can this code be improved?")
+            project_path = data.get("project", "").strip()
             request_id = data.get("request_id", str(uuid.uuid4()))
             
             if not file_path:
                 return jsonify({"error": "Missing 'file' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
+            
+            # Construct absolute file path
+            full_file_path = (project_root / file_path).resolve()
+            
+            # Security: ensure file is within project_root
+            try:
+                full_file_path.relative_to(project_root)
+            except ValueError:
+                return jsonify({"error": "Access denied: file outside project"}), 403
+            
             socketio = app.config["SOCKETIO"]
             
             # Spawn thread to handle async streaming
@@ -697,7 +822,7 @@ def register_routes(app: Flask):
                     # Run reasoning with streaming callback
                     result = loop.run_until_complete(
                         agent.reason_about_code_streaming(
-                            file_path=project_root / file_path,
+                            file_path=full_file_path,
                             query=query,
                             request_id=request_id,
                             on_step_complete=on_step,
