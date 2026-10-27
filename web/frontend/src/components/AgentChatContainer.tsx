@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { UnifiedAgentChat } from './UnifiedAgentChat';
-import { DiffViewer, FileDiff } from './DiffViewer';
+import { DiffViewer, type FileDiff, parseDiffLines } from './DiffViewer';
 import { SettingsPanel } from './SettingsPanel';
 import { useAnalysisSettings } from '../hooks/useAnalysisSettings';
 import './AgentChatContainer.css';
@@ -58,7 +58,7 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
       case 'chat':
         return (
           <UnifiedAgentChat
-            currentFile={currentFile}
+            currentFile={currentFile || ''}
             onResultsReceived={handleResultsReceived}
           />
         );
