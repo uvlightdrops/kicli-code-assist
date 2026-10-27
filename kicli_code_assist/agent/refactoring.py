@@ -62,7 +62,23 @@ class RefactoringAnalyzer:
         self.project_root = project_root
         self.ast_analyzer = ASTAnalyzer()  # No project_root parameter
 
-    async def analyze_file(self, file_path: Path) -> RefactoringResult:
+    def analyze(self, file_path: str | Path) -> dict:
+        """
+        Synchronous wrapper for analyze_file.
+        
+        Args:
+            file_path: Path to Python file (string or Path)
+            
+        Returns:
+            Dictionary with refactoring suggestions
+        """
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        
+        result = self._analyze_file_sync(file_path)
+        return result.to_dict()
+
+    def _analyze_file_sync(self, file_path: Path) -> RefactoringResult:
         """
         Analyze file for refactoring opportunities.
         
