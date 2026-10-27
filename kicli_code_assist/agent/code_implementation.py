@@ -7,6 +7,7 @@ Analyzes external projects and implements goals by:
 3. Generating implementation code via LLM
 4. Writing and verifying changes
 5. Git workflow integration (5.4.1)
+6. Test execution & verification (5.4.2)
 """
 
 import logging
@@ -16,6 +17,7 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 
 from kicli_code_assist.agent.git_manager import GitManager
+from kicli_code_assist.agent.test_runner import TestRunner
 
 logger = logging.getLogger(__name__)
 
@@ -516,3 +518,89 @@ class CodeImplementationAgent:
 
 
 
+
+    def apply_with_git_and_tests(self, goal_title: str, goal_description: str,
+                                generated_code: GeneratedCode, 
+                                push_to_remote: bool = True,
+                                run_tests: bool = True) -> Dict[str, Any]:
+        """
+        Apply code with full workflow including git and tests (Phase 5.4.1-5.4.2).
+        
+        Implements:
+        1. Create feature branch
+        2. Write code to files
+        3. Verify implementation
+        4. Run tests (optional)
+        5. Commit changes
+        6. Push to remote
+        
+        Args:
+            goal_title: Goal being implemented
+            goal_description: Detailed description
+            generated_code: GeneratedCode object
+            push_to_remote: Whether to push (default: True)
+            run_tests: Whether to run tests (default: True)
+        
+        Returns:
+            Dict with full workflow results including test output
+        """
+        logger.info(f"🚀 Starting full workflow for: {goal_title}")
+        
+        # First, apply git workflow
+        result = self.apply_with_git(goal_title, goal_description, generated_code, push_to_remote=False)
+        
+        if not result.get("success"):
+            logger.warning("Git workflow failed, skipping tests")
+            return result
+        
+        # Phase 5.4.2: Run tests
+        if run_tests:
+            logger.info("🧪 Running automated tests...")
+            try:
+                test_runner = TestRunner(str(self.project_root))
+                test_result = test_runner.run_tests()
+                result["test_results"] = {
+                    "framework": test_result.framework.value,
+                    "passed": test_result.passed,
+                    "total": test_result.total_tests,
+                    "passed_count": test_result.passed_tests,
+                    "failed_count": test_result.failed_tests,
+                    "skipped_count": test_result.skipped_tests,
+                    "failures": test_result.failures,
+                    "errors": test_result.errors,
+                    "summary": test_runner.format_result_summary(test_result)
+                }
+                
+                if test_result.passed:
+                    logger.info(f"✅ All tests passed ({test_result.passed_tests})")
+                    result["steps"]["tests_passed"] = True
+                else:
+                    logger.warning(f"⚠️  {test_result.failed_tests} test(s) failed")
+                    result["steps"]["tests_failed"] = True
+                    result["test_failure_warning"] = True
+                
+                logger.info(test_runner.format_result_summary(test_result))
+            
+            except Exception as e:
+                logger.error(f"Error running tests: {e}")
+                result["steps"]["tests_error"] = True
+                result["test_error"] = str(e)
+        
+        # Push if tests passed or no tests
+        if push_to_remote:
+            if result.get("test_results", {}).get("passed", True) or not run_tests:
+                logger.info("🚀 Pushing to remote...")
+                git = GitManager(str(self.project_root))
+                branch = result.get("branch")
+                if git.push_to_remote(branch):
+                    result["steps"]["pushed"] = True
+                    logger.info(f"✓ Pushed to origin/{branch}")
+                else:
+                    result["steps"]["pushed"] = False
+                    result["errors"].append("Failed to push")
+        
+        # Final status
+        result["workflow_complete"] = True
+        logger.info(f"✅ Workflow complete for: {goal_title}")
+        
+        return result
