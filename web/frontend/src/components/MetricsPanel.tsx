@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { AlertCircle, BarChart3, TrendingUp } from 'lucide-react';
+import { useProject } from '../hooks/useProject';
 
 export const MetricsPanel: React.FC<{ selectedFile: string | null }> = ({ selectedFile }) => {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+  const { current: currentProject } = useProject();
 
   const analyzeMetrics = async () => {
     if (!selectedFile) return;
@@ -16,6 +18,7 @@ export const MetricsPanel: React.FC<{ selectedFile: string | null }> = ({ select
     try {
       const response = await axios.post('/api/agent/metrics', {
         file: selectedFile,
+        project: currentProject?.path || '',
       });
       setResult(response.data);
     } catch (err) {
