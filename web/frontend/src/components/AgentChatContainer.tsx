@@ -318,10 +318,31 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
           <div className="analysis-panel">
             {latestResponse && (
               <>
+                {/* Analysis Menu Block - Top buttons to request specific analyses */}
+                <div className="analysis-menu-block">
+                  <div className="menu-title">Request Analysis:</div>
+                  <div className="menu-buttons">
+                    <button className="menu-button" title="Show code structure and organization">
+                      📋 Structure
+                    </button>
+                    <button className="menu-button" title="Show code quality metrics">
+                      📊 Metrics
+                    </button>
+                    <button className="menu-button" title="Show code dependencies">
+                      🔗 Dependencies
+                    </button>
+                    <button className="menu-button" title="Show refactoring suggestions">
+                      🔨 Refactor
+                    </button>
+                  </div>
+                </div>
+
+                {/* Analysis Summary */}
                 <div className="analysis-summary">
                   <strong>Summary:</strong> {latestResponse.summary}
                 </div>
 
+                {/* Tab Navigation */}
                 <div className="analysis-tabs">
                   {Object.keys(latestResponse.tabs || {}).map(tabName => (
                     <button
@@ -334,6 +355,7 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
                   ))}
                 </div>
 
+                {/* Tab Content */}
                 <div className="analysis-content">
                   {renderAnalysisTabContent()}
                 </div>
