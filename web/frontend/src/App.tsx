@@ -15,6 +15,7 @@ import { EnsemblePanel } from './components/EnsemblePanel'
 import { ToolsPanel } from './components/ToolsPanel'
 import { DependencyPanel } from './components/DependencyPanel'
 import { RefactoringPanel } from './components/RefactoringPanel'
+import { AgentChatContainer } from './components/AgentChatContainer'
 import { MetricsPanel } from './components/MetricsPanel'
 import { ThinkingStepsPanel } from './components/ThinkingStepsPanel'
 import EmptyState from './components/EmptyState'
@@ -59,6 +60,7 @@ const AppContent: React.FC = () => {
   const [connected, setConnected] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showAgentPanel, setShowAgentPanel] = useState(false)
+  const [useHybridAgent, setUseHybridAgent] = useState(true) // NEW: Use new Hybrid Agent UI
   const [currentFeature, setCurrentFeature] = useState<'explain' | 'reasoning' | 'ensemble' | 'dependencies' | 'refactor' | 'metrics' | 'tools'>('explain')
   const socketRef = useRef<any>(null)
 
@@ -387,108 +389,118 @@ const AppContent: React.FC = () => {
               )}
             </div>
 
-            {/* Right Sidebar: Chat or Agent with Feature Nav - flex-1 for equal width */}
+            {/* Right Sidebar: Chat or Hybrid Agent - flex-1 for equal width */}
             <div className="flex-1 border-l border-gray-700 bg-gray-800 flex flex-col overflow-hidden">
-              {/* Tab selector with Feature Navigation */}
-              <div className="border-b border-gray-700 p-2 space-y-2">
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowAgentPanel(false)}
-                    className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
-                      !showAgentPanel
-                        ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      💬 Chat
-                    </button>
-                    <button
-                      onClick={() => setShowAgentPanel(true)}
-                      className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
-                        showAgentPanel
-                          ? 'bg-blue-600 text-white'
-                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      }`}
-                    >
-                      🤖 Agent
-                    </button>
+              {/* Use new Hybrid Agent UI */}
+              {useHybridAgent ? (
+                <div className="flex-1 overflow-hidden">
+                  <AgentChatContainer currentFile={selectedFile?.path || null} />
+                </div>
+              ) : (
+                // Old Chat/Agent UI (kept for backward compatibility)
+                <>
+                  {/* Tab selector with Feature Navigation */}
+                  <div className="border-b border-gray-700 p-2 space-y-2">
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => setShowAgentPanel(false)}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
+                          !showAgentPanel
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        💬 Chat
+                      </button>
+                      <button
+                        onClick={() => setShowAgentPanel(true)}
+                        className={`flex-1 px-3 py-2 text-xs font-medium rounded transition ${
+                          showAgentPanel
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        }`}
+                      >
+                        🤖 Agent
+                      </button>
+                    </div>
+                    
+                    {/* Feature Navigation (only shown when Agent tab is active) */}
+                    {showAgentPanel && (
+                      <FeatureNav 
+                        currentFeature={currentFeature as any}
+                        onFeatureChange={(f) => setCurrentFeature(f as any)}
+                      />
+                    )}
                   </div>
-                  
-                  {/* Feature Navigation (only shown when Agent tab is active) */}
-                  {showAgentPanel && (
-                    <FeatureNav 
-                      currentFeature={currentFeature as any}
-                      onFeatureChange={(f) => setCurrentFeature(f as any)}
-                    />
-                  )}
-                </div>
 
-                {/* Content */}
-                <div className="flex-1 flex flex-col overflow-hidden">
-                  {!showAgentPanel ? (
-                    <>
-                      <ChatHistory messages={messages} loading={loading} />
-                      <ChatInput onSend={handleSendMessage} disabled={loading} />
-                    </>
-                  ) : (
-                    <>
-                      {/* Explain Panel (with Thinking Steps below) */}
-                      {currentFeature === 'explain' && (
-                        <div className="flex flex-col h-full">
-                          <div className="flex-1 overflow-hidden min-h-0">
-                            <AgentPanel 
-                              filePath={selectedFile?.path || null}
-                              onClose={() => setShowAgentPanel(false)}
-                            />
+                  {/* Content */}
+                  <div className="flex-1 flex flex-col overflow-hidden">
+                    {!showAgentPanel ? (
+                      <>
+                        <ChatHistory messages={messages} loading={loading} />
+                        <ChatInput onSend={handleSendMessage} disabled={loading} />
+                      </>
+                    ) : (
+                      <>
+                        {/* Explain Panel (with Thinking Steps below) */}
+                        {currentFeature === 'explain' && (
+                          <div className="flex flex-col h-full">
+                            <div className="flex-1 overflow-hidden min-h-0">
+                              <AgentPanel 
+                                filePath={selectedFile?.path || null}
+                                onClose={() => setShowAgentPanel(false)}
+                              />
+                            </div>
+                            <div className="h-1/3 overflow-hidden min-h-0">
+                              <ThinkingStepsPanel selectedFile={selectedFile?.path || null} />
+                            </div>
                           </div>
-                          <div className="h-1/3 overflow-hidden min-h-0">
-                            <ThinkingStepsPanel selectedFile={selectedFile?.path || null} />
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* Reasoning Panel */}
-                      {currentFeature === 'reasoning' && (
-                        <ReasoningPanel
-                          file={selectedFile?.path}
-                          isVisible={true}
-                        />
-                      )}
-                      
-                      {/* Ensemble Panel */}
-                      {currentFeature === 'ensemble' && (
-                        <EnsemblePanel
-                          file={selectedFile?.path}
-                          selectedCode={selectedFile?.content}
-                          isVisible={true}
-                        />
-                      )}
-                      
-                      {/* Dependencies Panel */}
-                      {currentFeature === 'dependencies' && (
-                        <DependencyPanel selectedFile={selectedFile?.path || null} />
-                      )}
-                      
-                      {/* Refactoring Panel */}
-                      {currentFeature === 'refactor' && (
-                        <RefactoringPanel selectedFile={selectedFile?.path || null} />
-                      )}
-                      
-                      {/* Metrics Panel */}
-                      {currentFeature === 'metrics' && (
-                        <MetricsPanel selectedFile={selectedFile?.path || null} />
-                      )}
-                      
-                      {/* Tools Panel */}
-                      {currentFeature === 'tools' && (
-                        <ToolsPanel isVisible={true} />
-                      )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </>
-          </div>
+                        )}
+                        
+                        {/* Reasoning Panel */}
+                        {currentFeature === 'reasoning' && (
+                          <ReasoningPanel
+                            file={selectedFile?.path}
+                            isVisible={true}
+                          />
+                        )}
+                        
+                        {/* Ensemble Panel */}
+                        {currentFeature === 'ensemble' && (
+                          <EnsemblePanel
+                            file={selectedFile?.path}
+                            selectedCode={selectedFile?.content}
+                            isVisible={true}
+                          />
+                        )}
+                        
+                        {/* Dependencies Panel */}
+                        {currentFeature === 'dependencies' && (
+                          <DependencyPanel selectedFile={selectedFile?.path || null} />
+                        )}
+                        
+                        {/* Refactoring Panel */}
+                        {currentFeature === 'refactor' && (
+                          <RefactoringPanel selectedFile={selectedFile?.path || null} />
+                        )}
+                        
+                        {/* Metrics Panel */}
+                        {currentFeature === 'metrics' && (
+                          <MetricsPanel selectedFile={selectedFile?.path || null} />
+                        )}
+                        
+                        {/* Tools Panel */}
+                        {currentFeature === 'tools' && (
+                          <ToolsPanel isVisible={true} />
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
+          </>
+        </div>
       </div>
     </div>
   )

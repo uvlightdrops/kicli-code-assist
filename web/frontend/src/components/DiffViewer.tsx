@@ -8,7 +8,7 @@ interface DiffLine {
   originalLineNumber?: number;
 }
 
-interface FileDiff {
+export interface FileDiff {
   filePath: string;
   status: 'created' | 'modified' | 'deleted';
   original: string;
