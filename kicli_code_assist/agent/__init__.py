@@ -19,11 +19,25 @@ from kicli_code_assist.agent.executor import (
     ExecutorResult,
 )
 
+# Phase 2C: Export aggregator components
+from kicli_code_assist.agent.aggregator import (
+    Action,
+    ActionType,
+    AggregatedResult,
+    ResultAggregator,
+    TabContent,
+)
+
 __all__ = [
     "ProgrammingAgent",
     "ASTContext",
     "AgentExecutor",
     "ExecutorResult",
+    "Action",
+    "ActionType",
+    "AggregatedResult",
+    "ResultAggregator",
+    "TabContent",
 ]
 
 logger = logging.getLogger("kicli-agent")
