@@ -1,11 +1,12 @@
 """
-Phase 5.3: Code Implementation Agent
+Phase 5.3-5.4: Code Implementation Agent
 
 Analyzes external projects and implements goals by:
 1. Reading existing code structure
 2. Understanding requirements from documentation
 3. Generating implementation code via LLM
 4. Writing and verifying changes
+5. Git workflow integration (5.4.1)
 """
 
 import logging
@@ -13,6 +14,8 @@ import ast
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
+
+from kicli_code_assist.agent.git_manager import GitManager
 
 logger = logging.getLogger(__name__)
 
@@ -385,5 +388,131 @@ class CodeImplementationAgent:
             result["warnings"].append(f"Cannot verify imports: {e}")
         
         return result
+    
+    def apply_with_git(self, goal_title: str, goal_description: str,
+                       generated_code: GeneratedCode, push_to_remote: bool = True) -> Dict[str, Any]:
+        """
+        Apply generated code with full git workflow (Phase 5.4.1).
+        
+        Implements:
+        1. Create feature branch
+        2. Write code to files
+        3. Verify implementation
+        4. Commit changes
+        5. Push to remote
+        
+        Args:
+            goal_title: Goal being implemented
+            goal_description: Detailed description of what was implemented
+            generated_code: GeneratedCode object with code to apply
+            push_to_remote: Whether to push to remote (default: True)
+        
+        Returns:
+            Dict with implementation workflow results
+        """
+        result = {
+            "success": False,
+            "goal": goal_title,
+            "steps": {},
+            "branch": None,
+            "commit_sha": None,
+            "errors": []
+        }
+        
+        try:
+            # Step 1: Initialize git manager
+            logger.info(f"🔄 Starting git workflow for: {goal_title}")
+            git = GitManager(str(self.project_root))
+            
+            # Step 2: Create feature branch
+            logger.info("📍 Creating feature branch...")
+            if not git.create_branch(goal_title):
+                result["errors"].append("Failed to create branch")
+                return result
+            
+            branch_name = git.get_current_branch()
+            result["branch"] = branch_name
+            result["steps"]["branch_created"] = True
+            logger.info(f"✓ Branch: {branch_name}")
+            
+            # Step 3: Apply code changes
+            logger.info("📝 Applying code changes...")
+            apply_result = self.apply_generated_code(generated_code, dry_run=False)
+            if not apply_result.get("success"):
+                result["errors"].append("Failed to apply code")
+                git.reset_branch(keep_changes=True)
+                return result
+            
+            result["steps"]["code_applied"] = True
+            
+            # Extract just filenames from changes_made messages
+            changes = apply_result.get("changes_made", [])
+            files_to_add = []
+            for change in changes:
+                # Extract filename from "Created new file: /path/to/file" or similar
+                if ":" in change:
+                    filename = change.split(":", 1)[1].strip()
+                else:
+                    filename = change
+                files_to_add.append(filename)
+            
+            result["files_written"] = files_to_add
+            logger.info(f"✓ Code applied to {len(files_to_add)} file(s)")
+            
+            # Step 4: Verify implementation
+            logger.info("✅ Verifying implementation...")
+            verification = self.verify_implementation(goal_title, generated_code)
+            if not verification.get("valid_syntax"):
+                result["errors"].append(f"Invalid syntax: {verification.get('errors', [])}")
+                git.reset_branch(keep_changes=True)
+                return result
+            
+            result["steps"]["verified"] = True
+            result["verification"] = verification
+            logger.info("✓ Verification passed")
+            
+            # Step 5: Commit changes
+            logger.info("💾 Committing changes...")
+            commit_sha = git.commit_changes(
+                goal_title,
+                goal_description,
+                files_to_add
+            )
+            if not commit_sha:
+                result["errors"].append("Failed to commit")
+                git.reset_branch(keep_changes=True)
+                return result
+            
+            result["commit_sha"] = commit_sha
+            result["steps"]["committed"] = True
+            logger.info(f"✓ Committed: {commit_sha[:8]}")
+            
+            # Step 6: Push to remote
+            if push_to_remote:
+                logger.info("🚀 Pushing to remote...")
+                if not git.push_to_remote(branch_name):
+                    result["errors"].append("Failed to push to remote")
+                    result["steps"]["pushed"] = False
+                else:
+                    result["steps"]["pushed"] = True
+                    logger.info(f"✓ Pushed to origin/{branch_name}")
+            
+            # Step 7: Generate PR info
+            logger.info("📋 Generating PR information...")
+            pr_info = git.create_pull_request_info(goal_title, goal_description)
+            result["pull_request_info"] = pr_info
+            result["steps"]["pr_ready"] = True
+            logger.info(f"✓ PR ready: '{pr_info['title']}'")
+            
+            # Success!
+            result["success"] = True
+            logger.info(f"✅ Git workflow complete for: {goal_title}")
+            
+        except Exception as e:
+            logger.error(f"Git workflow error: {e}", exc_info=True)
+            result["errors"].append(str(e))
+        
+        return result
+
 
 
