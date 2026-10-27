@@ -31,6 +31,7 @@ from kicli_code_assist.logging_integration import _get_or_create_logger, _get_lo
 from kicli_code_assist.agent.intent_detector import AgentIntentDetector
 from kicli_code_assist.agent.executor import AgentExecutor
 from kicli_code_assist.agent.aggregator import ResultAggregator
+from kicli_code_assist.agent.answer_generator import AnswerGenerator, AnalysisContext
 from ki_core.config import ConfigManager
 from ki_core.adapters import AsyncOpenAIClient, ProviderChain
 from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
@@ -62,6 +63,7 @@ def get_config() -> Dict[str, Any]:
 _intent_detector: Optional[AgentIntentDetector] = None
 _executor: Optional[AgentExecutor] = None
 _aggregator: Optional[ResultAggregator] = None
+_answer_generator: Optional[AnswerGenerator] = None
 
 
 def get_intent_detector(project_root: Optional[Path] = None) -> AgentIntentDetector:
@@ -99,6 +101,15 @@ def get_aggregator(provider_chain: Optional[ProviderChain] = None) -> ResultAggr
         )
         logging.getLogger("kicli-web").info("Initialized ResultAggregator (Phase 2C)")
     return _aggregator
+
+
+def get_answer_generator(provider_chain: Optional[ProviderChain] = None) -> AnswerGenerator:
+    """Get or create singleton AnswerGenerator instance."""
+    global _answer_generator
+    if _answer_generator is None:
+        _answer_generator = AnswerGenerator(provider_chain=provider_chain)
+        logging.getLogger("kicli-web").info("Initialized AnswerGenerator (Phase 2E)")
+    return _answer_generator
 
 
 def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
@@ -472,6 +483,21 @@ def register_routes(app: Flask):
                 aggregation_ms = (time.time() - aggregation_start) * 1000
                 app.logger.info(f"[{session_id}] Aggregation complete: {aggregation_ms:.1f}ms")
                 
+                # Phase 2E: Generate Conversational Answer
+                answer_start = time.time()
+                answer_generator = get_answer_generator()
+                analysis_context = AnalysisContext(
+                    query=query,
+                    file_path=str(file_path_obj),
+                    structure=aggregated.tabs.get('Structure', {}).data if 'Structure' in aggregated.tabs else None,
+                    metrics=aggregated.tabs.get('Metrics', {}).data if 'Metrics' in aggregated.tabs else None,
+                    dependencies=aggregated.tabs.get('Dependencies', {}).data if 'Dependencies' in aggregated.tabs else None,
+                    refactor_suggestions=aggregated.tabs.get('Refactor', {}).data if 'Refactor' in aggregated.tabs else None,
+                )
+                answer = await answer_generator.generate_answer(query, analysis_context)
+                answer_ms = (time.time() - answer_start) * 1000
+                app.logger.info(f"[{session_id}] Answer generation complete: {answer_ms:.1f}ms")
+                
                 # Calculate total timing
                 total_ms = (time.time() - total_start) * 1000
                 
@@ -480,6 +506,7 @@ def register_routes(app: Flask):
                     "success": True,
                     "session_id": session_id,
                     "query": query,
+                    "answer": answer,
                     "intent": {
                         "type": agent_intent.intent_type.value,
                         "confidence": agent_intent.confidence,
@@ -494,6 +521,7 @@ def register_routes(app: Flask):
                         "intent_ms": round(intent_ms, 1),
                         "execution_ms": round(execution_ms, 1),
                         "aggregation_ms": round(aggregation_ms, 1),
+                        "answer_ms": round(answer_ms, 1),
                         "total_ms": round(total_ms, 1)
                     },
                     "synthesis_method": aggregated.synthesis_method

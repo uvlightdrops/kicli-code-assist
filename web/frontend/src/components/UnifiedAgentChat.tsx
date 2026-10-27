@@ -62,21 +62,21 @@ export const UnifiedAgentChat: React.FC<{
         project: projectPath || localStorage.getItem('currentProject') || '',
       });
 
-      // Only add agent response message if there's actual content to show
-      // The Phase 2D response is passed to onResultsReceived for detailed tab rendering
-      if (response.data.summary) {
+      // Add the conversational answer from Phase 2E
+      if (response.data.answer) {
         const agentResponse: ChatMessage = {
           role: 'agent',
-          content: `✓ Analysis: ${response.data.intent.type} (${response.data.intent.agents.join(', ')})`,
+          content: response.data.answer,
           timestamp: new Date(),
           agentTypes: response.data.intent.agents || [],
         };
         setMessages(prev => [...prev, agentResponse]);
       }
+      
       setSession(response.data.session || null);
       setTokenCount(response.data.token_count || 0);
 
-      // Notify parent component of results
+      // Notify parent component of results for tab rendering
       if (onResultsReceived) {
         onResultsReceived(response.data);
       }
