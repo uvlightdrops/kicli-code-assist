@@ -12,6 +12,20 @@ from kicli_code_assist.agent.analysis import (
     SmartSelector,
 )
 
+# Phase 2B: Export executor components
+from kicli_code_assist.agent.executor import (
+    ASTContext,
+    AgentExecutor,
+    ExecutorResult,
+)
+
+__all__ = [
+    "ProgrammingAgent",
+    "ASTContext",
+    "AgentExecutor",
+    "ExecutorResult",
+]
+
 logger = logging.getLogger("kicli-agent")
 
 
