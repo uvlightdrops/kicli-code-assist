@@ -92,7 +92,11 @@ def register_routes(app: Flask):
                     "error": "Missing 'query' parameter",
                     "session_id": session_id
                 }), 400
-            if not file_path:
+            
+            # file_path is optional for external project queries
+            # Only required for file-specific analysis
+            is_external_project_query = project_root_str and project_root_str != str(Path.cwd())
+            if not is_external_project_query and not file_path:
                 return jsonify({
                     "success": False,
                     "error": "Missing 'file_path' parameter",

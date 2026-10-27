@@ -194,6 +194,59 @@ class ExternalProjectAnalyzer:
         
         return steps
 
+    def get_goal_details(self, goal_title: str) -> Optional[Dict[str, Any]]:
+        """Get detailed information about a specific goal.
+        
+        Searches documentation for more context about a goal.
+        Returns enriched goal data with implementation hints.
+        """
+        # Re-analyze to get current goals
+        analysis = self.analyze()
+        
+        # Find matching goal
+        matching_goals = [g for g in analysis.goals if g.title.lower() == goal_title.lower()]
+        
+        if not matching_goals:
+            return None
+        
+        goal = matching_goals[0]
+        
+        # Search documentation for more context
+        additional_context = self._search_goal_context(goal_title, analysis.doc_files)
+        
+        return {
+            "title": goal.title,
+            "phase": goal.phase,
+            "description": goal.description,
+            "requirements": goal.requirements,
+            "doc_files": analysis.doc_files,
+            "additional_context": additional_context,
+            "project_name": analysis.project_name
+        }
+
+    def _search_goal_context(self, goal_title: str, doc_files: List[str]) -> str:
+        """Search documentation for additional context about a goal."""
+        context_lines = []
+        search_term = goal_title.lower()
+        
+        for doc_file in doc_files:
+            if not os.path.exists(doc_file):
+                continue
+            
+            with open(doc_file, "r", encoding="utf-8", errors="ignore") as f:
+                lines = f.readlines()
+            
+            for i, line in enumerate(lines):
+                if search_term in line.lower():
+                    # Found a match - capture surrounding context
+                    start = max(0, i - 2)
+                    end = min(len(lines), i + 5)
+                    context = "".join(lines[start:end])
+                    if context not in context_lines:
+                        context_lines.append(context)
+        
+        return "\n---\n".join(context_lines[:3]) if context_lines else ""
+
 
 def get_external_analyzer(project_root: str) -> ExternalProjectAnalyzer:
     """Factory function to create analyzer instance."""

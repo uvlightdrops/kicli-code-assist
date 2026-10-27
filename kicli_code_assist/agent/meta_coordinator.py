@@ -116,7 +116,7 @@ class MetaCoordinationAgent:
             external_analysis = None
             if self._is_external_project_query(request.query, request.project_root):
                 logger.info(f"External project detected: {request.project_root}")
-                external_analysis = self._analyze_external_project(request.project_root)
+                external_analysis = self._analyze_external_project(request.project_root, request.query)
                 # Enhance request context with external analysis
                 request.context["external_analysis"] = external_analysis
             
@@ -339,6 +339,7 @@ class MetaCoordinationAgent:
         """Step 6: Generate conversational response.
         
         Creates human-readable answer from aggregated results.
+        Handles both project-overview and goal-specific queries.
         """
         import time
         start = time.time()
@@ -348,21 +349,55 @@ class MetaCoordinationAgent:
         
         # Build answer from external project analysis
         if external_analysis:
-            lines = [
-                f"# Analysis of {external_analysis.get('project_name', 'Project')}",
-                f"\n{external_analysis.get('summary', '')}",
-                "\n## Recommended Next Steps:",
-            ]
+            query_type = external_analysis.get("query_type", "project_overview")
             
-            for step in external_analysis.get("next_steps", [])[:5]:
-                lines.append(f"- {step}")
+            # Goal-specific analysis
+            if query_type == "goal_specific" and "goal" in external_analysis:
+                goal = external_analysis["goal"]
+                lines = [
+                    f"# Implementation Analysis: {goal.get('title', 'Goal')}",
+                    f"\n**Phase:** {goal.get('phase', 'Unknown')}",
+                    f"\n**Description:** {goal.get('description', 'N/A')}",
+                ]
+                
+                # Add context from documentation
+                if goal.get("additional_context"):
+                    lines.append(f"\n## Documentation Context:")
+                    context_preview = goal.get("additional_context", "")[:500]
+                    lines.append(f"```\n{context_preview}\n```")
+                
+                # Add requirements
+                if goal.get("requirements"):
+                    lines.append(f"\n## Requirements:")
+                    for req in goal.get("requirements", [])[:5]:
+                        lines.append(f"- {req}")
+                
+                lines.append(f"\n## Implementation Steps:")
+                lines.append("1. Analyze existing code structure")
+                lines.append("2. Identify required modules to modify")
+                lines.append("3. Create test cases")
+                lines.append("4. Implement functionality")
+                lines.append("5. Verify and document")
+                
+                answer = "\n".join(lines)
             
-            if external_analysis.get("goals"):
-                lines.append(f"\n## Implementation Goals ({len(external_analysis.get('goals', []))} total)")
-                for goal in external_analysis.get("goals", [])[:3]:
-                    lines.append(f"- **{goal.get('title', '')}** ({goal.get('phase', 'Unknown')})")
-            
-            answer = "\n".join(lines)
+            # Project overview
+            else:
+                lines = [
+                    f"# Analysis of {external_analysis.get('project_name', 'Project')}",
+                    f"\n{external_analysis.get('summary', '')}",
+                    "\n## Recommended Next Steps:",
+                ]
+                
+                for step in external_analysis.get("next_steps", [])[:5]:
+                    lines.append(f"- {step}")
+                
+                if external_analysis.get("goals"):
+                    lines.append(f"\n## Implementation Goals ({len(external_analysis.get('goals', []))} total)")
+                    for goal in external_analysis.get("goals", [])[:3]:
+                        lines.append(f"- **{goal.get('title', '')}** ({goal.get('phase', 'Unknown')})")
+                
+                answer = "\n".join(lines)
         else:
             answer = f"Query: {request.query[:100]}"
         
@@ -409,7 +444,7 @@ class MetaCoordinationAgent:
     
     def _is_external_project_query(self, query: str, project_root: str) -> bool:
         """Detect if query is asking to work on an external project."""
-        keywords = ["load", "analyze", "read", "external", "project", "repository"]
+        keywords = ["load", "analyze", "read", "external", "project", "repository", "implement", "goal"]
         query_lower = query.lower()
         
         # Check if query mentions analyzing/loading a project
@@ -421,14 +456,42 @@ class MetaCoordinationAgent:
         
         return has_project_keyword and is_external
     
-    def _analyze_external_project(self, project_root: str) -> Dict[str, Any]:
-        """Analyze external project structure and goals."""
+    def _analyze_external_project(self, project_root: str, query: str = "") -> Dict[str, Any]:
+        """Analyze external project structure and goals.
+        
+        If query mentions a specific goal, provide detailed goal info.
+        """
         try:
             analyzer = get_external_analyzer(project_root)
+            
+            # Check if query mentions a specific goal
+            query_lower = query.lower()
+            
+            # Look for specific goal keywords
+            goal_keywords = ["help anzeigen", "infosite", "kommandos", "callback", "cli framework"]
+            matched_goal = None
+            for keyword in goal_keywords:
+                if keyword in query_lower:
+                    matched_goal = keyword
+                    break
+            
+            # If specific goal found, get its details
+            if matched_goal:
+                goal_details = analyzer.get_goal_details(matched_goal.replace("\"", "").strip())
+                if goal_details:
+                    return {
+                        "project_name": analyzer.project_name,
+                        "query_type": "goal_specific",
+                        "goal": goal_details,
+                        "summary": f"Detailed analysis of goal: {matched_goal}"
+                    }
+            
+            # Otherwise, do full project analysis
             analysis = analyzer.analyze()
             
             return {
                 "project_name": analysis.project_name,
+                "query_type": "project_overview",
                 "summary": analysis.summary,
                 "goals": [
                     {
