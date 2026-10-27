@@ -18,6 +18,9 @@ from dataclasses import dataclass
 
 from kicli_code_assist.agent.git_manager import GitManager
 from kicli_code_assist.agent.test_runner import TestRunner
+from kicli_code_assist.agent.code_quality import CodeQualityChecker
+from kicli_code_assist.agent.rollback_manager import RollbackManager, SafeImplementationWrapper
+from kicli_code_assist.agent.implementation_state import ImplementationStateManager
 
 logger = logging.getLogger(__name__)
 
@@ -604,3 +607,203 @@ class CodeImplementationAgent:
         logger.info(f"✅ Workflow complete for: {goal_title}")
         
         return result
+
+    def apply_with_full_autonomy(self, goal_id: str, goal_title: str, 
+                                 goal_description: str,
+                                 generated_code: GeneratedCode,
+                                 state_manager: Optional[ImplementationStateManager] = None) -> Dict[str, Any]:
+        """
+        Full autonomous workflow (Phase 5.4: Complete Autonomy = 10/10).
+        
+        Implements all 5 sub-phases:
+        1. Git workflow (5.4.1)
+        2. Automated tests (5.4.2)
+        3. State tracking (5.4.3)
+        4. Quality checks (5.4.4)
+        5. Rollback capability (5.4.5)
+        
+        Args:
+            goal_id: Unique goal identifier
+            goal_title: Goal title
+            goal_description: Detailed description
+            generated_code: GeneratedCode to apply
+            state_manager: Optional state manager for tracking
+        
+        Returns:
+            Dict with complete workflow results and state
+        """
+        logger.info(f"🎯 PHASE 5.4 FULL AUTONOMY: {goal_id}")
+        
+        # Initialize managers
+        git = GitManager(str(self.project_root))
+        test_runner = TestRunner(str(self.project_root))
+        quality_checker = CodeQualityChecker(str(self.project_root))
+        rollback = RollbackManager(str(self.project_root))
+        
+        if state_manager is None:
+            state_manager = ImplementationStateManager()
+        
+        # Track implementation state
+        state_manager.start_implementation(
+            goal_id, goal_title, goal_description, {}
+        )
+        
+        try:
+            # Phase 5.4.1: Prepare rollback state
+            rollback_state = rollback.prepare_rollback(goal_id, f"feature/{goal_id}")
+            
+            # Phase 5.4.1: Git workflow
+            logger.info("📝 Phase 5.4.1: Git Workflow")
+            branch_name = f"feature/{goal_id}"
+            branch_created = git.create_branch(branch_name)
+            
+            if not branch_created:
+                logger.error("Failed to create feature branch")
+                state_manager.fail_implementation(goal_id, "Branch creation failed")
+                return {
+                    "success": False,
+                    "error": "Failed to create branch",
+                    "phase": "5.4.1"
+                }
+            
+            # Apply generated code
+            logger.info("💾 Applying code...")
+            result = self.apply_generated_code(generated_code)
+            
+            if not result.get("success"):
+                logger.error("Code application failed")
+                rollback.rollback_implementation(goal_id, "Code application failed")
+                state_manager.fail_implementation(goal_id, "Code application failed")
+                return {
+                    "success": False,
+                    "error": "Code application failed",
+                    "phase": "5.4.1",
+                    "rolled_back": True
+                }
+            
+            # Verify changes
+            logger.info("✓ Verifying implementation...")
+            verification = self.verify_implementation(generated_code)
+            
+            if not verification.get("success"):
+                logger.error("Verification failed")
+                rollback.rollback_implementation(goal_id, "Verification failed")
+                state_manager.fail_implementation(goal_id, "Verification failed")
+                return {
+                    "success": False,
+                    "error": "Verification failed",
+                    "phase": "5.4.1",
+                    "rolled_back": True
+                }
+            
+            # Commit changes
+            logger.info("📌 Committing...")
+            changes = result.get("changes", [])
+            commit_msg = f"Feature: {goal_title}\n\n{goal_description}"
+            commit_sha = git.commit_changes(changes, commit_msg)
+            
+            if not commit_sha:
+                logger.error("Commit failed")
+                rollback.rollback_implementation(goal_id, "Commit failed")
+                state_manager.fail_implementation(goal_id, "Commit failed")
+                return {
+                    "success": False,
+                    "error": "Commit failed",
+                    "phase": "5.4.1",
+                    "rolled_back": True
+                }
+            
+            # Phase 5.4.2: Automated tests
+            logger.info("📋 Phase 5.4.2: Running tests...")
+            test_result = test_runner.run_tests()
+            test_summary = {
+                "framework": test_result.framework.value,
+                "passed": test_result.passed,
+                "total": test_result.total_tests,
+                "summary": test_runner.format_result_summary(test_result)
+            }
+            
+            if not test_result.passed:
+                logger.warning("Tests failed, rolling back...")
+                rollback.rollback_implementation(goal_id, f"Tests failed: {test_result.failed_tests} failed")
+                state_manager.fail_implementation(goal_id, f"Tests failed ({test_result.failed_tests})")
+                return {
+                    "success": False,
+                    "error": f"Tests failed: {test_result.failed_tests} failed",
+                    "phase": "5.4.2",
+                    "tests": test_summary,
+                    "rolled_back": True
+                }
+            
+            logger.info(f"✅ Tests passed: {test_result.passed_tests}/{test_result.total_tests}")
+            
+            # Phase 5.4.4: Code quality checks
+            logger.info("🔍 Phase 5.4.4: Quality checks...")
+            files_to_check = [str(f) for f in generated_code.files.keys()]
+            quality_results = {
+                "pep8": quality_checker.check_pep8(files_to_check)
+            }
+            
+            quality_summary = quality_checker.format_summary(quality_results)
+            
+            if quality_checker.should_block_commit(quality_results):
+                logger.error("Quality checks failed, rolling back...")
+                rollback.rollback_implementation(goal_id, "Quality checks failed")
+                state_manager.fail_implementation(goal_id, "Quality checks blocked commit")
+                return {
+                    "success": False,
+                    "error": "Quality checks failed",
+                    "phase": "5.4.4",
+                    "quality": quality_summary,
+                    "rolled_back": True
+                }
+            
+            logger.info("✓ Quality checks passed")
+            
+            # Push to remote (only if all checks passed)
+            logger.info("🚀 Pushing to remote...")
+            push_ok = git.push_to_remote(branch_name)
+            
+            if not push_ok:
+                logger.warning("Push failed, but keeping local commits")
+            
+            # Phase 5.4.3: Track successful implementation
+            logger.info("📊 Phase 5.4.3: Tracking state...")
+            state_manager.complete_implementation(
+                goal_id,
+                {
+                    "commit_sha": commit_sha,
+                    "branch": branch_name,
+                    "files": len(result.get("changes", [])),
+                    "tests_passed": test_result.passed_tests,
+                    "tests_total": test_result.total_tests
+                }
+            )
+            
+            # Success
+            logger.info("🎉 PHASE 5.4 COMPLETE - FULL AUTONOMY ACHIEVED!")
+            
+            return {
+                "success": True,
+                "goal_id": goal_id,
+                "phase": "5.4 Complete",
+                "commit_sha": commit_sha,
+                "branch": branch_name,
+                "changes": result.get("changes", []),
+                "verification": verification,
+                "tests": test_summary,
+                "quality": quality_summary,
+                "pushed": push_ok,
+                "state_tracked": True
+            }
+        
+        except Exception as e:
+            logger.error(f"Autonomous implementation failed: {e}")
+            rollback.rollback_implementation(goal_id, f"Exception: {str(e)}")
+            state_manager.fail_implementation(goal_id, f"Exception: {str(e)}")
+            return {
+                "success": False,
+                "error": str(e),
+                "rolled_back": True,
+                "exception": True
+            }
