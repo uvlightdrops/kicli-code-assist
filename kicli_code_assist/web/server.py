@@ -599,13 +599,15 @@ def register_routes(app: Flask):
             data = request.json or {}
             code_snippet = data.get("code", "")
             question = data.get("question", "What is this code doing?")
+            project_path = data.get("project", "").strip()
             request_id = data.get("request_id", str(uuid.uuid4()))
             
             if not code_snippet:
                 return jsonify({"error": "Missing 'code' parameter"}), 400
             
-            config = app.config["KICLI_CONFIG"]
-            project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            project_root, error = resolve_project_root(project_path)
+            if error:
+                return jsonify({"error": error}), 403
             
             # Initialize ensemble
             ensemble = LLMEnsemble(project_root)
@@ -628,6 +630,7 @@ def register_routes(app: Flask):
             
         except Exception as e:
             app.logger.error(f"Agent ensemble error: {e}\n{traceback.format_exc()}")
+            return jsonify({"status": "error", "error": str(e)}), 500
             return jsonify({"status": "error", "error": str(e)}), 500
 
     @app.route("/api/agent/dependencies", methods=["POST"])
