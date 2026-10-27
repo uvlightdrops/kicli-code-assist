@@ -645,7 +645,7 @@ class CodeImplementationAgent:
         
         # Track implementation state
         state_manager.start_implementation(
-            goal_id, goal_title, goal_description, {}
+            goal_id, goal_title, str(self.project_root)
         )
         
         try:
@@ -683,7 +683,7 @@ class CodeImplementationAgent:
             
             # Verify changes
             logger.info("✓ Verifying implementation...")
-            verification = self.verify_implementation(generated_code)
+            verification = self.verify_implementation(goal_title, generated_code)
             
             if not verification.get("success"):
                 logger.error("Verification failed")
