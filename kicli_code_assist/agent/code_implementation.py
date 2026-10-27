@@ -61,6 +61,16 @@ class ProjectCodeStructure:
     summary: str
 
 
+@dataclass
+class GeneratedCode:
+    """Represents generated code ready to implement."""
+    goal_title: str
+    target_file: Path
+    code_content: str
+    description: str
+    imports_to_add: List[str]
+
+
 class CodeImplementationAgent:
     """Analyzes code structure and prepares for implementation."""
     
@@ -207,3 +217,73 @@ class CodeImplementationAgent:
 - Keep code style consistent with the project
 """
         return prompt
+    
+    def generate_code_via_llm(self, goal_title: str, goal_description: str, 
+                              requirements: List[str], api_client=None) -> Optional[GeneratedCode]:
+        """Use LLM to generate implementation code.
+        
+        Args:
+            goal_title: Goal name
+            goal_description: Detailed goal description
+            requirements: List of requirements
+            api_client: Optional ki-core AIClient for LLM calls
+            
+        Returns:
+            GeneratedCode object or None if generation fails
+        """
+        # Try to use ki-core AIClient if available
+        if api_client is None:
+            try:
+                from ki_core.core.client import AIClient
+                from ki_core.adapters.openai import OpenAIClient
+                from ki_core.config import ConfigManager
+                
+                config = ConfigManager()
+                api_client = OpenAIClient(config.llm_config)
+            except Exception as e:
+                logger.warning(f"Cannot initialize LLM client: {e}")
+                return None
+        
+        # Gather context
+        context = self.get_goal_implementation_context(goal_title, goal_description)
+        
+        # Generate prompt
+        prompt = self.generate_implementation_prompt(goal_title, goal_description, requirements, context)
+        
+        # Call LLM
+        try:
+            from ki_core.core.models import ChatRequest, ChatMessage
+            
+            request = ChatRequest(
+                messages=[
+                    ChatMessage(role="system", content="You are an expert Python developer helping implement features in a software project."),
+                    ChatMessage(role="user", content=prompt)
+                ],
+                model="claude-3-5-sonnet",
+                temperature=0.3,
+                max_tokens=2000
+            )
+            
+            response = api_client.chat(request)
+            
+            # Find relevant file
+            target_file = self.get_file_for_goal(goal_title, goal_description)
+            if not target_file:
+                # Create new file if no existing file found
+                module_name = goal_title.lower().replace(" ", "_")
+                target_file_path = self.project_root / "ki_knowledge" / "commands" / f"{module_name}.py"
+            else:
+                target_file_path = target_file.path
+            
+            return GeneratedCode(
+                goal_title=goal_title,
+                target_file=target_file_path,
+                code_content=response.content,
+                description=f"Generated code for: {goal_title}",
+                imports_to_add=context.get("imports_needed", [])
+            )
+        
+        except Exception as e:
+            logger.error(f"Code generation failed: {e}")
+            return None
+
