@@ -14,8 +14,8 @@ from typing import Dict, Any, Optional
 from flask import Flask, request, jsonify
 from flask_socketio import SocketIO
 
-from kicli_code_assist.web.server_instances import (
-    get_intent_detector, get_executor, get_aggregator, get_answer_generator
+from kicli_code_assist.agent.meta_coordinator import (
+    MetaCoordinationAgent, CoordinationRequest, get_meta_coordinator
 )
 
 
@@ -33,10 +33,9 @@ def register_routes(app: Flask):
     @app.route("/api/agent/route", methods=["POST"])
     def agent_route():
         """
-        Phase 2D: Intelligent Agent Router with Parallel Execution
+        Phase 5.1: Intelligent Agent Router with MetaCoordinationAgent
         
-        Integrates Phase 2A (Intent Detection), Phase 2B (Parallel Execution),
-        and Phase 2C (Result Aggregation) into a single endpoint.
+        Uses MetaCoordinationAgent to orchestrate analysis and implementation workflows.
         
         Request:
         {
@@ -52,172 +51,134 @@ def register_routes(app: Flask):
             "success": true,
             "session_id": "session-uuid",
             "query": "...",
+            "answer": "Detailed conversational response...",
             "intent": {
-                "type": "EXPLAIN",
-                "confidence": 0.92,
-                "agents": ["explain", "metrics"]
+                "type": "explain",
+                "confidence": 0.92
             },
-            "summary": "Natural language summary from Phase 2C...",
+            "workflow": "analysis",
+            "agents_used": ["metrics", "refactoring", "dependencies"],
             "tabs": {
                 "Structure": {...},
-                "Metrics": {...}
+                "Metrics": {...},
+                "Dependencies": {...}
             },
-            "actions": [],
-            "next_steps": ["Add type hints", "Optimize loop"],
+            "actions": [...],
             "timing": {
-                "intent_ms": 1200,
-                "execution_ms": 350,
-                "aggregation_ms": 800,
-                "total_ms": 2350
+                "intent_ms": 123,
+                "execution_ms": 456,
+                "aggregation_ms": 789,
+                "answer_ms": 234
             }
         }
         """
-        async def _agent_route_async():
-            """Async implementation of agent_route."""
-            session_id = None
-            total_start = time.time()
+        import uuid
+        import traceback
+        
+        session_id = None
+        
+        try:
+            data = request.get_json() or {}
+            query = data.get("query", "").strip()
+            file_path = data.get("file_path", "").strip()
+            project_root_str = data.get("project_root", "").strip()
+            scope = data.get("scope", "project")
+            session_id = data.get("session_id") or str(uuid.uuid4())
             
-            try:
-                data = request.get_json() or {}
-                query = data.get("query", "").strip()
-                file_path = data.get("file_path", "").strip()
-                project_root_str = data.get("project_root", "").strip()
-                scope = data.get("scope", "folder")
-                session_id = data.get("session_id") or str(uuid.uuid4())
-                
-                # Validation
-                if not query:
-                    return jsonify({"success": False, "error": "Missing 'query' parameter", "session_id": session_id}), 400
-                if not file_path:
-                    return jsonify({"success": False, "error": "Missing 'file_path' parameter", "session_id": session_id}), 400
-                
-                # Resolve project_root
-                if not project_root_str:
-                    config = app.config["KICLI_CONFIG"]
-                    project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
-                else:
-                    project_root = Path(project_root_str).resolve()
-                    try:
-                        ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
-                        project_root.relative_to(ALLOWED_ROOT)
-                    except ValueError:
-                        return jsonify({
-                            "success": False,
-                            "error": "Access denied: path outside allowed root",
-                            "session_id": session_id
-                        }), 403
-                
-                # Resolve and validate file path
-                file_path_obj = Path(file_path).resolve() if Path(file_path).is_absolute() else (project_root / file_path).resolve()
+            # Validation
+            if not query:
+                return jsonify({
+                    "success": False,
+                    "error": "Missing 'query' parameter",
+                    "session_id": session_id
+                }), 400
+            if not file_path:
+                return jsonify({
+                    "success": False,
+                    "error": "Missing 'file_path' parameter",
+                    "session_id": session_id
+                }), 400
+            
+            # Resolve project_root
+            if not project_root_str:
+                config = app.config.get("KICLI_CONFIG", {})
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                project_root = Path(project_root_str).resolve()
                 try:
-                    file_path_obj.relative_to(project_root)
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
                 except ValueError:
                     return jsonify({
                         "success": False,
-                        "error": "Access denied: file outside project",
+                        "error": "Access denied: path outside allowed root",
                         "session_id": session_id
                     }), 403
-                
-                app.logger.info(f"[{session_id}] Processing query: '{query}' on {file_path_obj.name}")
-                
-                # Phase 2A: Detect Intent
-                intent_start = time.time()
-                intent_detector = get_intent_detector()
-                agent_intent = await intent_detector.detect_intent(
-                    query,
-                    file_context={"file": str(file_path_obj), "scope": scope}
-                )
-                intent_ms = (time.time() - intent_start) * 1000
-                app.logger.info(
-                    f"[{session_id}] Intent: {agent_intent.intent_type.value} "
-                    f"(confidence: {agent_intent.confidence:.2f}) → agents: {agent_intent.agents_to_run}"
-                )
-                
-                # Phase 2B: Execute Agents in Parallel
-                executor_start = time.time()
-                executor = get_executor(project_root)
-                executor_result = await executor.execute(
-                    query=query,
-                    file_path=file_path_obj,
-                    scope=scope,
-                    session_id=session_id
-                )
-                execution_ms = (time.time() - executor_start) * 1000
-                app.logger.info(f"[{session_id}] Execution complete: {execution_ms:.1f}ms")
-                
-                # Phase 2C: Aggregate Results
-                aggregation_start = time.time()
-                aggregator = get_aggregator()
-                aggregated = await aggregator.aggregate(
-                    executor_result=executor_result,
-                    file_path=file_path_obj,
-                    query=query
-                )
-                aggregation_ms = (time.time() - aggregation_start) * 1000
-                app.logger.info(f"[{session_id}] Aggregation complete: {aggregation_ms:.1f}ms")
-                
-                # Phase 2E: Generate Conversational Answer
-                answer_start = time.time()
-                answer_generator = get_answer_generator()
-                analysis_context = AnalysisContext(
-                    query=query,
-                    file_path=str(file_path_obj),
-                    structure=aggregated.tabs['Structure'].data if 'Structure' in aggregated.tabs else None,
-                    metrics=aggregated.tabs['Metrics'].data if 'Metrics' in aggregated.tabs else None,
-                    dependencies=aggregated.tabs['Dependencies'].data if 'Dependencies' in aggregated.tabs else None,
-                    refactor_suggestions=aggregated.tabs['Refactor'].data if 'Refactor' in aggregated.tabs else None,
-                )
-                answer = await answer_generator.generate_answer(query, analysis_context)
-                answer_ms = (time.time() - answer_start) * 1000
-                app.logger.info(f"[{session_id}] Answer generation complete: {answer_ms:.1f}ms")
-                
-                # Calculate total timing
-                total_ms = (time.time() - total_start) * 1000
-                
-                # Build response
-                response = {
-                    "success": True,
-                    "session_id": session_id,
-                    "query": query,
-                    "answer": answer,
-                    "intent": {
-                        "type": agent_intent.intent_type.value,
-                        "confidence": agent_intent.confidence,
-                        "agents": agent_intent.agents_to_run,
-                        "reasoning": agent_intent.reasoning
-                    },
-                    "summary": aggregated.summary,
-                    "tabs": {name: tab.to_dict() for name, tab in aggregated.tabs.items()},
-                    "actions": [action.to_dict() for action in aggregated.actions],
-                    "next_steps": aggregated.next_steps,
-                    "timing": {
-                        "intent_ms": round(intent_ms, 1),
-                        "execution_ms": round(execution_ms, 1),
-                        "aggregation_ms": round(aggregation_ms, 1),
-                        "answer_ms": round(answer_ms, 1),
-                        "total_ms": round(total_ms, 1)
-                    },
-                    "synthesis_method": aggregated.synthesis_method
-                }
-                
-                app.logger.info(f"[{session_id}] Response complete: {total_ms:.1f}ms total")
-                return jsonify(response), 200
-                
-            except Exception as e:
-                app.logger.error(f"[{session_id}] Agent route error: {e}\n{traceback.format_exc()}")
+            
+            # Resolve and validate file path
+            file_path_obj = (
+                Path(file_path).resolve() 
+                if Path(file_path).is_absolute() 
+                else (project_root / file_path).resolve()
+            )
+            try:
+                file_path_obj.relative_to(project_root)
+            except ValueError:
                 return jsonify({
                     "success": False,
-                    "error": str(e),
+                    "error": "Access denied: file outside project",
                     "session_id": session_id
-                }), 500
-        
-        # Run async implementation using event loop
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        try:
-            return loop.run_until_complete(_agent_route_async())
-        finally:
-            loop.close()
+                }), 403
+            
+            logger.info(f"[{session_id}] Agent route: query='{query[:50]}' file={file_path_obj.name}")
+            
+            # Create coordination request
+            coord_req = CoordinationRequest(
+                query=query,
+                file_path=str(file_path_obj),
+                project_root=str(project_root),
+                scope=scope,
+                session_id=session_id
+            )
+            
+            # Execute coordination
+            coordinator = get_meta_coordinator()
+            coord_result = coordinator.coordinate(coord_req)
+            
+            # Build response
+            response = {
+                "success": coord_result.success,
+                "session_id": session_id,
+                "query": coord_result.query,
+                "answer": coord_result.answer,
+                "intent": {
+                    "type": coord_result.intent.type,
+                    "confidence": coord_result.intent.confidence
+                },
+                "workflow": coord_result.workflow,
+                "agents_used": coord_result.agents_used,
+                "tabs": coord_result.tabs,
+                "actions": coord_result.actions,
+                "timing": coord_result.timing_ms
+            }
+            
+            if coord_result.error:
+                response["error"] = coord_result.error
+            
+            logger.info(
+                f"[{session_id}] Complete: workflow={coord_result.workflow} "
+                f"agents={coord_result.agents_used}"
+            )
+            
+            return jsonify(response), 200
+            
+        except Exception as e:
+            logger.error(f"[{session_id}] Agent route error: {e}\n{traceback.format_exc()}")
+            return jsonify({
+                "success": False,
+                "error": str(e),
+                "session_id": session_id or "unknown"
+            }), 500
     
     # Helper function for resolving project root
     def resolve_project_root(project_path: Optional[str] = None) -> tuple[Path, Optional[str]]:
