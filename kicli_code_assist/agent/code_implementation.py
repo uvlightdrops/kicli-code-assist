@@ -757,7 +757,9 @@ class CodeImplementationAgent:
             
             # Phase 5.4.4: Code quality checks
             logger.info("🔍 Phase 5.4.4: Quality checks...")
-            files_to_check = [str(f) for f in generated_code.files.keys()]
+            # Get absolute path to the file that was written
+            target_file = self.project_root / generated_code.target_file
+            files_to_check = [str(target_file)] if target_file.exists() else []
             quality_results = {
                 "pep8": quality_checker.check_pep8(files_to_check)
             }
