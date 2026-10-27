@@ -738,7 +738,7 @@ class CodeImplementationAgent:
                 "summary": test_runner.format_result_summary(test_result)
             }
             
-            if not test_result.passed:
+            if not test_result.passed and test_result.total_tests > 0:
                 logger.warning("Tests failed, rolling back...")
                 rollback.rollback_implementation(goal_id, f"Tests failed: {test_result.failed_tests} failed")
                 state_manager.fail_implementation(goal_id, f"Tests failed ({test_result.failed_tests})")
@@ -750,7 +750,10 @@ class CodeImplementationAgent:
                     "rolled_back": True
                 }
             
-            logger.info(f"✅ Tests passed: {test_result.passed_tests}/{test_result.total_tests}")
+            if test_result.total_tests > 0:
+                logger.info(f"✅ Tests passed: {test_result.passed_tests}/{test_result.total_tests}")
+            else:
+                logger.info(f"ℹ️  No tests found (framework: {test_result.framework.value}), continuing...")
             
             # Phase 5.4.4: Code quality checks
             logger.info("🔍 Phase 5.4.4: Quality checks...")
