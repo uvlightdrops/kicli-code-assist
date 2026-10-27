@@ -789,15 +789,14 @@ class CodeImplementationAgent:
             
             # Phase 5.4.3: Track successful implementation
             logger.info("📊 Phase 5.4.3: Tracking state...")
+            files_changed = result.get("changes_made", [])
             state_manager.complete_implementation(
-                goal_id,
-                {
-                    "commit_sha": commit_sha,
-                    "branch": branch_name,
-                    "files": len(result.get("changes", [])),
-                    "tests_passed": test_result.passed_tests,
-                    "tests_total": test_result.total_tests
-                }
+                goal_id=goal_id,
+                commit_sha=commit_sha,
+                branch_name=branch_name,
+                files_modified=files_changed,
+                test_results=test_summary if test_result.total_tests > 0 else None,
+                test_passed=test_result.passed if test_result.total_tests > 0 else False
             )
             
             # Success
