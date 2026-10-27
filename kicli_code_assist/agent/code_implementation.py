@@ -314,10 +314,16 @@ class CodeImplementationAgent:
         }
         
         try:
+            # Resolve target file path relative to project root
+            if generated_code.target_file.is_absolute():
+                target_file = generated_code.target_file
+            else:
+                target_file = self.project_root / generated_code.target_file
+            
             # Check if target file exists
-            if generated_code.target_file.exists():
+            if target_file.exists():
                 # Append to existing file
-                existing_content = generated_code.target_file.read_text(encoding="utf-8")
+                existing_content = target_file.read_text(encoding="utf-8")
                 
                 # Extract function/class names from generated code
                 generated_lines = generated_code.code_content.split("\n")
@@ -334,21 +340,21 @@ class CodeImplementationAgent:
                     combined_content = existing_content + "\n\n# Generated implementation\n" + generated_code.code_content
                     
                     if not dry_run:
-                        generated_code.target_file.write_text(combined_content, encoding="utf-8")
+                        target_file.write_text(combined_content, encoding="utf-8")
                     
                     result["success"] = True
-                    result["changes_made"].append(f"Appended code to {generated_code.target_file.name}")
+                    result["changes_made"].append(f"Appended code to {target_file.name}")
                 else:
                     result["error"] = "No new code to add (definitions already exist)"
             else:
                 # Create new file
-                generated_code.target_file.parent.mkdir(parents=True, exist_ok=True)
+                target_file.parent.mkdir(parents=True, exist_ok=True)
                 
                 if not dry_run:
-                    generated_code.target_file.write_text(generated_code.code_content, encoding="utf-8")
+                    target_file.write_text(generated_code.code_content, encoding="utf-8")
                 
                 result["success"] = True
-                result["changes_made"].append(f"Created new file: {generated_code.target_file}")
+                result["changes_made"].append(f"Created new file: {target_file}")
         
         except Exception as e:
             result["error"] = str(e)
@@ -383,15 +389,24 @@ class CodeImplementationAgent:
         
         # Try to check imports
         try:
-            for imp in generated_code.imports_to_add:
-                try:
-                    __import__(imp)
-                    result["imports_ok"] = True
-                except ImportError:
-                    result["warnings"].append(f"Import not available: {imp}")
+            if not generated_code.imports_to_add:
+                # No external imports needed - that's OK
+                result["imports_ok"] = True
+            else:
+                # Check each required import
+                all_ok = True
+                for imp in generated_code.imports_to_add:
+                    try:
+                        __import__(imp)
+                    except ImportError:
+                        result["warnings"].append(f"Import not available: {imp}")
+                        all_ok = False
+                result["imports_ok"] = all_ok
         except Exception as e:
             result["warnings"].append(f"Cannot verify imports: {e}")
         
+        # Verification passes if syntax is valid (imports are warnings only)
+        result["verified"] = result["valid_syntax"]
         return result
     
     def apply_with_git(self, goal_title: str, goal_description: str,
@@ -668,7 +683,7 @@ class CodeImplementationAgent:
             
             # Apply generated code
             logger.info("💾 Applying code...")
-            result = self.apply_generated_code(generated_code)
+            result = self.apply_generated_code(generated_code, dry_run=False)
             
             if not result.get("success"):
                 logger.error("Code application failed")
@@ -685,7 +700,7 @@ class CodeImplementationAgent:
             logger.info("✓ Verifying implementation...")
             verification = self.verify_implementation(goal_title, generated_code)
             
-            if not verification.get("success"):
+            if not verification.get("verified"):
                 logger.error("Verification failed")
                 rollback.rollback_implementation(goal_id, "Verification failed")
                 state_manager.fail_implementation(goal_id, "Verification failed")
