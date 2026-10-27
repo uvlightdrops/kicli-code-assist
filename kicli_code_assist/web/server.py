@@ -489,10 +489,10 @@ def register_routes(app: Flask):
                 analysis_context = AnalysisContext(
                     query=query,
                     file_path=str(file_path_obj),
-                    structure=aggregated.tabs.get('Structure', {}).data if 'Structure' in aggregated.tabs else None,
-                    metrics=aggregated.tabs.get('Metrics', {}).data if 'Metrics' in aggregated.tabs else None,
-                    dependencies=aggregated.tabs.get('Dependencies', {}).data if 'Dependencies' in aggregated.tabs else None,
-                    refactor_suggestions=aggregated.tabs.get('Refactor', {}).data if 'Refactor' in aggregated.tabs else None,
+                    structure=aggregated.tabs['Structure'].data if 'Structure' in aggregated.tabs else None,
+                    metrics=aggregated.tabs['Metrics'].data if 'Metrics' in aggregated.tabs else None,
+                    dependencies=aggregated.tabs['Dependencies'].data if 'Dependencies' in aggregated.tabs else None,
+                    refactor_suggestions=aggregated.tabs['Refactor'].data if 'Refactor' in aggregated.tabs else None,
                 )
                 answer = await answer_generator.generate_answer(query, analysis_context)
                 answer_ms = (time.time() - answer_start) * 1000
