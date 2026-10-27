@@ -7,6 +7,7 @@ interface ChatMessage {
   content: string;
   timestamp: Date;
   agentTypes?: string[];
+  agentResults?: any[]; // Full agent results for rendering
 }
 
 interface AgentSession {
@@ -29,6 +30,7 @@ export const UnifiedAgentChat: React.FC<{
   const [session, setSession] = useState<AgentSession | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tokenCount, setTokenCount] = useState(0);
+  const [expandedAgent, setExpandedAgent] = useState<string | null>(null); // Which agent result is expanded
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -66,6 +68,7 @@ export const UnifiedAgentChat: React.FC<{
         content: `Analysis completed with ${response.data.agents?.length || 0} agents`,
         timestamp: new Date(),
         agentTypes: response.data.agents?.map((a: any) => a.type) || [],
+        agentResults: response.data.agents || [], // Store full results
       };
 
       setMessages(prev => [...prev, agentResponse]);
@@ -148,10 +151,69 @@ export const UnifiedAgentChat: React.FC<{
               {msg.agentTypes && msg.agentTypes.length > 0 && (
                 <div className="agent-types">
                   {msg.agentTypes.map(type => (
-                    <span key={type} className="agent-badge">
+                    <button
+                      key={type}
+                      className={`agent-badge ${expandedAgent === type ? 'active' : ''}`}
+                      onClick={() => setExpandedAgent(expandedAgent === type ? null : type)}
+                      title={`Click to ${expandedAgent === type ? 'collapse' : 'expand'} ${type} results`}
+                    >
                       {type}
-                    </span>
+                    </button>
                   ))}
+                </div>
+              )}
+              {/* Expanded Agent Result */}
+              {expandedAgent && msg.agentResults && (
+                <div className="agent-result-expanded">
+                  {msg.agentResults
+                    .filter(r => r.type === expandedAgent)
+                    .map(result => (
+                      <div key={result.type} className="result-detail">
+                        {result.result.status === 'error' ? (
+                          <div className="result-error">
+                            Error: {result.result.error}
+                          </div>
+                        ) : (
+                          <div className="result-content">
+                            {/* Explain result */}
+                            {result.type === 'explain' && result.result.summary && (
+                              <pre className="result-text">{result.result.summary}</pre>
+                            )}
+                            {result.type === 'explain' && result.result.classes && (
+                              <div className="result-section">
+                                <strong>Classes ({result.result.classes.length}):</strong>
+                                <ul>
+                                  {result.result.classes.map((cls: any) => (
+                                    <li key={cls.name}>
+                                      {cls.name} ({cls.methods.length} methods)
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                            {result.type === 'explain' && result.result.functions && (
+                              <div className="result-section">
+                                <strong>Functions ({result.result.functions.length}):</strong>
+                                <ul>
+                                  {result.result.functions.slice(0, 10).map((fn: any) => (
+                                    <li key={`${fn.line}-${fn.name}`}>
+                                      {fn.name} (complexity: {fn.complexity})
+                                    </li>
+                                  ))}
+                                  {result.result.functions.length > 10 && (
+                                    <li>... and {result.result.functions.length - 10} more</li>
+                                  )}
+                                </ul>
+                              </div>
+                            )}
+                            {/* Generic result */}
+                            {JSON.stringify(result.result).length < 1000 && (
+                              <pre className="result-json">{JSON.stringify(result.result, null, 2)}</pre>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
