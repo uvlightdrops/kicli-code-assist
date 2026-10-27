@@ -62,14 +62,17 @@ export const UnifiedAgentChat: React.FC<{
         project: projectPath || localStorage.getItem('currentProject') || '',
       });
 
-      const agentResponse: ChatMessage = {
-        role: 'agent',
-        content: `Analysis completed with ${response.data.agents?.length || 0} agents`,
-        timestamp: new Date(),
-        agentTypes: response.data.agents?.map((a: any) => a.type) || [],
-      };
-
-      setMessages(prev => [...prev, agentResponse]);
+      // Only add agent response message if there's actual content to show
+      // The Phase 2D response is passed to onResultsReceived for detailed tab rendering
+      if (response.data.summary) {
+        const agentResponse: ChatMessage = {
+          role: 'agent',
+          content: `✓ Analysis: ${response.data.intent.type} (${response.data.intent.agents.join(', ')})`,
+          timestamp: new Date(),
+          agentTypes: response.data.intent.agents || [],
+        };
+        setMessages(prev => [...prev, agentResponse]);
+      }
       setSession(response.data.session || null);
       setTokenCount(response.data.token_count || 0);
 
