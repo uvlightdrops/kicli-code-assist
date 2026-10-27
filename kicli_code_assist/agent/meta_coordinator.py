@@ -467,17 +467,20 @@ class MetaCoordinationAgent:
             # Check if query mentions a specific goal
             query_lower = query.lower()
             
-            # Look for specific goal keywords
-            goal_keywords = ["help anzeigen", "infosite", "kommandos", "callback", "cli framework"]
+            # Get all available goals first
+            analysis = analyzer.analyze()
             matched_goal = None
-            for keyword in goal_keywords:
-                if keyword in query_lower:
-                    matched_goal = keyword
+            
+            # Try to match full goal titles (case-insensitive)
+            for goal in analysis.goals:
+                goal_title_lower = goal.title.lower()
+                if goal_title_lower in query_lower:
+                    matched_goal = goal.title
                     break
             
             # If specific goal found, get its details
             if matched_goal:
-                goal_details = analyzer.get_goal_details(matched_goal.replace("\"", "").strip())
+                goal_details = analyzer.get_goal_details(matched_goal)
                 if goal_details:
                     return {
                         "project_name": analyzer.project_name,
@@ -487,8 +490,6 @@ class MetaCoordinationAgent:
                     }
             
             # Otherwise, do full project analysis
-            analysis = analyzer.analyze()
-            
             return {
                 "project_name": analysis.project_name,
                 "query_type": "project_overview",
