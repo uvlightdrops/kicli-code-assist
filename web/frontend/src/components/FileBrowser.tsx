@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useProject } from '../hooks/useProject'
 
 interface FileItem {
   name: string
@@ -13,17 +14,28 @@ interface FileBrowserProps {
 }
 
 const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
-  const [currentPath, setCurrentPath] = useState('')
+  const { current: project } = useProject()
+  const [currentPath, setCurrentPath] = useState(project?.path || '')
   const [items, setItems] = useState<FileItem[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [breadcrumb, setBreadcrumb] = useState<string[]>(['dev_flow'])
+  const [breadcrumb, setBreadcrumb] = useState<string[]>([])
   const [loadingFile, setLoadingFile] = useState<string | null>(null)
+
+  // Update breadcrumb when project changes
+  useEffect(() => {
+    if (project) {
+      setCurrentPath(project.path)
+      setBreadcrumb(['PROJECT FILES', project.name])
+    }
+  }, [project])
 
   // Load files from backend
   useEffect(() => {
-    loadFiles(currentPath)
-  }, [currentPath])
+    if (project) {
+      loadFiles(currentPath)
+    }
+  }, [currentPath, project])
 
   const loadFiles = async (path: string) => {
     setLoading(true)
@@ -33,7 +45,14 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
         params: { path: path || '' },
       })
       setItems(response.data.items)
-      setBreadcrumb(['dev_flow', ...path.split('/').filter(Boolean)])
+      
+      // Update breadcrumb with full path relative to project
+      if (path === project?.path) {
+        setBreadcrumb(['PROJECT FILES', project.name])
+      } else {
+        const relPath = path.replace(project?.path || '', '').split('/').filter(Boolean)
+        setBreadcrumb(['PROJECT FILES', project?.name || '', ...relPath])
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load files')
       setItems([])
@@ -62,19 +81,35 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
 
   const navigateToBreadcrumb = (index: number) => {
     if (index === 0) {
-      setCurrentPath('')
+      // Navigate to PROJECT FILES (root)
+      setCurrentPath(project?.path || '')
+    } else if (index === 1) {
+      // Navigate to project root
+      setCurrentPath(project?.path || '')
     } else {
-      const path = breadcrumb.slice(1, index + 1).join('/')
-      setCurrentPath(path)
+      // Reconstruct path from breadcrumb
+      const parts = breadcrumb.slice(2, index + 1)
+      const fullPath = `${project?.path}/${parts.join('/')}`
+      setCurrentPath(fullPath)
     }
   }
 
   const goUp = () => {
+    const projectPath = project?.path || ''
+    if (currentPath === projectPath) return // Already at project root
+    
     const parts = currentPath.split('/').filter(Boolean)
-    if (parts.length > 0) {
-      parts.pop()
-      setCurrentPath(parts.join('/'))
-    }
+    parts.pop()
+    const newPath = '/' + parts.join('/')
+    setCurrentPath(newPath)
+  }
+
+  if (!project) {
+    return (
+      <div className="flex flex-col h-full bg-gray-800 items-center justify-center">
+        <div className="text-gray-400 text-sm">No project open</div>
+      </div>
+    )
   }
 
   return (
@@ -99,7 +134,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
         </div>
 
         {/* Navigation Buttons */}
-        {currentPath && (
+        {currentPath !== project.path && (
           <button
             onClick={goUp}
             className="text-xs px-2 py-1 bg-gray-700 hover:bg-gray-600 text-gray-300 rounded transition"
@@ -155,8 +190,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
 
       {/* Footer */}
       <div className="border-t border-gray-700 p-2 text-xs text-gray-500 bg-gray-900">
-        <div>Root: ~/dev_flow</div>
-        {currentPath && <div className="truncate">{currentPath}</div>}
+        <div>Root: {project.path}</div>
       </div>
     </div>
   )

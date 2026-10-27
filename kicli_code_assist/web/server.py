@@ -717,6 +717,245 @@ def register_routes(app: Flask):
 
 
 # ============================================================================
+# Project Management Endpoints
+# ============================================================================
+
+def register_project_routes(app: Flask):
+    """Register project management REST API routes."""
+    
+    ALLOWED_ROOT = Path("/home/flow/dev_flow")
+    
+    def is_safe_path(path_str: str) -> bool:
+        """Verify path is within allowed root."""
+        try:
+            path = Path(path_str).resolve()
+            return str(path).startswith(str(ALLOWED_ROOT.resolve()))
+        except (ValueError, OSError):
+            return False
+    
+    def load_project_metadata(project_path: str) -> Optional[Dict[str, Any]]:
+        """Load or create project metadata."""
+        path = Path(project_path)
+        metadata_file = path / ".kicli_project"
+        
+        if metadata_file.exists():
+            try:
+                with open(metadata_file, "r") as f:
+                    return json.load(f)
+            except Exception as e:
+                app.logger.warning(f"Failed to load project metadata: {e}")
+        
+        # Create new metadata
+        return {
+            "id": str(uuid.uuid4()),
+            "name": path.name,
+            "path": str(path.resolve()),
+            "createdAt": datetime.now().isoformat(),
+            "lastOpened": datetime.now().isoformat(),
+            "type": "mixed",
+            "isGitRepo": (path / ".git").exists(),
+        }
+    
+    def save_project_metadata(project_path: str, metadata: Dict[str, Any]) -> None:
+        """Save project metadata."""
+        path = Path(project_path)
+        metadata_file = path / ".kicli_project"
+        metadata["lastOpened"] = datetime.now().isoformat()
+        with open(metadata_file, "w") as f:
+            json.dump(metadata, f, indent=2)
+    
+    @app.route("/api/projects/current", methods=["GET"])
+    def get_current_project():
+        """Get currently open project."""
+        try:
+            # For now, return null - project state managed in frontend
+            return jsonify({"success": True, "data": None}), 200
+        except Exception as e:
+            app.logger.error(f"Get current project error: {e}")
+            return jsonify({"success": False, "error": str(e)}), 500
+    
+    @app.route("/api/projects/open", methods=["POST"])
+    def open_project():
+        """Open a project by path."""
+        try:
+            data = request.json or {}
+            path = data.get("path", "").strip()
+            
+            if not path:
+                return jsonify({"success": False, "error": "Path required"}), 400
+            
+            if not is_safe_path(path):
+                return jsonify({
+                    "success": False, 
+                    "error": f"Path must be within {ALLOWED_ROOT}"
+                }), 403
+            
+            project_path = Path(path).resolve()
+            if not project_path.exists():
+                return jsonify({
+                    "success": False,
+                    "error": "Project path does not exist"
+                }), 404
+            
+            if not project_path.is_dir():
+                return jsonify({
+                    "success": False,
+                    "error": "Path must be a directory"
+                }), 400
+            
+            # Load/create metadata
+            metadata = load_project_metadata(str(project_path))
+            save_project_metadata(str(project_path), metadata)
+            
+            app.logger.info(f"Project opened: {project_path}")
+            
+            return jsonify({
+                "success": True,
+                "data": metadata
+            }), 200
+            
+        except Exception as e:
+            app.logger.error(f"Open project error: {e}\n{traceback.format_exc()}")
+            return jsonify({"success": False, "error": str(e)}), 500
+    
+    @app.route("/api/projects/create", methods=["POST"])
+    def create_project():
+        """Create a new project."""
+        try:
+            data = request.json or {}
+            name = data.get("name", "").strip()
+            parent_path = data.get("parentPath", str(ALLOWED_ROOT)).strip()
+            template = data.get("template", "empty")
+            
+            if not name:
+                return jsonify({"success": False, "error": "Project name required"}), 400
+            
+            if not is_safe_path(parent_path):
+                return jsonify({
+                    "success": False,
+                    "error": f"Parent path must be within {ALLOWED_ROOT}"
+                }), 403
+            
+            parent = Path(parent_path).resolve()
+            if not parent.exists():
+                return jsonify({
+                    "success": False,
+                    "error": "Parent path does not exist"
+                }), 404
+            
+            # Create project directory
+            project_path = parent / name
+            if project_path.exists():
+                return jsonify({
+                    "success": False,
+                    "error": f"Project already exists: {project_path}"
+                }), 409
+            
+            project_path.mkdir(parents=True, exist_ok=True)
+            
+            # Create template structure
+            if template == "node":
+                (project_path / "package.json").write_text(json.dumps({
+                    "name": name,
+                    "version": "0.1.0",
+                    "description": "",
+                    "main": "index.js",
+                    "scripts": {"start": "node index.js"},
+                }, indent=2))
+                (project_path / ".gitignore").write_text("node_modules/\n.env\n")
+            elif template == "python":
+                (project_path / ".gitignore").write_text("__pycache__/\n.venv/\n.env\n")
+                (project_path / "requirements.txt").write_text("")
+            
+            # Create .gitignore for empty template too
+            if not (project_path / ".gitignore").exists():
+                (project_path / ".gitignore").write_text(".DS_Store\n")
+            
+            # Create metadata
+            metadata = {
+                "id": str(uuid.uuid4()),
+                "name": name,
+                "path": str(project_path.resolve()),
+                "createdAt": datetime.now().isoformat(),
+                "lastOpened": datetime.now().isoformat(),
+                "type": "mixed",
+                "isGitRepo": False,
+            }
+            save_project_metadata(str(project_path), metadata)
+            
+            app.logger.info(f"Project created: {project_path}")
+            
+            return jsonify({
+                "success": True,
+                "data": metadata
+            }), 201
+            
+        except Exception as e:
+            app.logger.error(f"Create project error: {e}\n{traceback.format_exc()}")
+            return jsonify({"success": False, "error": str(e)}), 500
+    
+    @app.route("/api/projects/browse", methods=["GET"])
+    def browse_projects():
+        """Browse folders for project selection."""
+        try:
+            path = request.args.get("path", str(ALLOWED_ROOT)).strip()
+            
+            if not is_safe_path(path):
+                return jsonify({
+                    "success": False,
+                    "error": f"Path must be within {ALLOWED_ROOT}"
+                }), 403
+            
+            folder = Path(path).resolve()
+            if not folder.exists() or not folder.is_dir():
+                return jsonify({"items": []}), 200
+            
+            # List only folders
+            items = []
+            try:
+                for item in sorted(folder.iterdir()):
+                    if item.is_dir() and not item.name.startswith("."):
+                        items.append({
+                            "name": item.name,
+                            "path": str(item.resolve()),
+                            "isFolder": True,
+                        })
+            except PermissionError:
+                pass
+            
+            return jsonify({"items": items}), 200
+            
+        except Exception as e:
+            app.logger.error(f"Browse projects error: {e}")
+            return jsonify({"items": []}), 200
+    
+    @app.route("/api/projects/recent", methods=["GET"])
+    def get_recent_projects():
+        """Get recently opened projects from cache."""
+        try:
+            recent_file = ALLOWED_ROOT / ".kicli_recent_projects"
+            recent = []
+            
+            if recent_file.exists():
+                try:
+                    with open(recent_file, "r") as f:
+                        recent_data = json.load(f)
+                        # Filter to existing projects
+                        for proj in recent_data:
+                            proj_path = Path(proj.get("path", ""))
+                            if proj_path.exists():
+                                recent.append(proj)
+                except Exception as e:
+                    app.logger.debug(f"Failed to load recent projects: {e}")
+            
+            return jsonify({"recent": recent[:10]}), 200
+            
+        except Exception as e:
+            app.logger.error(f"Get recent projects error: {e}")
+            return jsonify({"recent": []}), 200
+
+
+# ============================================================================
 # WebSocket Event Handlers
 # ============================================================================
 
@@ -781,6 +1020,7 @@ def main():
     app, socketio = create_app(config)
     
     register_routes(app)
+    register_project_routes(app)
     register_websocket(app, socketio)
     
     # Start server
