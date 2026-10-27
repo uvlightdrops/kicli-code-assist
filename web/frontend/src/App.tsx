@@ -17,6 +17,11 @@ import { DependencyPanel } from './components/DependencyPanel'
 import { RefactoringPanel } from './components/RefactoringPanel'
 import { MetricsPanel } from './components/MetricsPanel'
 import { ThinkingStepsPanel } from './components/ThinkingStepsPanel'
+import EmptyState from './components/EmptyState'
+import CreateProjectModal from './components/CreateProjectModal'
+import OpenProjectModal from './components/OpenProjectModal'
+import { ProjectProvider, useProject } from './hooks/useProject'
+import type { Project } from './types/project'
 
 interface Message {
   id: string
@@ -39,7 +44,10 @@ interface TabFile {
   originalContent?: string // Track original for dirty checking
 }
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { current: project, isEmpty, closeProject } = useProject()
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showOpenModal, setShowOpenModal] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [files, setFiles] = useState<UploadedFile[]>([])
   const [openTabs, setOpenTabs] = useState<TabFile[]>([])
@@ -254,11 +262,41 @@ const App: React.FC = () => {
     setFiles((prev) => prev.filter((f) => f.id !== fileId))
   }
 
+  // Show Empty State if no project
+  if (isEmpty) {
+    return (
+      <>
+        <EmptyState 
+          onOpenProjectModal={() => setShowOpenModal(true)}
+          onCreateProjectModal={() => setShowCreateModal(true)}
+        />
+        <CreateProjectModal 
+          isOpen={showCreateModal}
+          onClose={() => setShowCreateModal(false)}
+        />
+        <OpenProjectModal 
+          isOpen={showOpenModal}
+          onClose={() => setShowOpenModal(false)}
+        />
+      </>
+    )
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gray-900 text-gray-100">
-      {/* Header - Status + Config Link */}
+      {/* Header - Status + Config Link + Project Controls */}
       <div className="bg-gray-800 border-b border-gray-700 px-4 py-2 flex items-center justify-between">
-        <div></div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">Project:</span>
+          <span className="text-xs font-semibold text-blue-400">{project?.name}</span>
+          <button
+            onClick={closeProject}
+            className="ml-2 px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 rounded transition"
+            title="Close project"
+          >
+            ✕
+          </button>
+        </div>
         <div className="flex items-center gap-4 text-xs">
           {/* Connection Status */}
           <div className="flex items-center gap-2">
@@ -477,4 +515,10 @@ const ConfigDisplay: React.FC = () => {
   )
 }
 
-export default App
+export default function App() {
+  return (
+    <ProjectProvider>
+      <AppContent />
+    </ProjectProvider>
+  )
+}
