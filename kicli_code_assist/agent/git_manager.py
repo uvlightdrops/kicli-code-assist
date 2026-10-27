@@ -90,6 +90,14 @@ class GitManager:
         feature_branch = f"feature/{clean_name}"
         
         try:
+            # Clean up any uncommitted changes before switching branches
+            try:
+                logger.info("Cleaning up uncommitted changes...")
+                self._run_git_command(["clean", "-fd"])
+                self._run_git_command(["checkout", "--"])
+            except Exception as e:
+                logger.warning(f"Cleanup failed: {e}")
+            
             # Try to update base branch (may fail if no remote)
             try:
                 logger.info(f"Updating {base_branch}...")
