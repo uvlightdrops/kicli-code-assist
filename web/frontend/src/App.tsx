@@ -394,7 +394,10 @@ const AppContent: React.FC = () => {
               {/* Use new Hybrid Agent UI */}
               {useHybridAgent ? (
                 <div className="flex-1 overflow-hidden">
-                  <AgentChatContainer currentFile={selectedFile?.path || null} />
+                  <AgentChatContainer 
+                    currentFile={selectedFile?.path || null}
+                    projectPath={project?.path || null}
+                  />
                 </div>
               ) : (
                 // Old Chat/Agent UI (kept for backward compatibility)
