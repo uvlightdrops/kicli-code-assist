@@ -77,7 +77,23 @@ class CodeMetricsAnalyzer:
         self.project_root = project_root
         self.ast_analyzer = ASTAnalyzer()  # No project_root parameter
 
-    async def analyze_file(self, file_path: Path) -> FileMetrics:
+    def analyze(self, file_path: str | Path) -> dict:
+        """
+        Synchronous wrapper for analyze_file.
+        
+        Args:
+            file_path: Path to Python file (string or Path)
+            
+        Returns:
+            Dictionary with metrics data
+        """
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+        
+        metrics = self._analyze_file_sync(file_path)
+        return metrics.to_dict()
+
+    def _analyze_file_sync(self, file_path: Path) -> FileMetrics:
         """
         Analyze metrics for a single file.
         
