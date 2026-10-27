@@ -72,36 +72,68 @@ INTENT_TO_AGENTS: Dict[IntentType, List[str]] = {
 }
 
 # Keyword fallback patterns for each intent
+# Multilingual: English + German keywords for better coverage
 # More specific keywords with primary/exclusive terms first
 INTENT_KEYWORDS: Dict[IntentType, List[str]] = {
     IntentType.EXPLAIN: [
+        # English
         "explain", "what does", "how does", "tell me", "describe", "understand",
-        "clarify", "show me", "meaning", "purpose", "how it works",
+        "clarify", "show me", "meaning", "purpose", "how it works", "structure",
+        # German
+        "erkläre", "erklär", "wie funktioniert", "wie geht", "beschreibe", "zeige",
+        "zeig mir", "struktur", "bedeutung", "zweck", "wie funktioniert das",
+        "was ist", "was sind",
     ],
     IntentType.REFACTOR: [
+        # English
         "refactor", "simplify", "clean", "reorganize", "cleaner",
         "rewrite", "restructure", "code quality", "readable", "implementation",
+        # German
+        "refaktoriere", "vereinfache", "bereinige", "reorganisiere", "sauberer",
+        "umschreibe", "umstrukturiere", "code qualität", "lesbar",
     ],
     IntentType.REVIEW: [
+        # English
         "review", "check", "audit", "examine", "look at",
         "validate", "verify", "issue", "problem", "quality",
+        # German
+        "review", "überprüfe", "audit", "untersuche", "schaue",
+        "validiere", "verifiziere", "fehler", "problem", "qualität",
     ],
     IntentType.OPTIMIZE: [
+        # English
         "optimize", "optimization", "performance", "speed", "faster",
         "efficient", "efficiency", "memory", "resource", "slow",
+        # German
+        "optimiere", "optimierung", "performance", "geschwindigkeit", "schneller",
+        "effizient", "effizienz", "speicher", "ressource", "langsam",
     ],
     IntentType.DIAGNOSE: [
+        # English
         "debug", "diagnose", "error", "exception", "crash", "crashing",
         "fail", "trace", "broken", "not working", "fix", "what's wrong", "wrong",
+        # German
+        "debug", "debugge", "diagnose", "fehler", "ausnahme", "absturz",
+        "fehlschlag", "spur", "kaputt", "funktioniert nicht", "behebt",
+        "was ist falsch", "falsch",
     ],
     IntentType.SUGGEST: [
+        # English
         "suggest", "recommendation", "what if", "could", "should",
         "best practice", "pattern", "implement", "create", "build",
         "how do i", "how can i", "example",
+        # German
+        "vorschlag", "empfehlung", "was ist wenn", "könnte", "sollte",
+        "best practice", "muster", "implementiere", "erstelle", "baue",
+        "wie mache ich", "wie kann ich", "beispiel",
     ],
     IntentType.VALIDATE: [
+        # English
         "validate", "correct", "is this right", "check correctness",
         "test coverage", "dependencies", "imports", "dependency",
+        # German
+        "validiere", "korrekt", "ist das richtig", "überprüfe korrektheit",
+        "test abdeckung", "abhängigkeiten", "importe", "abhängigkeit",
     ],
 }
 
@@ -302,32 +334,47 @@ class AgentIntentDetector:
             return self._detect_intent_keywords(query)
     
     def _build_system_prompt(self) -> str:
-        """Build system prompt for LLM intent classification."""
+        """Build system prompt for LLM intent classification.
+        
+        Supports English and German queries for broader developer base.
+        """
         intent_list = ", ".join([f"'{it.value}'" for it in IntentType])
         agents_list = ", ".join(
             [f"'{agent}'" for agents in INTENT_TO_AGENTS.values() for agent in agents]
         )
         
-        return f"""You are an expert at understanding developer intent.
+        return f"""You are an expert at understanding developer intent in English and German.
 Classify the user's query into one of these intent categories: {intent_list}.
 
+The query may be in English OR German. Detect the language and classify accordingly.
+
 For each query, respond with a JSON object containing:
-- intent_type: The primary intent (one of the above categories)
-- confidence: Your confidence in this classification (0.0 to 1.0)
+- intent_type: The primary intent (one of the above categories, lowercase)
+- confidence: Your confidence in this classification (0.0 to 1.0, between 0 and 1)
 - reasoning: Brief explanation of why you chose this intent
 
 Available agents to recommend: {agents_list}.
 
-Guidelines:
-- EXPLAIN: User wants to understand code, its purpose, or how it works
-- REFACTOR: User wants to improve code structure or readability
-- REVIEW: User wants code review, bug checking, or quality assessment
-- OPTIMIZE: User wants to improve performance or efficiency
-- DIAGNOSE: User wants to debug, trace, or fix errors
-- SUGGEST: User wants recommendations or implementation help
-- VALIDATE: User wants to verify correctness or test coverage
+Intent Guidelines (English):
+- explain: User wants to understand code, its purpose, or how it works
+- refactor: User wants to improve code structure or readability
+- review: User wants code review, bug checking, or quality assessment
+- optimize: User wants to improve performance or efficiency
+- diagnose: User wants to debug, trace, or fix errors
+- suggest: User wants recommendations or implementation help
+- validate: User wants to verify correctness or test coverage
 
-Be precise and confident. Use high confidence (0.8+) only when intent is very clear."""
+Deutsch Intent Guidelines:
+- explain: Benutzer möchte Code verstehen, seinen Zweck oder seine Funktionsweise
+- refactor: Benutzer möchte Code-Struktur oder Lesbarkeit verbessern
+- review: Benutzer möchte Code-Review, Bug-Checking oder Qualitätsbewertung
+- optimize: Benutzer möchte Performance oder Effizienz verbessern
+- diagnose: Benutzer möchte debuggen, nachverfolguen oder Fehler beheben
+- suggest: Benutzer möchte Empfehlungen oder Implementierungshilfe
+- validate: Benutzer möchte Korrektheit oder Testabdeckung überprüfen
+
+Be precise and confident. Use high confidence (0.85+) only when intent is very clear.
+For ambiguous queries, use lower confidence (0.5-0.7) and fallback will handle it."""
 
     def _build_user_prompt(self, query: str, file_context: Optional[Dict] = None) -> str:
         """Build user prompt for intent classification.
