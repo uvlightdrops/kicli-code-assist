@@ -193,12 +193,14 @@
 ## Files Created
 
 ```
-docs/
-├── AGENT_ROUTING_INTELLIGENCE_PLAN.md          (18.9 KB)
-├── PHASE_2_TECHNICAL_SPEC.md                   (23 KB)
-├── PHASE_2_IMPLEMENTATION_PRIORITY.md          (13.6 KB)
-├── PHASE_2_EXECUTIVE_SUMMARY.md                (10.6 KB)
-└── PHASE_2_ARCHITECTURE_COMPARISON.md          (13.2 KB)
+doc/
+├── architecture/
+│   └── AGENT_ROUTING_INTELLIGENCE_PLAN.md
+└── phases/
+    ├── PHASE_2_TECHNICAL_SPEC.md
+    ├── PHASE_2_IMPLEMENTATION_PRIORITY.md
+    ├── PHASE_2_EXECUTIVE_SUMMARY.md
+    └── PHASE_2_ARCHITECTURE_COMPARISON.md
 
 Total: 78.7 KB of comprehensive planning documents
 ```
