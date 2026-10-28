@@ -10,7 +10,8 @@ set -e
 
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 FRONTEND_DIR="${PROJECT_ROOT}/web/frontend"
-STATIC_DIR="${PROJECT_ROOT}/kicli_code_assist/web/static"
+STATIC_DIR="${PROJECT_ROOT}/kicli-code-assist/web/static"
+#STATIC_DIR="${PROJECT_ROOT}/kicli_code_assist/web/static"
 BUILD_FIRST=true
 
 # Parse args
@@ -23,6 +24,7 @@ echo ""
 if [[ "$BUILD_FIRST" == true ]]; then
     echo "▶ Building frontend..."
     cd "$FRONTEND_DIR"
+		echo "XXX run build"
     npm run build
     echo "✅ Build complete: dist/"
     echo ""
