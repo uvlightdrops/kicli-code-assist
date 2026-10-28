@@ -94,6 +94,7 @@ class CodeImplementationAgent:
         """Initialize with project root."""
         self.project_root = Path(project_root)
         self.code_files: Dict[str, CodeFile] = {}
+        self.project_structure: Optional[ProjectCodeStructure] = None
         
     def discover_python_files(self, max_files: int = 50) -> List[Path]:
         """Discover Python files in project."""
@@ -137,12 +138,14 @@ class CodeImplementationAgent:
         ]
         summary = "\n".join(l for l in summary_lines if l)
         
-        return ProjectCodeStructure(
+        structure = ProjectCodeStructure(
             project_root=self.project_root,
             python_files=code_files,
             main_modules=sorted(main_modules),
             summary=summary
         )
+        self.project_structure = structure
+        return structure
     
     def get_file_for_goal(self, goal_title: str, goal_description: str) -> Optional[CodeFile]:
         """Find most relevant file for a goal based on goal keywords."""
