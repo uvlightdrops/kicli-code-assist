@@ -1137,6 +1137,9 @@ def register_project_routes(app: Flask):
             # Step 3: Verify generated code
             steps.append({"name": "Code Verification", "status": "in_progress", "result": None})
             try:
+                if not generated_code:
+                    raise ValueError("LLM not configured or returned no code. Configure OpenAI or Ollama in ki.yaml")
+                
                 verification = generated_code.verify_implementation()
                 if not verification["valid"]:
                     raise ValueError(f"Code verification failed: {verification.get('errors', [])}")
@@ -1152,7 +1155,11 @@ def register_project_routes(app: Flask):
                     "implementation_id": implementation_id,
                     "status": "failed",
                     "steps": steps,
-                    "error": str(e)
+                    "error": str(e),
+                    "details": {
+                        "note": "LLM provider not configured",
+                        "config_file": "ki.yaml (llm.providers.openai.api_key or llm.providers.ollama.base_url)"
+                    }
                 }), 500
             
             # Step 4: Apply code with full autonomy (git + tests + quality + state)
