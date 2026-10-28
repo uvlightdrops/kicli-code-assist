@@ -402,4 +402,4 @@ const result = await fetch('/api/agent/route', {
 
 ---
 
-For more details, see: `PHASE_2D_IMPLEMENTATION.md`
+For more details, see: `doc/phases/PHASE_2D_IMPLEMENTATION.md`

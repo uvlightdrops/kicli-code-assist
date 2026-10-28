@@ -138,7 +138,7 @@ TestAgentExecutorPerformance (3 tests)
 ### New Files
 - ✅ `kicli_code_assist/agent/executor.py` - Main implementation (600+ lines)
 - ✅ `tests/test_executor.py` - Comprehensive tests (600+ lines)
-- ✅ `docs/PHASE_2B_IMPLEMENTATION_COMPLETE.md` - Full documentation
+- ✅ `doc/phases/PHASE_2B_IMPLEMENTATION_COMPLETE.md` - Full documentation
 
 ### Modified Files
 - ✅ `kicli_code_assist/agent/__init__.py` - Export new components
@@ -353,7 +353,7 @@ Phase 2B is **complete, tested, and production-ready**. The implementation:
 ## Contact & Support
 
 For questions about Phase 2B implementation:
-- See: `docs/PHASE_2B_IMPLEMENTATION_COMPLETE.md` (20KB detailed guide)
+- See: `doc/phases/PHASE_2B_IMPLEMENTATION_COMPLETE.md` (20KB detailed guide)
 - See: `tests/test_executor.py` (600+ lines of examples)
 - See: `kicli_code_assist/agent/executor.py` (600+ lines with docstrings)
 
