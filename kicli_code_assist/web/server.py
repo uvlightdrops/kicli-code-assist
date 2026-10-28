@@ -41,6 +41,9 @@ from kicli_code_assist.web.server_routes import (
 # Import WebSocket registration (Phase 3)
 from kicli_code_assist.web.server_websocket import register_websocket
 
+# Import agent config routes (Phase 5.5)
+from kicli_code_assist.web.agent_config import register_agent_config_routes
+
 
 def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     """Create and configure Flask app with SocketIO.
@@ -100,6 +103,9 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
             "error": "Development mode detected",
             "message": "Use http://localhost:3000 for assets (Vite Dev Server)"
         }), 400
+    
+    # Register agent config routes (Phase 5.5)
+    register_agent_config_routes(app)
     
     return app, socketio
 
