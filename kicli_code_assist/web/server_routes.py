@@ -1228,7 +1228,7 @@ def register_project_routes(app: Flask):
 
 def register_server_management_routes(app: Flask):
     """Register server management REST API routes."""
-    from kicli_code_assist.server_management import ServiceRegistry, OrphanDetector
+    from ki_core.server_management import ServiceRegistry, OrphanDetector
 
     @app.route("/api/server/status", methods=["GET"])
     def get_server_status():
