@@ -504,6 +504,7 @@ const AppContent: React.FC = () => {
             </div>
           </>
         </div>
+
         
         {/* Config Modal */}
         {showConfig && (

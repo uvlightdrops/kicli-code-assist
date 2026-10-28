@@ -43,19 +43,27 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
     setLoading(true)
     setError('')
     try {
+      // Convert absolute path to relative path for backend
+      let relativePath = ''
+      if (path && project?.path && path !== project.path) {
+        relativePath = path.startsWith(project.path) 
+          ? path.slice(project.path.length).replace(/^\//, '')
+          : path
+      }
+      
       const response = await axios.get('/api/project/files', {
         params: { 
-          path: path || '',
+          path: relativePath,
           project: project?.path || '',
         },
       })
       setItems(response.data.items)
       
       // Update breadcrumb with full path relative to project
-      if (path === project?.path) {
+      if (path === project?.path || relativePath === '') {
         setBreadcrumb(['PROJECT FILES', project.name])
       } else {
-        const relPath = path.replace(project?.path || '', '').split('/').filter(Boolean)
+        const relPath = relativePath.split('/').filter(Boolean)
         setBreadcrumb(['PROJECT FILES', project?.name || '', ...relPath])
       }
     } catch (err) {
@@ -67,7 +75,11 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
   }
 
   const handleFolderClick = (folder: FileItem) => {
-    setCurrentPath(folder.path)
+    // folder.path is relative to project, so build absolute path
+    const absolutePath = folder.path 
+      ? `${project?.path}/${folder.path}`
+      : project?.path
+    setCurrentPath(absolutePath)
   }
 
   const handleFileClick = async (file: FileItem) => {
