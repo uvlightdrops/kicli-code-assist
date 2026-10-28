@@ -504,6 +504,25 @@ const AppContent: React.FC = () => {
             </div>
           </>
         </div>
+        
+        {/* Config Modal */}
+        {showConfig && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-2xl max-h-96 overflow-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-lg font-semibold text-white">⚙️ Application Config</h2>
+                <button
+                  onClick={() => setShowConfig(false)}
+                  className="text-gray-400 hover:text-white transition"
+                  title="Close config"
+                >
+                  ✕
+                </button>
+              </div>
+              <ConfigDisplay />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
