@@ -22,20 +22,22 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
   const [breadcrumb, setBreadcrumb] = useState<string[]>([])
   const [loadingFile, setLoadingFile] = useState<string | null>(null)
 
-  // Update breadcrumb when project changes
+  // Combined effect: when project changes, update path and load files
   useEffect(() => {
     if (project) {
       setCurrentPath(project.path)
       setBreadcrumb(['PROJECT FILES', project.name])
+      loadFiles(project.path)
     }
   }, [project])
 
-  // Load files from backend
+  // Separate effect: when currentPath changes (user navigation), load files
   useEffect(() => {
-    if (project) {
+    // Only trigger if path changed AND project exists AND path is not initial project path
+    if (project && currentPath !== project.path && currentPath !== '') {
       loadFiles(currentPath)
     }
-  }, [currentPath, project])
+  }, [currentPath])
 
   const loadFiles = async (path: string) => {
     setLoading(true)
