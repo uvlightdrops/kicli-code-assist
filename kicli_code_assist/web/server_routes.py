@@ -234,9 +234,6 @@ def register_routes(app: Flask):
     def get_project_files():
         """Get project file tree structure (flat list for current directory)."""
         try:
-            # Get requested path from query parameter
-            requested_path = request.args.get("path", "").strip()
-            
             # Get the active project from query or fallback to config
             project_path = request.args.get("project", "").strip()
             
@@ -255,7 +252,14 @@ def register_routes(app: Flask):
                 except ValueError:
                     return jsonify({"error": "Access denied: path outside allowed root"}), 403
             
-            target_path = (project_root / requested_path).resolve()
+            # Get requested path from query parameter (defaults to project root)
+            requested_path = request.args.get("path", "").strip()
+            
+            # Build target path - if no path specified, use project root
+            if requested_path:
+                target_path = (project_root / requested_path).resolve()
+            else:
+                target_path = project_root
             
             # Security: ensure path is within project_root
             try:
