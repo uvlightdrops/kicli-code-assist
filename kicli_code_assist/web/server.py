@@ -62,8 +62,17 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     if config is None:
         config = get_config()
     
+    # Initialize ki_core ConfigManager for YAML persistence
+    try:
+        from ki_core.config import ConfigManager
+        ki_config_manager = ConfigManager()
+    except (ImportError, Exception) as e:
+        ki_config_manager = None
+        app.logger.debug(f"ki_core ConfigManager not available: {e}")
+    
     # Store config in app context
     app.config["KICLI_CONFIG"] = config
+    app.config["KI_CONFIG_MANAGER"] = ki_config_manager
     app.config["ACTIVE_REQUESTS"] = {}
     app.config["CHAT_SESSION"] = ChatSession()
     
@@ -104,8 +113,8 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
             "message": "Use http://localhost:3000 for assets (Vite Dev Server)"
         }), 400
     
-    # Register agent config routes (Phase 5.5)
-    register_agent_config_routes(app)
+    # Register agent config routes (Phase 5.5) with ki_config_manager
+    register_agent_config_routes(app, ki_config_manager=ki_config_manager)
     
     return app, socketio
 
