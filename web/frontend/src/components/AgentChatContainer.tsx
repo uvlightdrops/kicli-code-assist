@@ -49,19 +49,28 @@ export const AgentChatContainer: React.FC<AgentChatContainerProps> = ({ currentF
 
     setLatestResponse(response);
 
-    // Build thinking process text
-    const thinkingText =
-      `🎯 Intent: ${response.intent.type} (${(response.intent.confidence * 100).toFixed(0)}% confidence)\n` +
-      `🔧 Agents: ${response.intent.agents.join(', ')}\n` +
-      `⏱️  Timing: ${response.timing.total_ms}ms (Intent: ${response.timing.intent_ms}ms, Execution: ${response.timing.execution_ms}ms, Aggregation: ${response.timing.aggregation_ms}ms)\n\n` +
-      `📋 Summary:\n${response.summary}`;
+    // Build thinking process text with safety checks
+    try {
+      const agentsList = response.intent?.agents?.length > 0 
+        ? response.intent.agents.join(', ') 
+        : 'No agents specified';
+      
+      const thinkingText =
+        `🎯 Intent: ${response.intent?.type || 'unknown'} (${((response.intent?.confidence || 0) * 100).toFixed(0)}% confidence)\n` +
+        `🔧 Agents: ${agentsList}\n` +
+        `⏱️  Timing: ${response.timing?.total_ms || 0}ms (Intent: ${response.timing?.intent_ms || 0}ms, Execution: ${response.timing?.execution_ms || 0}ms, Aggregation: ${response.timing?.aggregation_ms || 0}ms)\n\n` +
+        `📋 Summary:\n${response.summary || 'No summary available'}`;
 
-    setThinkingProcess(thinkingText);
+      setThinkingProcess(thinkingText);
 
-    // Set first available tab as active
-    const tabKeys = Object.keys(response.tabs || {});
-    if (tabKeys.length > 0) {
-      setActiveAnalysisTab(tabKeys[0]);
+      // Set first available tab as active
+      const tabKeys = Object.keys(response.tabs || {});
+      if (tabKeys.length > 0) {
+        setActiveAnalysisTab(tabKeys[0]);
+      }
+    } catch (error) {
+      console.error('Error processing agent response:', error, response);
+      setThinkingProcess(`⚠️ Error processing response: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   };
 
