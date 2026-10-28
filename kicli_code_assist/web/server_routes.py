@@ -1223,6 +1223,126 @@ def register_project_routes(app: Flask):
 
 
 # ============================================================================
+# Server Management Endpoints (Phase 1)
+# ============================================================================
+
+def register_server_management_routes(app: Flask):
+    """Register server management REST API routes."""
+    from kicli_code_assist.server_management import ServiceRegistry, OrphanDetector
+
+    @app.route("/api/server/status", methods=["GET"])
+    def get_server_status():
+        """Get status of all registered services."""
+        try:
+            registry = ServiceRegistry()
+            services = registry.to_dict()
+            
+            return jsonify({
+                "success": True,
+                "services": services,
+                "counts": {
+                    "running": len(registry.get_running_services()),
+                    "orphaned": len(registry.get_orphaned_services()),
+                    "total": len(registry.list_services()),
+                },
+            }), 200
+        except Exception as e:
+            logger.error(f"Server status error: {e}", exc_info=True)
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/server/detect-orphans", methods=["POST"])
+    def detect_orphans():
+        """Detect and mark orphaned services."""
+        try:
+            registry = ServiceRegistry()
+            detector = OrphanDetector(registry)
+            orphans = detector.detect_orphans()
+            
+            return jsonify({
+                "success": True,
+                "orphaned_count": len(orphans),
+                "orphans": orphans,
+            }), 200
+        except Exception as e:
+            logger.error(f"Orphan detection error: {e}", exc_info=True)
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/server/cleanup", methods=["POST"])
+    def cleanup_orphans():
+        """Clean up orphaned services from registry."""
+        try:
+            registry = ServiceRegistry()
+            detector = OrphanDetector(registry)
+            result = detector.cleanup_orphans()
+            
+            return jsonify({
+                "success": True,
+                "cleaned": result['cleaned'],
+                "services": result['services'],
+            }), 200
+        except Exception as e:
+            logger.error(f"Cleanup error: {e}", exc_info=True)
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/server/register", methods=["POST"])
+    def register_service():
+        """Register a service."""
+        try:
+            data = request.json or {}
+            name = data.get("name", "").strip()
+            pid = data.get("pid")
+            port = data.get("port")
+            
+            if not name or pid is None:
+                return jsonify({
+                    "error": "Missing 'name' or 'pid'"
+                }), 400
+            
+            registry = ServiceRegistry()
+            entry = registry.register(
+                name=name,
+                pid=pid,
+                port=port,
+                metadata=data.get("metadata")
+            )
+            
+            return jsonify({
+                "success": True,
+                "service": {
+                    "name": entry.name,
+                    "pid": entry.pid,
+                    "port": entry.port,
+                    "status": entry.status,
+                    "started_at": entry.started_at,
+                },
+            }), 201
+        except Exception as e:
+            logger.error(f"Service registration error: {e}", exc_info=True)
+            return jsonify({"error": str(e)}), 500
+
+    @app.route("/api/server/unregister", methods=["POST"])
+    def unregister_service():
+        """Unregister a service."""
+        try:
+            data = request.json or {}
+            name = data.get("name", "").strip()
+            
+            if not name:
+                return jsonify({"error": "Missing 'name'"}), 400
+            
+            registry = ServiceRegistry()
+            success = registry.unregister(name)
+            
+            return jsonify({
+                "success": success,
+                "message": f"Service '{name}' {'unregistered' if success else 'not found'}",
+            }), 200 if success else 404
+        except Exception as e:
+            logger.error(f"Service unregistration error: {e}", exc_info=True)
+            return jsonify({"error": str(e)}), 500
+
+
+# ============================================================================
 # WebSocket Event Handlers
 # ============================================================================
 

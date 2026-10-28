@@ -35,7 +35,7 @@ from kicli_code_assist.web.server_config import (
 
 # Import route registration (Phase 2)
 from kicli_code_assist.web.server_routes import (
-    register_routes, register_project_routes
+    register_routes, register_project_routes, register_server_management_routes
 )
 
 # Import WebSocket registration (Phase 3)
@@ -119,6 +119,7 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     # Register all other routes (Phase 2D unified router)
     register_routes(app)
     register_project_routes(app)
+    register_server_management_routes(app)
     
     # Register WebSocket handlers
     register_websocket(app, socketio)
