@@ -226,7 +226,7 @@ Requires WebSocket support.
 
 ## For Production
 
-See **docs/guides/WEB_DEPLOYMENT_GUIDE.md** for:
+See **doc/guides/WEB_DEPLOYMENT_GUIDE.md** for:
 - Gunicorn setup
 - Systemd service
 - Nginx reverse proxy
@@ -241,6 +241,6 @@ MIT (same as kicli-code-assist)
 ---
 
 **Questions?** Check:
-- `docs/architecture/WEB_FRONTEND_DESIGN.md` - Full architecture
-- `docs/guides/WEB_DEPLOYMENT_GUIDE.md` - Deployment guide
+- `doc/architecture/WEB_FRONTEND_DESIGN.md` - Full architecture
+- `doc/guides/WEB_DEPLOYMENT_GUIDE.md` - Deployment guide
 - `../README.md` - Main project README

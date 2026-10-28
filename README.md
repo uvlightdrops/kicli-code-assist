@@ -68,24 +68,24 @@ kicli-assist chat
 ## 📚 Documentation
 
 ### User Guides
-- **[Installation Guide](INSTALLATION.md)** - Detailed setup instructions
-- **[Chat Workflow Guide](docs/CHAT_WITH_FILES_WORKFLOW.md)** - Using chat with files
-- **[Diff User Guide](docs/DIFF_USER_GUIDE.md)** - Reviewing and applying diffs
-- **[File Browser Guide](docs/FILE_BROWSER.md)** - Browsing project files
-- **[Chat History Guide](docs/CHAT_HISTORY_AND_PROMPTS.md)** - Session management
+- **[Installation Guide](doc/guides/INSTALLATION.md)** - Detailed setup instructions
+- **[Chat Workflow Guide](doc/features/CHAT_WITH_FILES_WORKFLOW.md)** - Using chat with files
+- **[Diff User Guide](doc/features/DIFF_USER_GUIDE.md)** - Reviewing and applying diffs
+- **[File Browser Guide](doc/features/FILE_BROWSER.md)** - Browsing project files
+- **[Chat History Guide](doc/features/CHAT_HISTORY_AND_PROMPTS.md)** - Session management
 
 ### Technical Reference
-- **[Configuration System](docs/YAML_CONFIG_SYSADMIN.md)** - Layered config setup
+- **[Configuration System](doc/guides/YAML_CONFIG_SYSADMIN.md)** - Layered config setup
 - **[Shared YAML configuration concepts](../yaml_cfg_wizard/doc/YAML_CONFIG_CONCEPTS.md)**
-- **[Project Context](docs/PROJECT_CONTEXT.md)** - Context detection and management
+- **[Project Context](doc/guides/PROJECT_CONTEXT.md)** - Context detection and management
 - **[Integration Status](INTEGRATION_STATUS.md)** - Current feature status
 
 ### Feature Status
-- **[Customer Requests](docs/customer_requests.md)** - Tracked customer features
-- **[Centralized Tracking](../../yaml_cfg_wizard/docs/FEATURE_STATUS.md)** - Full ecosystem status
+- **[Customer Requests](doc/tracking/customer_requests.md)** - Tracked customer features
+- **[Centralized Tracking](../../yaml_cfg_wizard/doc/FEATURE_STATUS.md)** - Full ecosystem status
 
 ### Legacy Documentation
-- **[Archive](docs/archive/)** - Historical development phases (Phases 2-5)
+- **[Archive](doc/archive/)** - Historical development phases (Phases 2-5)
 
 ---
 
@@ -238,7 +238,7 @@ kicli-code-assist/
 │   ├── defaults.yaml       # Generated defaults
 │   ├── profiles/           # Profile overrides
 │   └── stages/             # Stage overrides
-├── docs/
+├── doc/
 │   ├── archive/            # Legacy phase docs
 │   └── *.md                # Current guides
 └── tests/                  # Test suite
@@ -276,7 +276,7 @@ kicli-assist tui
 - ⏳ Path security restrictions (pending)
 - ⏳ Prompt templates (pending)
 
-See [docs/customer_requests.md](docs/customer_requests.md) for details.
+See [doc/tracking/customer_requests.md](doc/tracking/customer_requests.md) for details.
 
 ---
 
@@ -297,7 +297,7 @@ Proprietary - All rights reserved
 ## 🤝 Support
 
 - **Issues:** Report via GitHub issues
-- **Documentation:** See [docs/](docs/)
+- **Documentation:** See [doc/](doc/)
 - **Config Help:** `kicli-assist doctor`
 - **CLI Help:** `kicli-assist --help`
 
