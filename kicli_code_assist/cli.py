@@ -132,47 +132,110 @@ def run_stage(subcommand: str | None = None, **kwargs: Any) -> None:
 
 
 def run_server(subcommand: str | None = None, **kwargs: Any) -> None:
-    """Server management (delegates to ki-core base implementation)."""
-    from ki_core.commands import (
-        run_server_status,
-        run_server_register,
-        run_server_unregister,
-        run_server_detect_orphans,
-        run_server_cleanup,
-        run_server_sync,
-    )
-    
-    subcommand = subcommand or "status"
+    """Server management (DEPRECATED - use 'kicli-assist server <subcommand>' instead)."""
+    click.echo("❌ Error: Use 'kicli-assist server <subcommand>' instead of --subcommand", err=True)
+    click.echo("Examples:")
+    click.echo("  kicli-assist server status")
+    click.echo("  kicli-assist server start --service backend")
+    click.echo("  kicli-assist server stop --service backend")
+    click.echo("  kicli-assist server restart --service backend")
+
+
+# ============================================================================
+# Server Management Click Group & Subcommands
+# ============================================================================
+
+@click.group()
+def server():
+    """Manage services (backend, frontend, etc)."""
+    pass
+
+
+@server.command()
+@click.option('--verbose', '-v', is_flag=True, help='Show detailed info')
+def status(verbose: bool):
+    """Show status of all registered services."""
+    from ki_core.commands import run_server_status
+    run_server_status(echo_fn=click.echo, verbose=verbose)
+
+
+@server.command()
+@click.option('--service', '-s', required=True, help='Service name')
+def start(service: str):
+    """Start a service."""
+    from ki_core.commands import run_server_start
+    from ki_core.config import load_config
     
     try:
-        if subcommand == "status":
-            verbose = kwargs.get("verbose", False)
-            run_server_status(echo_fn=click.echo, verbose=verbose)
-        elif subcommand == "register":
-            name = kwargs.get("name", "").strip()
-            pid = kwargs.get("pid")
-            port = kwargs.get("port")
-            if not name or pid is None:
-                click.echo("❌ Missing required: --name and --pid", err=True)
-                return
-            run_server_register(name, int(pid), port=int(port) if port else None, echo_fn=click.echo)
-        elif subcommand == "unregister":
-            name = kwargs.get("name", "").strip()
-            if not name:
-                click.echo("❌ Missing required: --name", err=True)
-                return
-            run_server_unregister(name, echo_fn=click.echo)
-        elif subcommand == "detect-orphans":
-            run_server_detect_orphans(echo_fn=click.echo)
-        elif subcommand == "cleanup":
-            run_server_cleanup(echo_fn=click.echo)
-        elif subcommand == "sync":
-            run_server_sync(echo_fn=click.echo)
-        else:
-            click.echo(f"Unknown server subcommand: {subcommand}")
-    except Exception as e:
-        click.echo(f"❌ Error: {e}", err=True)
-        raise
+        config = load_config()
+    except:
+        config = {}
+    
+    run_server_start(service, echo_fn=click.echo, config=config)
+
+
+@server.command()
+@click.option('--service', '-s', required=True, help='Service name')
+@click.option('--force', '-f', is_flag=True, help='Use SIGKILL')
+def stop(service: str, force: bool):
+    """Stop a service."""
+    from ki_core.commands import run_server_stop
+    run_server_stop(service, echo_fn=click.echo, force=force)
+
+
+@server.command()
+@click.option('--service', '-s', required=True, help='Service name')
+def restart(service: str):
+    """Restart a service."""
+    from ki_core.commands import run_server_restart
+    from ki_core.config import load_config
+    
+    try:
+        config = load_config()
+    except:
+        config = {}
+    
+    run_server_restart(service, echo_fn=click.echo, config=config)
+
+
+@server.command()
+@click.option('--name', '-n', required=True, help='Service name')
+@click.option('--pid', '-p', type=int, required=True, help='Process ID')
+@click.option('--port', type=int, help='Port number')
+def register(name: str, pid: int, port: int | None):
+    """Register a running service."""
+    from ki_core.commands import run_server_register
+    run_server_register(name, pid, port=port, echo_fn=click.echo)
+
+
+@server.command()
+@click.option('--name', '-n', required=True, help='Service name')
+def unregister(name: str):
+    """Unregister a service."""
+    from ki_core.commands import run_server_unregister
+    run_server_unregister(name, echo_fn=click.echo)
+
+
+@server.command()
+def detect_orphans():
+    """Detect orphaned services."""
+    from ki_core.commands import run_server_detect_orphans
+    run_server_detect_orphans(echo_fn=click.echo)
+
+
+@server.command()
+def cleanup():
+    """Clean up orphaned services."""
+    from ki_core.commands import run_server_cleanup
+    run_server_cleanup(echo_fn=click.echo)
+
+
+@server.command()
+def sync():
+    """Sync registry with actual processes."""
+    from ki_core.commands import run_server_sync
+    run_server_sync(echo_fn=click.echo)
+
 
 
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
@@ -346,6 +409,9 @@ def _register_yaml_commands(root: click.Group, config_path: str | None = None) -
 
 
 _register_yaml_commands(cli)
+
+# Register server subcommand group (native Click structure, not YAML-based)
+cli.add_command(server)
 
 
 def main() -> None:
