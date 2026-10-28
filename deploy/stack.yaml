@@ -1,0 +1,110 @@
+# Example stack.yaml with Option C features
+# Location: kicli-code-assist/deploy/stack.yaml (or resolved via ki_core:load_config)
+
+stack:
+  name: kicli
+  target: local                    # Default target: local | minikube | k8s
+  
+  services:
+    # Database: No dependencies, no health check needed
+    db:
+      kind: process
+      command: ["python", "-m", "sqlite3", "app.db"]
+      port: 5432
+      cwd: "{root}"
+      
+    # Backend API: Depends on db, has health check
+    api:
+      kind: process
+      command: ["{python}", "-m", "uvicorn", "app:app", "--host", "{host}", "--port", "{port}"]
+      cwd: "{root}"
+      host: 0.0.0.0
+      port: 8000
+      depends_on: [db]            # NEW: Wait for db to be healthy first
+      health_path: /docs          # NEW: Endpoint to check for readiness
+      health_timeout: 5           # NEW: Max seconds to wait for response
+      health_retries: 3           # NEW: Retry attempts before failing
+      health_interval: 0.5        # NEW: Seconds between retries
+      env:
+        DB_HOST: "127.0.0.1"
+        DB_PORT: "5432"
+      
+    # Background worker: Depends on db, no public port
+    worker:
+      kind: process
+      command: ["{python}", "worker.py"]
+      cwd: "{root}"
+      port: 0                      # No port = no health check needed
+      depends_on: [db]            # NEW: Wait for db first
+      env:
+        DB_HOST: "127.0.0.1"
+        DB_PORT: "5432"
+        
+    # Frontend: Depends on api being healthy
+    frontend:
+      kind: process
+      command: ["npm", "start"]
+      cwd: "{root}/web"
+      host: 0.0.0.0
+      port: 3000
+      depends_on: [api]           # NEW: Wait for api to be healthy
+      health_path: /               # NEW: Check root path
+      health_timeout: 5
+      health_retries: 3
+      
+    # Redis cache: No dependencies, simple port check
+    cache:
+      kind: compose
+      port: 6379
+      compose:
+        dir: deploy/redis
+        service: redis
+      # No depends_on: can start independently
+      
+    # Optional: External service (not managed by stackctl)
+    external_auth:
+      kind: external
+      port: 9000
+      # Not managed by stackctl, just monitored
+
+  # Kubernetes config (ignored for local target)
+  k8s:
+    namespace: kicli-demo
+    images:
+      app:
+        dockerfile: deploy/docker/Dockerfile
+    secret_env:
+      DB_PASSWORD: demo
+    
+  # Target-specific overrides (deep merge)
+  targets:
+    # Local target (default)
+    local:
+      services:
+        db:
+          command: ["python", "-m", "sqlite3", ":memory:"]  # In-memory for local dev
+        frontend:
+          port: 3000                                         # Different port per target? Uncomment
+          
+    # Minikube staging
+    minikube:
+      services:
+        db:
+          kind: compose              # Use Docker Compose in minikube
+          compose:
+            dir: deploy/postgres
+            service: postgres
+        frontend:
+          k8s:
+            expose: true             # NodePort for local access
+        worker:
+          k8s: null                  # Don't deploy worker in minikube
+          
+    # Production Kubernetes
+    k8s:
+      services:
+        frontend:
+          k8s:
+            expose: true             # Ingress for external access
+            volumes:
+              assets: {mount: /app/static, size: 10Gi}
