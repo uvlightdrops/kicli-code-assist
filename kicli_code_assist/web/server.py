@@ -116,6 +116,13 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     # Register agent config routes (Phase 5.5) with ki_config_manager
     register_agent_config_routes(app, ki_config_manager=ki_config_manager)
     
+    # Register all other routes (Phase 2D unified router)
+    register_routes(app)
+    register_project_routes(app)
+    
+    # Register WebSocket handlers
+    register_websocket(app, socketio)
+    
     return app, socketio
 
 
@@ -125,9 +132,7 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
 
 _config = get_config()
 app, socketio = create_app(_config)
-register_routes(app)
-register_project_routes(app)
-register_websocket(app, socketio)
+# Note: Routes already registered in create_app() above
 
 
 # ============================================================================
