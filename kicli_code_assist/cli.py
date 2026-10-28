@@ -131,6 +131,50 @@ def run_stage(subcommand: str | None = None, **kwargs: Any) -> None:
         raise
 
 
+def run_server(subcommand: str | None = None, **kwargs: Any) -> None:
+    """Server management (delegates to ki-core base implementation)."""
+    from ki_core.commands import (
+        run_server_status,
+        run_server_register,
+        run_server_unregister,
+        run_server_detect_orphans,
+        run_server_cleanup,
+        run_server_sync,
+    )
+    
+    subcommand = subcommand or "status"
+    
+    try:
+        if subcommand == "status":
+            verbose = kwargs.get("verbose", False)
+            run_server_status(echo_fn=click.echo, verbose=verbose)
+        elif subcommand == "register":
+            name = kwargs.get("name", "").strip()
+            pid = kwargs.get("pid")
+            port = kwargs.get("port")
+            if not name or pid is None:
+                click.echo("❌ Missing required: --name and --pid", err=True)
+                return
+            run_server_register(name, int(pid), port=int(port) if port else None, echo_fn=click.echo)
+        elif subcommand == "unregister":
+            name = kwargs.get("name", "").strip()
+            if not name:
+                click.echo("❌ Missing required: --name", err=True)
+                return
+            run_server_unregister(name, echo_fn=click.echo)
+        elif subcommand == "detect-orphans":
+            run_server_detect_orphans(echo_fn=click.echo)
+        elif subcommand == "cleanup":
+            run_server_cleanup(echo_fn=click.echo)
+        elif subcommand == "sync":
+            run_server_sync(echo_fn=click.echo)
+        else:
+            click.echo(f"Unknown server subcommand: {subcommand}")
+    except Exception as e:
+        click.echo(f"❌ Error: {e}", err=True)
+        raise
+
+
 def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
     """Load the YAML command tree, or fallback to the built-in default."""
     default_path = Path(__file__).with_name("cli_commands.yaml")
@@ -168,6 +212,46 @@ def _load_yaml_tree(path: str | None = None) -> Dict[str, Any]:
                 "name": "doctor",
                 "help": "Show CLI and environment diagnostics",
                 "callback": "kicli_code_assist.cli:run_doctor",
+            },
+            {
+                "name": "server",
+                "help": "Manage services (backend, frontend, etc.)",
+                "callback": "kicli_code_assist.cli:run_server",
+                "options": [
+                    {
+                        "names": ["--subcommand"],
+                        "param": "subcommand",
+                        "default": "status",
+                        "help": "Subcommand: status, register, unregister, detect-orphans, cleanup, sync",
+                    },
+                    {
+                        "names": ["--name"],
+                        "param": "name",
+                        "default": None,
+                        "help": "Service name (for register/unregister)",
+                    },
+                    {
+                        "names": ["--pid"],
+                        "param": "pid",
+                        "type": "int",
+                        "default": None,
+                        "help": "Process ID (for register)",
+                    },
+                    {
+                        "names": ["--port"],
+                        "param": "port",
+                        "type": "int",
+                        "default": None,
+                        "help": "Port number (for register)",
+                    },
+                    {
+                        "names": ["-v", "--verbose"],
+                        "param": "verbose",
+                        "type": "bool",
+                        "default": False,
+                        "help": "Show detailed information",
+                    },
+                ],
             },
         ],
     }

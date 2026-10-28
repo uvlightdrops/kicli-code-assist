@@ -180,4 +180,33 @@ commands:
             type: str
             default: "active"
             help: Subcommand
+  - name: server
+    help: Manage services (backend, frontend, etc.)
+    callback: kicli_code_assist.cli:run_server
+    options:
+      - names: ["--subcommand"]
+        param: subcommand
+        type: str
+        default: "status"
+        help: "Subcommand: status, register, unregister, detect-orphans, cleanup, sync"
+      - names: ["--name"]
+        param: name
+        type: str
+        default: null
+        help: Service name (for register/unregister)
+      - names: ["--pid"]
+        param: pid
+        type: int
+        default: null
+        help: Process ID (for register)
+      - names: ["--port"]
+        param: port
+        type: int
+        default: null
+        help: Port number (for register)
+      - names: ["-v", "--verbose"]
+        param: verbose
+        type: bool
+        default: false
+        help: Show detailed information
 
