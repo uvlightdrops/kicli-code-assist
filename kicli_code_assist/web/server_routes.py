@@ -1021,6 +1021,195 @@ def register_project_routes(app: Flask):
             app.logger.error(f"Get recent projects error: {e}")
             return jsonify({"recent": []}), 200
 
+    @app.route("/api/agent/implement", methods=["POST"])
+    def agent_implement():
+        """
+        Phase 5.5.2: Autonomous Implementation via HTTP
+        
+        Triggers CodeImplementationAgent to autonomously implement changes
+        in an external project with Git workflow, testing, and state tracking.
+        
+        Request:
+        {
+            "query": "Description of what to implement",
+            "project_root": "/path/to/project",
+            "dry_run": false (optional, default: false)
+        }
+        
+        Response:
+        {
+            "success": true,
+            "session_id": "uuid",
+            "status": "in_progress" | "completed" | "failed",
+            "implementation_id": "uuid",
+            "steps": [
+                {"name": "Analysis", "status": "completed", "result": "..."},
+                {"name": "Code Generation", "status": "in_progress", "result": null},
+                ...
+            ],
+            "details": {...}
+        }
+        """
+        try:
+            from kicli_code_assist.agent.code_implementation import CodeImplementationAgent
+            
+            data = request.get_json() or {}
+            query = data.get("query", "").strip()
+            project_root_str = data.get("project_root", "").strip()
+            dry_run = data.get("dry_run", False)
+            
+            if not query:
+                return jsonify({"error": "query is required"}), 400
+            
+            if not project_root_str:
+                return jsonify({"error": "project_root is required"}), 400
+            
+            project_root = Path(project_root_str).resolve()
+            
+            # Security check
+            try:
+                ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                project_root.relative_to(ALLOWED_ROOT)
+            except ValueError:
+                return jsonify({"error": "Access denied: path outside allowed root"}), 403
+            
+            if not project_root.exists():
+                return jsonify({"error": f"Project path does not exist: {project_root}"}), 404
+            
+            # Create session
+            session_id = str(uuid.uuid4())
+            implementation_id = str(uuid.uuid4())
+            
+            # Initialize agent
+            agent = CodeImplementationAgent(project_root=project_root)
+            
+            # Analyze project structure
+            logger.info(f"[{session_id}] Starting autonomous implementation")
+            logger.info(f"  Query: {query}")
+            logger.info(f"  Project: {project_root}")
+            
+            steps = [
+                {"name": "Project Analysis", "status": "in_progress", "result": None}
+            ]
+            
+            # Step 1: Discover and analyze project
+            try:
+                agent.discover_python_files()
+                agent.read_and_analyze_files()
+                steps[0]["status"] = "completed"
+                steps[0]["result"] = f"Found {len(agent.project_structure.main_modules)} modules, {len(agent.project_structure.python_files)} files"
+            except Exception as e:
+                steps[0]["status"] = "failed"
+                steps[0]["result"] = str(e)
+                logger.error(f"Project analysis failed: {e}", exc_info=True)
+                return jsonify({
+                    "success": False,
+                    "session_id": session_id,
+                    "implementation_id": implementation_id,
+                    "status": "failed",
+                    "steps": steps,
+                    "error": str(e)
+                }), 500
+            
+            # Step 2: Generate implementation code
+            steps.append({"name": "Code Generation", "status": "in_progress", "result": None})
+            try:
+                generated_code = agent.generate_code_via_llm(
+                    goal_title="Autonomous Implementation",
+                    goal_description=query,
+                    requirements=[]
+                )
+                steps[-1]["status"] = "completed"
+                steps[-1]["result"] = f"Generated {len(str(generated_code.code)) if generated_code else 0} chars"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["result"] = str(e)
+                logger.error(f"Code generation failed: {e}", exc_info=True)
+                return jsonify({
+                    "success": False,
+                    "session_id": session_id,
+                    "implementation_id": implementation_id,
+                    "status": "failed",
+                    "steps": steps,
+                    "error": str(e)
+                }), 500
+            
+            # Step 3: Verify generated code
+            steps.append({"name": "Code Verification", "status": "in_progress", "result": None})
+            try:
+                verification = generated_code.verify_implementation()
+                if not verification["valid"]:
+                    raise ValueError(f"Code verification failed: {verification.get('errors', [])}")
+                steps[-1]["status"] = "completed"
+                steps[-1]["result"] = "Code syntax and imports validated"
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["result"] = str(e)
+                logger.error(f"Verification failed: {e}")
+                return jsonify({
+                    "success": False,
+                    "session_id": session_id,
+                    "implementation_id": implementation_id,
+                    "status": "failed",
+                    "steps": steps,
+                    "error": str(e)
+                }), 500
+            
+            # Step 4: Apply code with full autonomy (git + tests + quality + state)
+            steps.append({"name": "Code Application & Git Workflow", "status": "in_progress", "result": None})
+            try:
+                if dry_run:
+                    # Dry run: just apply to disk, don't git
+                    apply_result = agent.apply_generated_code(
+                        generated_code,
+                        dry_run=True
+                    )
+                    steps[-1]["result"] = f"Dry run: {apply_result.get('message', 'No changes')}"
+                else:
+                    # Full autonomy: git + tests + quality + state tracking
+                    result = agent.apply_with_full_autonomy(
+                        generated_code,
+                        goal_description=query
+                    )
+                    steps[-1]["result"] = result
+                
+                steps[-1]["status"] = "completed"
+                
+            except Exception as e:
+                steps[-1]["status"] = "failed"
+                steps[-1]["result"] = str(e)
+                logger.error(f"Application/Git workflow failed: {e}", exc_info=True)
+                return jsonify({
+                    "success": False,
+                    "session_id": session_id,
+                    "implementation_id": implementation_id,
+                    "status": "failed",
+                    "steps": steps,
+                    "error": str(e)
+                }), 500
+            
+            logger.info(f"[{session_id}] Autonomous implementation completed successfully")
+            
+            return jsonify({
+                "success": True,
+                "session_id": session_id,
+                "implementation_id": implementation_id,
+                "status": "completed",
+                "steps": steps,
+                "details": {
+                    "project_root": str(project_root),
+                    "query": query,
+                    "dry_run": dry_run
+                }
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Autonomous implementation error: {e}", exc_info=True)
+            return jsonify({
+                "error": str(e),
+                "traceback": traceback.format_exc()
+            }), 500
+
 
 # ============================================================================
 # WebSocket Event Handlers

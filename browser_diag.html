@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FileBrowser Diagnostics</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>FileBrowser Diagnostics</h1>
+    <div id="log" style="border: 1px solid #ccc; padding: 10px; height: 600px; overflow-y: auto; font-family: monospace; background: #f5f5f5;">
+    </div>
+    <button onclick="testFlow()">Test Project Open + File List</button>
+    <button onclick="clearLog()">Clear Log</button>
+
+    <script>
+        function log(msg) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${timestamp}] ${msg}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        async function testFlow() {
+            log('=== Starting diagnostic test ===');
+            
+            // Step 1: Open project
+            log('Step 1: POST /api/projects/open');
+            try {
+                const projectRes = await axios.post('/api/projects/open', {
+                    path: '/home/flow/dev_flow/ki-knowledge'
+                });
+                log(`✓ Success: ${JSON.stringify(projectRes.data)}`);
+                const projectData = projectRes.data.data;
+                
+                // Step 2: List files
+                log('Step 2: GET /api/project/files');
+                const filesRes = await axios.get('/api/project/files', {
+                    params: {
+                        path: '',
+                        project: projectData.path
+                    }
+                });
+                log(`✓ Success: Got ${filesRes.data.items.length} items`);
+                filesRes.data.items.slice(0, 3).forEach(item => {
+                    log(`  - ${item.type === 'folder' ? '📁' : '📄'} ${item.name}`);
+                });
+                
+            } catch (err) {
+                log(`✗ Error: ${err.message}`);
+                if (err.response) {
+                    log(`  Status: ${err.response.status}`);
+                    log(`  Data: ${JSON.stringify(err.response.data)}`);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
