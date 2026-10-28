@@ -13,14 +13,22 @@ Analyzes external projects and implements goals by:
 import logging
 import ast
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Callable
 from dataclasses import dataclass
+from datetime import datetime
 
 from kicli_code_assist.agent.git_manager import GitManager
 from kicli_code_assist.agent.test_runner import TestRunner
 from kicli_code_assist.agent.code_quality import CodeQualityChecker
 from kicli_code_assist.agent.rollback_manager import RollbackManager, SafeImplementationWrapper
 from kicli_code_assist.agent.implementation_state import ImplementationStateManager
+from kicli_code_assist.agent.agent_controller import AgentController
+from kicli_code_assist.agent.agent_state import (
+    AgentStatus,
+    AgentPhase,
+    ThinkingType,
+    AgentStateSnapshot,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -623,12 +631,20 @@ class CodeImplementationAgent:
         
         return result
 
-    def apply_with_full_autonomy(self, goal_id: str, goal_title: str, 
-                                 goal_description: str,
-                                 generated_code: GeneratedCode,
-                                 state_manager: Optional[ImplementationStateManager] = None) -> Dict[str, Any]:
+    def apply_with_full_autonomy(
+        self,
+        goal_id: str,
+        goal_title: str,
+        goal_description: str,
+        generated_code: GeneratedCode,
+        state_manager: Optional[ImplementationStateManager] = None,
+        controller: Optional[AgentController] = None,
+        state_broadcast_callback: Optional[Callable[[AgentStateSnapshot], None]] = None,
+    ) -> Dict[str, Any]:
         """
         Full autonomous workflow (Phase 5.4: Complete Autonomy = 10/10).
+        
+        With Phase 5.5 streaming: broadcasts state to all listeners (WebUI, CLI supervisor).
         
         Implements all 5 sub-phases:
         1. Git workflow (5.4.1)
@@ -643,6 +659,8 @@ class CodeImplementationAgent:
             goal_description: Detailed description
             generated_code: GeneratedCode to apply
             state_manager: Optional state manager for tracking
+            controller: Optional AgentController for state streaming
+            state_broadcast_callback: Callback for state updates (if no controller)
         
         Returns:
             Dict with complete workflow results and state
@@ -658,6 +676,17 @@ class CodeImplementationAgent:
         if state_manager is None:
             state_manager = ImplementationStateManager()
         
+        # Initialize controller for streaming (Phase 5.5)
+        if controller is None and state_broadcast_callback:
+            controller = AgentController(
+                broadcast_callback=state_broadcast_callback
+            )
+        
+        agent_id = None
+        if controller:
+            agent_id = controller.create_agent(goal_id, AgentPhase.INIT)
+            controller.set_status(agent_id, AgentStatus.THINKING, "Analyzing goal")
+        
         # Track implementation state
         state_manager.start_implementation(
             goal_id, goal_title, str(self.project_root)
@@ -669,26 +698,64 @@ class CodeImplementationAgent:
             
             # Phase 5.4.1: Git workflow
             logger.info("📝 Phase 5.4.1: Git Workflow")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.GIT_WORKFLOW, 15)
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.PLANNING,
+                    f"Creating feature branch for {goal_title}",
+                )
+            
             branch_name = f"feature/{goal_id}"
             branch_created = git.create_branch(branch_name)
             
             if not branch_created:
                 logger.error("Failed to create feature branch")
                 state_manager.fail_implementation(goal_id, "Branch creation failed")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "BranchCreationError",
+                        "Failed to create feature branch",
+                        recovery_hint="Check git configuration and permissions",
+                    )
+                    controller.complete_execution(agent_id, False)
                 return {
                     "success": False,
                     "error": "Failed to create branch",
                     "phase": "5.4.1"
                 }
             
+            if agent_id:
+                controller.add_action(
+                    agent_id,
+                    "git_branch_created",
+                    f"Created feature branch: {branch_name}",
+                )
+            
             # Apply generated code
             logger.info("💾 Applying code...")
+            if agent_id:
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.EXECUTION,
+                    "Applying generated code to project",
+                )
+            
             result = self.apply_generated_code(generated_code, dry_run=False)
             
             if not result.get("success"):
                 logger.error("Code application failed")
                 rollback.rollback_implementation(goal_id, "Code application failed")
                 state_manager.fail_implementation(goal_id, "Code application failed")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "CodeApplicationError",
+                        "Failed to apply generated code",
+                        recovery_hint="Check generated code syntax and file paths",
+                    )
+                    controller.complete_execution(agent_id, False)
                 return {
                     "success": False,
                     "error": "Code application failed",
@@ -696,14 +763,37 @@ class CodeImplementationAgent:
                     "rolled_back": True
                 }
             
+            if agent_id:
+                controller.add_action(
+                    agent_id,
+                    "code_applied",
+                    f"Applied code to {len(generated_code.files)} file(s)",
+                    details={"files_count": len(generated_code.files)},
+                )
+            
             # Verify changes
             logger.info("✓ Verifying implementation...")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.STATE_TRACKING, 40)
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.ANALYSIS,
+                    "Verifying generated code syntax and structure",
+                )
+            
             verification = self.verify_implementation(goal_title, generated_code)
             
             if not verification.get("verified"):
                 logger.error("Verification failed")
                 rollback.rollback_implementation(goal_id, "Verification failed")
                 state_manager.fail_implementation(goal_id, "Verification failed")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "VerificationError",
+                        "Code verification failed",
+                    )
+                    controller.complete_execution(agent_id, False)
                 return {
                     "success": False,
                     "error": "Verification failed",
@@ -711,16 +801,38 @@ class CodeImplementationAgent:
                     "rolled_back": True
                 }
             
+            if agent_id:
+                controller.add_action(
+                    agent_id,
+                    "verification_passed",
+                    "Code verification passed all checks",
+                )
+            
             # Commit changes
             logger.info("📌 Committing...")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.GIT_WORKFLOW, 50)
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.EXECUTION,
+                    "Committing changes to feature branch",
+                )
+            
             changes = result.get("changes", [])
-            commit_msg = f"Feature: {goal_title}\n\n{goal_description}"
+            commit_msg = f"Implement: {goal_title}\n\n{goal_description}"
             commit_sha = git.commit_changes(changes, commit_msg)
             
             if not commit_sha:
                 logger.error("Commit failed")
                 rollback.rollback_implementation(goal_id, "Commit failed")
                 state_manager.fail_implementation(goal_id, "Commit failed")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "CommitError",
+                        "Failed to commit changes",
+                    )
+                    controller.complete_execution(agent_id, False)
                 return {
                     "success": False,
                     "error": "Commit failed",
@@ -728,8 +840,25 @@ class CodeImplementationAgent:
                     "rolled_back": True
                 }
             
+            if agent_id:
+                controller.set_git_context(agent_id, branch_name, commit_sha)
+                controller.add_action(
+                    agent_id,
+                    "git_commit",
+                    f"Committed changes: {commit_sha[:8]}",
+                    details={"commit_sha": commit_sha},
+                )
+            
             # Phase 5.4.2: Automated tests
             logger.info("📋 Phase 5.4.2: Running tests...")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.TEST_AUTOMATION, 65)
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.EXECUTION,
+                    "Running automated test suite",
+                )
+            
             test_result = test_runner.run_tests()
             test_summary = {
                 "framework": test_result.framework.value,
@@ -738,8 +867,18 @@ class CodeImplementationAgent:
                 "summary": test_runner.format_result_summary(test_result)
             }
             
+            if agent_id:
+                controller.set_test_results(agent_id, test_summary)
+            
             if not test_result.passed and test_result.total_tests > 0:
                 logger.warning("Tests failed, rolling back...")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "TestFailureError",
+                        f"Tests failed: {test_result.failed_tests} failed",
+                    )
+                    controller.complete_execution(agent_id, False)
                 rollback.rollback_implementation(goal_id, f"Tests failed: {test_result.failed_tests} failed")
                 state_manager.fail_implementation(goal_id, f"Tests failed ({test_result.failed_tests})")
                 return {
@@ -752,11 +891,32 @@ class CodeImplementationAgent:
             
             if test_result.total_tests > 0:
                 logger.info(f"✅ Tests passed: {test_result.passed_tests}/{test_result.total_tests}")
+                if agent_id:
+                    controller.add_action(
+                        agent_id,
+                        "tests_passed",
+                        f"All {test_result.passed_tests} tests passed",
+                    )
             else:
                 logger.info(f"ℹ️  No tests found (framework: {test_result.framework.value}), continuing...")
+                if agent_id:
+                    controller.add_action(
+                        agent_id,
+                        "no_tests_found",
+                        "No test files found (acceptable for new modules)",
+                        status="warning",
+                    )
             
             # Phase 5.4.4: Code quality checks
             logger.info("🔍 Phase 5.4.4: Quality checks...")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.CODE_QUALITY, 80)
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.ANALYSIS,
+                    "Checking code quality (PEP 8, imports, syntax)",
+                )
+            
             # Get absolute path to the file that was written
             target_file = self.project_root / generated_code.target_file
             files_to_check = [str(target_file)] if target_file.exists() else []
@@ -766,8 +926,18 @@ class CodeImplementationAgent:
             
             quality_summary = quality_checker.format_summary(quality_results)
             
+            if agent_id:
+                controller.quality_checks = quality_summary
+            
             if quality_checker.should_block_commit(quality_results):
                 logger.error("Quality checks failed, rolling back...")
+                if agent_id:
+                    controller.set_error(
+                        agent_id,
+                        "QualityCheckError",
+                        "Quality checks failed",
+                    )
+                    controller.complete_execution(agent_id, False)
                 rollback.rollback_implementation(goal_id, "Quality checks failed")
                 state_manager.fail_implementation(goal_id, "Quality checks blocked commit")
                 return {
@@ -779,16 +949,39 @@ class CodeImplementationAgent:
                 }
             
             logger.info("✓ Quality checks passed")
+            if agent_id:
+                controller.add_action(
+                    agent_id,
+                    "quality_checks_passed",
+                    "All quality checks passed (PEP 8, imports)",
+                )
             
             # Push to remote (only if all checks passed)
             logger.info("🚀 Pushing to remote...")
+            if agent_id:
+                controller.add_thinking_step(
+                    agent_id,
+                    ThinkingType.EXECUTION,
+                    "Pushing changes to remote repository",
+                )
+            
             push_ok = git.push_to_remote(branch_name)
             
             if not push_ok:
                 logger.warning("Push failed, but keeping local commits")
+                if agent_id:
+                    controller.add_action(
+                        agent_id,
+                        "push_failed",
+                        "Remote push failed (local-only repo is OK)",
+                        status="warning",
+                    )
             
             # Phase 5.4.3: Track successful implementation
             logger.info("📊 Phase 5.4.3: Tracking state...")
+            if agent_id:
+                controller.set_phase(agent_id, AgentPhase.COMPLETE, 100)
+            
             files_changed = result.get("changes_made", [])
             state_manager.complete_implementation(
                 goal_id=goal_id,
@@ -801,6 +994,18 @@ class CodeImplementationAgent:
             
             # Success
             logger.info("🎉 PHASE 5.4 COMPLETE - FULL AUTONOMY ACHIEVED!")
+            if agent_id:
+                controller.add_action(
+                    agent_id,
+                    "execution_complete",
+                    f"Successfully implemented {goal_title}",
+                    details={
+                        "commit_sha": commit_sha,
+                        "branch": branch_name,
+                        "files_changed": len(files_changed),
+                    },
+                )
+                controller.complete_execution(agent_id, True)
             
             return {
                 "success": True,
@@ -813,16 +1018,25 @@ class CodeImplementationAgent:
                 "tests": test_summary,
                 "quality": quality_summary,
                 "pushed": push_ok,
-                "state_tracked": True
+                "state_tracked": True,
+                "agent_id": agent_id,
             }
         
         except Exception as e:
             logger.error(f"Autonomous implementation failed: {e}")
+            if agent_id:
+                controller.set_error(
+                    agent_id,
+                    "UnexpectedException",
+                    f"Unexpected error: {str(e)}",
+                )
+                controller.complete_execution(agent_id, False)
             rollback.rollback_implementation(goal_id, f"Exception: {str(e)}")
             state_manager.fail_implementation(goal_id, f"Exception: {str(e)}")
             return {
                 "success": False,
                 "error": str(e),
                 "rolled_back": True,
-                "exception": True
+                "exception": True,
+                "agent_id": agent_id,
             }
