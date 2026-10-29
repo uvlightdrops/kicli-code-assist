@@ -17,10 +17,11 @@ dependencies = [
     "rich>=13.0.0",
     "pygments>=2.14.0",
     "pyyaml>=6.0",
+    "tomli>=2.0; python_version < '3.11'",
     "click>=8.1.7",
-    "ki-core @ file:///home/flow/dev_flow/ki-core",
-    "yaml-cfg-wizard @ file:///home/flow/dev_flow/yaml_cfg_wizard",
-    "flowpy @ file:///home/flow/dev_flow/flowpy",
+    "ki-core @ file://${PROJECT_DIR}/../../ki-core",
+    "yaml-cfg-wizard @ file://${PROJECT_DIR}/../../yaml_cfg_wizard",
+    "flowpy @ file://${PROJECT_DIR}/../../flowpy",
 ]
 
 [project.optional-dependencies]
