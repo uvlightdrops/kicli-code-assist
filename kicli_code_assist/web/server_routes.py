@@ -6,6 +6,7 @@ Includes:
 - Streaming endpoints for reasoning and metrics
 """
 
+import asyncio
 import os
 import logging
 import json
@@ -13,6 +14,7 @@ import uuid
 import traceback
 from pathlib import Path
 from datetime import datetime
+from threading import Thread
 from typing import Dict, Any, Optional
 
 from flask import Flask, request, jsonify
@@ -221,10 +223,30 @@ def register_routes(app: Flask):
             providers = llm_config.get("providers", {})
             openai_config = providers.get("openai", {})
             ollama_config = providers.get("ollama", {})
+            ki_config = providers.get("ki", {})
+
+            def has_key(value) -> bool:
+                return isinstance(value, str) and bool(value) and not value.startswith("${")
+
+            try:
+                from kicli_code_assist.llm_runtime import chat_settings
+                active = chat_settings(config)
+            except Exception:
+                active = {"provider": llm_config.get("provider", "auto"), "base_url": "", "model": ""}
             return jsonify({
                 "web": config.get("web", {}),
-                "openai": {"configured": bool(openai_config.get("api_key"))},
-                "ollama": {"configured": bool(ollama_config.get("base_url"))},
+                "llm": {
+                    "provider": active.get("provider"),
+                    "model": active.get("model") or None,
+                    "applies": "next_request",
+                },
+                "openai": {"configured": has_key(openai_config.get("api_key")),
+                           "model": openai_config.get("model")},
+                "ki": {"configured": has_key(ki_config.get("api_key")),
+                       "model": ki_config.get("model")},
+                "ollama": {"configured": bool(ollama_config.get("base_url")),
+                           "model": ollama_config.get("model")},
+                "mock": {"configured": True},
             }), 200
         except Exception as e:
             app.logger.error(f"Config endpoint error: {e}")
@@ -518,7 +540,7 @@ def register_routes(app: Flask):
                 return jsonify({"error": error}), 403
             
             # Initialize ensemble
-            ensemble = LLMEnsemble(project_root)
+            ensemble = LLMEnsemble(project_root, app.config.get("KICLI_CONFIG"))
             
             # Run ensemble voting (sync wrapper for async)
             loop = asyncio.new_event_loop()
@@ -771,7 +793,9 @@ def register_routes(app: Flask):
             request_id = str(uuid.uuid4())
             app.logger.info(f"Chat request {request_id}: message={len(message)} chars, files={len(files)}")
             
-            # Spawn thread to handle async chat
+            # Spawn thread to handle async chat (config of this request is
+            # app.config["KICLI_CONFIG"], refreshed by the live-config hook)
+            from kicli_code_assist.web.server_async import process_chat_sync
             socketio = app.config["SOCKETIO"]
             thread = Thread(
                 target=process_chat_sync,
@@ -1142,7 +1166,7 @@ def register_project_routes(app: Flask):
             steps.append({"name": "Code Verification", "status": "in_progress", "result": None})
             try:
                 if not generated_code:
-                    raise ValueError("LLM not configured or returned no code. Configure OpenAI or Ollama in ki.yaml")
+                    raise ValueError("LLM not configured or returned no code. Configure llm.* in the settings panel (API keys in creds.yaml)")
                 
                 verification = generated_code.verify_implementation()
                 if not verification["valid"]:
@@ -1227,33 +1251,15 @@ def register_project_routes(app: Flask):
 # ============================================================================
 
 def register_server_management_routes(app: Flask):
-    """Register server management REST API routes."""
-    from ki_core.server_management import ServiceRegistry, OrphanDetector
-
-    @app.route("/api/server/status", methods=["GET"])
-    def get_server_status():
-        """Get status of all registered services."""
-        try:
-            registry = ServiceRegistry()
-            services = registry.to_dict()
-            
-            return jsonify({
-                "success": True,
-                "services": services,
-                "counts": {
-                    "running": len(registry.get_running_services()),
-                    "orphaned": len(registry.get_orphaned_services()),
-                    "total": len(registry.list_services()),
-                },
-            }), 200
-        except Exception as e:
-            logger.error(f"Server status error: {e}", exc_info=True)
-            return jsonify({"error": str(e)}), 500
+    """stackctl owns lifecycle; legacy endpoints below only maintain old records."""
+    from .stackctl_bridge import register_stackctl_routes
+    register_stackctl_routes(app)
 
     @app.route("/api/server/detect-orphans", methods=["POST"])
     def detect_orphans():
-        """Detect and mark orphaned services."""
+        """Detect old registry records, not stackctl lifecycle state."""
         try:
+            from ki_core.server_management import ServiceRegistry, OrphanDetector
             registry = ServiceRegistry()
             detector = OrphanDetector(registry)
             orphans = detector.detect_orphans()
@@ -1271,6 +1277,7 @@ def register_server_management_routes(app: Flask):
     def cleanup_orphans():
         """Clean up orphaned services from registry."""
         try:
+            from ki_core.server_management import ServiceRegistry, OrphanDetector
             registry = ServiceRegistry()
             detector = OrphanDetector(registry)
             result = detector.cleanup_orphans()
@@ -1286,8 +1293,9 @@ def register_server_management_routes(app: Flask):
 
     @app.route("/api/server/register", methods=["POST"])
     def register_service():
-        """Register a service."""
+        """Compatibility bookkeeping only; does not authorize stackctl actions."""
         try:
+            from ki_core.server_management import ServiceRegistry
             data = request.json or {}
             name = data.get("name", "").strip()
             pid = data.get("pid")
@@ -1324,6 +1332,7 @@ def register_server_management_routes(app: Flask):
     def unregister_service():
         """Unregister a service."""
         try:
+            from ki_core.server_management import ServiceRegistry
             data = request.json or {}
             name = data.get("name", "").strip()
             
@@ -1345,4 +1354,3 @@ def register_server_management_routes(app: Flask):
 # ============================================================================
 # WebSocket Event Handlers
 # ============================================================================
-

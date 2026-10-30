@@ -61,7 +61,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
       
       // Update breadcrumb with full path relative to project
       if (path === project?.path || relativePath === '') {
-        setBreadcrumb(['PROJECT FILES', project.name])
+        setBreadcrumb(['PROJECT FILES', project?.name ?? ''])
       } else {
         const relPath = relativePath.split('/').filter(Boolean)
         setBreadcrumb(['PROJECT FILES', project?.name || '', ...relPath])
@@ -78,7 +78,7 @@ const FileBrowser: React.FC<FileBrowserProps> = ({ onSelectFile }) => {
     // folder.path is relative to project, so build absolute path
     const absolutePath = folder.path 
       ? `${project?.path}/${folder.path}`
-      : project?.path
+      : project?.path ?? ''
     setCurrentPath(absolutePath)
   }
 

@@ -3,6 +3,7 @@
 import ki_core
 import pytest
 import yaml
+from pathlib import Path
 
 from kicli_code_assist.ui.settings_panel import (
     SettingField,
@@ -28,7 +29,9 @@ def fields(merged_schema):
 class TestSchemaCollection:
     def test_collects_whitelisted_sections(self, fields):
         paths = {f.path for f in fields}
-        assert "llm.default_provider" in paths
+        assert "llm.provider" in paths
+        assert "agent.intervention.mode" in paths
+        assert "web.port" in paths
         assert "http.verify_ssl" in paths
         assert "security.allowed_base_path" in paths
         assert "storage.cache_dir" in paths
@@ -87,45 +90,53 @@ class TestCoerce:
         assert _coerce("hello", "string") == "hello"
 
 
+REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+def _project(tmp_path, monkeypatch, ki_yaml: dict):
+    import shutil
+    shutil.copytree(REPO_ROOT / "schema", tmp_path / "schema")
+    (tmp_path / "ki.yaml").write_text(yaml.safe_dump(ki_yaml))
+    monkeypatch.chdir(tmp_path)
+    for key in [k for k in __import__("os").environ if k.startswith("KI_CFG_")]:
+        monkeypatch.delenv(key)
+    monkeypatch.delenv("KI_STAGE", raising=False)
+    monkeypatch.delenv("KI_PROFILE", raising=False)
+    return tmp_path / "ki.yaml"
+
+
 class TestSettingsPanelSave:
-    def test_save_merges_onto_existing_file(self, tmp_path):
-        config_path = tmp_path / "ki.yaml"
-        config_path.write_text(yaml.safe_dump({"prompts": {"active_role": "coder"}}))
-
-        panel = SettingsPanel.__new__(SettingsPanel)
-        panel.raw_config = {}
-        panel.config_path = config_path
-        panel.fields = [
-            SettingField(
-                path="http.request_timeout",
-                section="HTTP Client Settings",
-                field_type="integer",
-                title="Request Timeout",
-            )
-        ]
-
-        # Bypass widget querying by monkeypatching collect_values directly.
-        panel.collect_values = lambda: {"http.request_timeout": 45}
-        saved_path = panel.save()
-
-        assert saved_path == config_path
-        on_disk = yaml.safe_load(config_path.read_text())
-        assert on_disk["prompts"] == {"active_role": "coder"}
-        assert on_disk["http"]["request_timeout"] == 45
-
-    def test_save_creates_file_when_missing(self, tmp_path):
-        config_path = tmp_path / "nested" / "ki.yaml"
+    def test_save_writes_runtime_override_not_ki_yaml(self, tmp_path, monkeypatch):
+        config_path = _project(tmp_path, monkeypatch, {"llm": {"provider": "mock"}})
+        before = config_path.read_text()
 
         panel = SettingsPanel.__new__(SettingsPanel)
         panel.raw_config = {}
         panel.config_path = config_path
         panel.fields = []
-        panel.collect_values = lambda: {"storage.cache_dir": "/tmp/cache"}
+        panel.collect_values = lambda: {"http.request_timeout": 45}
+        saved_path = panel.save()
 
-        panel.save()
-        assert config_path.exists()
-        on_disk = yaml.safe_load(config_path.read_text())
-        assert on_disk["storage"]["cache_dir"] == "/tmp/cache"
+        assert saved_path == tmp_path / "config" / "runtime" / "runtime.yaml"
+        assert config_path.read_text() == before
+        on_disk = yaml.safe_load(saved_path.read_text())
+        assert on_disk == {"http": {"request_timeout": 45}}
+
+    def test_save_only_writes_changed_values(self, tmp_path, monkeypatch):
+        config_path = _project(tmp_path, monkeypatch, {"http": {"request_timeout": 30}})
+
+        panel = SettingsPanel.__new__(SettingsPanel)
+        panel.raw_config = {}
+        panel.config_path = config_path
+        panel.fields = []
+        panel.collect_values = lambda: {
+            "http.request_timeout": 30,
+            "storage.cache_dir": "cache-dir",
+            "llm.providers.openai.api_key": "not-written",
+        }
+        target = panel.save()
+        on_disk = yaml.safe_load(target.read_text())
+        assert on_disk == {"storage": {"cache_dir": "cache-dir"}}
 
 
 def test_find_config_path_default_is_ki_yaml(tmp_path, monkeypatch):

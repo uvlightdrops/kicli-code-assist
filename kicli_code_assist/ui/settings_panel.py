@@ -4,9 +4,11 @@ Rather than hardcoding a field list, this walks the merged JSON schema
 (ki-core's generic base schema + this app's schema/kicli.schema.yaml) to
 discover editable fields, their types, defaults, and validation rules.
 Current values come from the already-resolved config (AppConfig.raw).
-Saving writes only the edited dotted-paths back onto whatever the active
-ki.yaml file already contains, leaving untouched sections (creds, prompts,
-custom provider keys, ...) exactly as they were.
+Saving goes through the shared ``ki_core.runtime_settings`` service (same
+store as the web settings panel): only values that differ from the
+effective configuration are written as overrides to
+``config/runtime/runtime.yaml`` (atomic, revision-checked). ki.yaml and
+creds.yaml are never rewritten; secrets are not editable here.
 """
 
 from __future__ import annotations
@@ -16,7 +18,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Optional
 
-import yaml
 from textual.containers import Vertical, VerticalScroll, Horizontal
 from textual.widgets import Static, Button, Label, Input, Switch, Select
 from textual.binding import Binding
@@ -30,7 +31,7 @@ from yaml_cfg_wizard.schema_utils import merge_schemas
 # Top-level schema sections exposed in the settings UI. "creds" (secrets)
 # and "prompts" (already has its own dedicated Ctrl+O modal) are
 # intentionally excluded.
-WHITELISTED_SECTIONS = ["llm", "http", "security", "storage", "apps.kicli"]
+WHITELISTED_SECTIONS = ["llm", "http", "agent", "web", "security", "storage", "apps.kicli"]
 
 # Leaf field names that hold secrets and must never show up in a plain
 # editable text field, even if their parent section is whitelisted.
@@ -246,20 +247,31 @@ class SettingsPanel(Vertical):
         return values
 
     def save(self) -> Path:
-        """Merge edited values onto the on-disk YAML file and write it back."""
-        values = self.collect_values()
-        on_disk: dict = {}
-        if self.config_path.exists():
-            on_disk = yaml.safe_load(self.config_path.read_text()) or {}
-        for dotted_path, value in values.items():
-            _set_by_path(on_disk, dotted_path, value)
-        self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        self.config_path.write_text(yaml.safe_dump(on_disk, sort_keys=False))
-        return self.config_path
+        """Persist changed, editable values as runtime overrides; returns the target file."""
+        from kicli_code_assist import runtime_config
+
+        project_root = Path(self.config_path).resolve().parent
+        service = runtime_config.settings_service(project_root)
+        snap = service.snapshot()
+        rows = {r["path"]: r for r in snap["rows"]}
+        changes = {}
+        for dotted_path, value in self.collect_values().items():
+            row = rows.get(dotted_path)
+            if row is None or not row["editable"] or row["shadowed"]:
+                continue
+            if row["effective"] != value:
+                changes[dotted_path] = value
+        if changes:
+            runtime_config.save(snap["revision"], changes, (), project_root)
+        return service.target
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         if event.button.id == "save-settings":
-            path = self.save()
+            try:
+                path = self.save()
+            except Exception as exc:  # safe ki-core messages, no values
+                self.query_one("#settings-status", Static).update(f"[red]{exc}[/red]")
+                return
             self.post_message(SettingsSaved(path))
         elif event.button.id == "cancel-settings":
             self.app.pop_screen()

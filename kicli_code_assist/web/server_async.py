@@ -8,18 +8,20 @@ Handles:
 
 import asyncio
 import logging
+import traceback
 from concurrent.futures import ThreadPoolExecutor
 from typing import Dict, Any
 
-from flask import request
+from flask import Flask, request
 from flask_socketio import SocketIO
 
 from kicli_code_assist.chat_session import ChatSession
 from kicli_code_assist.web.server_instances import (
     get_intent_detector, get_executor, get_aggregator, get_answer_generator
 )
-from ki_core.adapters import AsyncOpenAIClient
 from ki_core.core.models import ChatRequest, Message, Role, StreamEventType
+
+from kicli_code_assist.llm_runtime import resolve_chat
 
 
 logger = logging.getLogger("kicli-web")
@@ -62,97 +64,72 @@ async def process_chat_async(request_id: str, message: str, files: list,
         messages = chat_session.get_messages_for_api()
         logger.info(f"Request {request_id}: {len(messages)} messages prepared")
         
-        # Try to use LLM provider if configured
+        # Build the client from the configuration of *this* request
+        # (llm.provider incl. ki/openai/ollama/mock/auto, endpoint, model,
+        # http.request_timeout/verify_ssl) - see kicli_code_assist.llm_runtime.
         try:
-            # Extract OpenAI config from ki.yaml (nested under llm.providers.openai)
-            llm_config = config.get("llm", {})
-            providers = llm_config.get("providers", {})
-            openai_config = providers.get("openai", {})
-            api_key = openai_config.get("api_key")
-            model = openai_config.get("model", "gpt-4o-mini")
-            base_url = openai_config.get("base_url", "https://api.openai.com/v1")
-            
-            if api_key:
-                # Create async OpenAI client
-                client = AsyncOpenAIClient(
-                    api_key=api_key,
-                    model=model,
-                    base_url=base_url,
-                )
-                
-                # Build ChatRequest for LLM
-                chat_request = ChatRequest(
-                    messages=[
-                        Message(role=Role.USER if msg.get("role") == "user" else Role.ASSISTANT, 
-                               content=msg.get("content", ""))
-                        for msg in messages
-                    ],
-                    model=model,
-                    temperature=0.7,
-                )
-                
-                # Stream response from LLM
-                logger.info(f"Request {request_id}: Streaming from OpenAI ({model})")
-                socketio.emit("chat.response", {
-                    "request_id": request_id,
-                    "type": "status",
-                    "content": f"🤖 Querying LLM: {model}...",
-                }, room=request_id)
-                
-                response_text = ""
-                chunk_count = 0
-                
-                async for stream_event in client.achat_stream(chat_request):
-                    # Check if this is a content token
-                    if stream_event.type == StreamEventType.TOKEN:
-                        chunk = stream_event.text
-                        response_text += chunk
-                        chunk_count += 1
-                        
-                        # Emit chunk via WebSocket (real-time streaming)
-                        socketio.emit("chat.response", {
-                            "request_id": request_id,
-                            "type": "chunk",
-                            "content": chunk,
-                        }, room=request_id)
-                        
-                        logger.debug(f"Request {request_id}: Chunk {chunk_count} ({len(chunk)} chars)")
-                    
-                    elif stream_event.type == StreamEventType.DONE:
-                        logger.info(f"Request {request_id}: Stream completed")
-                        break
-                
-                # Add assistant response to chat history
-                chat_session.add_message("assistant", response_text)
-                logger.info(f"Request {request_id}: Response complete ({len(response_text)} chars, {chunk_count} chunks)")
-                
-                # Emit completion
-                socketio.emit("chat.response", {
-                    "request_id": request_id,
-                    "type": "complete",
-                    "status": "success",
-                }, room=request_id)
-                
-            else:
-                # No API key configured - show error
-                logger.warning(f"Request {request_id}: No OpenAI API key configured")
-                error_msg = "❌ OpenAI API key not configured in ki.yaml. Please add openai.api_key to enable LLM."
-                socketio.emit("chat.response", {
-                    "request_id": request_id,
-                    "type": "error",
-                    "error": error_msg,
-                }, room=request_id)
-                
-        except ImportError as e:
-            # AsyncOpenAI not installed
-            logger.error(f"Request {request_id}: ImportError: {e}")
-            error_msg = f"❌ Missing dependency: {str(e)}. Install: pip install openai"
+            client, settings = resolve_chat(config)
+        except Exception as e:
+            logger.warning(f"Request {request_id}: LLM not configured ({type(e).__name__})")
             socketio.emit("chat.response", {
                 "request_id": request_id,
                 "type": "error",
-                "error": error_msg,
+                "error": f"❌ LLM not configured: {e}. Adjust llm.* in the settings panel; "
+                         "API keys belong in creds.yaml.",
             }, room=request_id)
-        
+            return
+
+        provider, model = settings.get("provider"), settings.get("model")
+        role_map = {"user": Role.USER, "assistant": Role.ASSISTANT, "system": Role.SYSTEM}
+        chat_request = ChatRequest(
+            messages=[
+                Message(role=role_map.get(msg.get("role"), Role.USER), content=msg.get("content", ""))
+                for msg in messages
+            ],
+            model=model,
+            temperature=0.7,
+        )
+
+        logger.info(f"Request {request_id}: Streaming from {provider} ({model})")
+        socketio.emit("chat.response", {
+            "request_id": request_id,
+            "type": "status",
+            "content": f"🤖 Querying LLM: {provider}/{model}...",
+        }, room=request_id)
+
+        response_text = ""
+        chunk_count = 0
+        try:
+            async for stream_event in client.achat_stream(chat_request):
+                if stream_event.type == StreamEventType.TOKEN and stream_event.text:
+                    response_text += stream_event.text
+                    chunk_count += 1
+                    socketio.emit("chat.response", {
+                        "request_id": request_id,
+                        "type": "chunk",
+                        "content": stream_event.text,
+                    }, room=request_id)
+                elif stream_event.type == StreamEventType.DONE:
+                    break
+        except Exception as e:
+            logger.error(f"Request {request_id}: LLM error from {provider}: {type(e).__name__}")
+            socketio.emit("chat.response", {
+                "request_id": request_id,
+                "type": "error",
+                "error": f"❌ LLM error ({provider}): {type(e).__name__}: {e}",
+            }, room=request_id)
+            return
+
+        chat_session.add_message("assistant", response_text)
+        logger.info(f"Request {request_id}: Response complete ({len(response_text)} chars, {chunk_count} chunks)")
+        socketio.emit("chat.response", {
+            "request_id": request_id,
+            "type": "complete",
+            "status": "success",
+            "provider": provider,
+            "model": model,
+        }, room=request_id)
+
     except Exception as e:
         logger.error(f"Chat processing error {request_id}: {type(e).__name__}: {e}\n{traceback.format_exc()}")
         socketio.emit("chat.response", {

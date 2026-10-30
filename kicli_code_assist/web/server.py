@@ -15,6 +15,7 @@ Architecture (Phases 1-4 Modularization):
 import os
 import sys
 import logging
+import secrets
 from pathlib import Path
 from typing import Dict, Any, Optional
 
@@ -44,23 +45,40 @@ from kicli_code_assist.web.server_websocket import register_websocket
 # Import agent config routes (Phase 5.5)
 from kicli_code_assist.web.agent_config import register_agent_config_routes
 
+# Runtime settings (shared ki_core.runtime_settings service)
+from kicli_code_assist.web.settings_routes import register_settings_routes
+from kicli_code_assist.llm_runtime import get_live_config
 
-def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
+
+def create_app(
+    config: Optional[Dict] = None, project_root: Optional[Path] = None,
+) -> tuple[Flask, SocketIO]:
     """Create and configure Flask app with SocketIO.
     
     Integrates all refactored modules (Phases 1-4) into a single app.
     
     Args:
-        config: Optional configuration dict. If None, loads from ki.yaml
+        config: Optional fixed configuration dict (tests). If None, the app
+            runs in live mode: ``app.config["KICLI_CONFIG"]`` is refreshed
+            from the layered ki-core config before every request, so
+            runtime.yaml/creds.yaml/stage edits apply without restart.
+        project_root: Project whose ``config/`` tree is used (default: cwd
+            or the directory of the discovered ki.yaml).
         
     Returns:
         Tuple of (Flask app, SocketIO instance)
     """
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = "kicli-web-dev-secret"
+    app.config["SECRET_KEY"] = os.environ.get("KICLI_WEB_SECRET_KEY") or secrets.token_hex(32)
     
+    live = None
     if config is None:
-        config = get_config()
+        try:
+            live = get_live_config(project_root)
+            config = live.get()
+        except Exception as e:
+            logging.getLogger("kicli-web").error(f"Live config unavailable: {type(e).__name__}")
+            config = get_config()
     
     # Initialize ki_core ConfigManager for YAML persistence
     try:
@@ -72,9 +90,29 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
     
     # Store config in app context
     app.config["KICLI_CONFIG"] = config
+    app.config["KICLI_LIVE_CONFIG"] = live
     app.config["KI_CONFIG_MANAGER"] = ki_config_manager
     app.config["ACTIVE_REQUESTS"] = {}
     app.config["CHAT_SESSION"] = ChatSession()
+
+    def refresh_config(force: bool = False) -> None:
+        """Pick up config changes; drop clients that cached the old LLM settings."""
+        if live is None:
+            return
+        if force:
+            live.invalidate()
+        previous = app.config.get("KICLI_CONFIG")
+        current = live.get()
+        app.config["KICLI_CONFIG"] = current
+        if current is not previous:
+            from kicli_code_assist.llm_integration import reset_async_integration
+            reset_async_integration()
+
+    app.config["KICLI_REFRESH_CONFIG"] = refresh_config
+    if live is not None:
+        @app.before_request
+        def _refresh_live_config():
+            refresh_config()
     
     # Setup logging
     log_dir = _get_log_dir()
@@ -113,8 +151,9 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
             "message": "Use http://localhost:3000 for assets (Vite Dev Server)"
         }), 400
     
-    # Register agent config routes (Phase 5.5) with ki_config_manager
-    register_agent_config_routes(app, ki_config_manager=ki_config_manager)
+    # Register agent config routes (Phase 5.5) - legacy API bridged to runtime settings
+    register_agent_config_routes(app, ki_config_manager=ki_config_manager, project_root=project_root)
+    register_settings_routes(app, project_root=project_root)
     
     # Register all other routes (Phase 2D unified router)
     register_routes(app)
@@ -131,9 +170,7 @@ def create_app(config: Optional[Dict] = None) -> tuple[Flask, SocketIO]:
 # Global App Instances (for WSGI/production deployment)
 # ============================================================================
 
-_config = get_config()
-app, socketio = create_app(_config)
-# Note: Routes already registered in create_app() above
+app, socketio = create_app()  # live mode: config refreshed per request
 
 
 # ============================================================================
@@ -142,7 +179,7 @@ app, socketio = create_app(_config)
 
 def main():
     """Main entry point when run as module."""
-    host, port = get_web_settings(_config)
+    host, port = get_web_settings(app.config["KICLI_CONFIG"])
     app.logger.info(f"Starting kicli-web server on {host}:{port}")
     
     socketio.run(

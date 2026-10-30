@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { settingsWriteHeaders } from '../services/runtimeSettings';
 
 interface AgentConfig {
   intervention: { mode: 'queue' | 'supervisor' | 'user_prompt' };
@@ -34,7 +35,8 @@ interface UseAgentSettingsResult {
   resetConfig: () => Promise<boolean>;
 }
 
-const API_BASE = (window as any).__API_URL || 'http://localhost:8000';
+// Same-origin (Vite proxies /api in dev); values persist via the shared runtime settings.
+const API_BASE = '';
 
 export function useAgentSettings(): UseAgentSettingsResult {
   const [config, setConfig] = useState<AgentConfig | null>(null);
@@ -78,7 +80,7 @@ export function useAgentSettings(): UseAgentSettingsResult {
 
         const response = await fetch(`${API_BASE}/api/agent/config`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', ...(await settingsWriteHeaders()) },
           body: JSON.stringify(updates),
         });
 
@@ -110,7 +112,7 @@ export function useAgentSettings(): UseAgentSettingsResult {
 
       const response = await fetch(`${API_BASE}/api/agent/config/reset`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', ...(await settingsWriteHeaders()) },
       });
 
       if (!response.ok) {

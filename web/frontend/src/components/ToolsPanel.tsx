@@ -1,19 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { AgentSettingsPanel } from './AgentSettingsPanel';
+import { ServerPanel } from './ServerPanel';
+import { RuntimeSettingsPanel } from './RuntimeSettingsPanel';
+
+interface LlmSummary {
+  llm?: { provider: string; model: string; applies: string };
+  [provider: string]: { configured?: boolean; model?: string } | any;
+}
+
+const PROVIDERS = ['ki', 'openai', 'ollama', 'mock'] as const;
+
+function useLlmSummary(active: boolean) {
+  const [summary, setSummary] = useState<LlmSummary | null>(null);
+  useEffect(() => {
+    if (!active) return;
+    let cancelled = false;
+    fetch('/api/config', { cache: 'no-store' })
+      .then(res => (res.ok ? res.json() : null))
+      .then(data => { if (!cancelled) setSummary(data); })
+      .catch(() => { if (!cancelled) setSummary(null); });
+    return () => { cancelled = true; };
+  }, [active]);
+  return summary;
+}
 
 interface ToolsPanelProps {
   isVisible: boolean;
 }
 
 export function ToolsPanel({ isVisible }: ToolsPanelProps) {
-  const [activeTab, setActiveTab] = useState<'features' | 'agent'>('features');
+  const [activeTab, setActiveTab] = useState<'features' | 'agent' | 'servers' | 'settings'>('features');
   const [settings, setSettings] = useState({
     autoAnalyze: false,
     showMetrics: true,
-    useOllama: true,
-    useOpenAI: true,
     cacheResults: true,
   });
+  const llmSummary = useLlmSummary(isVisible && activeTab === 'features');
 
   const handleToggle = (key: keyof typeof settings) => {
     setSettings(prev => ({
@@ -30,6 +52,10 @@ export function ToolsPanel({ isVisible }: ToolsPanelProps) {
 
       {/* Tab Navigation */}
       <div className="flex gap-2 border-b border-gray-700 pb-2">
+        <button onClick={() => setActiveTab('servers')}
+          className={`px-3 py-2 text-sm rounded ${activeTab === 'servers' ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
+          Servers
+        </button>
         <button
           onClick={() => setActiveTab('features')}
           className={`px-3 py-2 text-sm font-medium rounded transition ${
@@ -50,6 +76,16 @@ export function ToolsPanel({ isVisible }: ToolsPanelProps) {
         >
           🤖 Agent
         </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          className={`px-3 py-2 text-sm font-medium rounded transition ${
+            activeTab === 'settings'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          }`}
+        >
+          🛠 Konfiguration
+        </button>
       </div>
 
       {/* Features Tab */}
@@ -57,27 +93,28 @@ export function ToolsPanel({ isVisible }: ToolsPanelProps) {
         <>
           {/* Feature Toggles */}
           <div className="space-y-3 border-b border-gray-700 pb-4">
-            <h3 className="text-sm font-semibold text-gray-300">LLM Providers</h3>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.useOpenAI}
-                onChange={() => handleToggle('useOpenAI')}
-                className="rounded border-gray-600"
-              />
-              <span className="text-sm text-gray-300">Use OpenAI (GPT-4o-mini)</span>
-            </label>
-
-            <label className="flex items-center gap-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={settings.useOllama}
-                onChange={() => handleToggle('useOllama')}
-                className="rounded border-gray-600"
-              />
-              <span className="text-sm text-gray-300">Use Ollama (Llama2)</span>
-            </label>
+            <h3 className="text-sm font-semibold text-gray-300">LLM Provider</h3>
+            {llmSummary?.llm ? (
+              <div className="text-sm text-gray-300 space-y-1">
+                <div>
+                  Aktiv: <strong>{llmSummary.llm.provider}</strong>
+                  {llmSummary.llm.model && <> · {llmSummary.llm.model}</>}
+                </div>
+                <div className="text-xs text-gray-500 space-y-0.5">
+                  {PROVIDERS.map(name => (
+                    <div key={name}>
+                      {llmSummary[name]?.configured ? '✓' : '✗'} {name}
+                      {llmSummary[name]?.model ? ` (${llmSummary[name].model})` : ''}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="text-xs text-gray-500">Provider-Status nicht verfügbar.</div>
+            )}
+            <button className="text-xs text-blue-300 hover:underline" onClick={() => setActiveTab('settings')}>
+              Provider/Modell ändern (wirkt ab der nächsten Anfrage) →
+            </button>
           </div>
 
           {/* Analysis Settings */}
@@ -135,8 +172,6 @@ export function ToolsPanel({ isVisible }: ToolsPanelProps) {
           {/* Status */}
           <div className="mt-6 pt-4 border-t border-gray-700">
             <div className="text-xs text-gray-500 space-y-1">
-              <div>✓ OpenAI API: Configured</div>
-              <div>✓ Ollama: Available</div>
               <div>✓ AST Analyzer: Ready</div>
             </div>
           </div>
@@ -144,6 +179,8 @@ export function ToolsPanel({ isVisible }: ToolsPanelProps) {
       )}
 
       {/* Agent Settings Tab */}
+      {activeTab === 'servers' && <ServerPanel />}
+      {activeTab === 'settings' && <RuntimeSettingsPanel />}
       {activeTab === 'agent' && (
         <div className="mt-4">
           <AgentSettingsPanel />

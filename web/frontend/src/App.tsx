@@ -13,6 +13,7 @@ import { FeatureNav } from './components/FeatureNav'
 import { ReasoningPanel } from './components/ReasoningPanel'
 import { EnsemblePanel } from './components/EnsemblePanel'
 import { ToolsPanel } from './components/ToolsPanel'
+import { RuntimeSettingsPanel } from './components/RuntimeSettingsPanel'
 import { DependencyPanel } from './components/DependencyPanel'
 import { RefactoringPanel } from './components/RefactoringPanel'
 import { AgentChatContainer } from './components/AgentChatContainer'
@@ -509,9 +510,9 @@ const AppContent: React.FC = () => {
         {/* Config Modal */}
         {showConfig && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div className="bg-gray-900 border border-gray-700 rounded-lg p-6 max-w-2xl max-h-96 overflow-auto">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-auto">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-semibold text-white">⚙️ Application Config</h2>
+                <h2 className="text-lg font-semibold text-white">⚙️ Konfiguration</h2>
                 <button
                   onClick={() => setShowConfig(false)}
                   className="text-gray-400 hover:text-white transition"
@@ -520,33 +521,12 @@ const AppContent: React.FC = () => {
                   ✕
                 </button>
               </div>
-              <ConfigDisplay />
+              <RuntimeSettingsPanel />
             </div>
           </div>
         )}
       </div>
     </div>
-  )
-}
-
-// Config Display Component
-const ConfigDisplay: React.FC = () => {
-  const [config, setConfig] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    axios.get('/api/config').then((res) => {
-      setConfig(res.data)
-      setLoading(false)
-    })
-  }, [])
-
-  if (loading) return <div>Loading config...</div>
-
-  return (
-    <pre className="text-xs font-mono bg-gray-900 p-2 rounded overflow-auto">
-      {JSON.stringify(config, null, 2)}
-    </pre>
   )
 }
 
