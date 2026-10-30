@@ -31,7 +31,21 @@ Agents (programmieren über Web-UI)
 
 ## Setup auf Semi-Prod Host
 
-### 1. Vorbereitung
+### 0. Voraussetzungen
+
+**Erforderliche Tools:**
+- Python 3.10+
+- Node.js 18+ (für Frontend-Build)
+- npm (kommt mit Node.js)
+
+```bash
+# Check Versionen
+python3 --version
+node --version
+npm --version
+```
+
+### 1. Vorbereitung - Backend
 
 ```bash
 # SSH auf Semi-Prod
@@ -50,7 +64,24 @@ pip install -e /path/to/kicli-code-assist
 stackctl repo-status
 ```
 
-### 2. Systemd Service installieren
+### 2. Vorbereitung - Frontend
+
+```bash
+# Frontend bauen (von kicli-code-assist root)
+cd web/frontend
+
+# Dependencies installieren
+npm install
+
+# Production Build
+npm run build
+# Output: ../../../kicli_code_assist/web/static/ (Flask served)
+
+# Optional: Test lokal
+npm run dev  # Startet dev server auf :3000
+```
+
+### 3. Systemd Service installieren
 
 ```bash
 # Von kicli-code-assist root:
@@ -59,11 +90,11 @@ cd /path/to/kicli-code-assist
 # Script ausführen (mit sudo)
 bash scripts/setup_stackctl_systemd.sh install
 
-# Verifyifizieren
+# Verify
 sudo systemctl status kicli-assist
 ```
 
-### 3. Stack Config anpassen
+### 4. Stack Config anpassen
 
 ```bash
 # Beispiel für Semi-Prod:
@@ -73,7 +104,7 @@ cp deploy/stack-semiprod.yaml deploy/stack.yaml
 vi deploy/stack.yaml
 ```
 
-### 4. Service starten
+### 5. Service starten
 
 ```bash
 # Start
@@ -89,6 +120,17 @@ sudo journalctl -u kicli-assist -f
 sudo systemctl stop kicli-assist
 ```
 
+### 6. WebUI testen
+
+```bash
+# Health Check
+curl http://127.0.0.1:8000/api/health
+
+# Browser (lokal über SSH tunnel)
+ssh -L 8000:127.0.0.1:8000 user@semi-prod
+# Dann: http://localhost:8000 im Browser
+```
+
 ## Verfügbare Kommandos
 
 ```bash
@@ -102,7 +144,49 @@ bash scripts/setup_stackctl_systemd.sh enable    # Auto-start bei Boot
 bash scripts/setup_stackctl_systemd.sh disable   # Auto-start deaktivieren
 ```
 
-## Mit Web-Server für WebUI (Reverse Proxy)
+## WebUI für externe Zugriffe aktivieren
+
+Falls du die WebUI remote erreichbar brauchst (nicht nur TUI), DANN brauchst du einen Web-Server.
+
+### Schritt-für-Schritt: WebUI Setup mit Apache
+
+```bash
+# 1. Apache installieren (falls nicht vorhanden)
+sudo apt update
+sudo apt install apache2
+
+# 2. Module aktivieren
+sudo a2enmod proxy proxy_http proxy_wstunnel rewrite
+
+# 3. VHost kopieren
+sudo cp /path/to/kicli-code-assist/doc/deployment/kicli-web-option1.conf \
+     /etc/apache2/sites-available/
+
+# 4. Anpassen (ServerName etc.)
+sudo vi /etc/apache2/sites-available/kicli-web-option1.conf
+
+# 5. VHost aktivieren
+sudo a2ensite kicli-web-option1.conf
+
+# 6. Syntax prüfen & reload
+sudo apache2ctl configtest  # Sollte "Syntax OK" melden
+sudo systemctl reload apache2
+
+# 7. Testen
+curl -H "Host: kicli.example.com" http://localhost/api/health
+```
+
+**Danach:**
+- Browser öffnet: `http://kicli.example.com` (extern)
+- Apache :80 → systemd :8000 (Reverse Proxy)
+- WebSocket & API funktionieren durchgehend
+
+**Optional: HTTPS/SSL**
+```bash
+# Let's Encrypt (if public domain)
+sudo apt install certbot python3-certbot-apache
+sudo certbot --apache -d kicli.example.com
+```
 
 Falls du die WebUI remote erreichbar brauchst, verwende einen der folgenden:
 
