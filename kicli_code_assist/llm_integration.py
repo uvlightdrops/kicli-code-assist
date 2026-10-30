@@ -11,7 +11,6 @@ from typing import Optional, Callable
 import json
 
 from ki_core.adapters import ProviderChain
-from ki_core.adapters.openai_async import AsyncOpenAIClient
 from ki_core.core.models import ChatRequest, ChatResponse
 from ki_core.errors import (
     KICoreError,
@@ -39,74 +38,94 @@ except ImportError:
     llm_logger = logger
 
 
-class AsyncLLMIntegration:
-    """Async LLM integration for non-blocking AI operations."""
+_UNSET = object()
 
-    def __init__(self, config: Optional[AppConfig] = None):
+
+def _build_messages(messages: list[dict], system_prompt: Optional[str]):
+    """ki-core messages; the (secret-filtered) system prompt goes first."""
+    from ki_core.core.models import Message, Role
+
+    result = [Message(role=Role(msg["role"]), content=msg["content"]) for msg in messages]
+    if system_prompt and not any(m.role == Role.SYSTEM for m in result):
+        result.insert(0, Message(role=Role.SYSTEM, content=system_prompt))
+    return result
+
+
+class AsyncLLMIntegration:
+    """Async LLM integration for non-blocking AI operations.
+
+    The provider client is built from the *current* layered configuration
+    (``llm.provider`` incl. ki/openai/ollama/mock/auto, endpoint, model,
+    ``http.request_timeout``/``verify_ssl``) via ``kicli_code_assist.llm_runtime``
+    and rebuilt whenever that configuration changes, so settings edits apply
+    on the next request.
+    """
+
+    def __init__(self, config: Optional[AppConfig] = None, *, provider: Optional[str] = None):
         """Initialize async LLM integration.
         
         Args:
-            config: AppConfig instance (uses default if not provided)
+            config: Fixed AppConfig (tests/embedding). If omitted, the live
+                configuration is used and re-read per request.
+            provider: Optional provider override (default: ``llm.provider``).
         """
-        self.config = config or AppConfig.from_env()
-        self.provider_chain: Optional[ProviderChain] = None
+        self._fixed_config = config
+        self._provider_override = provider
+        self._explicit_chain = _UNSET
+        self._chain_source = None
+        self._chain: Optional[ProviderChain] = None
+        self._settings: dict = {}
         self.secret_filter = SensitiveDataFilter()
         self._initialize_providers()
 
+    @property
+    def config(self) -> AppConfig:
+        if self._fixed_config is not None:
+            return self._fixed_config
+        return AppConfig.from_yaml(None)
+
+    def _resolved(self):
+        if self._fixed_config is not None:
+            return self._fixed_config.raw
+        from kicli_code_assist.llm_runtime import current_config
+        return current_config()
+
+    @property
+    def provider_chain(self) -> Optional[ProviderChain]:
+        if self._explicit_chain is not _UNSET:
+            return self._explicit_chain
+        self._initialize_providers()
+        return self._chain
+
+    @provider_chain.setter
+    def provider_chain(self, value: Optional[ProviderChain]) -> None:
+        self._explicit_chain = value
+
+    @property
+    def active_settings(self) -> dict:
+        """Provider/base_url/model of the current client (no secrets)."""
+        _ = self.provider_chain
+        return dict(self._settings)
+
     def _initialize_providers(self) -> None:
-        """Initialize provider chain with configured providers."""
-        providers = []
-        llm_logger.info("=" * 60)
-        llm_logger.info("Initializing LLM providers")
-        
-        # Check if providers are actually configured
-        openai_enabled = self.config.openai_api_key and not self.config.openai_api_key.startswith("${")
-        # Ollama is enabled if base_url is set
-        ollama_enabled = bool(self.config.ollama_base_url)
-        
-        llm_logger.info(f"OpenAI enabled: {openai_enabled}")
-        llm_logger.info(f"Ollama enabled: {ollama_enabled}")
+        """(Re)build the single configured provider when the config changed."""
+        from kicli_code_assist.llm_runtime import resolve_chat
 
-        # Try OpenAI if configured
-        if openai_enabled:
-            try:
-                from ki_core.adapters.openai_async import AsyncOpenAIClient
-                from ki_core.core.models import ChatRequest
-                
-                model = self.config.openai_model or "gpt-4o-mini"
-                client = AsyncOpenAIClient(
-                    api_key=self.config.openai_api_key,
-                    model=model,
-                    timeout=30,
-                )
-                providers.append(client)
-                llm_logger.info(f"✓ OpenAI provider initialized")
-                llm_logger.info(f"  Model: {model}")
-            except Exception as e:
-                llm_logger.warning(f"Failed to initialize OpenAI: {e}")
-
-        # Try Ollama (uses schema default: localhost:11434)
-        if ollama_enabled:
-            try:
-                from ki_core.adapters.ollama import OllamaClient
-                
-                model = self.config.ollama_model or "llama3.2"
-                client = OllamaClient(
-                    base_url=self.config.ollama_base_url,
-                    model=model,
-                )
-                providers.append(client)
-                llm_logger.info(f"✓ Ollama provider initialized")
-                llm_logger.info(f"  Base URL: {self.config.ollama_base_url}")
-                llm_logger.info(f"  Model: {model}")
-            except Exception as e:
-                llm_logger.warning(f"Failed to initialize Ollama: {e}")
-
-        if providers:
-            self.provider_chain = ProviderChain(providers)
-            llm_logger.info(f"Provider chain ready: {len(providers)} provider(s)")
-        else:
-            llm_logger.error("No LLM providers configured")
+        resolved = self._resolved()
+        if resolved is self._chain_source and self._chain_source is not None:
+            return
+        self._chain_source = resolved
+        self._chain = None
+        self._settings = {}
+        try:
+            client, self._settings = resolve_chat(resolved, provider=self._provider_override)
+            self._chain = ProviderChain([client])
+            llm_logger.info(
+                "LLM provider ready: %s model=%s", self._settings.get("provider"), self._settings.get("model")
+            )
+        except Exception as e:
+            self._chain_source = None  # retry on the next request
+            llm_logger.error("No usable LLM provider configured: %s", type(e).__name__)
 
     async def query(
         self,
@@ -136,22 +155,13 @@ class AsyncLLMIntegration:
             llm_logger.error("No provider chain configured")
             raise ProviderConfigError(
                 "LLM",
-                "No LLM providers configured. Set OPENAI_API_KEY or OLLAMA_BASE_URL."
+                "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
-        # Determine active provider & log provider info
-        provider_name = "unknown"
-        provider_url = "unknown"
-        
-        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
-            provider_name = "OpenAI"
-            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
-        elif self.config.ollama_base_url:
-            provider_name = "Ollama"
-            provider_url = self.config.ollama_base_url
-        
-        llm_logger.info(f"📌 Active Provider: {provider_name}")
-        llm_logger.info(f"📍 Provider URL: {provider_url}")
+        provider_chain = self.provider_chain
+        settings = self._settings
+        llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
+        llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
 
         # Log message content summary (with safety)
         llm_logger.info("📨 User Messages:")
@@ -162,7 +172,6 @@ class AsyncLLMIntegration:
             llm_logger.info(f"  [{i}] {role}: {content_preview}{'...' if len(str(content)) > 100 else ''}")
 
         # Filter system prompt for secrets
-        original_system = system_prompt
         if system_prompt:
             original_length = len(system_prompt)
             system_prompt = self.secret_filter.filter(system_prompt)
@@ -171,34 +180,21 @@ class AsyncLLMIntegration:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
                 llm_logger.info(f"   System prompt length: {original_length} → {len(system_prompt)} chars")
             
-            # Log complete system prompt (after filtering)
-            llm_logger.info("🔧 System Prompt (complete):")
-            for line in system_prompt.split('\n'):
-                if line.strip():
-                    llm_logger.info(f"   {line}")
+            llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
 
         # Build ChatRequest with model from active provider
-        from ki_core.core.models import ChatRequest, Message, Role
+        from ki_core.core.models import ChatRequest
 
-        message_objs = [
-            Message(role=Role(msg["role"]), content=msg["content"])
-            for msg in messages
-        ]
+        message_objs = _build_messages(messages, system_prompt)
         
-        # Use model from the configured provider
+        # The client already carries the configured model; None keeps it.
         model = None
-        if self.config.openai_api_key:
-            model = self.config.openai_model or "gpt-4o-mini"
-        elif self.config.ollama_base_url:
-            model = self.config.ollama_model or "llama3.2"
-        else:
-            model = "gpt-4o-mini"
         
-        llm_logger.info(f"🔤 Active Model: {model}")
+        llm_logger.info(f"🔤 Active Model: {settings.get('model')}")
         
         # Log request payload summary (sanitized)
         llm_logger.info("📦 Request Payload:")
-        llm_logger.info(f"   Model: {model}")
+        llm_logger.info(f"   Model: {settings.get('model')}")
         llm_logger.info(f"   Messages: {len(message_objs)}")
         llm_logger.info(f"   Total message chars: {sum(len(m.content) for m in message_objs)}")
         
@@ -212,7 +208,7 @@ class AsyncLLMIntegration:
                 on_progress("Querying LLM...")
             
             llm_logger.info("⏳ Sending request to provider chain...")
-            response = await self.provider_chain.achat(request)
+            response = await provider_chain.achat(request)
             
             response_text = response.message.content
             response_length = len(response_text)
@@ -268,22 +264,13 @@ class AsyncLLMIntegration:
             llm_logger.error("No provider chain configured")
             raise ProviderConfigError(
                 "LLM",
-                "No LLM providers configured"
+                "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
-        # Determine active provider & log provider info
-        provider_name = "unknown"
-        provider_url = "unknown"
-        
-        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
-            provider_name = "OpenAI"
-            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
-        elif self.config.ollama_base_url:
-            provider_name = "Ollama"
-            provider_url = self.config.ollama_base_url
-        
-        llm_logger.info(f"📌 Active Provider: {provider_name}")
-        llm_logger.info(f"📍 Provider URL: {provider_url}")
+        provider_chain = self.provider_chain
+        settings = self._settings
+        llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
+        llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
 
         # Log message summaries
         llm_logger.info("📨 User Messages:")
@@ -301,18 +288,11 @@ class AsyncLLMIntegration:
             if redactions > 0:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
             
-            # Log complete system prompt (after filtering)
-            llm_logger.info("🔧 System Prompt (complete):")
-            for line in system_prompt.split('\n'):
-                if line.strip():
-                    llm_logger.info(f"   {line}")
+            llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
 
-        from ki_core.core.models import ChatRequest, Message, Role
+        from ki_core.core.models import ChatRequest
 
-        message_objs = [
-            Message(role=Role(msg["role"]), content=msg["content"])
-            for msg in messages
-        ]
+        message_objs = _build_messages(messages, system_prompt)
         
         request = ChatRequest(messages=message_objs)
         
@@ -335,7 +315,7 @@ class AsyncLLMIntegration:
             
             llm_logger.info("Starting stream from provider chain...")
             
-            async for event in self.provider_chain.achat_stream(request):
+            async for event in provider_chain.achat_stream(request):
                 # Check if user requested cancellation
                 if cancellation.cancelled:
                     llm_logger.warning("Stream cancelled by user")
@@ -395,14 +375,20 @@ _integration: Optional[AsyncLLMIntegration] = None
 
 def get_async_integration(config: Optional[AppConfig] = None) -> AsyncLLMIntegration:
     """Get or create global async LLM integration.
-    
-    Args:
-        config: Optional config override
-        
-    Returns:
-        AsyncLLMIntegration instance
+
+    The instance re-reads the live configuration per request, so it stays
+    valid across settings changes. An explicit ``config`` returns a fixed,
+    non-shared instance.
     """
     global _integration
+    if config is not None:
+        return AsyncLLMIntegration(config)
     if _integration is None:
-        _integration = AsyncLLMIntegration(config)
+        _integration = AsyncLLMIntegration()
     return _integration
+
+
+def reset_async_integration() -> None:
+    """Drop the cached integration (it is rebuilt on next use)."""
+    global _integration
+    _integration = None

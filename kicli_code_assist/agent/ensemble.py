@@ -9,9 +9,10 @@ from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Optional, List, Dict, Any
 
-from ki_core.config import ConfigManager
-from ki_core.adapters import AsyncOpenAIClient
 from ki_core.core.models import ChatRequest, Message, Role
+
+from kicli_code_assist.llm_runtime import chat_client, current_config
+
 @dataclass
 class LLMResponse:
     """Single LLM response."""
@@ -42,18 +43,10 @@ class VotingResult:
 class LLMEnsemble:
     """Ensemble voting with OpenAI + Ollama."""
 
-    def __init__(self, project_root: Path = Path(".")):
-        """Initialize ensemble."""
+    def __init__(self, project_root: Path = Path("."), config: Optional[Dict[str, Any]] = None):
+        """Initialize ensemble with the configuration current at request time."""
         self.project_root = project_root
-        self.config_manager = ConfigManager()
-        config = self.config_manager.load()
-        
-        # Extract LLM config
-        llm_config = config.get("llm", {})
-        providers = llm_config.get("providers", {})
-        
-        self.openai_config = providers.get("openai", {})
-        self.ollama_config = providers.get("ollama", {})
+        self.config = current_config() if config is None else config
 
     async def vote_on_code(
         self,
@@ -144,97 +137,36 @@ Please provide a concise analysis (2-3 sentences)."""
 
         return result
 
-    async def _call_openai(self, prompt: str) -> LLMResponse:
-        """Call OpenAI API."""
+    async def _call_provider(self, provider: str, prompt: str) -> LLMResponse:
+        """One vote via ki-core's client (endpoint/model/timeout/TLS from config)."""
         start_time = time.time()
-
         try:
-            api_key = self.openai_config.get("api_key")
-            if not api_key:
-                return LLMResponse(
-                    provider="openai",
-                    text="",
-                    duration_ms=int((time.time() - start_time) * 1000),
-                    error="OpenAI API key not configured",
-                )
-            
-            model = self.openai_config.get("model", "gpt-4o-mini")
-            base_url = self.openai_config.get("base_url", "https://api.openai.com/v1")
-            
-            client = AsyncOpenAIClient(
-                api_key=api_key,
-                model=model,
-                base_url=base_url,
-            )
-            
-            # Build ChatRequest for OpenAI
+            client = chat_client(self.config, provider=provider)
             request = ChatRequest(
                 messages=[Message(role=Role.USER, content=prompt)],
-                model=model,
                 temperature=0.3,
             )
-            
             response = await client.achat(request)
-            text = response.message.content
-
             return LLMResponse(
-                provider="openai",
-                text=text,
+                provider=provider,
+                text=response.message.content,
                 duration_ms=int((time.time() - start_time) * 1000),
-                tokens_used=0,  # Not available in ChatResponse
             )
         except Exception as e:
             return LLMResponse(
-                provider="openai",
+                provider=provider,
                 text="",
                 duration_ms=int((time.time() - start_time) * 1000),
-                error=str(e),
+                error=f"{type(e).__name__}: {e}",
             )
+
+    async def _call_openai(self, prompt: str) -> LLMResponse:
+        """Call the configured OpenAI provider."""
+        return await self._call_provider("openai", prompt)
 
     async def _call_ollama(self, prompt: str) -> LLMResponse:
-        """Call Ollama API."""
-        start_time = time.time()
-
-        try:
-            base_url = self.ollama_config.get("base_url", "http://127.0.0.1:11434")
-            model = self.ollama_config.get("model", "llama2")
-            
-            # Simple synchronous HTTP call to Ollama (wrapped in async)
-            import requests
-            
-            response = requests.post(
-                f"{base_url}/api/generate",
-                json={
-                    "model": model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "temperature": 0.3,
-                },
-                timeout=30
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                text = data.get("response", "")
-                return LLMResponse(
-                    provider="ollama",
-                    text=text,
-                    duration_ms=int((time.time() - start_time) * 1000),
-                )
-            else:
-                return LLMResponse(
-                    provider="ollama",
-                    text="",
-                    duration_ms=int((time.time() - start_time) * 1000),
-                    error=f"Ollama API returned {response.status_code}",
-                )
-        except Exception as e:
-            return LLMResponse(
-                provider="ollama",
-                text="",
-                duration_ms=int((time.time() - start_time) * 1000),
-                error=str(e),
-            )
+        """Call the configured Ollama provider."""
+        return await self._call_provider("ollama", prompt)
 
     def _compute_consensus(self, responses: List[LLMResponse]) -> str:
         """Simple consensus: return both if different, one if similar."""

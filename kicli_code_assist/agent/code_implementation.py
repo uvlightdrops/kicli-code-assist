@@ -250,17 +250,13 @@ class CodeImplementationAgent:
         Returns:
             GeneratedCode object or None if generation fails
         """
-        # Try to use ki-core AIClient if available
+        # Client for the configured provider (llm.provider, model, timeout) at call time
         if api_client is None:
             try:
-                from ki_core.core.client import AIClient
-                from ki_core.adapters.openai import OpenAIClient
-                from ki_core.config import ConfigManager
-                
-                config = ConfigManager()
-                api_client = OpenAIClient(config.llm_config)
+                from kicli_code_assist.llm_runtime import chat_client
+                api_client = chat_client()
             except Exception as e:
-                logger.warning(f"Cannot initialize LLM client: {e}")
+                logger.warning(f"Cannot initialize LLM client: {type(e).__name__}: {e}")
                 return None
         
         # Gather context
@@ -271,16 +267,14 @@ class CodeImplementationAgent:
         
         # Call LLM
         try:
-            from ki_core.core.models import ChatRequest, ChatMessage
+            from ki_core.core.models import ChatRequest, Message, Role
             
             request = ChatRequest(
                 messages=[
-                    ChatMessage(role="system", content="You are an expert Python developer helping implement features in a software project."),
-                    ChatMessage(role="user", content=prompt)
+                    Message(role=Role.SYSTEM, content="You are an expert Python developer helping implement features in a software project."),
+                    Message(role=Role.USER, content=prompt),
                 ],
-                model="claude-3-5-sonnet",
                 temperature=0.3,
-                max_tokens=2000
             )
             
             response = api_client.chat(request)
@@ -297,7 +291,7 @@ class CodeImplementationAgent:
             return GeneratedCode(
                 goal_title=goal_title,
                 target_file=target_file_path,
-                code_content=response.content,
+                code_content=response.message.content,
                 description=f"Generated code for: {goal_title}",
                 imports_to_add=context.get("imports_needed", [])
             )
