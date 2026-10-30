@@ -19,9 +19,12 @@ dependencies = [
     "pyyaml>=6.0",
     "tomli>=2.0; python_version < '3.11'",
     "click>=8.1.7",
-    "ki-core @ file://${PROJECT_DIR}/../../ki-core",
-    "yaml-cfg-wizard @ file://${PROJECT_DIR}/../../yaml_cfg_wizard",
-    "flowpy @ file://${PROJECT_DIR}/../../flowpy",
+    #"ki-core @ file://../../ki-core",
+    #"yaml-cfg-wizard @ file://../../yaml_cfg_wizard",
+    #"flowpy @ file://../../flowpy",
+    "ki-core",
+    "yaml-cfg-wizard",
+    "flowpy",
 ]
 
 [project.optional-dependencies]
@@ -46,8 +49,8 @@ kicli-assist = "kicli_code_assist.cli:cli"
 kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
 
 [tool.stackctl]
-config_loader = "ki_core:load_config"
-config_key = "stack"
+#config_loader = "ki_core:load_config"
+#config_key = "stack"
 
 [[tool.stackctl.siblings]]
 name = "yaml-cfg-wizard"
