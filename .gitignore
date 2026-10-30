@@ -67,3 +67,4 @@ tmp_*
 node_modules/
 package-lock.json
 static/
+_openai.env
