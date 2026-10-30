@@ -108,6 +108,7 @@ class AsyncLLMIntegration:
         return dict(self._settings)
 
     def _initialize_providers(self) -> None:
+<<<<<<< HEAD
         """(Re)build the single configured provider when the config changed."""
         from kicli_code_assist.llm_runtime import resolve_chat
 
@@ -126,6 +127,61 @@ class AsyncLLMIntegration:
         except Exception as e:
             self._chain_source = None  # retry on the next request
             llm_logger.error("No usable LLM provider configured: %s", type(e).__name__)
+=======
+        """Initialize provider chain with configured providers."""
+        providers = []
+        llm_logger.info("=" * 60)
+        llm_logger.info("Initializing LLM providers")
+        
+        # Check if providers are actually configured
+        openai_enabled = self.config.openai_api_key and not self.config.openai_api_key.startswith("${")
+        # Ollama is enabled if base_url is set
+        ollama_enabled = bool(self.config.ollama_base_url)
+        
+        llm_logger.info(f"OpenAI enabled: {openai_enabled}")
+        llm_logger.info(f"Ollama enabled: {ollama_enabled}")
+
+        # Try OpenAI if configured
+        if openai_enabled:
+            try:
+                from ki_core.adapters.openai_async import AsyncOpenAIClient
+                from ki_core.core.models import ChatRequest
+                
+                model = self.config.openai_model or "gpt-4o-mini"
+                client = AsyncOpenAIClient(
+                    api_key=self.config.openai_api_key,
+                    model=model,
+                    timeout=30,
+                )
+                providers.append(client)
+                llm_logger.info(f"✓ OpenAI provider initialized")
+                llm_logger.info(f"  Model: {model}")
+            except Exception as e:
+                llm_logger.warning(f"Failed to initialize OpenAI: {e}")
+
+        # Try Ollama (uses schema default: localhost:11434)
+        if ollama_enabled:
+            try:
+                from ki_core.adapters.ollama import OllamaClient
+                
+                model = self.config.ollama_model or "llama3.2"
+                client = OllamaClient(
+                    base_url=self.config.ollama_base_url,
+                    model=model,
+                )
+                providers.append(client)
+                llm_logger.info(f"✓ Ollama provider initialized")
+                llm_logger.info(f"  Base URL: {self.config.ollama_base_url}")
+                llm_logger.info(f"  Model: {model}")
+            except Exception as e:
+                llm_logger.warning(f"Failed to initialize Ollama: {e}")
+
+        if providers:
+            self.provider_chain = ProviderChain(providers)
+            llm_logger.info(f"Provider chain ready: {len(providers)} provider(s)")
+        else:
+            llm_logger.error("No LLM providers configured")
+>>>>>>> origin/devel
 
     async def query(
         self,
@@ -158,10 +214,26 @@ class AsyncLLMIntegration:
                 "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
+<<<<<<< HEAD
         provider_chain = self.provider_chain
         settings = self._settings
         llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
         llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
+=======
+        # Determine active provider & log provider info
+        provider_name = "unknown"
+        provider_url = "unknown"
+        
+        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
+            provider_name = "OpenAI"
+            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
+        elif self.config.ollama_base_url:
+            provider_name = "Ollama"
+            provider_url = self.config.ollama_base_url
+        
+        llm_logger.info(f"📌 Active Provider: {provider_name}")
+        llm_logger.info(f"📍 Provider URL: {provider_url}")
+>>>>>>> origin/devel
 
         # Log message content summary (with safety)
         llm_logger.info("📨 User Messages:")
@@ -180,7 +252,15 @@ class AsyncLLMIntegration:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
                 llm_logger.info(f"   System prompt length: {original_length} → {len(system_prompt)} chars")
             
+<<<<<<< HEAD
             llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
+=======
+            # Log complete system prompt (after filtering)
+            llm_logger.info("🔧 System Prompt (complete):")
+            for line in system_prompt.split('\n'):
+                if line.strip():
+                    llm_logger.info(f"   {line}")
+>>>>>>> origin/devel
 
         # Build ChatRequest with model from active provider
         from ki_core.core.models import ChatRequest
@@ -190,11 +270,19 @@ class AsyncLLMIntegration:
         # The client already carries the configured model; None keeps it.
         model = None
         
+<<<<<<< HEAD
         llm_logger.info(f"🔤 Active Model: {settings.get('model')}")
         
         # Log request payload summary (sanitized)
         llm_logger.info("📦 Request Payload:")
         llm_logger.info(f"   Model: {settings.get('model')}")
+=======
+        llm_logger.info(f"🔤 Active Model: {model}")
+        
+        # Log request payload summary (sanitized)
+        llm_logger.info("📦 Request Payload:")
+        llm_logger.info(f"   Model: {model}")
+>>>>>>> origin/devel
         llm_logger.info(f"   Messages: {len(message_objs)}")
         llm_logger.info(f"   Total message chars: {sum(len(m.content) for m in message_objs)}")
         
@@ -208,7 +296,11 @@ class AsyncLLMIntegration:
                 on_progress("Querying LLM...")
             
             llm_logger.info("⏳ Sending request to provider chain...")
+<<<<<<< HEAD
             response = await provider_chain.achat(request)
+=======
+            response = await self.provider_chain.achat(request)
+>>>>>>> origin/devel
             
             response_text = response.message.content
             response_length = len(response_text)
@@ -267,10 +359,26 @@ class AsyncLLMIntegration:
                 "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
+<<<<<<< HEAD
         provider_chain = self.provider_chain
         settings = self._settings
         llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
         llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
+=======
+        # Determine active provider & log provider info
+        provider_name = "unknown"
+        provider_url = "unknown"
+        
+        if self.config.openai_api_key and not self.config.openai_api_key.startswith("${"):
+            provider_name = "OpenAI"
+            provider_url = self.config.openai_base_url or "https://api.openai.com/v1"
+        elif self.config.ollama_base_url:
+            provider_name = "Ollama"
+            provider_url = self.config.ollama_base_url
+        
+        llm_logger.info(f"📌 Active Provider: {provider_name}")
+        llm_logger.info(f"📍 Provider URL: {provider_url}")
+>>>>>>> origin/devel
 
         # Log message summaries
         llm_logger.info("📨 User Messages:")
@@ -288,7 +396,15 @@ class AsyncLLMIntegration:
             if redactions > 0:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
             
+<<<<<<< HEAD
             llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
+=======
+            # Log complete system prompt (after filtering)
+            llm_logger.info("🔧 System Prompt (complete):")
+            for line in system_prompt.split('\n'):
+                if line.strip():
+                    llm_logger.info(f"   {line}")
+>>>>>>> origin/devel
 
         from ki_core.core.models import ChatRequest
 
@@ -315,7 +431,11 @@ class AsyncLLMIntegration:
             
             llm_logger.info("Starting stream from provider chain...")
             
+<<<<<<< HEAD
             async for event in provider_chain.achat_stream(request):
+=======
+            async for event in self.provider_chain.achat_stream(request):
+>>>>>>> origin/devel
                 # Check if user requested cancellation
                 if cancellation.cancelled:
                     llm_logger.warning("Stream cancelled by user")
