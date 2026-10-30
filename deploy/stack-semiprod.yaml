@@ -1,0 +1,30 @@
+# Semi-Prod Stack Configuration
+# Used by: systemd service + stackctl for orchestration
+# Location: kicli-code-assist/deploy/stack.yaml
+
+stack:
+  name: kicli-assist-semiprod
+  target: local
+  
+  services:
+    # Main Web Application
+    web:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1           # Localhost (reverse proxy handles external)
+      port: 8000
+      pidfile: ".kicli.pid"     # Store PID for monitoring
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "production"
+      
+      # NEW: Health check before marking ready
+      health_path: /api/health
+      health_timeout: 10        # Startup can be slow
+      health_retries: 5
+      health_interval: 2
+      
+      # Logging
+      stdout_log: "log/web.log"
+      stderr_log: "log/web.err.log"
