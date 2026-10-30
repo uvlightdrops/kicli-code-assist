@@ -1,0 +1,50 @@
+[Unit]
+Description=kicli-code-assist Web Service (stackctl orchestrated)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=@SERVICE_USER@
+WorkingDirectory=@PROJECT_ROOT@
+
+# Virtual environment activation
+Environment="PATH=@PROJECT_ROOT@/.venv/bin:/usr/local/bin:/usr/bin:/bin"
+Environment="VIRTUAL_ENV=@PROJECT_ROOT@/.venv"
+
+# Python settings
+Environment="PYTHONDONTWRITEBYTECODE=1"
+Environment="PYTHONUNBUFFERED=1"
+
+# Application settings
+Environment="KICLI_PROJECT_ROOT=@PROJECT_ROOT@"
+Environment="KI_STAGE=production"
+
+# Proxy settings (if needed - uncomment)
+# Environment="HTTP_PROXY=http://proxy.server:port"
+# Environment="HTTPS_PROXY=http://proxy.server:port"
+
+# Start command using stackctl (ensure stack.yaml exists)
+ExecStart=@PROJECT_ROOT@/.venv/bin/python -m stackctl local start --project @PROJECT_ROOT@
+
+# Restart policy
+Restart=on-failure
+RestartSec=10
+StartLimitInterval=60s
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kicli-assist
+
+# Security
+PrivateTmp=yes
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadWritePaths=@PROJECT_ROOT@
+
+[Install]
+WantedBy=multi-user.target
+

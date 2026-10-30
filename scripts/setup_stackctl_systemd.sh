@@ -33,61 +33,22 @@ install_service() {
     fi
     echo "  ✅ Using user: $SERVICE_USER"
     
-    # Create systemd service file
-    SYSTEMD_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
+    # Load template
+    TEMPLATE_FILE="$SCRIPT_DIR/kicli-assist.service.template"
+    if [[ ! -f "$TEMPLATE_FILE" ]]; then
+        echo "  ❌ Error: Template not found: $TEMPLATE_FILE"
+        exit 1
+    fi
     
+    # Read template and substitute variables
+    SERVICE_CONTENT=$(cat "$TEMPLATE_FILE")
+    SERVICE_CONTENT="${SERVICE_CONTENT//@SERVICE_USER@/$SERVICE_USER}"
+    SERVICE_CONTENT="${SERVICE_CONTENT//@PROJECT_ROOT@/$PROJECT_ROOT}"
+    
+    # Write to systemd
+    SYSTEMD_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
     echo "  Creating systemd service: $SYSTEMD_FILE"
-    sudo tee "$SYSTEMD_FILE" > /dev/null <<EOF
-[Unit]
-Description=kicli-code-assist Web Service (stackctl orchestrated)
-After=network-online.target
-Wants=network-online.target
-
-[Service]
-Type=simple
-User=$SERVICE_USER
-WorkingDirectory=$PROJECT_ROOT
-
-# Virtual environment activation
-Environment="PATH=$VENV_PATH/bin:/usr/local/bin:/usr/bin:/bin"
-Environment="VIRTUAL_ENV=$VENV_PATH"
-
-# Python settings
-Environment="PYTHONDONTWRITEBYTECODE=1"
-Environment="PYTHONUNBUFFERED=1"
-
-# Application settings
-Environment="KICLI_PROJECT_ROOT=$PROJECT_ROOT"
-Environment="KI_STAGE=production"
-
-# Proxy settings (if needed - uncomment)
-# Environment="HTTP_PROXY=http://proxy.server:port"
-# Environment="HTTPS_PROXY=http://proxy.server:port"
-
-# Start command using stackctl (ensure stack.yaml exists)
-ExecStart=$VENV_PATH/bin/python -m stackctl local start --project $PROJECT_ROOT
-
-# Restart policy
-Restart=on-failure
-RestartSec=10
-StartLimitInterval=60s
-StartLimitBurst=3
-
-# Logging
-StandardOutput=journal
-StandardError=journal
-SyslogIdentifier=kicli-assist
-
-# Security
-PrivateTmp=yes
-NoNewPrivileges=yes
-ProtectSystem=strict
-ProtectHome=yes
-ReadWritePaths=$PROJECT_ROOT
-
-[Install]
-WantedBy=multi-user.target
-EOF
+    echo "$SERVICE_CONTENT" | sudo tee "$SYSTEMD_FILE" > /dev/null
     
     # Reload systemd daemon
     sudo systemctl daemon-reload
