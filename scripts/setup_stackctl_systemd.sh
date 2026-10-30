@@ -4,8 +4,8 @@
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PROJECT_ROOT="$SCRIPT_DIR"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SERVICE_NAME="kicli-assist"
 SERVICE_USER="${KICLI_USER:-$(whoami)}"  # Use current user if not specified
 VENV_PATH="${KICLI_VENV:-$PROJECT_ROOT/.venv}"
