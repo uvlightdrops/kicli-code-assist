@@ -1,30 +1,25 @@
-"""Agent configuration API endpoints for Phase 5.5 streaming.
+"""Legacy agent configuration API (``/api/agent/config``), bridged to runtime settings.
 
-Integrates with ki_core.config.ConfigManager for YAML-backed agent settings.
-Agent settings are stored in ki.yaml under 'agent' section and synced via ConfigManager.
-
-Enables WebUI to read and modify agent streaming settings in real-time:
-- Intervention mode (queue, supervisor, user_prompt)
-- Thinking detail level (minimal, balanced, verbose)
-- Auto-rollback behavior
-
-All changes persist to ki.yaml and are shared across all kicli-assist instances.
+The ``agent`` section is part of the kicli schema and is stored like every
+other setting through ``ki_core.runtime_settings`` in
+``config/runtime/runtime.yaml`` (see ``kicli_code_assist.runtime_config``).
+There is no separate in-memory store anymore: reads return the effective
+layered value, writes are runtime overrides, ``reset`` removes them.
+Writes need the same local guard and settings token as ``/api/settings``.
 """
 
+import copy
 import logging
 from pathlib import Path
 from typing import Dict, Any, Optional
 from flask import Flask, request, jsonify
 
-try:
-    from ki_core.config import ConfigManager, ConfigDict
-except ImportError:
-    ConfigManager = None
-    ConfigDict = None
+from kicli_code_assist import runtime_config
+from kicli_code_assist.runtime_config import ConflictError, EditorError, ValidationError
 
 logger = logging.getLogger("kicli-web-agent-config")
 
-# Default agent configuration (used when ki.yaml doesn't define agent section)
+# Defaults mirror schema/kicli.schema.yaml (agent section)
 DEFAULT_AGENT_CONFIG = {
     "intervention": {
         "mode": "user_prompt",  # queue, supervisor, user_prompt
@@ -47,250 +42,199 @@ DEFAULT_AGENT_CONFIG = {
 }
 
 
+
+
 class AgentConfigManager:
-    """Manages agent configuration backed by ki.yaml via ki_core.ConfigManager.
-    
-    Reads from 'agent' section in ki.yaml, falls back to defaults if not present.
-    Updates persist to ki.yaml if ConfigManager is available.
-    """
-    
-    def __init__(self, config_manager: Optional[Any] = None):
-        """Initialize with optional ki_core.ConfigManager.
-        
-        Args:
-            config_manager: ki_core.ConfigManager instance. If None, uses in-memory defaults.
-        """
+    """View of the ``agent`` section of the layered configuration."""
+
+    def __init__(self, config_manager: Optional[Any] = None, project_root: Optional[Path] = None):
         self.ki_config_manager = config_manager
-        self._runtime_config = DEFAULT_AGENT_CONFIG.copy()
-    
+        self.project_root = project_root
+
     def get_config(self) -> Dict[str, Any]:
-        """Get current agent configuration.
-        
-        Attempts to load from ki.yaml via ConfigManager first, falls back to defaults.
-        Returns merged config (ki.yaml + defaults).
-        """
-        if self.ki_config_manager:
-            try:
-                config = self.ki_config_manager.load()
-                # Load agent section from ki.yaml, merge with defaults
-                agent_config = config.get_path("agent", {})
-                if agent_config:
-                    # Deep merge with defaults
-                    return self._deep_merge(DEFAULT_AGENT_CONFIG, agent_config)
-            except Exception as e:
-                logger.warning(f"Failed to load agent config from ki.yaml: {e}")
-        
-        return self._runtime_config.copy()
-    
+        """Effective agent configuration (defaults < ki.yaml < stage < runtime.yaml < env)."""
+        try:
+            from kicli_code_assist.llm_runtime import get_live_config
+            agent = get_live_config(self.project_root).get().get("agent") or {}
+        except Exception as e:
+            logger.warning(f"Failed to load agent config: {type(e).__name__}")
+            agent = {}
+        return self._deep_merge(DEFAULT_AGENT_CONFIG, agent if isinstance(agent, dict) else {})
+
     def update_config(self, updates: Dict[str, Any]) -> Dict[str, Any]:
-        """Update configuration with validation.
-        
-        Persists to ki.yaml if ConfigManager is available, otherwise uses in-memory storage.
-        
-        Args:
-            updates: Dict with nested updates (e.g., {"intervention": {"mode": "supervisor"}})
-            
-        Returns:
-            Updated config
+        """Validate and persist ``updates`` as runtime overrides.
+
+        Raises:
+            ValueError: invalid structure/values (legacy contract -> HTTP 400)
+            ConflictError: runtime.yaml changed concurrently
         """
-        # Validate first
-        current = self.get_config()
-        test_config = self._deep_merge(current, updates)
+        if not isinstance(updates, dict) or not updates:
+            raise ValueError("Body must be a non-empty object of agent sections")
+        unknown = set(updates) - set(AGENT_CONFIG_SCHEMA)
+        if unknown:
+            raise ValueError(f"Unknown section(s): {', '.join(sorted(unknown))}")
+        for section, values in updates.items():
+            if not isinstance(values, dict):
+                raise ValueError(f"Section {section} must be an object")
+            unknown_keys = set(values) - set(AGENT_CONFIG_SCHEMA[section])
+            if unknown_keys:
+                raise ValueError(f"Unknown key(s) in {section}: {', '.join(sorted(unknown_keys))}")
+        test_config = self._deep_merge(self.get_config(), updates)
         is_valid, error_msg = self.validate_config(test_config)
         if not is_valid:
             raise ValueError(error_msg)
-        
-        # Update in-memory
-        self._runtime_config = self._deep_merge(self._runtime_config, updates)
-        
-        # Persist to ki.yaml if available
-        if self.ki_config_manager:
-            try:
-                config = self.ki_config_manager.load()
-                # Update agent section in config
-                agent_section = config.get_path("agent", {}) or {}
-                agent_section = self._deep_merge(agent_section, updates)
-                
-                # Write back to yaml (would need YAML writer in ki_core)
-                # For now, log that it would be persisted
-                logger.info(f"Agent config would persist to ki.yaml: {updates}")
-                # TODO: Implement YAML persistence via ki_core
-            except Exception as e:
-                logger.warning(f"Could not persist agent config to ki.yaml: {e}")
-        
-        logger.info(f"Agent config updated: {updates}")
-        return test_config
-    
+        changes = runtime_config.flatten("agent", updates)
+        service = runtime_config.settings_service(self.project_root)
+        revision = service.snapshot()["revision"]
+        try:
+            self.last_result = runtime_config.save(revision, changes, (), self.project_root)
+        except ValidationError as e:
+            raise ValueError(str(e)) from None
+        return self.get_config()
+
     def reset_to_defaults(self) -> Dict[str, Any]:
-        """Reset configuration to defaults."""
-        self._runtime_config = DEFAULT_AGENT_CONFIG.copy()
-        logger.info("Agent config reset to defaults")
-        return self._runtime_config.copy()
-    
+        """Remove all runtime overrides of the agent section."""
+        snap = runtime_config.snapshot(self.project_root)
+        remove = [r["path"] for r in snap["rows"]
+                  if r["section"] == "agent" and r["overridden"] and r["editable"]]
+        if remove:
+            self.last_result = runtime_config.save(snap["revision"], {}, remove, self.project_root)
+        else:
+            self.last_result = snap
+        return self.get_config()
+
     @staticmethod
     def _deep_merge(base: Dict[str, Any], updates: Dict[str, Any]) -> Dict[str, Any]:
-        """Recursively merge updates into base dict."""
-        result = base.copy()
+        """Recursively merge updates into a copy of base."""
+        result = copy.deepcopy(base)
         for key, value in updates.items():
             if isinstance(value, dict) and key in result and isinstance(result[key], dict):
                 result[key] = AgentConfigManager._deep_merge(result[key], value)
             else:
-                result[key] = value
+                result[key] = copy.deepcopy(value)
         return result
-    
+
     @staticmethod
     def validate_config(config: Dict[str, Any]) -> tuple[bool, Optional[str]]:
-        """Validate configuration values.
-        
-        Returns:
-            (is_valid, error_message)
-        """
-        valid_modes = {"queue", "supervisor", "user_prompt"}
-        if config.get("intervention", {}).get("mode") not in valid_modes:
-            return False, f"Invalid intervention mode. Must be one of {valid_modes}"
-        
-        valid_detail = {"minimal", "balanced", "verbose"}
-        if config.get("streaming", {}).get("thinking_detail") not in valid_detail:
-            return False, f"Invalid thinking_detail. Must be one of {valid_detail}"
-        
-        valid_persistence = {"json", "sqlite"}
-        if config.get("state", {}).get("persistence") not in valid_persistence:
-            return False, f"Invalid persistence. Must be one of {valid_persistence}"
-        
-        valid_retention = {"session", "7days", "permanent"}
-        if config.get("state", {}).get("retention") not in valid_retention:
-            return False, f"Invalid retention. Must be one of {valid_retention}"
-        
+        """Validate configuration values against AGENT_CONFIG_SCHEMA."""
+        for section, fields in AGENT_CONFIG_SCHEMA.items():
+            values = config.get(section, {})
+            if not isinstance(values, dict):
+                return False, f"Section {section} must be an object"
+            for key, rule in fields.items():
+                if key not in values:
+                    continue
+                value = values[key]
+                kind = rule["type"]
+                if kind == "boolean" and not isinstance(value, bool):
+                    return False, f"{section}.{key} must be a boolean"
+                if kind == "integer":
+                    if isinstance(value, bool) or not isinstance(value, int):
+                        return False, f"{section}.{key} must be an integer"
+                    if not rule.get("minimum", value) <= value <= rule.get("maximum", value):
+                        return False, (f"{section}.{key} must be between "
+                                       f"{rule['minimum']} and {rule['maximum']}")
+                if kind == "string" and "enum" in rule and value not in rule["enum"]:
+                    label = {"mode": "intervention mode"}.get(key, key)
+                    return False, f"Invalid {label}. Must be one of {set(rule['enum'])}"
         return True, None
 
 
-# Global instance
-_config_manager: Optional[AgentConfigManager] = None
+def get_agent_config_manager(
+    ki_config_manager: Optional[Any] = None, project_root: Optional[Path] = None,
+) -> AgentConfigManager:
+    """Stateless view; kept for backwards compatibility."""
+    return AgentConfigManager(config_manager=ki_config_manager, project_root=project_root)
 
 
-def get_agent_config_manager(ki_config_manager: Optional[Any] = None) -> AgentConfigManager:
-    """Get or create global agent config manager.
-    
-    Args:
-        ki_config_manager: Optional ki_core.ConfigManager instance for YAML persistence.
-    """
-    global _config_manager
-    if _config_manager is None:
-        _config_manager = AgentConfigManager(config_manager=ki_config_manager)
-    return _config_manager
+def register_agent_config_routes(
+    app: Flask, ki_config_manager: Optional[Any] = None, project_root: Optional[Path] = None,
+):
+    """Register the legacy agent configuration endpoints (bridged to runtime settings)."""
+    from kicli_code_assist.web.settings_routes import after_save
 
+    def manager() -> AgentConfigManager:
+        return get_agent_config_manager(ki_config_manager, project_root)
 
-def register_agent_config_routes(app: Flask, ki_config_manager: Optional[Any] = None):
-    """Register agent configuration API endpoints.
-    
-    Args:
-        app: Flask application instance
-        ki_config_manager: Optional ki_core.ConfigManager for YAML persistence
-    """
-    # Initialize manager with ki_config_manager if provided
-    if ki_config_manager:
-        global _config_manager
-        _config_manager = AgentConfigManager(config_manager=ki_config_manager)
-    
+    def access(write: bool):
+        check = app.config.get("KICLI_SETTINGS_ACCESS")
+        if check is None:
+            return jsonify({"error": "Settings API not available"}), 503
+        return check(write=write)
+
     @app.route("/api/agent/config", methods=["GET"])
     def get_agent_config():
-        """Get current agent configuration.
-        
-        Loads from ki.yaml if available, otherwise returns in-memory config.
-        
-        Returns:
-            {
-                "intervention": {"mode": "user_prompt"},
-                "streaming": {"thinking_detail": "balanced", ...},
-                "rollback": {"auto_on_error": true, ...},
-                "state": {...}
-            }
-        """
+        """Effective agent configuration."""
+        denied = access(False)
+        if denied is not None:
+            return denied
         try:
-            manager = get_agent_config_manager(ki_config_manager)
-            return jsonify(manager.get_config()), 200
+            return jsonify(manager().get_config()), 200
         except Exception as e:
-            logger.error(f"Get agent config error: {e}")
-            return jsonify({"error": str(e)}), 500
-    
+            logger.error(f"Get agent config error: {type(e).__name__}")
+            return jsonify({"error": "Agent configuration could not be read"}), 500
+
     @app.route("/api/agent/config", methods=["PUT", "POST"])
     def update_agent_config():
-        """Update agent configuration.
-        
-        Updates persist to ki.yaml if ConfigManager is available.
-        
-        Request:
-        {
-            "intervention": {"mode": "supervisor"},
-            "streaming": {"thinking_detail": "verbose"}
-        }
-        
-        Returns:
-            Updated config or error
-        """
+        """Persist agent overrides, e.g. {"intervention": {"mode": "supervisor"}}."""
+        denied = access(True)
+        if denied is not None:
+            return denied
+        data = request.get_json(silent=True)
         try:
-            data = request.get_json() or {}
-            manager = get_agent_config_manager(ki_config_manager)
-            
-            # Update and validate
-            updated = manager.update_config(data)
-            logger.info(f"Agent config updated via API: {data}")
-            
+            m = manager()
+            updated = m.update_config(data)
+            after_save(app, m.last_result, runtime_config.flatten("agent", data))
             return jsonify({
                 "success": True,
                 "config": updated,
-                "message": "Configuration updated successfully"
+                "message": "Configuration updated (applies to the next request)",
             }), 200
-        
         except ValueError as e:
-            logger.warning(f"Agent config validation error: {e}")
             return jsonify({"error": str(e)}), 400
+        except ConflictError as e:
+            return jsonify({"error": str(e) or "Configuration changed meanwhile"}), 409
+        except EditorError as e:
+            return jsonify({"error": str(e)}), 503
         except Exception as e:
-            logger.error(f"Update agent config error: {e}")
-            return jsonify({"error": str(e)}), 500
-    
+            logger.error(f"Update agent config error: {type(e).__name__}")
+            return jsonify({"error": "Agent configuration could not be saved"}), 500
+
     @app.route("/api/agent/config/<section>", methods=["GET"])
     def get_config_section(section: str):
-        """Get specific config section.
-        
-        Args:
-            section: "intervention", "streaming", "rollback", or "state"
-        
-        Returns:
-            Configuration for that section
-        """
-        try:
-            manager = get_agent_config_manager(ki_config_manager)
-            config = manager.get_config()
-            
-            if section not in config:
-                return jsonify({
-                    "error": f"Unknown section: {section}. Valid: intervention, streaming, rollback, state"
-                }), 404
-            
-            return jsonify({section: config[section]}), 200
-        
-        except Exception as e:
-            logger.error(f"Get config section error: {e}")
-            return jsonify({"error": str(e)}), 500
-    
+        """Get one section: intervention, streaming, rollback or state."""
+        denied = access(False)
+        if denied is not None:
+            return denied
+        config = manager().get_config()
+        if section not in AGENT_CONFIG_SCHEMA:
+            return jsonify({
+                "error": f"Unknown section. Valid: {', '.join(AGENT_CONFIG_SCHEMA)}"
+            }), 404
+        return jsonify({section: config.get(section, {})}), 200
+
     @app.route("/api/agent/config/reset", methods=["POST"])
     def reset_agent_config():
-        """Reset configuration to defaults."""
+        """Remove all runtime overrides of the agent section."""
+        denied = access(True)
+        if denied is not None:
+            return denied
         try:
-            manager = get_agent_config_manager(ki_config_manager)
-            config = manager.reset_to_defaults()
-            
-            logger.info("Agent config reset to defaults")
+            m = manager()
+            config = m.reset_to_defaults()
+            after_save(app, m.last_result, {"agent"})
             return jsonify({
                 "success": True,
                 "config": config,
-                "message": "Configuration reset to defaults"
+                "message": "Agent overrides removed",
             }), 200
-        
+        except ConflictError as e:
+            return jsonify({"error": str(e) or "Configuration changed meanwhile"}), 409
+        except EditorError as e:
+            return jsonify({"error": str(e)}), 503
         except Exception as e:
-            logger.error(f"Reset config error: {e}")
-            return jsonify({"error": str(e)}), 500
+            logger.error(f"Reset config error: {type(e).__name__}")
+            return jsonify({"error": "Agent configuration could not be reset"}), 500
 
 
 # Schema for validation and documentation

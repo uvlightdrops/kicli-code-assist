@@ -37,6 +37,110 @@ properties:
         default: false
         description: "Enable path restriction enforcement"
     additionalProperties: true
+  web:
+    type: object
+    title: "Web Server"
+    description: "Flask/Socket.IO backend of the web IDE (read at process start)"
+    properties:
+      host:
+        type: string
+        title: "Bind host"
+        default: "127.0.0.1"
+        description: "Interface the web backend binds to; keep loopback unless protected by a proxy"
+      port:
+        type: integer
+        title: "Port"
+        default: 8000
+        minimum: 1
+        maximum: 65535
+        description: "TCP port of the web backend"
+      cors_origins:
+        type: array
+        title: "Allowed origins"
+        default: ["http://localhost:3000"]
+        items:
+          type: string
+          pattern: "^https?://[A-Za-z0-9.\\[\\]:-]+$"
+        description: "Browser origins allowed to call the API (scheme://host[:port], no path)"
+    additionalProperties: true
+  agent:
+    type: object
+    title: "Agent Streaming"
+    description: "Agent intervention/streaming/rollback behaviour (read per request)"
+    properties:
+      intervention:
+        type: object
+        title: "Intervention"
+        properties:
+          mode:
+            type: string
+            title: "Intervention mode"
+            enum: ["queue", "supervisor", "user_prompt"]
+            default: "user_prompt"
+            description: "How conflicting user/supervisor commands are handled"
+        additionalProperties: false
+      streaming:
+        type: object
+        title: "Streaming"
+        properties:
+          thinking_detail:
+            type: string
+            title: "Thinking detail"
+            enum: ["minimal", "balanced", "verbose"]
+            default: "balanced"
+            description: "Amount of agent reasoning streamed to the UI"
+          state_broadcast_rate:
+            type: integer
+            title: "State broadcast rate"
+            minimum: 1
+            maximum: 100
+            default: 10
+            description: "State updates per second sent over WebSocket"
+          websocket_timeout:
+            type: integer
+            title: "WebSocket timeout (s)"
+            minimum: 10
+            maximum: 300
+            default: 30
+            description: "Seconds without client activity before a stream is dropped"
+        additionalProperties: false
+      rollback:
+        type: object
+        title: "Rollback"
+        properties:
+          auto_on_error:
+            type: boolean
+            default: true
+            description: "Roll back agent changes automatically on errors"
+          log_error_artifacts:
+            type: boolean
+            default: true
+            description: "Keep error artifacts for inspection"
+          preserve_branch:
+            type: boolean
+            default: false
+            description: "Keep the work branch after a rollback"
+        additionalProperties: false
+      state:
+        type: object
+        title: "State"
+        properties:
+          persistence:
+            type: string
+            enum: ["json", "sqlite"]
+            default: "json"
+            description: "Agent state storage format"
+          retention:
+            type: string
+            enum: ["session", "7days", "permanent"]
+            default: "session"
+            description: "How long agent state is kept"
+          export_on_completion:
+            type: boolean
+            default: true
+            description: "Export the agent state when a run completes"
+        additionalProperties: false
+    additionalProperties: true
   prompts:
     type: object
     title: "Prompt Management Settings"
