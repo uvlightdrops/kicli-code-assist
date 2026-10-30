@@ -146,56 +146,65 @@ def run_server(subcommand: str | None = None, **kwargs: Any) -> None:
 # ============================================================================
 
 @click.group()
-def server():
-    """Manage services (backend, frontend, etc)."""
-    pass
+@click.option("--project", help="Registered project root (defaults to current directory)")
+@click.pass_context
+def server(ctx, project):
+    """Manage registered projects through their own stackctl."""
+    ctx.ensure_object(dict)
+    ctx.obj["server_project"] = project or str(Path.cwd().resolve())
+
+
+def _stackctl_server(action, services=()):
+    import json
+    from ki_core.config import load_config
+    from kicli_code_assist.web.stackctl_bridge import StackctlBridge, StackctlError
+
+    try:
+        manager = StackctlBridge(load_config())
+        root = manager.project(click.get_current_context().obj["server_project"])
+        if action == "status":
+            payload = manager.status(root)
+        else:
+            names = manager.services(root, list(services))
+            payload = manager.invoke(root, action, names, json_output=action == "logs")
+        click.echo(json.dumps(payload, indent=2) if action in {"status", "logs"} else payload["output"])
+    except StackctlError as exc:
+        raise click.ClickException(str(exc)) from exc
 
 
 @server.command()
 @click.option('--verbose', '-v', is_flag=True, help='Show detailed info')
 def status(verbose: bool):
-    """Show status of all registered services."""
-    from ki_core.commands import run_server_status
-    run_server_status(echo_fn=click.echo, verbose=verbose)
+    """Show live stackctl status (--verbose retained for compatibility)."""
+    _stackctl_server("status")
 
 
 @server.command()
-@click.option('--service', '-s', required=True, help='Service name')
-def start(service: str):
-    """Start a service."""
-    from ki_core.commands import run_server_start
-    from ki_core.config import load_config
-    
-    try:
-        config = load_config()
-    except:
-        config = {}
-    
-    run_server_start(service, echo_fn=click.echo, config=config)
+@click.option('--service', '-s', multiple=True, help='Service name; omit for all')
+def start(service):
+    """Start project services through stackctl."""
+    _stackctl_server("start", service)
 
 
 @server.command()
-@click.option('--service', '-s', required=True, help='Service name')
-@click.option('--force', '-f', is_flag=True, help='Use SIGKILL')
-def stop(service: str, force: bool):
-    """Stop a service."""
-    from ki_core.commands import run_server_stop
-    run_server_stop(service, echo_fn=click.echo, force=force)
+@click.option('--service', '-s', multiple=True, help='Service name; omit for all')
+def stop(service):
+    """Stop project services through stackctl."""
+    _stackctl_server("stop", service)
 
 
 @server.command()
-@click.option('--service', '-s', required=True, help='Service name')
-def restart(service: str):
-    """Restart a service."""
-    from ki_core.commands import run_server_restart
-    from ki_core.config import load_config
-    
-    try:
-        config = load_config()
-    except:
-        config = {}
-    
-    run_server_restart(service, echo_fn=click.echo, config=config)
+@click.option('--service', '-s', multiple=True, help='Service name; omit for all')
+def restart(service):
+    """Restart project services through stackctl."""
+    _stackctl_server("restart", service)
+
+
+@server.command()
+@click.option('--service', '-s', multiple=True, help='Service name; omit for all')
+def logs(service):
+    """Read bounded project logs through stackctl."""
+    _stackctl_server("logs", service)
 
 
 @server.command()
