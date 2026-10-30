@@ -1,23 +1,33 @@
 # Option 2 Deployment: stackctl + systemd
 
-Einfache, robuste Variante für Semi-Prod.
+Robuste Variante für Semi-Prod mit Unterstützung für TUI und WebUI.
 
 ## Architektur
 
+### TUI (Terminal User Interface) - Lokal nur
 ```
 systemd [kicli-assist service]
     ↓
 stackctl local start
     ↓
-    ├─ Orchestration: start/stop/health-check services
-    ├─ Dependencies: enforce startup order
-    ├─ Health Checks: wait until ready
-    └─ Logs: aggregate output
-    ↓
-[Flask Web App] → 127.0.0.1:8000
-    ↓
-[Apache2 reverse proxy] → External port 80/443
+Agents (programmieren über CLI/Terminal)
 ```
+
+### WebUI (Web Interface) - Remote Zugriff
+```
+Browser (Remote/External)
+    ↓
+Web Server (Apache2, Nginx, Caddy, etc.) :80/:443
+    ↓
+systemd [kicli-assist service] :8000 (Reverse Proxy)
+    ↓
+stackctl local start
+    ↓
+Agents (programmieren über Web-UI)
+```
+
+**Wichtig:** WebUI erfordert einen Web-Server für externen Zugriff. TUI läuft auch ohne.
+
 
 ## Setup auf Semi-Prod Host
 
@@ -92,9 +102,11 @@ bash scripts/setup_stackctl_systemd.sh enable    # Auto-start bei Boot
 bash scripts/setup_stackctl_systemd.sh disable   # Auto-start deaktivieren
 ```
 
-## Mit Apache2 Reverse Proxy
+## Mit Web-Server für WebUI (Reverse Proxy)
 
-### Apache Config
+Falls du die WebUI remote erreichbar brauchst, verwende einen der folgenden:
+
+### Apache2
 
 ```apache
 <VirtualHost *:80>
@@ -128,7 +140,52 @@ sudo a2ensite kicli-semiprod
 sudo systemctl reload apache2
 ```
 
-## Troubleshooting
+### Nginx (Alternative)
+
+```nginx
+server {
+    listen 80;
+    server_name kicli.example.com;
+    
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+    
+    # WebSocket support
+    location /socket.io/ {
+        proxy_pass http://127.0.0.1:8000/socket.io/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+```
+
+**Enable:**
+```bash
+sudo ln -s /etc/nginx/sites-available/kicli /etc/nginx/sites-enabled/
+sudo systemctl reload nginx
+```
+
+
+## Zusammenfassung: TUI vs WebUI
+
+| Aspekt | TUI | WebUI |
+|--------|-----|-------|
+| **User Interface** | Terminal/CLI | Browser |
+| **Access** | Local SSH nur | Remote über HTTP/HTTPS |
+| **Required** | systemd + stackctl | systemd + stackctl + Web-Server |
+| **Web-Server nötig** | ❌ Nein | ✅ Ja (Apache/Nginx/Caddy/...) |
+| **Setup-Zeit** | ~ 5 Min | ~ 10-15 Min |
+| **Komplexität** | Einfach | Mittel |
+
+**Wahl treffen:**
+- **TUI nur:** Systemd + Stackctl reicht, Skip Web-Server
+- **WebUI:** Systemd + Stackctl + Web-Server (deine Wahl: Apache/Nginx/etc.)
+
 
 ### Service startet nicht
 ```bash
