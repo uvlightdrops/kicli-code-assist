@@ -37,11 +37,13 @@ Complete documentation for the KI Code Assistant project, organized by topic and
 - **[Semi-Production Deployment](deployment/SEMI_PROD_DEPLOYMENT.md)** - Staging setup
 
 ### 💾 Server Management
-- **[Server Management Overview](server/SERVER_MANAGEMENT_README.md)** - Overview and quick start
-- **[Server Management Design](server/SERVER_MANAGEMENT_DESIGN.md)** - Architecture and design
-- **[Server Management Flows](server/SERVER_MANAGEMENT_FLOWS.md)** - Workflow diagrams
-- **[Server Management Implementation](server/SERVER_MANAGEMENT_IMPLEMENTATION.md)** - Implementation details
-- **[Server Management Decisions](server/SERVER_MANAGEMENT_DECISIONS.md)** - Decision log
+Cross-project documentation now lives in `~/dev_doc/server-mngm/`.
+
+- **[Server Management Overview](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md)** - Overview and quick start
+- **[Server Management Design](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_DESIGN.md)** - Architecture and design
+- **[Server Management Flows](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_FLOWS.md)** - Workflow diagrams
+- **[Server Management Implementation](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_IMPLEMENTATION.md)** - Implementation plan
+- **[Server Management Decisions](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_DECISIONS.md)** - Decision log
 
 ### 📈 Development Phases
 - **[Phase Documentation](phases/)** - Phase-specific documentation and reports
@@ -76,7 +78,6 @@ doc/
 ├── specifications/      # Technical specifications
 ├── tracking/            # Project tracking and status
 ├── phases/              # Phase-specific documentation
-├── server/              # Server management documentation
 ├── archive/             # Historical documentation
 └── README.md            # This file
 ```
@@ -92,7 +93,7 @@ doc/
 | Deploy to production | [Production Deployment](guides/PRODUCTION_DEPLOYMENT.md) |
 | Check feature status | [Features Implemented](features/FEATURES_IMPLEMENTED.md) |
 | Review recent changes | [Phase Documentation](phases/) |
-| Manage a running server | [Server Management](server/) |
+| Manage a running server | [Server Management](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md) |
 | See what was built before | [Archive](archive/) |
 
 ---
@@ -145,11 +146,8 @@ doc/
 - README.md
 
 ### Server Management
-- SERVER_MANAGEMENT_README.md
-- SERVER_MANAGEMENT_DESIGN.md
-- SERVER_MANAGEMENT_FLOWS.md
-- SERVER_MANAGEMENT_IMPLEMENTATION.md
-- SERVER_MANAGEMENT_DECISIONS.md
+Moved to [shared server management documentation](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md)
+in `~/dev_doc/server-mngm/`.
 
 ### Phases
 - PHASE_1_HYBRID_IMPLEMENTATION.md
