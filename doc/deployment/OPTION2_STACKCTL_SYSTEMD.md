@@ -15,7 +15,11 @@ Agents (programmieren über CLI/Terminal)
 
 ### WebUI (Web Interface) - Remote Zugriff
 ```
-Browser (Remote/External)
+Browser (Remote/External):wq   # Manual test:
+   cd /path/to/kicli-code-assist
+   source .venv/bin/activate
+   python -m stackctl local start --project .
+   # → Fehler sollte sichtbar sein
     ↓
 Web Server (Apache2, Nginx, Caddy, etc.) :80/:443
     ↓

@@ -1,0 +1,38 @@
+# Full Stack Configuration (Variante #4)
+# Location: kicli-code-assist/deploy/stack-full.yaml
+#
+# Flask + Optional Database + Pre-built Frontend
+# Use-Case: Production mit Chat-History persistent
+# Usage: stackctl local start --project . --spec-file deploy/stack-full.yaml
+
+stack:
+  name: kicli-assist-full
+  target: local
+  
+  services:
+    # Database initialization (optional, for future features)
+    # Comment out if not using persistent DB yet
+    db:
+      kind: process
+      command: ["bash", "-c", "python -c 'import sqlite3; db = sqlite3.connect(\"var/kicli.db\"); db.execute(\"CREATE TABLE IF NOT EXISTS chat_history (id INTEGER PRIMARY KEY, session_id TEXT, message TEXT, response TEXT, created_at TIMESTAMP)\"); db.commit()'"]
+      cwd: "{root}"
+      # Non-blocking init, then exit
+      
+    # Backend API
+    web:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1
+      port: 8000
+      depends_on: [db]  # Wait for DB init
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "production"
+        DB_URL: "sqlite:///var/kicli.db"
+      health_path: /api/health
+      health_timeout: 10
+      health_retries: 5
+      health_interval: 2
+      stdout_log: "log/web.log"
+      stderr_log: "log/web.err.log"

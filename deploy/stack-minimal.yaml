@@ -1,0 +1,27 @@
+# Minimal Stack Configuration (Variante #1)
+# Location: kicli-code-assist/deploy/stack-minimal.yaml
+#
+# Nur Flask, keine WebUI
+# Use-Case: TUI-only, Production ohne Frontend
+# Usage: stackctl local start --project . --spec-file deploy/stack-minimal.yaml
+
+stack:
+  name: kicli-assist-minimal
+  target: local
+  
+  services:
+    web:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1
+      port: 8000
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "production"
+      health_path: /api/health
+      health_timeout: 10
+      health_retries: 5
+      health_interval: 2
+      stdout_log: "log/web.log"
+      stderr_log: "log/web.err.log"
