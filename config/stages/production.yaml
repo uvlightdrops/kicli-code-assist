@@ -1,0 +1,25 @@
+# Production stage: single unified service (Flask serves API + static frontend)
+# Prerequisites: npm run build (builds frontend to static/)
+#
+# Stack base (config/defaults/stack.yaml) is removed in this stage.
+# Instead: one combined web service for both API and pre-built frontend.
+
+stack:
+  name: kicli-assist-prod
+  target: local
+  services:
+    web:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1
+      port: 8000
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "production"
+      health_path: /api/health
+      health_timeout: 10
+      health_retries: 5
+      health_interval: 2
+      stdout_log: "log/web.log"
+      stderr_log: "log/web.err.log"

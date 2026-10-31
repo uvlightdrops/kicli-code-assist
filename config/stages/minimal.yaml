@@ -1,0 +1,25 @@
+# Minimal stage: API-only (no frontend)
+# Use for testing, CI/CD, or server-only deployments.
+#
+# Stack base (config/defaults/stack.yaml) is replaced.
+# Only one service: API server.
+
+stack:
+  name: kicli-assist-minimal
+  target: local
+  services:
+    api:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1
+      port: 8000
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "minimal"
+      health_path: /api/health
+      health_timeout: 10
+      health_retries: 5
+      health_interval: 2
+      stdout_log: "log/api.log"
+      stderr_log: "log/api.err.log"

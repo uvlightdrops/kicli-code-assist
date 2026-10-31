@@ -49,8 +49,8 @@ kicli-assist = "kicli_code_assist.cli:cli"
 kicli-assist-tmux = "kicli_code_assist.tmux_launcher:main"
 
 [tool.stackctl]
-#config_loader = "ki_core:load_config"
-#config_key = "stack"
+config_loader = "ki_core:load_config"
+config_key = "stack"
 
 [[tool.stackctl.siblings]]
 name = "yaml-cfg-wizard"

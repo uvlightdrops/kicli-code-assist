@@ -1,5 +1,6 @@
-# Development stage configuration
-# This is the default stage for local development
+# Development stage: local dev with HMR frontend
+# Base stack from config/defaults/stack.yaml applies.
+# This stage file overrides specific services for development.
 
-# Inherit defaults and override as needed for dev environment
-stack: stackctl-dev
+# All services run (api + frontend with HMR)
+# No additional overrides needed; defaults are suitable for dev
