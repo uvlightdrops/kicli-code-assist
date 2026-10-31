@@ -1,0 +1,84 @@
+name: Test (Minimal Stage)
+
+on:
+  push:
+    branches: [main, devel]
+  pull_request:
+    branches: [main, devel]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install Node dependencies
+        run: |
+          cd web/frontend
+          npm install
+      
+      - name: Build frontend
+        run: |
+          cd web/frontend
+          npm run build
+      
+      - name: Test minimal stage (API-only)
+        env:
+          KI_STAGE: minimal
+        run: |
+          # Start stackctl services in the background
+          stackctl -t local start &
+          STACKCTL_PID=$!
+          
+          # Wait for service to be ready
+          sleep 5
+          
+          # Test health check
+          response=$(curl -s http://127.0.0.1:8000/api/health)
+          echo "Health check response: $response"
+          
+          # Verify the response contains 'ok'
+          if echo "$response" | grep -q '"status":"ok"'; then
+            echo "✅ API health check passed"
+          else
+            echo "❌ API health check failed"
+            exit 1
+          fi
+          
+          # Stop services
+          stackctl -t local stop
+          wait $STACKCTL_PID || true
+  
+      - name: Verify stack configuration
+        env:
+          KI_STAGE: minimal
+        run: |
+          python -c "
+          from ki_core.config import load_config
+          config = load_config()
+          services = list(config.get('stack', {}).get('services', {}).keys())
+          print(f'Services in minimal stage: {services}')
+          if services == ['api']:
+            print('✅ Correct services for minimal stage')
+          else:
+            print(f'❌ Expected [\"api\"], got {services}')
+            exit(1)
+          "
