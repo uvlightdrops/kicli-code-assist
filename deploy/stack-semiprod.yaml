@@ -1,16 +1,26 @@
-# Semi-Prod Stack Configuration (Variante #3: Production)
+# Semi-Prod Stack Configuration (Variante #3: Production-Ready)
 # Location: kicli-code-assist/deploy/stack-semiprod.yaml
 #
-# Flask serves both API + Static Frontend Files
-# PRE-BUILD: npm run build (frontend static files to kicli_code_assist/web/static/)
+# Runs Flask API serving both API endpoints and pre-built frontend static files
+# This is the default for production deployments (symlinked as stack.yaml)
 #
-# Usage:
-#   cd web/frontend && npm run build
+# USAGE:
+#   # Pre-build frontend once:
+#   cd web/frontend && npm run build  # outputs to ../kicli_code_assist/web/static/
+#   
+#   # Then run:
 #   cd /path/to/kicli-code-assist
-#   cd deploy && ln -sf stack-semiprod.yaml stack.yaml && cd ..
+#   ln -sf stack-semiprod.yaml stack.yaml
 #   stackctl -t local start
 #
-# Flask listens on 127.0.0.1:8000 (Apache reverse proxy handles external)
+# ENDPOINTS:
+#   - API: http://127.0.0.1:8000/api/...
+#   - Frontend static: http://127.0.0.1:8000/
+#
+# NOTES:
+#   - Flask auto-serves static files from kicli_code_assist/web/static/
+#   - No separate frontend server required
+#   - Apache reverse proxy listens on :80/:443 and forwards to Flask :8000
 
 stack:
   name: kicli-assist-semiprod

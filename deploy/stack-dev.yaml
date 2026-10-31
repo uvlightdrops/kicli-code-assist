@@ -1,15 +1,20 @@
-# DEV Stack Configuration (Variante #2: Development)
+# DEV Stack Configuration (Variante #2: Development with HMR)
 # Location: kicli-code-assist/deploy/stack-dev.yaml
 #
-# For local development with Hot Module Reload (HMR)
+# Runs Flask API + Vite dev server with Hot Module Reload (HMR)
 #
-# Usage:
-#   cd deploy && ln -sf stack-dev.yaml stack.yaml && cd ..
+# USAGE:
+#   ln -sf stack-dev.yaml stack.yaml
 #   stackctl -t local start
 #
-# Then open:
-#   - React HMR: http://localhost:5173
-#   - API: http://localhost:8000
+# ENDPOINTS:
+#   - API: http://127.0.0.1:8000/api/...
+#   - Frontend HMR: http://127.0.0.1:5173/
+#
+# NOTES:
+#   - Frontend uses direct vite binary for reliable stackctl integration
+#   - Vite will auto-negotiate ports if 5173 is busy
+#   - API refreshes from ki.yaml config on each request (live mode)
 
 stack:
   name: kicli-assist-dev
@@ -36,7 +41,7 @@ stack:
     # Frontend Dev Server (Vite HMR)
     frontend:
       kind: process
-      command: ["npm", "run", "dev"]
+      command: ["{root}/web/frontend/node_modules/.bin/vite"]  # Direct vite binary
       cwd: "{root}/web/frontend"
       host: 127.0.0.1
       port: 5173  # Vite default

@@ -1,14 +1,30 @@
-# Full Stack Configuration (Variante #4)
+# Full Stack Configuration (Variante #4: Database Support)
 # Location: kicli-code-assist/deploy/stack-full.yaml
 #
-# Flask + Optional Database + Pre-built Frontend
-# Use-Case: Production mit Chat-History persistent (future feature)
+# Runs Flask API + pre-built frontend + SQLite database for persistent storage
+# This variant is for features that need chat history or state persistence
 #
-# Usage:
-#   cd deploy && ln -sf stack-full.yaml stack.yaml && cd ..
+# USAGE:
+#   # Pre-build frontend:
+#   cd web/frontend && npm run build
+#   
+#   # Then run:
+#   cd /path/to/kicli-code-assist
+#   ln -sf stack-full.yaml stack.yaml
 #   stackctl -t local start
 #
-# Database is optional, comment out db service if not needed
+# ENDPOINTS:
+#   - API: http://127.0.0.1:8000/api/...
+#   - Frontend: http://127.0.0.1:8000/
+#
+# DATABASE:
+#   - SQLite file: var/kicli.db
+#   - Auto-initialized on first start
+#
+# NOTES:
+#   - Database init runs once during stack startup
+#   - Currently minimal schema (chat_history table)
+#   - Can be extended for additional persistence needs
 
 stack:
   name: kicli-assist-full

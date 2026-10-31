@@ -1,12 +1,20 @@
-# Minimal Stack Configuration (Variante #1)
+# Minimal Stack Configuration (Variante #1: TUI-Only)
 # Location: kicli-code-assist/deploy/stack-minimal.yaml
 #
-# Nur Flask, keine WebUI
-# Use-Case: TUI-only, Production ohne Frontend
+# Runs Flask API only, no WebUI (suitable for terminal-based workflows)
+# This is the leanest deployment option
 #
-# Usage:
-#   cd deploy && ln -sf stack-minimal.yaml stack.yaml && cd ..
+# USAGE:
+#   ln -sf stack-minimal.yaml stack.yaml
 #   stackctl -t local start
+#
+# ENDPOINTS:
+#   - API only: http://127.0.0.1:8000/api/...
+#   - No frontend served
+#
+# NOTES:
+#   - Use this for server-only or TUI-only deployments
+#   - Lowest resource usage, no JavaScript/npm dependencies needed at runtime
 
 stack:
   name: kicli-assist-minimal

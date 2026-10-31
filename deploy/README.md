@@ -1,89 +1,100 @@
 # Stack Configurations
 
-Deploy-Konfigurationen für unterschiedliche Szenarien.
+Deploy configurations for different scenarios using stackctl.
 
-## Files
+## Variants
 
-| Datei | Variante | Use-Case |
-|-------|----------|----------|
-| **stack.yaml** | #3 Production | **DEFAULT für Semi-Prod** |
-| stack-minimal.yaml | #1 Minimal | TUI-only, keine WebUI |
-| stack-dev.yaml | #2 Development | Local dev mit HMR |
-| stack-semiprod.yaml | #3 Production | Semi-Prod (copy of stack.yaml) |
-| stack-full.yaml | #4 Full Stack | Mit DB (Chat-History, später) |
+| File | Scenario | Frontend | Database | Use Case |
+|------|----------|----------|----------|----------|
+| **stack.yaml** | Default | Depends | No | Symlink (→ stack-semiprod.yaml) |
+| stack-minimal.yaml | #1 Minimal | None | No | TUI-only, leanest setup |
+| stack-dev.yaml | #2 Development | Vite HMR @ :5173 | No | Local dev with hot reload |
+| stack-semiprod.yaml | #3 Production | Static via Flask | No | **Production default** |
+| stack-full.yaml | #4 Full | Static via Flask | SQLite | Persistent storage (future) |
 
 ## Quick Start
 
-### Semi-Prod (Production)
+**Development** (with HMR):
 ```bash
-# 1. Frontend bauen
-cd web/frontend
-npm install
-npm run build
-
-# 2. Stack starten (verwendet stack.yaml)
 cd /path/to/kicli-code-assist
-stackctl -t local start
-```
-
-### Local Development (HMR)
-```bash
-# Frontend npm install (einmalig)
-cd web/frontend && npm install
-
-# Stack mit Dev-Variante (von projekt-root)
-cd /path/to/kicli-code-assist
-# NOTE: stackctl sucht automatisch das aktuelle Projekt
-# Bei mehreren Specs: manuell stack.yaml durch stack-dev.yaml ersetzen
+ln -sf deploy/stack-dev.yaml deploy/stack.yaml
 stackctl -t local start
 
-# Browser: http://localhost:5173 (React HMR)
+# Browser: http://localhost:5173 (React dev server)
 # API: http://localhost:8000
 ```
 
-### TUI Only (keine WebUI)
+**Production** (pre-built frontend):
 ```bash
-# Nutze stack-minimal.yaml statt default stack.yaml
 cd /path/to/kicli-code-assist
-cp deploy/stack-minimal.yaml deploy/stack.yaml
+cd web/frontend && npm run build  # one-time
+cd ../..
+ln -sf deploy/stack-semiprod.yaml deploy/stack.yaml
 stackctl -t local start
+
+# Browser: http://localhost:8000 (Flask serving static files)
+# API: http://localhost:8000/api/...
 ```
 
-### Mit Database (Zukunft)
+**Minimal** (TUI only, no frontend):
 ```bash
-# Nutze stack-full.yaml statt default stack.yaml
 cd /path/to/kicli-code-assist
-cp deploy/stack-full.yaml deploy/stack.yaml
+ln -sf deploy/stack-minimal.yaml deploy/stack.yaml
 stackctl -t local start
+
+# API only: http://localhost:8000/api/...
 ```
 
-## How stackctl finds spec
+## How Variant Switching Works
 
-stackctl liest `pyproject.toml`:
-```toml
-[tool.stackctl]
-spec_file = "deploy/stack.yaml"  # Default Spec
-```
+`stack.yaml` is a **symlink**. Change it to switch variants:
 
-`stack.yaml` ist ein **Symlink** → momentan auf `stack-semiprod.yaml`
-
-Um andere Varianten zu nutzen:
 ```bash
-# Für Dev (HMR):
-cd deploy && ln -sf stack-dev.yaml stack.yaml && cd ..
-stackctl -t local start
-
-# Für TUI-only:
-cd deploy && ln -sf stack-minimal.yaml stack.yaml && cd ..
-stackctl -t local start
-
-# Zurück zu Production:
-cd deploy && ln -sf stack-semiprod.yaml stack.yaml && cd ..
+cd deploy
+ln -sf stack-dev.yaml stack.yaml        # Development (HMR)
+ln -sf stack-semiprod.yaml stack.yaml   # Production (default)
+ln -sf stack-minimal.yaml stack.yaml    # TUI-only
+ln -sf stack-full.yaml stack.yaml       # With database
+cd ..
 stackctl -t local start
 ```
 
-**Hinweis:** Es gibt kein `--spec-file` Flag in stackctl CLI. Der Symlink ermöglicht flexibles Wechseln zwischen Varianten.
+stackctl reads `pyproject.toml` → `[tool.stackctl] spec_file = "deploy/stack.yaml"` → follows symlink.
 
-## Details
+## Frontend Build
 
-Siehe: `doc/deployment/STACK_YAML_VARIANTS.md`
+Required for `stack-semiprod.yaml` and `stack-full.yaml`:
+
+```bash
+cd web/frontend
+npm run build
+# Output: kicli_code_assist/web/static/
+```
+
+Flask auto-serves these static files.
+
+## Service Endpoints
+
+- **API**: http://127.0.0.1:8000/api/...
+- **Health**: http://127.0.0.1:8000/api/health
+- **Frontend**: Depends on variant
+  - Dev: http://127.0.0.1:5173/
+  - Production: http://127.0.0.1:8000/
+
+## Status & Logs
+
+```bash
+stackctl -t local status                    # Show all services
+tail -f var/log/api.log                     # API logs
+tail -f var/log/frontend.log                # Frontend logs (dev variant)
+```
+
+## Default Behavior
+
+The symlink points to `stack-semiprod.yaml` for production safety.
+
+For development, explicitly switch to `stack-dev.yaml` each time.
+
+---
+
+For detailed architecture and scenario explanations, see: `doc/deployment/STACK_YAML_VARIANTS.md`
