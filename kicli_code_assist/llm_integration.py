@@ -108,26 +108,6 @@ class AsyncLLMIntegration:
         return dict(self._settings)
 
     def _initialize_providers(self) -> None:
-<<<<<<< HEAD
-        """(Re)build the single configured provider when the config changed."""
-        from kicli_code_assist.llm_runtime import resolve_chat
-
-        resolved = self._resolved()
-        if resolved is self._chain_source and self._chain_source is not None:
-            return
-        self._chain_source = resolved
-        self._chain = None
-        self._settings = {}
-        try:
-            client, self._settings = resolve_chat(resolved, provider=self._provider_override)
-            self._chain = ProviderChain([client])
-            llm_logger.info(
-                "LLM provider ready: %s model=%s", self._settings.get("provider"), self._settings.get("model")
-            )
-        except Exception as e:
-            self._chain_source = None  # retry on the next request
-            llm_logger.error("No usable LLM provider configured: %s", type(e).__name__)
-=======
         """Initialize provider chain with configured providers."""
         providers = []
         llm_logger.info("=" * 60)
@@ -181,7 +161,6 @@ class AsyncLLMIntegration:
             llm_logger.info(f"Provider chain ready: {len(providers)} provider(s)")
         else:
             llm_logger.error("No LLM providers configured")
->>>>>>> origin/devel
 
     async def query(
         self,
@@ -214,12 +193,6 @@ class AsyncLLMIntegration:
                 "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
-<<<<<<< HEAD
-        provider_chain = self.provider_chain
-        settings = self._settings
-        llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
-        llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
-=======
         # Determine active provider & log provider info
         provider_name = "unknown"
         provider_url = "unknown"
@@ -233,7 +206,6 @@ class AsyncLLMIntegration:
         
         llm_logger.info(f"📌 Active Provider: {provider_name}")
         llm_logger.info(f"📍 Provider URL: {provider_url}")
->>>>>>> origin/devel
 
         # Log message content summary (with safety)
         llm_logger.info("📨 User Messages:")
@@ -252,15 +224,11 @@ class AsyncLLMIntegration:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
                 llm_logger.info(f"   System prompt length: {original_length} → {len(system_prompt)} chars")
             
-<<<<<<< HEAD
-            llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
-=======
             # Log complete system prompt (after filtering)
             llm_logger.info("🔧 System Prompt (complete):")
             for line in system_prompt.split('\n'):
                 if line.strip():
                     llm_logger.info(f"   {line}")
->>>>>>> origin/devel
 
         # Build ChatRequest with model from active provider
         from ki_core.core.models import ChatRequest
@@ -270,19 +238,11 @@ class AsyncLLMIntegration:
         # The client already carries the configured model; None keeps it.
         model = None
         
-<<<<<<< HEAD
-        llm_logger.info(f"🔤 Active Model: {settings.get('model')}")
-        
-        # Log request payload summary (sanitized)
-        llm_logger.info("📦 Request Payload:")
-        llm_logger.info(f"   Model: {settings.get('model')}")
-=======
         llm_logger.info(f"🔤 Active Model: {model}")
         
         # Log request payload summary (sanitized)
         llm_logger.info("📦 Request Payload:")
         llm_logger.info(f"   Model: {model}")
->>>>>>> origin/devel
         llm_logger.info(f"   Messages: {len(message_objs)}")
         llm_logger.info(f"   Total message chars: {sum(len(m.content) for m in message_objs)}")
         
@@ -296,11 +256,7 @@ class AsyncLLMIntegration:
                 on_progress("Querying LLM...")
             
             llm_logger.info("⏳ Sending request to provider chain...")
-<<<<<<< HEAD
-            response = await provider_chain.achat(request)
-=======
             response = await self.provider_chain.achat(request)
->>>>>>> origin/devel
             
             response_text = response.message.content
             response_length = len(response_text)
@@ -359,12 +315,6 @@ class AsyncLLMIntegration:
                 "No usable LLM provider configured (check llm.provider and its settings)."
             )
 
-<<<<<<< HEAD
-        provider_chain = self.provider_chain
-        settings = self._settings
-        llm_logger.info(f"📌 Active Provider: {settings.get('provider', 'unknown')}")
-        llm_logger.info(f"📍 Provider URL: {settings.get('base_url') or 'n/a'}")
-=======
         # Determine active provider & log provider info
         provider_name = "unknown"
         provider_url = "unknown"
@@ -378,7 +328,6 @@ class AsyncLLMIntegration:
         
         llm_logger.info(f"📌 Active Provider: {provider_name}")
         llm_logger.info(f"📍 Provider URL: {provider_url}")
->>>>>>> origin/devel
 
         # Log message summaries
         llm_logger.info("📨 User Messages:")
@@ -396,15 +345,11 @@ class AsyncLLMIntegration:
             if redactions > 0:
                 llm_logger.warning(f"⚠️  Filtered {redactions} secret(s) from system prompt")
             
-<<<<<<< HEAD
-            llm_logger.info(f"🔧 System prompt: {len(system_prompt)} chars (content not logged)")
-=======
             # Log complete system prompt (after filtering)
             llm_logger.info("🔧 System Prompt (complete):")
             for line in system_prompt.split('\n'):
                 if line.strip():
                     llm_logger.info(f"   {line}")
->>>>>>> origin/devel
 
         from ki_core.core.models import ChatRequest
 
@@ -431,11 +376,7 @@ class AsyncLLMIntegration:
             
             llm_logger.info("Starting stream from provider chain...")
             
-<<<<<<< HEAD
-            async for event in provider_chain.achat_stream(request):
-=======
             async for event in self.provider_chain.achat_stream(request):
->>>>>>> origin/devel
                 # Check if user requested cancellation
                 if cancellation.cancelled:
                     llm_logger.warning("Stream cancelled by user")
