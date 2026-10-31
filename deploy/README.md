@@ -65,20 +65,24 @@ stackctl liest `pyproject.toml`:
 spec_file = "deploy/stack.yaml"  # Default Spec
 ```
 
-Um andere Varianten zu nutzen: **Tausche die Datei aus**
-```bash
-# Momentan: stack.yaml (default)
-# Für Dev: stack-dev.yaml
-cp deploy/stack-dev.yaml deploy/stack.yaml
+`stack.yaml` ist ein **Symlink** → momentan auf `stack-semiprod.yaml`
 
-# Dann:
+Um andere Varianten zu nutzen:
+```bash
+# Für Dev (HMR):
+cd deploy && ln -sf stack-dev.yaml stack.yaml && cd ..
+stackctl -t local start
+
+# Für TUI-only:
+cd deploy && ln -sf stack-minimal.yaml stack.yaml && cd ..
 stackctl -t local start
 
 # Zurück zu Production:
-cp deploy/stack-semiprod.yaml deploy/stack.yaml
+cd deploy && ln -sf stack-semiprod.yaml stack.yaml && cd ..
+stackctl -t local start
 ```
 
-**Hinweis:** Es gibt kein `--spec-file` Flag in stackctl CLI.
+**Hinweis:** Es gibt kein `--spec-file` Flag in stackctl CLI. Der Symlink ermöglicht flexibles Wechseln zwischen Varianten.
 
 ## Details
 
