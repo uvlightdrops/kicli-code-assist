@@ -1,0 +1,43 @@
+# DEV Stack Configuration (Variante #2: Development)
+# Location: kicli-code-assist/deploy/stack-dev.yaml
+#
+# For local development with Hot Module Reload (HMR)
+# Usage: stackctl local start --project . --spec-file deploy/stack-dev.yaml
+
+stack:
+  name: kicli-assist-dev
+  target: local
+  
+  services:
+    # Backend API
+    api:
+      kind: process
+      command: ["{python}", "-m", "kicli_code_assist.web.server"]
+      cwd: "{root}"
+      host: 127.0.0.1
+      port: 8000
+      env:
+        PYTHONUNBUFFERED: "1"
+        KI_STAGE: "development"
+      health_path: /api/health
+      health_timeout: 10
+      health_retries: 5
+      health_interval: 2
+      stdout_log: "log/api.log"
+      stderr_log: "log/api.err.log"
+    
+    # Frontend Dev Server (Vite HMR)
+    frontend:
+      kind: process
+      command: ["npm", "run", "dev"]
+      cwd: "{root}/web/frontend"
+      host: 127.0.0.1
+      port: 5173  # Vite default
+      depends_on: [api]
+      env:
+        VITE_API_URL: "http://127.0.0.1:8000"
+      health_path: /
+      health_timeout: 15
+      health_retries: 3
+      stdout_log: "log/frontend.log"
+      stderr_log: "log/frontend.err.log"
