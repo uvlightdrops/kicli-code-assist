@@ -1,0 +1,5 @@
+# Development stage configuration
+# This is the default stage for local development
+
+# Inherit defaults and override as needed for dev environment
+stack: stackctl-dev
