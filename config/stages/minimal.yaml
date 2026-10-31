@@ -1,10 +1,11 @@
 # Minimal stage: API-only (no frontend)
 # Use for testing, CI/CD, or server-only deployments.
 #
-# Stack base (config/defaults/stack.yaml) is replaced.
-# Only one service: API server.
+# __replace__: true tells the config system to replace the entire stack
+# section instead of merging it. This removes the frontend service.
 
 stack:
+  __replace__: true
   name: kicli-assist-minimal
   target: local
   services:

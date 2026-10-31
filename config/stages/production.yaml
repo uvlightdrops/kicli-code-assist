@@ -1,10 +1,11 @@
 # Production stage: single unified service (Flask serves API + static frontend)
 # Prerequisites: npm run build (builds frontend to static/)
 #
-# Stack base (config/defaults/stack.yaml) is removed in this stage.
-# Instead: one combined web service for both API and pre-built frontend.
+# __replace__: true tells the config system to replace the entire stack
+# section instead of merging it. This removes the separate frontend service.
 
 stack:
+  __replace__: true
   name: kicli-assist-prod
   target: local
   services:
