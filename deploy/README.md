@@ -23,7 +23,7 @@ npm run build
 
 # 2. Stack starten (verwendet stack.yaml)
 cd /path/to/kicli-code-assist
-stackctl local start --project .
+stackctl -t local start
 ```
 
 ### Local Development (HMR)
@@ -31,9 +31,11 @@ stackctl local start --project .
 # Frontend npm install (einmalig)
 cd web/frontend && npm install
 
-# Stack mit Dev-Variante
+# Stack mit Dev-Variante (von projekt-root)
 cd /path/to/kicli-code-assist
-stackctl local start --project . --spec-file deploy/stack-dev.yaml
+# NOTE: stackctl sucht automatisch das aktuelle Projekt
+# Bei mehreren Specs: manuell stack.yaml durch stack-dev.yaml ersetzen
+stackctl -t local start
 
 # Browser: http://localhost:5173 (React HMR)
 # API: http://localhost:8000
@@ -41,13 +43,42 @@ stackctl local start --project . --spec-file deploy/stack-dev.yaml
 
 ### TUI Only (keine WebUI)
 ```bash
-stackctl local start --project . --spec-file deploy/stack-minimal.yaml
+# Nutze stack-minimal.yaml statt default stack.yaml
+cd /path/to/kicli-code-assist
+cp deploy/stack-minimal.yaml deploy/stack.yaml
+stackctl -t local start
 ```
 
 ### Mit Database (Zukunft)
 ```bash
-stackctl local start --project . --spec-file deploy/stack-full.yaml
+# Nutze stack-full.yaml statt default stack.yaml
+cd /path/to/kicli-code-assist
+cp deploy/stack-full.yaml deploy/stack.yaml
+stackctl -t local start
 ```
+
+## How stackctl finds spec
+
+stackctl liest `pyproject.toml`:
+```toml
+[tool.stackctl]
+spec_file = "deploy/stack.yaml"  # Default Spec
+```
+
+Um andere Varianten zu nutzen: **Tausche die Datei aus**
+```bash
+# Momentan: stack.yaml (default)
+# Für Dev: stack-dev.yaml
+cp deploy/stack-dev.yaml deploy/stack.yaml
+
+# Dann:
+stackctl -t local start
+
+# Zurück zu Production:
+cp deploy/stack-semiprod.yaml deploy/stack.yaml
+```
+
+**Hinweis:** Es gibt kein `--spec-file` Flag in stackctl CLI.
 
 ## Details
 
