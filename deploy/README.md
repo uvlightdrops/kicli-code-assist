@@ -1,100 +1,46 @@
-# Stack Configurations
+# ❌ DEPRECATED - Use `config/stages/` instead
 
-Deploy configurations for different scenarios using stackctl.
+This folder contains **legacy stack configurations** from before the stackctl stage-based refactoring.
 
-## Variants
+## What Changed?
 
-| File | Scenario | Frontend | Database | Use Case |
-|------|----------|----------|----------|----------|
-| **stack.yaml** | Default | Depends | No | Symlink (→ stack-semiprod.yaml) |
-| stack-minimal.yaml | #1 Minimal | None | No | TUI-only, leanest setup |
-| stack-dev.yaml | #2 Development | Vite HMR @ :5173 | No | Local dev with hot reload |
-| stack-semiprod.yaml | #3 Production | Static via Flask | No | **Production default** |
-| stack-full.yaml | #4 Full | Static via Flask | SQLite | Persistent storage (future) |
+The project now uses **stage-based configuration** (cleaner, more maintainable):
+- **Old system**: Symlinks (`stack.yaml` → `stack-dev.yaml`, `stack-prod.yaml`, etc.) in `deploy/`
+- **New system**: Stage files (`config/stages/development.yaml`, `config/stages/production.yaml`, etc.) with environment variables
 
-## Quick Start
+## Migration
 
-**Development** (with HMR):
-```bash
-cd /path/to/kicli-code-assist
-ln -sf deploy/stack-dev.yaml deploy/stack.yaml
-stackctl -t local start
-
-# Browser: http://localhost:5173 (React dev server)
-# API: http://localhost:8000
-```
-
-**Production** (pre-built frontend):
-```bash
-cd /path/to/kicli-code-assist
-cd web/frontend && npm run build  # one-time
-cd ../..
-ln -sf deploy/stack-semiprod.yaml deploy/stack.yaml
-stackctl -t local start
-
-# Browser: http://localhost:8000 (Flask serving static files)
-# API: http://localhost:8000/api/...
-```
-
-**Minimal** (TUI only, no frontend):
-```bash
-cd /path/to/kicli-code-assist
-ln -sf deploy/stack-minimal.yaml deploy/stack.yaml
-stackctl -t local start
-
-# API only: http://localhost:8000/api/...
-```
-
-## How Variant Switching Works
-
-`stack.yaml` is a **symlink**. Change it to switch variants:
-
+**Before** (symlink-based):
 ```bash
 cd deploy
-ln -sf stack-dev.yaml stack.yaml        # Development (HMR)
-ln -sf stack-semiprod.yaml stack.yaml   # Production (default)
-ln -sf stack-minimal.yaml stack.yaml    # TUI-only
-ln -sf stack-full.yaml stack.yaml       # With database
-cd ..
+ln -sf stack-dev.yaml stack.yaml
 stackctl -t local start
 ```
 
-stackctl reads `pyproject.toml` → `[tool.stackctl] spec_file = "deploy/stack.yaml"` → follows symlink.
-
-## Frontend Build
-
-Required for `stack-semiprod.yaml` and `stack-full.yaml`:
-
+**Now** (stage-based):
 ```bash
-cd web/frontend
-npm run build
-# Output: kicli_code_assist/web/static/
+export KI_STAGE=development   # or production, minimal, etc.
+stackctl -t local start
 ```
 
-Flask auto-serves these static files.
+## Why the Change?
 
-## Service Endpoints
+1. **Cleaner**: Stage selection via `KI_STAGE` env var (standard pattern)
+2. **Version control friendly**: No symlinks to commit/maintain
+3. **Compatible with other ki-ecosystem apps**: ki-knowledge uses the same pattern
+4. **Non-destructive overrides**: YAML `__replace__` marker for full dict replacement
 
-- **API**: http://127.0.0.1:8000/api/...
-- **Health**: http://127.0.0.1:8000/api/health
-- **Frontend**: Depends on variant
-  - Dev: http://127.0.0.1:5173/
-  - Production: http://127.0.0.1:8000/
+## Legacy Files
 
-## Status & Logs
+Archived in `deploy/legacy/`:
+- `stack-dev.yaml` - Development (Vite HMR)
+- `stack-minimal.yaml` - API-only
+- `stack-semiprod.yaml` - Production (pre-built frontend)
+- `stack-full.yaml` - With database support (unused)
 
-```bash
-stackctl -t local status                    # Show all services
-tail -f var/log/api.log                     # API logs
-tail -f var/log/frontend.log                # Frontend logs (dev variant)
-```
+These files are kept for reference only and should not be used.
 
-## Default Behavior
+## Documentation
 
-The symlink points to `stack-semiprod.yaml` for production safety.
+See `doc/deployment/STACKCTL_IMPLEMENTATION.md` for the complete stage architecture and how to use it.
 
-For development, explicitly switch to `stack-dev.yaml` each time.
-
----
-
-For detailed architecture and scenario explanations, see: `doc/deployment/STACK_YAML_VARIANTS.md`
