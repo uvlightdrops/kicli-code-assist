@@ -2,8 +2,13 @@
 # Location: kicli-code-assist/deploy/stack-full.yaml
 #
 # Flask + Optional Database + Pre-built Frontend
-# Use-Case: Production mit Chat-History persistent
-# Usage: stackctl local start --project . --spec-file deploy/stack-full.yaml
+# Use-Case: Production mit Chat-History persistent (future feature)
+#
+# Usage:
+#   cd deploy && ln -sf stack-full.yaml stack.yaml && cd ..
+#   stackctl -t local start
+#
+# Database is optional, comment out db service if not needed
 
 stack:
   name: kicli-assist-full

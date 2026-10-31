@@ -1,13 +1,16 @@
 # Semi-Prod Stack Configuration (Variante #3: Production)
-# Used by: systemd service + stackctl for orchestration
-# Location: kicli-code-assist/deploy/stack.yaml
+# Location: kicli-code-assist/deploy/stack-semiprod.yaml
 #
+# Flask serves both API + Static Frontend Files
 # PRE-BUILD: npm run build (frontend static files to kicli_code_assist/web/static/)
-# THEN: stackctl local start --project .
 #
-# Flask serves both:
-# - /api/* routes (backend)
-# - /* static files (frontend built output)
+# Usage:
+#   cd web/frontend && npm run build
+#   cd /path/to/kicli-code-assist
+#   cd deploy && ln -sf stack-semiprod.yaml stack.yaml && cd ..
+#   stackctl -t local start
+#
+# Flask listens on 127.0.0.1:8000 (Apache reverse proxy handles external)
 
 stack:
   name: kicli-assist-semiprod

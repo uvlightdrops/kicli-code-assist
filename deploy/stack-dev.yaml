@@ -2,7 +2,14 @@
 # Location: kicli-code-assist/deploy/stack-dev.yaml
 #
 # For local development with Hot Module Reload (HMR)
-# Usage: stackctl local start --project . --spec-file deploy/stack-dev.yaml
+#
+# Usage:
+#   cd deploy && ln -sf stack-dev.yaml stack.yaml && cd ..
+#   stackctl -t local start
+#
+# Then open:
+#   - React HMR: http://localhost:5173
+#   - API: http://localhost:8000
 
 stack:
   name: kicli-assist-dev

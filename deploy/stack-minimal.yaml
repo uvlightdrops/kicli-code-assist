@@ -3,7 +3,10 @@
 #
 # Nur Flask, keine WebUI
 # Use-Case: TUI-only, Production ohne Frontend
-# Usage: stackctl local start --project . --spec-file deploy/stack-minimal.yaml
+#
+# Usage:
+#   cd deploy && ln -sf stack-minimal.yaml stack.yaml && cd ..
+#   stackctl -t local start
 
 stack:
   name: kicli-assist-minimal
