@@ -1,3 +1,13 @@
+---
+project: kicli-code-assist
+scope: architecture
+created: 2026-10-XX XX
+updated: 2026-11-02 13
+update_reason: Added canonical YAML header
+status: current
+agent_project: kicli-code-assist
+---
+
 # Phase 4: Architecture Overview
 
 **Covers**: Async LLM Processing, Security, AI Workflow Integration  
