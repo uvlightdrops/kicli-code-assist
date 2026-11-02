@@ -1,20 +1,55 @@
-# Archive - Legacy Development Phases
+---
+project: kicli-code-assist
+scope: archive
+created: 2026-11-02 14
+updated: 2026-11-02 14
+update_reason: Reorganized archive structure with per-folder subfolders
+status: current
+agent_project: kicli-code-assist
+---
 
-This folder contains historical development phase documentation from earlier project stages.
+# Archive - Legacy Development Documentation
 
-## Contents
+This folder contains general historical documentation that doesn't fit into specific categories.
 
-- **DEVELOPMENT.md** - v0.2 to v1.0 development roadmap (archived)
-- **FEATURE_ROADMAP.md** - Feature roadmap and architecture (archived)
-- **FIXES_APPLIED.md** - Critical fixes from earlier sessions (archived)
-- **PHASE2_PROJECT_AWARE_CHAT.md** - Phase 2 implementation notes (archived)
-- **PHASE5_CHECKLIST.md** - Phase 5 UI implementation checklist (archived)
-- **PHASE5_INTEGRATION_GUIDE.md** - Phase 5 integration steps (archived)
-- **PHASE5_UI_INTEGRATION.md** - Phase 5 UI component details (archived)
-- **QUICK_START_PHASE5.md** - Phase 5 quick start guide (archived)
+**Note:** Most archived docs have been moved to per-folder archives:
+- Phase docs → `/phases/archive/`
+- Architecture docs → `/architecture/archive/`
+- Test reports → `/testing/archive/`
+- Session tracking → `/tracking/archive/`
+- Guides → `/guides/archive/`
+- Features → `/features/archive/`
+- Deployment → `/deployment/archive/`
+
+---
+
+## Contents in This Folder
+
+- **DEVELOPMENT.md** - v0.2 to v1.0 development roadmap
+- **FEATURE_ROADMAP.md** - Earlier feature roadmap
+- **FIXES_APPLIED.md** - Critical fixes from earlier sessions
+- **INDEX_OLD.md** - Old documentation index
+- **REORGANIZATION_SUMMARY.md** - Documentation reorganization notes
+- **WEB_FRONTEND_SESSION_SUMMARY.md** - Historical frontend work
+- **WEB_MONACO_INTEGRATION.md** - Monaco editor integration attempts
+
+---
 
 ## Status
 
-These documents represent completed development phases. Current project status and guides are in the parent `docs/` folder.
+These documents represent historical work from earlier project stages.
 
-For current feature status, see: `../FEATURE_STATUS.md` or the yaml-cfg-wizard centralized docs.
+**For current documentation**, see the appropriate folder:
+- Phases → `/phases/README.md`
+- Architecture → `/architecture/README.md`
+- Testing → `/testing/README.md`
+- Tracking → `/tracking/README.md`
+- Guides → `/guides/README.md`
+- Features → `/features/README.md`
+- Deployment → `/deployment/README.md`
+
+---
+
+## Using This Archive
+
+This folder is for general miscellaneous docs that don't fit elsewhere. For category-specific archives, check the folder-specific archive/ subfolders.
