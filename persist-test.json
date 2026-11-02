@@ -1,0 +1,13 @@
+{
+  "session_name": "persist-test",
+  "created": 1793586228.701201,
+  "updated": 1793586228.701202,
+  "message_count": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-11-02T03:23:48.701189"
+    }
+  ]
+}

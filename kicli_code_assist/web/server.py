@@ -45,6 +45,9 @@ from kicli_code_assist.web.server_websocket import register_websocket
 # Import agent config routes (Phase 5.5)
 from kicli_code_assist.web.agent_config import register_agent_config_routes
 
+# Import trace routes (Phase 5.5.2.I3)
+from kicli_code_assist.web.agent_traces import register_trace_routes
+
 # Runtime settings (shared ki_core.runtime_settings service)
 from kicli_code_assist.web.settings_routes import register_settings_routes
 from kicli_code_assist.llm_runtime import get_live_config
@@ -154,6 +157,9 @@ def create_app(
     # Register agent config routes (Phase 5.5) - legacy API bridged to runtime settings
     register_agent_config_routes(app, ki_config_manager=ki_config_manager, project_root=project_root)
     register_settings_routes(app, project_root=project_root)
+    
+    # Register trace routes (Phase 5.5.2.I3) - transparency data queries
+    register_trace_routes(app, project_root=project_root)
     
     # Register all other routes (Phase 2D unified router)
     register_routes(app)

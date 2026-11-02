@@ -93,12 +93,20 @@ class GeneratedCode:
 class CodeImplementationAgent:
     """Analyzes code structure and prepares for implementation."""
     
-    def __init__(self, project_root: str, enable_transparency: bool = True):
+    def __init__(
+        self,
+        project_root: str,
+        enable_transparency: bool = True,
+        socketio=None,
+        execution_id: Optional[str] = None
+    ):
         """Initialize with project root.
         
         Args:
             project_root: Path to project root
             enable_transparency: Enable transparency tracing (default True)
+            socketio: Flask-SocketIO instance for WebSocket events (optional)
+            execution_id: Unique execution identifier for WebSocket rooms (optional)
         """
         self.project_root = Path(project_root)
         self.code_files: Dict[str, CodeFile] = {}
@@ -106,10 +114,12 @@ class CodeImplementationAgent:
         
         # Phase 5.5.2: Initialize transparency modules
         self.enable_transparency = enable_transparency
+        self.socketio = socketio
+        self.execution_id = execution_id
         self.tracer: Optional[ReasoningTracer] = None
         self.tracker: Optional[LLMCallTracker] = None
         self.metrics: Optional[PerformanceMetrics] = None
-        self.execution_id: Optional[str] = None
+        self.event_emitter = None
         
         if self.enable_transparency:
             from pathlib import Path as PathlibPath
@@ -128,6 +138,11 @@ class CodeImplementationAgent:
                 agent_id="CodeImplementationAgent",
                 goal_id="default"
             )
+            
+            # Initialize WebSocket event emitter if socketio provided
+            if self.socketio and self.execution_id:
+                from kicli_code_assist.agent.transparency_event_emitter import TransparencyEventEmitter
+                self.event_emitter = TransparencyEventEmitter(self.socketio, self.execution_id)
         
     def discover_python_files(self, max_files: int = 50) -> List[Path]:
         """Discover Python files in project."""

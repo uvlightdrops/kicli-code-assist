@@ -1,0 +1,18 @@
+{
+  "session_name": "test-session-2",
+  "created": 1793586226.8776,
+  "updated": 1793586226.877678,
+  "message_count": 2,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hello",
+      "timestamp": "2026-11-02T03:23:46.877402"
+    },
+    {
+      "role": "assistant",
+      "content": "Hi there!",
+      "timestamp": "2026-11-02T03:23:46.877653"
+    }
+  ]
+}

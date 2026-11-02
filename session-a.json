@@ -1,0 +1,13 @@
+{
+  "session_name": "session-a",
+  "created": 1793586227.0764918,
+  "updated": 1793586227.076557,
+  "message_count": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Message A",
+      "timestamp": "2026-11-02T03:23:47.076274"
+    }
+  ]
+}
