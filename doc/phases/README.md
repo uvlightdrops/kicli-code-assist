@@ -84,6 +84,7 @@ See `/home/flow/dev_doc/DOCUMENTATION_MAINTENANCE_STANDARDS.md` for header stand
 | Document | Purpose |
 |----------|---------|
 | `PHASE_5_1_SUMMARY.md` | MetaCoordinationAgent implementation (6-stage pipeline) |
+| `../architecture/AGENT_COORDINATION_ARCHITECTURE.md` | Architecture deep-dive |
 
 ---
 
@@ -132,7 +133,7 @@ See `/home/flow/dev_doc/DOCUMENTATION_MAINTENANCE_STANDARDS.md` for header stand
 | Document | Purpose |
 |----------|---------|
 | `PHASE_5_5_1_IMPLEMENTATION_REPORT.md` | Implementation report (doc/phases/) |
-| `../architecture/PHASE_5_5_1_MULTIFILE_REFACTORING.md` | Architecture deep-dive |
+| `../architecture/MULTIFILE_REFACTORING_ARCHITECTURE.md` | Architecture deep-dive |
 
 #### 5.5.2 - Transparency & Observability ✅
 
@@ -143,10 +144,10 @@ See `/home/flow/dev_doc/DOCUMENTATION_MAINTENANCE_STANDARDS.md` for header stand
 |----------|------|---------|
 | `PHASE_5_5_2_SUMMARY.md` | Summary | Complete transparency architecture overview |
 | `PHASE_5_5_2_IMPLEMENTATION_REPORT.md` | Report | Implementation details and integration |
-| `../architecture/PHASE_5_5_2_TRANSPARENCY_ARCHITECTURE.md` | Architecture | Core modules & design |
-| `../architecture/PHASE_5_5_2_I2_WEBSOCKET_ARCHITECTURE.md` | Architecture | WebSocket streaming (6 event types) |
-| `../architecture/PHASE_5_5_2_I4_FRONTEND_CONCEPT.md` | Design | Frontend ReasoningPanel concept |
-| `../architecture/PHASE_5_5_2_INTEGRATION_CONCEPT.md` | Design | Integration strategy |
+| `../architecture/TRANSPARENCY_MODULES_ARCHITECTURE.md` | Architecture | Core modules & design (ReasoningTracer, LLMCallTracker, PerformanceMetrics) |
+| `../architecture/WEBSOCKET_STREAMING_ARCHITECTURE.md` | Architecture | WebSocket streaming (6 event types) |
+| `../architecture/REASONING_PANEL_FRONTEND_DESIGN.md` | Design | Frontend ReasoningPanel concept |
+| `../architecture/TRANSPARENCY_INTEGRATION_ARCHITECTURE.md` | Design | Integration strategy |
 | `../testing/PHASE_5_5_2_UNIT_TEST_REPORT.md` | Testing | Unit test results (93/93 passing) |
 | `../tracking/PHASE_5_5_2_SESSION_PROGRESS.md` | Tracking | Session progress updates |
 | `../tracking/PHASE_5_5_2_I2_I3_COMPLETION.md` | Tracking | I2-I3 completion status |
@@ -157,7 +158,7 @@ See `/home/flow/dev_doc/DOCUMENTATION_MAINTENANCE_STANDARDS.md` for header stand
 
 | Document | Purpose |
 |----------|---------|
-| `../architecture/PHASE_5_5_3_ORCHESTRATION_ARCHITECTURE.md` | Orchestration layer design |
+| `../architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md` | Agent orchestration layer design |
 
 #### Session Tracking
 
