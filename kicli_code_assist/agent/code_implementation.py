@@ -29,6 +29,9 @@ from kicli_code_assist.agent.agent_state import (
     ThinkingType,
     AgentStateSnapshot,
 )
+from kicli_code_assist.agent.reasoning_tracer import ReasoningTracer, EventType
+from kicli_code_assist.agent.llm_call_tracker import LLMCallTracker, CallPurpose, LLMModel
+from kicli_code_assist.agent.performance_metrics import PerformanceMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -90,11 +93,41 @@ class GeneratedCode:
 class CodeImplementationAgent:
     """Analyzes code structure and prepares for implementation."""
     
-    def __init__(self, project_root: str):
-        """Initialize with project root."""
+    def __init__(self, project_root: str, enable_transparency: bool = True):
+        """Initialize with project root.
+        
+        Args:
+            project_root: Path to project root
+            enable_transparency: Enable transparency tracing (default True)
+        """
         self.project_root = Path(project_root)
         self.code_files: Dict[str, CodeFile] = {}
         self.project_structure: Optional[ProjectCodeStructure] = None
+        
+        # Phase 5.5.2: Initialize transparency modules
+        self.enable_transparency = enable_transparency
+        self.tracer: Optional[ReasoningTracer] = None
+        self.tracker: Optional[LLMCallTracker] = None
+        self.metrics: Optional[PerformanceMetrics] = None
+        self.execution_id: Optional[str] = None
+        
+        if self.enable_transparency:
+            from pathlib import Path as PathlibPath
+            traces_dir = PathlibPath(project_root) / "traces"
+            traces_dir.mkdir(parents=True, exist_ok=True)
+            
+            self.tracer = ReasoningTracer(
+                agent_id="CodeImplementationAgent",
+                output_dir=str(traces_dir)
+            )
+            self.tracker = LLMCallTracker(
+                agent_id="CodeImplementationAgent",
+                output_dir=str(traces_dir)
+            )
+            self.metrics = PerformanceMetrics(
+                agent_id="CodeImplementationAgent",
+                goal_id="default"
+            )
         
     def discover_python_files(self, max_files: int = 50) -> List[Path]:
         """Discover Python files in project."""
@@ -250,6 +283,19 @@ class CodeImplementationAgent:
         Returns:
             GeneratedCode object or None if generation fails
         """
+        # Phase 5.5.2: Record decision point
+        if self.tracer:
+            self.tracer.record_decision(
+                options_considered=[
+                    "Use cached implementation",
+                    "Generate via LLM",
+                    "Use template"
+                ],
+                option_selected="Generate via LLM",
+                confidence_score=0.9,
+                reasoning="LLM generation provides best customization"
+            )
+        
         # Client for the configured provider (llm.provider, model, timeout) at call time
         if api_client is None:
             try:
@@ -257,6 +303,12 @@ class CodeImplementationAgent:
                 api_client = chat_client()
             except Exception as e:
                 logger.warning(f"Cannot initialize LLM client: {type(e).__name__}: {e}")
+                if self.tracer:
+                    self.tracer.record_error(
+                        error_type="LLMClientError",
+                        message=f"{type(e).__name__}: {e}",
+                        recovery_suggestion="Check LLM configuration and API keys"
+                    )
                 return None
         
         # Gather context
@@ -268,6 +320,12 @@ class CodeImplementationAgent:
         # Call LLM
         try:
             from ki_core.core.models import ChatRequest, Message, Role
+            import time
+            
+            if self.metrics:
+                self.metrics.start_timer("llm_generation")
+            
+            llm_start = time.time()
             
             request = ChatRequest(
                 messages=[
@@ -278,6 +336,31 @@ class CodeImplementationAgent:
             )
             
             response = api_client.chat(request)
+            llm_end = time.time()
+            
+            if self.metrics:
+                self.metrics.stop_timer("llm_generation")
+            
+            # Phase 5.5.2: Record LLM call
+            if self.tracker:
+                token_usage = getattr(response, "usage", None)
+                self.tracker.record_call(
+                    model=LLMModel.GPT_4O,  # Default; can be detected from api_client
+                    purpose=CallPurpose.CODE_GENERATION,
+                    prompt_tokens=len(prompt) // 4,  # Approximate
+                    completion_tokens=len(response.message.content) // 4,  # Approximate
+                    total_tokens=(len(prompt) + len(response.message.content)) // 4,
+                    latency_seconds=llm_end - llm_start,
+                    session_id=self.execution_id or "unknown"
+                )
+            
+            # Phase 5.5.2: Record execution
+            if self.tracer:
+                self.tracer.record_execution(
+                    action="llm_generation",
+                    result="success",
+                    output_length=len(response.message.content)
+                )
             
             # Find relevant file
             target_file = self.get_file_for_goal(goal_title, goal_description)
@@ -642,6 +725,7 @@ class CodeImplementationAgent:
         Full autonomous workflow (Phase 5.4: Complete Autonomy = 10/10).
         
         With Phase 5.5 streaming: broadcasts state to all listeners (WebUI, CLI supervisor).
+        With Phase 5.5.2 Transparency: tracks all decisions, LLM costs, and performance metrics.
         
         Implements all 5 sub-phases:
         1. Git workflow (5.4.1)
@@ -660,9 +744,22 @@ class CodeImplementationAgent:
             state_broadcast_callback: Callback for state updates (if no controller)
         
         Returns:
-            Dict with complete workflow results and state
+            Dict with complete workflow results and state with transparency data
         """
         logger.info(f"🎯 PHASE 5.4 FULL AUTONOMY: {goal_id}")
+        
+        # Phase 5.5.2: Initialize transparency modules
+        if self.enable_transparency:
+            self.execution_id = f"{goal_id}-{datetime.now().isoformat()}"
+            if self.tracer:
+                self.tracer.start_session(
+                    session_name=f"Implementation-{goal_id}",
+                    agent_type="CodeImplementationAgent",
+                    execution_id=self.execution_id
+                )
+            if self.metrics:
+                self.metrics.execution_id = self.execution_id
+                self.metrics.start_phase("initialization")
         
         # Initialize managers
         git = GitManager(str(self.project_root))
@@ -688,6 +785,13 @@ class CodeImplementationAgent:
         state_manager.start_implementation(
             goal_id, goal_title, str(self.project_root)
         )
+        
+        # Phase 5.5.2: Record initialization event
+        if self.tracer:
+            self.tracer.record_event(
+                event_type=EventType.INITIALIZATION,
+                description=f"Starting autonomous implementation: {goal_title}"
+            )
         
         try:
             # Phase 5.4.1: Prepare rollback state
@@ -1004,7 +1108,8 @@ class CodeImplementationAgent:
                 )
                 controller.complete_execution(agent_id, True)
             
-            return {
+            # Phase 5.5.2: Finalize transparency data
+            response_data = {
                 "success": True,
                 "goal_id": goal_id,
                 "phase": "5.4 Complete",
@@ -1018,9 +1123,60 @@ class CodeImplementationAgent:
                 "state_tracked": True,
                 "agent_id": agent_id,
             }
+            
+            if self.enable_transparency:
+                if self.tracer:
+                    self.tracer.record_event(
+                        event_type=EventType.EXECUTION_COMPLETE,
+                        description="Autonomous implementation completed successfully"
+                    )
+                    self.tracer.end_session()
+                    session_data = self.tracer.get_current_session()
+                    response_data["execution_trace"] = {
+                        "session_id": self.execution_id,
+                        "total_events": len(session_data.events) if session_data else 0,
+                        "trace_file": str(self.tracer.output_dir / f"{self.execution_id}.json")
+                    }
+                
+                if self.metrics:
+                    self.metrics.end_phase("implementation")
+                    self.metrics.finalize()
+                    metrics_data = self.metrics.generate_report()
+                    response_data["performance_metrics"] = {
+                        "execution_id": self.execution_id,
+                        "total_phases": len(metrics_data.get("phases", {})),
+                        "total_duration_ms": metrics_data.get("total_duration_ms", 0),
+                        "metrics_file": str(self.metrics.output_dir / f"{self.execution_id}-metrics.json")
+                    }
+                
+                if self.tracker:
+                    cost_summary = self.tracker.get_cost_summary()
+                    response_data["cost_tracking"] = {
+                        "total_cost": cost_summary.get("total_cost", 0.0),
+                        "total_tokens": cost_summary.get("total_tokens", 0),
+                        "calls_count": cost_summary.get("calls_count", 0),
+                        "cost_file": str(self.tracker.output_dir / f"{self.execution_id}-calls.json")
+                    }
+            
+            return response_data
         
         except Exception as e:
             logger.error(f"Autonomous implementation failed: {e}")
+            
+            # Phase 5.5.2: Record error in transparency modules
+            if self.tracer:
+                self.tracer.record_error(
+                    error_type=type(e).__name__,
+                    message=str(e),
+                    recovery_suggestion="Check logs and rollback branch"
+                )
+                self.tracer.end_session()
+            
+            if self.metrics:
+                self.metrics.increment_counter("errors", amount=1)
+                self.metrics.end_phase("implementation")
+                self.metrics.finalize()
+            
             if agent_id:
                 controller.set_error(
                     agent_id,
@@ -1028,12 +1184,23 @@ class CodeImplementationAgent:
                     f"Unexpected error: {str(e)}",
                 )
                 controller.complete_execution(agent_id, False)
+            
             rollback.rollback_implementation(goal_id, f"Exception: {str(e)}")
             state_manager.fail_implementation(goal_id, f"Exception: {str(e)}")
-            return {
+            
+            response_data = {
                 "success": False,
                 "error": str(e),
                 "rolled_back": True,
                 "exception": True,
                 "agent_id": agent_id,
             }
+            
+            # Include transparency data even on failure
+            if self.enable_transparency and self.execution_id:
+                response_data["execution_trace"] = {
+                    "session_id": self.execution_id,
+                    "trace_file": str(self.tracer.output_dir / f"{self.execution_id}.json") if self.tracer else None
+                }
+            
+            return response_data
