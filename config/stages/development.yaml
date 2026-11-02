@@ -1,6 +1,26 @@
-# Development stage: local dev with HMR frontend
-# Base stack from config/defaults/stack.yaml applies.
-# This stage file overrides specific services for development.
+# Development stage: local development with HMR frontend
+# Merges with config/defaults/stack.yaml
+# Adds development-specific environment variables
 
-# All services run (api + frontend with HMR)
-# No additional overrides needed; defaults are suitable for dev
+stack:
+  services:
+    api:
+      env:
+        FLASK_ENV: development
+        FLASK_DEBUG: "1"
+        LOG_LEVEL: DEBUG
+    
+    frontend:
+      env:
+        VITE_API_URL: "http://127.0.0.1:8000"
+        VITE_HMR_HOST: "127.0.0.1"
+        VITE_HMR_PORT: "5173"
+
+# Web configuration (passed to Flask)
+web:
+  cors_origins:
+    - "http://127.0.0.1:5173"  # Vite dev server (development)
+    - "http://localhost:5173"
+    - "http://127.0.0.1:8000"  # API itself (for testing)
+
+

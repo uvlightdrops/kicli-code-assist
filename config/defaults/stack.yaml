@@ -22,7 +22,11 @@ stack:
     
     frontend:
       kind: process
-      command: ["{root}/web/frontend/node_modules/.bin/vite"]
+      command: [
+        "{root}/web/frontend/node_modules/.bin/vite",
+        "--host", "127.0.0.1",
+        "--port", "5173"
+      ]
       cwd: "{root}/web/frontend"
       host: 127.0.0.1
       port: 5173

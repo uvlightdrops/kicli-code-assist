@@ -137,21 +137,37 @@ def create_app(
     def index():
         """Serve main index.html from static folder (Production only).
         
-        In development, Vite Dev Server on port 3000 handles the UI.
+        In development, Vite Dev Server on port 5173 handles the UI.
         This route only serves static builds for production deployments.
         """
+        # Get frontend port from config
+        config = app.config.get("KICLI_CONFIG", {})
+        stack = config.get("stack", {})
+        frontend = stack.get("services", {}).get("frontend", {})
+        frontend_host = frontend.get("host", "127.0.0.1")
+        frontend_port = frontend.get("port", 5173)
+        frontend_url = f"http://{frontend_host}:{frontend_port}"
+        
         return jsonify({
             "error": "Development mode detected",
-            "message": "Use http://localhost:3000 for UI (Vite Dev Server)",
+            "message": f"Use {frontend_url} for UI (Vite Dev Server)",
             "production_usage": "Set FLASK_ENV=production to serve static builds from this port"
         }), 400
     
     @app.route("/assets/<path:filename>", methods=["GET"])
     def serve_assets(filename):
         """Serve static assets (Production only)."""
+        # Get frontend port from config
+        config = app.config.get("KICLI_CONFIG", {})
+        stack = config.get("stack", {})
+        frontend = stack.get("services", {}).get("frontend", {})
+        frontend_host = frontend.get("host", "127.0.0.1")
+        frontend_port = frontend.get("port", 5173)
+        frontend_url = f"http://{frontend_host}:{frontend_port}"
+        
         return jsonify({
             "error": "Development mode detected",
-            "message": "Use http://localhost:3000 for assets (Vite Dev Server)"
+            "message": f"Use {frontend_url} for assets (Vite Dev Server)"
         }), 400
     
     # Register agent config routes (Phase 5.5) - legacy API bridged to runtime settings

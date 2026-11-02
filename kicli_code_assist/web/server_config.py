@@ -10,21 +10,35 @@ from ki_core.config import ConfigManager
 
 
 def get_config() -> Dict[str, Any]:
-    """Load configuration from ki.yaml via ConfigManager.
+    """Load configuration from ki.yaml and stack.yaml via ConfigManager.
     
     Returns:
-        Configuration dict with web, storage, llm, etc. settings.
+        Configuration dict with web, storage, llm, stack, etc. settings.
         Fallback to defaults if config file not found.
     """
     try:
         config_manager = ConfigManager()
         config = config_manager.load()
+        
+        # Also load stack configuration (for CORS, ports, etc.)
+        # This merges stage overrides automatically
+        try:
+            stack_config = config_manager.load(key="stack")
+            if stack_config:
+                config["stack"] = stack_config
+        except Exception:
+            pass  # Stack config is optional
+        
         return config
     except Exception as e:
         logger = logging.getLogger("kicli-web")
         logger.error(f"Failed to load config: {e}")
         return {
-            "web": {"host": "127.0.0.1", "port": 8000},
+            "web": {
+                "host": "127.0.0.1", 
+                "port": 8000,
+                "cors_origins": ["http://127.0.0.1:5173", "http://127.0.0.1:8000"]
+            },
             "storage": {"log_dir": str(Path.home() / "dev_data" / "kicli-code-assist" / "log")},
         }
 
@@ -47,13 +61,36 @@ def setup_logging(config: Dict[str, Any]) -> logging.Logger:
 def get_cors_origins(config: Dict[str, Any]) -> list[str]:
     """Get CORS allowed origins from config.
     
+    Priority:
+    1. web.cors_origins from ki.yaml
+    2. Derive from stack.yaml frontend port (if available)
+    3. Fallback to development defaults
+    
     Args:
         config: Configuration dict
         
     Returns:
         List of allowed CORS origins
     """
-    return config.get("web", {}).get("cors_origins", ["http://localhost:3000"])
+    # Try explicit CORS configuration first
+    cors = config.get("web", {}).get("cors_origins")
+    if cors:
+        return cors
+    
+    # Try to derive from stack configuration
+    try:
+        stack = config.get("stack", {})
+        frontend = stack.get("services", {}).get("frontend", {})
+        host = frontend.get("host", "127.0.0.1")
+        port = frontend.get("port", 5173)
+        
+        if host and port:
+            return [f"http://{host}:{port}"]
+    except Exception:
+        pass
+    
+    # Fallback to development defaults
+    return ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8000"]
 
 
 def get_web_settings(config: Dict[str, Any]) -> tuple[str, int]:

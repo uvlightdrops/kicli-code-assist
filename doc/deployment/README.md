@@ -1,4 +1,22 @@
-# Deployment Documentation
+---
+title: "Deployment Documentation (kicli-code-assist)"
+project: "kicli-code-assist"
+agent_project: "kicli-code-assist"
+scope: "deployment"
+purpose: "Index and quick-start guide for deployment infrastructure"
+created: 2026-11-01
+updated: 2026-11-02T04:20:00+01:00
+update_reason: "Added YAML header for metadata tracking and consolidation"
+status: "active"
+cross_references:
+  - "STACKCTL_ARCHITECTURE.md: High-level design"
+  - "STACKCTL_IMPLEMENTATION.md: Implementation details"
+  - "CURRENT_STATUS.md: Deployment readiness"
+  - "stackctl/doc/README.md: General stackctl usage"
+  - "dev_doc/DEPLOYMENT_STANDARDS.md: Cross-project patterns"
+---
+
+# Deployment Documentation (kicli-code-assist)
 
 Complete guide to deploying and managing kicli-code-assist using StackCtl.
 
