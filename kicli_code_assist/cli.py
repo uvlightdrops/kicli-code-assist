@@ -39,15 +39,36 @@ def tui(project: str | None, api_url: str) -> None:
     Example:
         kicli-assist tui --project /path/to/project --api-url http://prod-backend:8000
     """
-    from kicli_code_assist.ui.tui_client import run_tui as run_tui_app
-    from kicli_code_assist.ui.tui_config import TUIConfig
+    from kicli_code_assist.ui.tui_client import run_tui
+    from kicli_code_assist.ui.config import ConfigLoader
+    from pathlib import Path
+    import tempfile
+    import yaml
     
     project_path = project or str(Path.cwd())
-    config = TUIConfig(api_base_url=api_url)
+    
+    # Create temporary config with overrides
+    config_data = {
+        "backend": {
+            "url": api_url,
+        },
+        "file_tree": {
+            "project_root": project_path,
+        },
+    }
+    
+    # Write temp config
+    with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as f:
+        yaml.dump(config_data, f)
+        config_path = f.name
     
     click.echo(f"Starting TUI for project: {project_path}", err=True)
     click.echo(f"Backend: {api_url}", err=True)
-    run_tui_app(project_path, config)
+    
+    try:
+        run_tui(config_path)
+    finally:
+        Path(config_path).unlink(missing_ok=True)
 
 
 def run_tmux(simple: bool = False, session: str = "ki-assist") -> None:

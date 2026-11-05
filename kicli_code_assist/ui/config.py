@@ -29,12 +29,9 @@ class AgentTabsConfig(BaseModel):
     """Agent tabs panel configuration."""
     enabled: bool = True
     enabled_tabs: List[str] = Field(
-        default_factory=lambda: ["explain", "suggest", "reason", "metrics"]
+        default_factory=lambda: ["Explain", "Suggest", "Reason", "Metrics"]
     )
-    tab_order: List[str] = Field(
-        default_factory=lambda: ["explain", "suggest", "reason", "metrics", "refactor", "dependencies"]
-    )
-    default_tab: str = "explain"
+    default_tab: str = "Explain"
 
     class Config:
         extra = "allow"
@@ -121,7 +118,12 @@ class ConfigLoader:
         return Path("config/tui_config.yaml")
     
     def _load(self) -> TUIConfig:
-        """Load config from YAML file."""
+        """Load config from YAML file.
+        
+        Supports both formats:
+        1. Top-level sections (new, yaml-cfg-wizard compatible)
+        2. Nested under 'tui:' (legacy)
+        """
         if not self.config_path.exists():
             # Return defaults
             return TUIConfig()
@@ -133,8 +135,13 @@ class ConfigLoader:
             if not data:
                 return TUIConfig()
             
-            # Extract nested sections
-            tui_data = data.get("tui", {})
+            # Check if nested under 'tui:' (legacy) or top-level (new)
+            if "tui" in data:
+                # Legacy format
+                tui_data = data.get("tui", {})
+            else:
+                # New format (top-level sections)
+                tui_data = data
             
             return TUIConfig(
                 file_tree=FileTreeConfig(**tui_data.get("file_tree", {})),

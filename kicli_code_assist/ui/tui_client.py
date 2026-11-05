@@ -149,11 +149,12 @@ class KICLITUIApp:
                             enabled_tabs=self.config.agent_tabs.enabled_tabs,
                             default_tab=self.config.agent_tabs.default_tab,
                         )
-            
-            # Input bar
+        
+        # Input bar (always visible)
+        with Vertical(id="input-container"):
             yield InputBar(multiline=True)
         
-        # Status bar
+        # Status bar (always visible)
         with Vertical(id="status-container"):
             yield StatusBar()
         
@@ -171,21 +172,24 @@ class KICLITUIApp:
         if self.config.debug:
             self.title = f"{self.TITLE} [DEBUG]"
         
-        # Initialize status bar
-        status_bar = self.query_one(StatusBar)
-        status_bar.set_connected(False)
+        # Initialize status bar (always present)
+        try:
+            status_bar = self.query_one(StatusBar)
+            status_bar.set_connected(False)
+        except Exception as e:
+            logger.warning(f"StatusBar not found: {e}")
         
         # Initialize backend client and connect
         self.backend_client = BackendClient(self.config.backend.url)
         self._connect_backend()
         
-        # Bind InputBar submit to handler
+        # Bind InputBar submit to handler (InputBar always present)
         try:
             input_bar = self.query_one(InputBar)
             input_bar.on_submit_callback = self._on_input_submit
             input_bar.on_file_selected_callback = self._on_file_selected
         except Exception as e:
-            logger.error(f"Failed to bind input bar: {e}")
+            logger.warning(f"InputBar not found: {e}")
     
     def action_quit(self) -> None:
         """Handle quit action."""
