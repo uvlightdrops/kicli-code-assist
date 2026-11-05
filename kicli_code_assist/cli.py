@@ -27,6 +27,29 @@ def run_tui(config: str | None = None, provider: str | None = None) -> None:
     run_textual()
 
 
+@click.command()
+@click.option("--project", default=None, help="Project root (defaults to current directory)")
+@click.option("--api-url", default="http://localhost:8000", help="Backend API URL")
+def tui(project: str | None, api_url: str) -> None:
+    """Launch agent-driven TUI client (for jump hosts without GUI access).
+    
+    The TUI provides terminal-based access to code analysis agents,
+    identical to the web UI but for environments without graphical display.
+    
+    Example:
+        kicli-assist tui --project /path/to/project --api-url http://prod-backend:8000
+    """
+    from kicli_code_assist.ui.tui_client import run_tui as run_tui_app
+    from kicli_code_assist.ui.tui_config import TUIConfig
+    
+    project_path = project or str(Path.cwd())
+    config = TUIConfig(api_base_url=api_url)
+    
+    click.echo(f"Starting TUI for project: {project_path}", err=True)
+    click.echo(f"Backend: {api_url}", err=True)
+    run_tui_app(project_path, config)
+
+
 def run_tmux(simple: bool = False, session: str = "ki-assist") -> None:
     """Launch the tmux-based layout."""
     from kicli_code_assist.tmux_launcher import launch_tmux_assistant, launch_simple_tmux
@@ -421,6 +444,9 @@ _register_yaml_commands(cli)
 
 # Register server subcommand group (native Click structure, not YAML-based)
 cli.add_command(server)
+
+# Register TUI command
+cli.add_command(tui)
 
 
 def main() -> None:
