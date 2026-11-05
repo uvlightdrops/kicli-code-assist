@@ -24,10 +24,12 @@ class TUIAgentClient:
         self._client = httpx.AsyncClient(base_url=self.base_url, timeout=timeout)
     
     async def health_check(self) -> bool:
-        """Check if backend is available."""
+        """Check if backend is available by attempting a simple request."""
         try:
-            resp = await self._client.get("/health", timeout=2.0)
-            return resp.status_code == 200
+            # Try root endpoint (all Flask apps have this)
+            resp = await self._client.get("/", timeout=2.0)
+            # Accept any non-timeout response (even 404, error messages, etc.)
+            return resp.status_code < 500
         except Exception as e:
             logger.error(f"Health check failed: {e}")
             return False
