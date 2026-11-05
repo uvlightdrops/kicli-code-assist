@@ -26,18 +26,18 @@ class ProjectExplorer(Container):
     def __init__(self, project_path: str, **kwargs):
         super().__init__(**kwargs)
         self.project_path = Path(project_path)
-        self.tree: Optional[Tree] = None
+        self.file_tree: Optional[Tree] = None
         self.selected_file: Optional[str] = None
     
     def compose(self):
         """Create tree widget."""
-        self.tree = Tree("📁 Project")
-        yield self.tree
+        self.file_tree = Tree("📁 Project")
+        yield self.file_tree
     
     def on_mount(self) -> None:
         """Populate tree on mount."""
-        if self.tree:
-            self._load_tree(self.tree.root, self.project_path)
+        if self.file_tree:
+            self._load_tree(self.file_tree.root, self.project_path)
     
     def _load_tree(self, parent, path: Path, max_depth: int = 3, depth: int = 0) -> None:
         """Recursively load directory tree."""
