@@ -1,0 +1,59 @@
+# TUI Configuration
+
+tui:
+  # File tree panel
+  file_tree:
+    enabled: true
+    project_root: "."
+    ignore_patterns:
+      - .git
+      - __pycache__
+      - .venv
+      - node_modules
+      - .pytest_cache
+    max_depth: 10
+  
+  # Agent tabs panel
+  agent_tabs:
+    enabled: true
+    enabled_tabs:
+      - explain
+      - suggest
+      - reason
+      - metrics
+    tab_order:
+      - explain
+      - suggest
+      - reason
+      - metrics
+      - refactor
+      - dependencies
+    default_tab: explain
+  
+  # Logs panel
+  logs:
+    enabled: true
+    max_lines: 100
+    level: INFO
+  
+  # Chat panel (disabled for Phase 1)
+  chat:
+    enabled: false
+    max_history: 50
+  
+  # Backend API
+  backend:
+    url: "http://localhost:8000"
+    timeout: 30
+    retry_count: 3
+  
+  # Editor modes
+  vi_mode: true
+  preview_modal: true
+  
+  # UI styling
+  theme: dark
+  layout: split  # split | focused
+  
+  # Debugging
+  debug: false
