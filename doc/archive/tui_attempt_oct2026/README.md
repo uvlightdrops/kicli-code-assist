@@ -193,7 +193,19 @@ Input Mode:
 
 ---
 
-## What Happened Next?
+## Archived Session Tracking (Nov 5, 2026)
+
+### TUI_IMPLEMENTATION_SESSION_20261105.md
+**What:** Summary of Nov 5 TUI implementation session  
+**Contains:** Code metrics, deliverables checklist, architecture decisions  
+**Note:** Session complete; implementation archived. Preserved in session checkpoint 011.
+
+### TUI_BLOCKER_YAML_CFG_WIZARD.md
+**What:** Tracker for yaml_cfg_wizard import blocker (now resolved)  
+**Contains:** Problem analysis, resolution steps  
+**Note:** Blocker fixed in ki-core; preserved in checkpoint 011.
+
+---
 
 **Nov 2026 Pivot:**
 1. ✅ Created FRONTEND_SPECIFICATION (abstract, multi-frontend)
