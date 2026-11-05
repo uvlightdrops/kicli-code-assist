@@ -36,7 +36,7 @@ TUI_CSS = """
 Screen {
     layout: grid;
     grid-size: 2 3;
-    grid-columns: 25% 1fr;
+    grid-columns: 40% 1fr;
     grid-rows: 1fr auto auto;
 }
 
