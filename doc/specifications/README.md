@@ -22,7 +22,7 @@ This directory contains **foundational specifications** for kicli-code-assist. S
 
 ## Current Specifications
 
-### 01_ARCHITECTURE.md ✅ UPDATED
+### 01_ARCHITECTURE.md ✅ ACTIVE
 **Status:** `active` — System overview for Phase 1+ TUI development
 
 **Describes:**
@@ -44,42 +44,42 @@ This directory contains **foundational specifications** for kicli-code-assist. S
 
 ---
 
-### 02_TUI_SPECIFICATION.md
-**Status:** `archived` — Legacy chat-based design (Oct 2026)
-
-**Describes:** Earlier FileList + Chat + Input interface
-
-**Why Archived:** 
-- Pivoted to agent-backend approach (Nov 2026)
-- Leverages Phase 5.5.2 features (transparency, reasoning)
-- Better for operational context (K8s jump hosts)
-
-**See Also:** `doc/archive/tui_attempt_oct2026/` for historical reference
-
----
-
-### 03_BACKEND_SPECIFICATION.md
-**Status:** `reference` — Route contracts & event formats
+### 02_PHASE_1_CHECKLIST.md ✅ NEW
+**Status:** `active` — Phase 1 implementation checklist
 
 **Describes:**
-- `/api/agent/route` — Main entry point
-- Individual agent endpoints
-- JSON-L response format
-- WebSocket namespaces
+- Component implementation tasks (Project Tree, Tabs, Input, Status Bar)
+- Backend connectivity requirements
+- User interaction workflow
+- Keyboard shortcuts
+- Error handling strategies
+- Testing checklist
+- Success criteria
+- Learnings from Oct 2026 attempt
+
+**When to use:**
+- Developer: Track implementation progress
+- QA: Validate against checklist
+- Reviewer: Acceptance criteria
+
+**Read together with:**
+- `doc/architecture/FRONTEND_SPECIFICATION.md` (what each component does)
+- `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md` (how to implement)
 
 ---
 
-### 04_FEATURE_CHECKLIST.md
-**Status:** `reference` — Phase completeness tracker
+### Archived Specifications
 
-**Describes:** What's done, in progress, blocked in each phase
+**See:** `doc/archive/tui_attempt_oct2026/` for:
+- `02_TUI_SPECIFICATION.md` — Legacy chat-based design (Oct 2026)
+- `03_BACKEND_SPECIFICATION.md` — Old chat backend routes
+- `04_FEATURE_CHECKLIST.md` — Old feature checklist (chat phase)
+- `05_IMPLEMENTATION_DETAILS.md` — Old code walkthrough
 
----
-
-### 05_IMPLEMENTATION_DETAILS.md
-**Status:** `reference` — Code patterns & conventions
-
-**Describes:** Python/Textual best practices for this project
+**Why archived:** 
+- Oct 2026 chat-based approach superseded by agent-backend design
+- Preserved for historical reference and lessons learned
+- See archive README for insights extracted
 
 ---
 

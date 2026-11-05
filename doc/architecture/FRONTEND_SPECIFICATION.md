@@ -97,20 +97,21 @@ cross_references:
        }
 
 4. Backend streams response (JSON-L format)
-   └─→ [Frontend] For each event:
-       ```json
-       {"event_type": "explain", "content": "This function..."}
-       {"event_type": "metrics", "complexity": 3, "maintainability_index": 75}
-       {"event_type": "suggest", "suggestions": [...]}
-       ```
+   └─ For each event:
+   
+   {"event_type": "explain", "content": "This function..."}
+   {"event_type": "metrics", "complexity": 3, "maintainability_index": 75}
+   {"event_type": "suggest", "suggestions": [...]}
+
 
 5. Frontend renders each event to appropriate Tab
-   └─→ [Explain Tab] Renders explanation text
-   └─→ [Metrics Tab] Renders metric values
-   └─→ [Suggest Tab] Renders suggestions with diffs
+   - [Explain Tab] Renders explanation text
+   - [Metrics Tab] Renders metric values
+   - [Suggest Tab] Renders suggestions with diffs
 
 6. Status Bar updates with timing + cost
-   └─→ "✅ Complete | Time: 2.3s | Cost: $0.04 | Tokens: 234"
+   - "✅ Complete | Time: 2.3s | Cost: $0.04 | Tokens: 234"
+
 ```
 
 ---
@@ -284,7 +285,7 @@ Cyclomatic:        3
 ```
 [green]+ def process_data(items: List[int]) -> List[int]:[/]
 [red]- def process_data(items):[/]
-  
+
   """Process items by doubling each value."""
   return [item * 2 for item in items]
 ```
@@ -313,9 +314,9 @@ Cyclomatic:        3
 ```
 ❌ Request timed out (>60s)
    Last response: Metrics completed (2.1s ago)
-   
+
    Waiting for: Reasoning trace...
-   
+
    [Cancel] [Retry] [View Partial]
 ```
 
@@ -323,10 +324,10 @@ Cyclomatic:        3
 
 ```
 ⚠️  LLM Error from backend
-   
+
    Provider: OpenAI
    Error: Invalid API key
-   
+
    Solution: Configure OpenAI key in ki.yaml
 ```
 
