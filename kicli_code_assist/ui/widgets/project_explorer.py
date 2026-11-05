@@ -59,13 +59,13 @@ class ProjectExplorer(Container):
         except (PermissionError, OSError):
             pass
     
-    def on_tree_select(self, event: Tree.Selected) -> None:
+    def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
         """Handle file selection."""
         if event.node.data and Path(event.node.data).is_file():
             self.selected_file = event.node.data
             self.post_message(self.FileSelected(str(event.node.data)))
     
-    class FileSelected(Widget.Post):
-        """Posted when file is selected."""
+    class FileSelected:
+        """Message when file is selected."""
         def __init__(self, file_path: str):
             self.file_path = file_path
