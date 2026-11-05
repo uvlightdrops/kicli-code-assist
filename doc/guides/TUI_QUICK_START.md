@@ -31,8 +31,8 @@ python3 -c "import textual; import httpx; import rich; print('✅ All OK')"
 
 ### Local Development
 ```bash
-# Start backend
-KI_STAGE=development python -m stackenv start
+# Start backend (from ki-ecosystem or project root)
+.venv/bin/python -m stackctl start
 
 # In another terminal, launch TUI
 kicli-assist tui --project /path/to/project
@@ -121,7 +121,7 @@ Backend (localhost:8000 or remote)
 ```
 **Fix**: Ensure backend is running:
 ```bash
-KI_STAGE=development python -m stackenv start
+.venv/bin/python -m stackctl start
 ```
 
 For remote backend, use `--api-url`:
