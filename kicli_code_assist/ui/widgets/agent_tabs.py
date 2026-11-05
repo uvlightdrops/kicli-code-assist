@@ -1,0 +1,248 @@
+"""
+Agent Tabs Panel Widget
+
+Tabbed container for agent response display.
+Each tab = one agent mode (Explain, Suggest, Reason, Metrics, etc.)
+"""
+
+import logging
+from typing import Dict, Optional, List
+from textual.widgets import TabbedContent, TabPane, Static, RichLog
+from textual.containers import Container, Vertical
+from textual.reactive import reactive
+from rich.text import Text
+
+logger = logging.getLogger(__name__)
+
+
+class AgentTabPanel(TabbedContent):
+    """Tabbed panel for agent responses.
+    
+    Features:
+    - Multiple tabs (Explain, Suggest, Reason, Metrics, Refactor, Dependencies)
+    - Rich formatted output (code blocks, diffs, etc.)
+    - Loading state with spinner
+    - Keyboard navigation (Ctrl+1-6)
+    - Scrollable content
+    - Clear tab history
+    """
+    
+    # Observable state
+    active_tab = reactive("")
+    
+    DEFAULT_CSS = """
+    AgentTabPanel {
+        width: 1fr;
+        height: 1fr;
+        border: solid $primary;
+        background: $surface;
+    }
+    
+    AgentTabPanel > TabPane {
+        width: 1fr;
+        height: 1fr;
+    }
+    
+    AgentTabPanel Tabs {
+        background: $panel;
+        height: 3;
+    }
+    
+    AgentTabPanel .tab-content {
+        width: 1fr;
+        height: 1fr;
+        overflow: auto;
+    }
+    
+    AgentTabPanel .loading-spinner {
+        align: center middle;
+        content-align: center middle;
+    }
+    """
+    
+    def __init__(self, enabled_tabs: List[str] = None, default_tab: str = "explain"):
+        """Initialize agent tabs.
+        
+        Args:
+            enabled_tabs: List of enabled tab names
+            default_tab: Default active tab
+        """
+        super().__init__()
+        self.enabled_tabs = enabled_tabs or [
+            "explain", "suggest", "reason", "metrics", "refactor", "dependencies"
+        ]
+        self.default_tab = default_tab
+        self.tab_panels: Dict[str, RichLog] = {}
+        self.is_loading = reactive(False)
+        
+        logger.info(f"AgentTabPanel initialized with tabs: {self.enabled_tabs}")
+    
+    def compose(self):
+        """Compose tab panels."""
+        tab_map = {
+            "explain": ("💡 Explain", "Code explanation and analysis"),
+            "suggest": ("💡 Suggest", "Improvement suggestions"),
+            "reason": ("🧠 Reasoning", "Agent reasoning trace"),
+            "metrics": ("📊 Metrics", "Code quality metrics"),
+            "refactor": ("🔄 Refactor", "Refactoring recommendations"),
+            "dependencies": ("🔗 Dependencies", "Dependency analysis"),
+        }
+        
+        for tab_name in self.enabled_tabs:
+            title, description = tab_map.get(tab_name, (tab_name, ""))
+            
+            # Create tab pane with RichLog
+            log = RichLog(classes="tab-content")
+            pane = TabPane(title, log, id=f"tab-{tab_name}")
+            self.tab_panels[tab_name] = log
+            yield pane
+    
+    def on_mount(self) -> None:
+        """Initialize on mount."""
+        # Set active tab to default
+        if self.default_tab in self.tab_panels:
+            self.active_tab = self.default_tab
+            logger.debug(f"Default tab set: {self.default_tab}")
+    
+    def display_response(self, tab_name: str, content, flush: bool = False) -> None:
+        """Display response content in a tab.
+        
+        Args:
+            tab_name: Tab name to display in
+            content: Response content (str or Rich renderable)
+            flush: Clear tab before displaying
+        """
+        if tab_name not in self.tab_panels:
+            logger.warning(f"Tab not found: {tab_name}")
+            return
+        
+        log = self.tab_panels[tab_name]
+        
+        if flush:
+            log.clear()
+        
+        # Handle different content types
+        if isinstance(content, str):
+            log.write(Text(content))
+        else:
+            log.write(content)
+        
+        logger.debug(f"Response displayed in {tab_name}")
+    
+    def append_output(self, tab_name: str, content, newline: bool = True) -> None:
+        """Append output to a tab.
+        
+        Args:
+            tab_name: Tab name
+            content: Content to append
+            newline: Add newline after content
+        """
+        if tab_name not in self.tab_panels:
+            logger.warning(f"Tab not found: {tab_name}")
+            return
+        
+        log = self.tab_panels[tab_name]
+        
+        if isinstance(content, str):
+            text = Text(content)
+            if newline:
+                text.append("\n")
+            log.write(text)
+        else:
+            log.write(content)
+    
+    def clear_tab(self, tab_name: str) -> None:
+        """Clear a specific tab.
+        
+        Args:
+            tab_name: Tab name to clear
+        """
+        if tab_name not in self.tab_panels:
+            logger.warning(f"Tab not found: {tab_name}")
+            return
+        
+        self.tab_panels[tab_name].clear()
+        logger.debug(f"Tab cleared: {tab_name}")
+    
+    def clear_all(self) -> None:
+        """Clear all tabs."""
+        for log in self.tab_panels.values():
+            log.clear()
+        logger.debug("All tabs cleared")
+    
+    def set_loading(self, tab_name: str, loading: bool) -> None:
+        """Set loading state for a tab.
+        
+        Args:
+            tab_name: Tab name
+            loading: Loading state
+        """
+        if tab_name not in self.tab_panels:
+            return
+        
+        if loading:
+            self.display_response(tab_name, "⏳ Processing...", flush=True)
+        
+        logger.debug(f"Tab {tab_name} loading: {loading}")
+    
+    def action_next_tab(self) -> None:
+        """Switch to next tab."""
+        tab_names = list(self.tab_panels.keys())
+        if not tab_names:
+            return
+        
+        try:
+            current_idx = tab_names.index(self.active_tab)
+            next_idx = (current_idx + 1) % len(tab_names)
+            self.active_tab = tab_names[next_idx]
+        except (ValueError, IndexError):
+            pass
+    
+    def action_prev_tab(self) -> None:
+        """Switch to previous tab."""
+        tab_names = list(self.tab_panels.keys())
+        if not tab_names:
+            return
+        
+        try:
+            current_idx = tab_names.index(self.active_tab)
+            prev_idx = (current_idx - 1) % len(tab_names)
+            self.active_tab = tab_names[prev_idx]
+        except (ValueError, IndexError):
+            pass
+    
+    def action_tab_1(self) -> None:
+        """Switch to tab 1."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 0:
+            self.active_tab = tabs[0]
+    
+    def action_tab_2(self) -> None:
+        """Switch to tab 2."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 1:
+            self.active_tab = tabs[1]
+    
+    def action_tab_3(self) -> None:
+        """Switch to tab 3."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 2:
+            self.active_tab = tabs[2]
+    
+    def action_tab_4(self) -> None:
+        """Switch to tab 4."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 3:
+            self.active_tab = tabs[3]
+    
+    def action_tab_5(self) -> None:
+        """Switch to tab 5."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 4:
+            self.active_tab = tabs[4]
+    
+    def action_tab_6(self) -> None:
+        """Switch to tab 6."""
+        tabs = list(self.tab_panels.keys())
+        if len(tabs) > 5:
+            self.active_tab = tabs[5]
