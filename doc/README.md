@@ -36,14 +36,10 @@ Complete documentation for the KI Code Assistant project, organized by topic and
 - **[Secrets Management](guides/SECRETS_MANAGEMENT.md)** - Handling credentials
 - **[Semi-Production Deployment](deployment/SEMI_PROD_DEPLOYMENT.md)** - Staging setup
 
-### 💾 Server Management
-Cross-project documentation now lives in `~/dev_doc/server-mngm/`.
-
-- **[Server Management Overview](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md)** - Overview and quick start
-- **[Server Management Design](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_DESIGN.md)** - Architecture and design
-- **[Server Management Flows](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_FLOWS.md)** - Workflow diagrams
-- **[Server Management Implementation](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_IMPLEMENTATION.md)** - Implementation plan
-- **[Server Management Decisions](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_DECISIONS.md)** - Decision log
+### 💾 Server Management & Orchestration
+- **[Server & Orchestration Guide](server/README.md)** - Orchestration approach, links to stackctl design
+- **[Cross-Project Pattern](../../../dev_doc/SERVICE_ORCHESTRATION_PATTERN.md)** - stackctl + Layer 1 design
+- **[Historical Design](../../../dev_doc/server-mngm/)** - Oct 28 design (reference only)
 
 ### 📈 Development Phases
 - **[Phase Documentation](phases/)** - Phase-specific documentation and reports
@@ -93,7 +89,7 @@ doc/
 | Deploy to production | [Production Deployment](guides/PRODUCTION_DEPLOYMENT.md) |
 | Check feature status | [Features Implemented](features/FEATURES_IMPLEMENTED.md) |
 | Review recent changes | [Phase Documentation](phases/) |
-| Manage a running server | [Server Management](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md) |
+| Manage a running server | [Server & Orchestration](server/README.md) |
 | See what was built before | [Archive](archive/) |
 
 ---
