@@ -1,4 +1,21 @@
+---
+title: Terminal UI - Tabs Guide
+project: kicli-code-assist
+scope: TUI Feature (Temporary Location)
+status: active
+created: 2026-10-19T11:00:00+01:00
+updated: 2026-11-03T14:45:00+01:00
+update_reason: Added YAML header; note temporary location in frontend-web/ (will move to frontend-tui/ in Phase 2)
+agent_project: null
+cross_references:
+  - "doc/specifications/01_ARCHITECTURE.md"
+  - "doc/frontend-web/README.md"
+  - "doc/archive/tui_attempt_oct2026/README.md"
+---
+
 # kicli-assist TUI Tabs Guide
+
+**Location Note:** This document describes Terminal UI (TUI) features. Currently stored in `doc/frontend-web/` temporarily; will be moved to `doc/frontend-tui/` in Phase 2 when TUI 2.0 development begins.
 
 Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische Funktion für den Workflow.
 

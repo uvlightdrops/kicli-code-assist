@@ -1,3 +1,18 @@
+---
+title: Web Editor Frameworks - Comprehensive Comparison
+project: kicli-code-assist
+scope: WebUI Architecture
+status: active
+created: 2026-10-28T10:00:00+01:00
+updated: 2026-11-03T14:50:00+01:00
+update_reason: Added YAML header; reference for editor framework selection
+agent_project: null
+cross_references:
+  - "doc/frontend-web/README.md"
+  - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+  - "doc/frontend-web/WEB_FRONTEND_DESIGN.md"
+---
+
 # Web Editor Frameworks - Comprehensive Comparison
 
 ## 1️⃣ MONACO EDITOR

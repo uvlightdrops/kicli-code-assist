@@ -1,3 +1,18 @@
+---
+title: Diff Engine & Code Edit Features - User Guide
+project: kicli-code-assist
+scope: WebUI Feature
+status: active
+created: 2026-09-15T10:00:00+01:00
+updated: 2026-11-03T14:40:00+01:00
+update_reason: Added YAML header for doc organization
+agent_project: CodeImplementationAgent
+cross_references:
+  - "doc/frontend-web/README.md"
+  - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+  - "doc/specifications/01_ARCHITECTURE.md"
+---
+
 # Diff Engine & Code Edit Features - Benutzerhandbuch
 
 ## Überblick
