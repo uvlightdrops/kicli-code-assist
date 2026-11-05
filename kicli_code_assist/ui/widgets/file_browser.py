@@ -57,6 +57,7 @@ class FileTree(Tree):
         self.project_root = Path(project_root).resolve()
         self.ignore_patterns = ignore_patterns or [".git", "__pycache__", ".venv"]
         self.current_selection: Optional[TreeNode] = None
+        self.on_file_selected_callback: Optional[callable] = None
         
         logger.info(f"FileTree initialized: {self.project_root}")
     
@@ -152,6 +153,13 @@ class FileTree(Tree):
                     self._populate_node(node)
             
             logger.debug(f"Selected: {self.selected_path}")
+            
+            # Call file selection callback
+            if not is_dir and self.on_file_selected_callback:
+                try:
+                    self.on_file_selected_callback(self.selected_path)
+                except Exception as e:
+                    logger.error(f"File selection callback error: {e}")
     
     def _populate_node(self, node: TreeNode) -> None:
         """Populate a directory node on first expand."""
@@ -188,6 +196,14 @@ class FileTree(Tree):
                 return None
         
         return None
+    
+    def set_on_file_selected(self, callback: callable) -> None:
+        """Set file selection callback.
+        
+        Args:
+            callback: Function called when file selected (receives file path)
+        """
+        self.on_file_selected_callback = callback
     
     def action_vi_up(self) -> None:
         """VI-style up navigation (k)."""

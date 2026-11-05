@@ -63,6 +63,7 @@ class InputBar(Container):
         self.history_index: int = -1
         self.input_widget: Optional[Input] = None
         self.on_submit_callback: Optional[Callable[[str], None]] = None
+        self.on_file_selected_callback: Optional[Callable[[str], None]] = None
     
     def compose(self):
         """Compose input layout."""
@@ -100,10 +101,19 @@ class InputBar(Container):
         # Clear input
         self.input_widget.value = ""
         
-        # Call callback
+        # Call callback (sync or async)
         if self.on_submit_callback:
             try:
-                self.on_submit_callback(text)
+                import asyncio
+                import inspect
+                
+                # Check if callback is async
+                if inspect.iscoroutinefunction(self.on_submit_callback):
+                    # For async callbacks, create task
+                    asyncio.create_task(self.on_submit_callback(text))
+                else:
+                    # For sync callbacks, call directly
+                    self.on_submit_callback(text)
             except Exception as e:
                 logger.error(f"Submit callback error: {e}")
                 self.set_status(f"Error: {e}", error=True)
@@ -276,4 +286,25 @@ class StatusBar(Static):
     
     def watch_error_message(self) -> None:
         """React to error message change."""
+        self.update_status()
+    
+    def set_loading(self, is_loading: bool) -> None:
+        """Set loading state.
+        
+        Args:
+            is_loading: True if loading
+        """
+        if is_loading:
+            self.connection_status = "⏳ Processing..."
+        else:
+            self.connection_status = "🟢 Connected"
+        self.update_status()
+    
+    def set_status(self, message: str) -> None:
+        """Set general status message.
+        
+        Args:
+            message: Status message
+        """
+        self.connection_status = message
         self.update_status()

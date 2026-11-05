@@ -104,30 +104,54 @@ class AgentTabPanel(TabbedContent):
             self.active_tab = self.default_tab
             logger.debug(f"Default tab set: {self.default_tab}")
     
-    def display_response(self, tab_name: str, content, flush: bool = False) -> None:
-        """Display response content in a tab.
+    def display_response(self, response_data, flush: bool = True) -> None:
+        """Display response data from backend.
         
         Args:
-            tab_name: Tab name to display in
-            content: Response content (str or Rich renderable)
-            flush: Clear tab before displaying
+            response_data: Dict with tab names as keys and content as values
+                          or string to display in 'Explain' tab
+            flush: Clear tabs before displaying
         """
-        if tab_name not in self.tab_panels:
-            logger.warning(f"Tab not found: {tab_name}")
-            return
-        
-        log = self.tab_panels[tab_name]
+        from textual.text import Text
         
         if flush:
-            log.clear()
+            self.clear_all()
         
-        # Handle different content types
-        if isinstance(content, str):
-            log.write(Text(content))
-        else:
-            log.write(content)
+        # Handle string response (display in Explain tab)
+        if isinstance(response_data, str):
+            if "Explain" in self.tab_panels:
+                self.tab_panels["Explain"].write(Text(response_data))
+            return
         
-        logger.debug(f"Response displayed in {tab_name}")
+        # Handle dict response (multiple tabs)
+        if not isinstance(response_data, dict):
+            logger.warning(f"Invalid response data type: {type(response_data)}")
+            return
+        
+        # Display each tab's content
+        for tab_name, content in response_data.items():
+            if tab_name not in self.tab_panels:
+                # Skip unknown tabs
+                continue
+            
+            log = self.tab_panels[tab_name]
+            
+            # Handle different content types
+            if isinstance(content, str):
+                log.write(Text(content))
+            elif isinstance(content, list):
+                # Handle list of items
+                for item in content:
+                    if isinstance(item, str):
+                        log.write(Text(item))
+                        log.write(Text("\n"))
+                    else:
+                        log.write(Text(str(item)))
+                        log.write(Text("\n"))
+            else:
+                log.write(Text(str(content)))
+        
+        logger.debug(f"Response displayed in tabs")
     
     def append_output(self, tab_name: str, content, newline: bool = True) -> None:
         """Append output to a tab.

@@ -7,12 +7,14 @@ Composes file tree, agent tabs, input bar, and status bar.
 
 from pathlib import Path
 import logging
+import asyncio
 from textual.app import ComposeResult, on
 from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Header, Footer, Static
 from textual import work
 
 from .config import ConfigLoader, TUIConfig
+from .api_client import BackendClient
 from .widgets.file_browser import FileTree
 from .widgets.agent_tabs import AgentTabPanel
 from .widgets.input_bar import InputBar, StatusBar
@@ -118,6 +120,8 @@ class KICLITUIApp:
         """Initialize TUI app with configuration."""
         self.config_loader = ConfigLoader(config_path)
         self.config = self.config_loader.config
+        self.backend_client: BackendClient = None
+        self.selected_file: str = None
         
         if self.config.debug:
             self.config_loader.debug_print()
@@ -169,12 +173,92 @@ class KICLITUIApp:
         
         # Initialize status bar
         status_bar = self.query_one(StatusBar)
-        status_bar.set_connected(False)  # Will be set to True on backend connect
+        status_bar.set_connected(False)
+        
+        # Initialize backend client and connect
+        self.backend_client = BackendClient(self.config.backend.url)
+        self._connect_backend()
+        
+        # Bind InputBar submit to handler
+        try:
+            input_bar = self.query_one(InputBar)
+            input_bar.on_submit_callback = self._on_input_submit
+            input_bar.on_file_selected_callback = self._on_file_selected
+        except Exception as e:
+            logger.error(f"Failed to bind input bar: {e}")
     
     def action_quit(self) -> None:
         """Handle quit action."""
         logger.info("Shutting down TUI")
+        
+        # Close backend connection
+        if self.backend_client:
+            asyncio.create_task(self.backend_client.close())
+        
         self.exit()
+    
+    @work(exclusive=True)
+    async def _connect_backend(self) -> None:
+        """Connect to backend (background task)."""
+        status_bar = self.query_one(StatusBar)
+        
+        try:
+            connected = await self.backend_client.init()
+            status_bar.set_connected(connected)
+            
+            if connected:
+                logger.info("Backend connected successfully")
+            else:
+                logger.error("Failed to connect to backend")
+                status_bar.set_error("Backend unavailable")
+        except Exception as e:
+            logger.error(f"Backend connection error: {e}")
+            status_bar.set_error(f"Connection failed: {e}")
+    
+    @work(exclusive=True)
+    async def _on_input_submit(self, user_input: str) -> None:
+        """Handle user input submission."""
+        if not user_input.strip():
+            return
+        
+        status_bar = self.query_one(StatusBar)
+        tabs = self.query_one(AgentTabPanel)
+        
+        try:
+            status_bar.set_loading(True)
+            status_bar.set_status(f"Processing: {user_input[:40]}...")
+            
+            # Send request to backend
+            if not self.backend_client.is_connected:
+                status_bar.set_error("Not connected to backend")
+                return
+            
+            response = await self.backend_client.send_request(
+                request_text=user_input,
+                context_file=self.selected_file,
+            )
+            
+            if response.success:
+                # Display response in tabs
+                tabs.display_response(response.data)
+                status_bar.set_status("✅ Complete")
+                logger.info(f"Response processed: {response.status_code}")
+            else:
+                error_msg = response.error or "Unknown error"
+                status_bar.set_error(f"Error: {error_msg}")
+                logger.error(f"Request failed: {error_msg}")
+        
+        except Exception as e:
+            logger.error(f"Input submission error: {e}")
+            status_bar.set_error(f"Error: {e}")
+        
+        finally:
+            status_bar.set_loading(False)
+    
+    def _on_file_selected(self, file_path: str) -> None:
+        """Handle file selection from tree."""
+        self.selected_file = file_path
+        logger.debug(f"File selected: {file_path}")
     
     def action_tab_1(self) -> None:
         """Tab 1."""
