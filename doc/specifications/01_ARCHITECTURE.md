@@ -1,172 +1,340 @@
-# KI Code Assistant - System Architecture
+---
+title: System Architecture Overview
+project: kicli-code-assist
+scope: architecture
+status: active
+created: 2026-11-05T21:42+01:00
+updated: 2026-11-05T21:42+01:00
+update_reason: Refactor for TUI 2.0 (agentische intelligent IDE, nicht chat)
+agent_project: kicli-code-assist
+cross_references:
+  - doc/architecture/FRONTEND_SPECIFICATION.md (abstract multi-frontend interface)
+  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (TUI 2.0 vision & roadmap)
+  - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md (Textual implementation details)
+  - doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md (backend agent routing)
+  - doc/architecture/TRANSPARENCY_MODULES_ARCHITECTURE.md (reasoning traces & observability)
+---
 
-## Project Overview
+# System Architecture Overview
 
-KI Code Assistant is an interactive terminal UI (TUI) for project-aware AI-driven code assistance. It enables developers to:
-- Browse project files in a vi/netrw-style interface
-- Load files into AI context for analysis
-- Chat with an LLM (via OpenAI, Ollama, or Mock provider)
-- Maintain conversation history with project context
+## Executive Summary
 
-## Tech Stack
+**KI Code Assist** is a **server-client system** for intelligent code analysis via terminal or web UI. The architecture separates concerns into three layers:
 
-- **Language**: Python 3.10+
-- **TUI Framework**: Textual 0.20.0+
-- **LLM Providers**: 
-  - OpenAI GPT API (via ki-core)
-  - Ollama local (via ki-core)
-  - Mock provider for testing
-- **Configuration**: YAML-based (via ki-core)
-- **Project Context**: Static file scanning
+1. **Backend** (Flask/FastAPI) — Agent orchestration, LLM routing, transparency
+2. **Frontend Specification** (abstract) — Multi-frontend interface contract
+3. **Frontend Implementations** — TUI (Textual), WebUI (React), future (GTK, Web)
 
-## System Components
+**Goal:** Ship agentische intelligent terminal IDE that leverages Phase 5.5.2 backend capabilities (reasoning traces, multi-agent orchestration, code understanding).
 
-### 1. Core Module (ki-core)
+---
 
-**Responsibility**: Unified LLM provider abstraction and configuration
-
-**Components**:
-- `Config` class: YAML + environment variable loading
-- Provider adapters: OpenAI, Ollama, Mock
-- Message/ChatRequest models for API contracts
-
-**Key File**: `ki-core/src/ki_core/config.py`
-
-**Configuration Sources** (in priority order):
-1. Environment variables (e.g., `KI_PROVIDER`, `KI_OPENAI_KEY`)
-2. YAML file at `~/.ki/config.yaml`
-3. Defaults (Ollama localhost:11434)
-
-**Auto-Detection Logic**:
-1. If `KI_PROVIDER` env var set → use that provider
-2. Else if OpenAI key available → use OpenAI
-3. Else if Ollama reachable → use Ollama
-4. Else → use Mock provider
-
-### 2. KI Code Assistant (kicli-code-assist)
-
-**Responsibility**: Interactive TUI for code assistance
-
-**Main Components**:
-
-#### A. TUI Application (`textual_app.py`)
-- `CodeAssistantApp`: Main Textual app container
-- `SelectableFileList`: Custom widget for vi-style file browsing
-- `FocusAwareInput`: Custom Input widget for message submission
-- Layout: Split-screen (file browser left, chat right) + input area
-
-#### B. Chat Session (`chat_session.py`)
-- Maintains conversation history
-- Integrates project context into messages
-- Formats messages for LLM API
-
-#### C. Project Context (`context/project_context.py`)
-- Scans project directory for relevant files
-- Categorizes by language/type
-- Provides context status summary
-
-### 3. Integration Points
+## Architecture Diagram
 
 ```
-User Input (TUI)
-  ↓
-Textual Event Handlers
-  ↓
-Action Methods (focus, navigation, submission)
-  ↓
-ChatSession.add_message()
-  ↓
-Project Context Manager
-  ↓
-ki-core.Config.from_env() → get LLM client
-  ↓
-LLM Provider (OpenAI/Ollama/Mock)
-  ↓
-Response Stream → ChatDisplay (RichLog)
-  ↓
-ChatSession.add_message("assistant", response)
+┌─────────────────────────────────────────────────────────────┐
+│                      USER INTERACTION                        │
+├──────────────────────────┬──────────────────────────────────┤
+│  TUI 2.0 (Textual)       │  WebUI (React)                   │
+│  Terminal IDE            │  Browser IDE                     │
+│  Project Tree + Tabs     │  Split-pane + Chat              │
+└──────────────────────────┴──────────────────────────────────┘
+                           │
+           ┌───────────────┴───────────────┐
+           │                               │
+     ┌─────▼──────────────┐        ┌──────▼──────────────┐
+     │  HTTP Streaming    │        │  WebSocket Stream  │
+     │  /api/agent/route  │        │  /agent/execution  │
+     └─────┬──────────────┘        └──────┬──────────────┘
+           │                              │
+           └───────────────┬──────────────┘
+                           │
+     ┌─────────────────────▼──────────────────────┐
+     │         Backend (Flask)                    │
+     ├─────────────────────────────────────────────┤
+     │  MetaCoordinationAgent (routing)           │
+     │  + CodeImplementationAgent                 │
+     │  + DependencyAnalyzer                      │
+     │  + RefactoringAnalyzer                     │
+     │  + CodeMetricsAnalyzer                     │
+     │  + StreamingReasoningAgent                 │
+     │                                             │
+     │  ReasoningTracer (transparency)            │
+     │  LLMCallTracker (observability)            │
+     │  PerformanceMetrics (timing)               │
+     └─────────────────────┬──────────────────────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+         ┌────▼────┐          ┌────────▼────┐
+         │  ki-core │          │ OpenAI API  │
+         │ (config) │          │ Ollama API  │
+         └──────────┘          └─────────────┘
 ```
 
-## Data Flow
+---
 
-### Message Flow
-1. User types in Input field (INPUT mode)
-2. Presses ENTER
-3. `FocusAwareInput.on_key()` triggers `action_select_cursor()`
-4. `on_input_submitted_manual()` called
-5. Message added to ChatSession
-6. Project context injected via `get_messages_for_api()`
-7. Request sent to LLM asynchronously (`_send_to_llm_async()`)
-8. Response streamed back to `chat_display` (RichLog)
-9. Response added to ChatSession history
+## Core Concepts
 
-### File Navigation Flow
-1. User navigates file list (UP/DOWN in BROWSER mode)
-2. `SelectableFileList.action_cursor_up/down()` updates cursor
-3. `update_display()` re-renders file list with ">" marker
-4. User presses ENTER to open directory or select file
-5. `action_select_cursor()` in SelectableFileList
-6. If directory: `load_directory()` updates current_dir
-7. If file: `parent_app.update_file_preview()` (currently no-op)
+### 1. Backend (Server Layer)
 
-## State Management
+**Responsibility:** Orchestrate agents, process requests, stream responses
 
-### Current Focus
-- **Reactive State**: `current_focus` ("browser" or "input")
-- **Watch Method**: `watch_current_focus()` updates status bar
-- **Control**: TAB/Shift+TAB toggle between modes
+**Key Modules:**
+- `MetaCoordinationAgent` — Routes requests to appropriate agent
+- `CodeImplementationAgent` — Generates code via LLM
+- `DependencyAnalyzer` — Finds circular deps, imports
+- `RefactoringAnalyzer` — Detects 5 refactoring patterns
+- `CodeMetricsAnalyzer` — Computes complexity, maintainability
+- `StreamingReasoningAgent` — Streams reasoning steps
 
-### File Selection
-- **Stored In**: `SelectableFileList.selected_index`
-- **File List**: `SelectableFileList.entries` (list of tuples)
-- **Current Directory**: `SelectableFileList.current_dir`
+**Transparency Stack (Phase 5.5.2):**
+- `ReasoningTracer` — Captures reasoning decisions
+- `LLMCallTracker` — Logs all LLM API calls
+- `PerformanceMetrics` — Measures execution time
 
-### Chat State
-- **History**: `ChatSession.messages` (list of dicts)
-- **Project Context**: `ChatSession.project_context` (dict)
-- **Display**: `RichLog` widget (text rendering)
+**Configuration:** `ki.yaml` (local), `config/stages/` (deployment)
 
-## Configuration Files
+**Deployment:** `python -m stackctl start`
 
-### Entry Points
-- **TUI Command**: `kicli-assist tui` (defined in `cli.py`)
-- **Config Loading**: `ki-core/src/ki_core/config.py`
+### 2. Frontend Specification (Interface Contract)
+
+**Responsibility:** Define abstract interface that multiple frontends implement
+
+**What It Specifies:**
+- Layout & components (Project Tree, Tabs, Input, Status Bar)
+- Backend routes required (`GET /api/project/scan`, `POST /api/agent/route`, etc.)
+- Data flows (request → response → display)
+- Event format (JSON-L streaming)
+- Error handling (backend unavailable, timeout, LLM error)
+- Keyboard shortcuts (common across all frontends)
+
+**File:** `doc/architecture/FRONTEND_SPECIFICATION.md`
+
+**Why Separate?** So that Textual TUI, React WebUI, and future GTK/Web frontends can all be built against this spec without backend changes.
+
+### 3. Frontend Implementations
+
+#### A. TUI 2.0 (Textual) — Terminal IDE for host-2
+
+**Status:** Phase 1 (foundation) — starting now
+
+**Key Features (by phase):**
+- Phase 1: Project tree, tabbed output, input field, status bar
+- Phase 2: Agent streaming, rich formatting (code blocks, diffs, metrics)
+- Phase 3: Real-time reasoning events, keyboard macros
+- Phase 4: Performance optimization for large projects
+- Phase 5+: Session persistence, split panes, themes
+
+**Architecture:** `doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md`
+
+**Implementation:** `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md`
+
+#### B. WebUI (React) — Web IDE for host-1
+
+**Status:** Deployed (Phase 1-3 complete)
+
+**Features:**
+- Split-pane editor + agent chat
+- Real-time reasoning panel (WebSocket)
+- Diff viewer, metrics dashboard
+- Session history
+
+**Code:** `web/frontend/` (React/TypeScript)
+
+---
+
+## Data Flow: Request → Response
+
+### User Request (TUI Example)
+
+```
+1. User selects file: src/main.py
+2. User types: "Analyze this for performance issues"
+3. Presses Enter
+
+4. TUI sends HTTP request:
+   POST /api/agent/route
+   {
+     "project_path": "/home/user/project",
+     "selected_file": "src/main.py",
+     "user_request": "Analyze this for performance issues",
+     "agent_modes": ["explain", "metrics", "suggest"]
+   }
+
+5. Backend:
+   - MetaCoordinator routes to appropriate agents
+   - CodeMetricsAnalyzer: complexity, maintainability
+   - CodeImplementationAgent: analysis + suggestions
+   - ReasoningTracer: captures reasoning steps
+   - LLMCallTracker: logs LLM calls
+   - PerformanceMetrics: measures time
+
+6. Backend streams response (JSON-L):
+   {"event_type": "explain", "content": "This function..."}
+   {"event_type": "metrics", "complexity": 3}
+   {"event_type": "suggest", "suggestions": [...]}
+   {"event_type": "complete", "duration_ms": 2341}
+
+7. TUI:
+   - Renders each event to appropriate tab (Explain, Metrics, Suggest)
+   - Updates status bar (elapsed time, cost)
+   - User can switch tabs while processing
+
+8. User interacts:
+   - Presses Ctrl+1 → Jump to Explain tab
+   - Presses Ctrl+2 → Jump to Metrics tab
+   - Presses Up/Down → Previous requests from history
+   - Presses Ctrl+C → Cancel running request
+```
+
+---
+
+## Backend Routes Summary
+
+See `doc/architecture/FRONTEND_SPECIFICATION.md` for full contract.
+
+**Key Routes:**
+
+```
+Project Operations:
+  GET /api/project/scan       → List files in project
+  GET /api/project/file       → Get file contents
+
+Agent Operations (Streaming):
+  POST /api/agent/route       → Main entry point (all agents)
+  POST /api/agent/explain     → Explain code
+  POST /api/agent/suggest     → Generate suggestions
+  POST /api/agent/reason      → Stream reasoning
+  POST /api/agent/metrics     → Compute metrics
+  POST /api/agent/refactor    → Refactoring ideas
+  POST /api/agent/dependencies → Dependency analysis
+
+WebSocket (Real-time):
+  WS /socket.io/agent/execution
+    Events: reasoning_step, llm_call, performance_metric
+
+Historical Queries:
+  GET /api/traces/{trace_id}  → Full trace object
+  GET /api/logs/tail          → Recent logs
+```
+
+---
+
+## Configuration & Deployment
+
+### Local Development
+
+```bash
+# Terminal 1: Start backend
+cd /home/flow/dev_flow/kicli-code-assist
+python -m stackctl start
+
+# Terminal 2: Start TUI
+kicli-assist tui --project /path/to/project
+
+# Terminal 3: Check logs
+tail -f log/kicli.log
+```
 
 ### Environment Variables
-```
-KI_PROVIDER=openai|ollama|mock
-KI_OPENAI_KEY=sk-...
-KI_OLLAMA_URL=http://localhost:11434
-KI_OLLAMA_MODEL=llama2
-```
 
-### YAML Config (`~/.ki/config.yaml`)
-```yaml
-provider: openai|ollama
-openai:
-  api_key: sk-...
-ollama:
-  url: http://localhost:11434
-  model: llama2
+```bash
+KI_STAGE=development          # Local config loading
+OPENAI_API_KEY=sk-...        # LLM provider
+KI_OLLAMA_URL=http://...     # Ollama endpoint (if using)
 ```
 
-## Error Handling
+### Configuration Files
 
-- **Missing Provider**: Falls back to Mock provider
-- **LLM Errors**: Displayed in chat via RichLog (red error text)
-- **File I/O**: Try/except in SelectableFileList.load_directory()
-- **Async Failures**: Caught in `_send_to_llm_async()`, shown in chat
+- **Local:** `ki.yaml` (project root)
+- **Staging:** `config/stages/staging.yaml`
+- **Production:** `config/stages/production.yaml`
 
-## Performance Considerations
+---
 
-- **File Scanning**: Only current directory (not recursive)
-- **Async LLM**: Non-blocking with `app.call_later()`
-- **Chat Display**: RichLog streams response (no line-buffering)
-- **Memory**: No persistent storage (session-only)
+## Phase Roadmap
 
-## Future Architecture Decisions
+### Phase 1: Foundation (This Week - Nov 5-8)
+- [x] Documentation: FRONTEND_SPECIFICATION + TUI_INTELLIGENT_TERMINAL_IDE
+- [ ] TUI scaffold: Project Tree + Tabs + Input + Status Bar
+- [ ] Backend connectivity: Health check + basic request/response
+- [ ] Keyboard shortcuts: Basic navigation + tab switching
 
-1. **Database**: Plan to store conversation sessions
-2. **Event Bus**: NATS for multi-service communication
-3. **Persistence**: SQLite or PostgreSQL for context/history
-4. **Real-time Sync**: WebSocket for multi-user sessions
+**Goal:** TUI renders, can submit requests, displays responses
+
+### Phase 2: Agent Integration (Week 1)
+- Streaming all agent modes (Explain, Suggest, Metrics, Reason, Refactor, Deps)
+- Rich formatting (code blocks, diffs, metrics visualization)
+- Input history + completion
+- Error recovery (timeout, backend unavailable)
+
+**Goal:** Full agent capabilities visible in TUI
+
+### Phase 3: Intelligence Features (Week 2)
+- Real-time reasoning events (WebSocket)
+- Advanced keyboard shortcuts (macros)
+- Search + filtering
+- Session context tracking
+
+**Goal:** TUI becomes powerful IDE tool
+
+### Phase 4: Performance (Week 3)
+- Large project optimization (lazy-load trees)
+- Caching + session state
+- Memory optimization
+
+### Phase 5+: Extended Features (Future)
+- Session persistence
+- Split panes / themes
+- Offline mode
+- Multi-file editing
+
+---
+
+## Related Documentation
+
+**Start Here:**
+- `doc/architecture/FRONTEND_SPECIFICATION.md` — Interface contract
+- `doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md` — TUI vision & phases
+
+**Deep Dives:**
+- `doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md` — Backend routing
+- `doc/architecture/TRANSPARENCY_MODULES_ARCHITECTURE.md` — Observability
+- `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md` — Textual specifics
+
+**Reference:**
+- `doc/architecture/WEBSOCKET_STREAMING_ARCHITECTURE.md` — Real-time events
+- `doc/architecture/ASYNC_LLM_SECURITY_ARCHITECTURE.md` — Security considerations
+
+**Deprecated (Archive):**
+- `doc/archive/tui_attempt_oct2026/02_TUI_SPECIFICATION_LEGACY.md` — Old chat-based design
+
+---
+
+## Success Criteria
+
+**By End of Phase 1:**
+- TUI compiles and runs without errors
+- Can connect to backend (`/api/project/scan` works)
+- Can submit request and receive response
+- File tree navigation works (Up/Down/Enter)
+- Tab switching works (Ctrl+1-6)
+- Status bar shows connection + timing
+- Keyboard shortcuts functional
+
+**By End of Phase 2:**
+- All 6 agent modes stream correctly
+- Rich formatting visible (code blocks, metrics)
+- Input history works
+- Error handling graceful
+
+**By End of Phase 3:**
+- Real-time reasoning visible
+- Advanced keyboard features working
+- TUI is genuinely useful IDE tool
+
+---
+
+**Status:** Foundation complete  
+**Next Step:** Phase 1 implementation (TUI scaffold)

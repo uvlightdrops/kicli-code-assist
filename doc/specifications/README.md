@@ -4,182 +4,167 @@ scope: reference
 project: kicli-code-assist
 status: active
 created: 2026-11-05T19:55+01:00
-updated: 2026-11-05T19:55+01:00
-update_reason: Updated to reflect current agent-backend TUI architecture
+updated: 2026-11-05T21:45+01:00
+update_reason: Update for TUI 2.0 foundation (FRONTEND_SPECIFICATION + architecture links)
 agent_project: kicli-code-assist
 cross_references:
-  - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
-  - doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md
-  - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md
+  - doc/architecture/01_ARCHITECTURE.md (system overview & phase roadmap)
+  - doc/architecture/FRONTEND_SPECIFICATION.md (abstract multi-frontend contract)
+  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (TUI vision & 5-phase roadmap)
+  - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md (Textual implementation details)
 ---
 
 # Specifications Directory Guide
 
-This directory contains **complete specifications** for kicli-code-assist components. Specifications define *what* to build and success criteria, not *how* to implement (see guides/ and architecture/ for implementation details).
+This directory contains **foundational specifications** for kicli-code-assist. Specifications define *what* to build and success criteria.
+
+**For implementation details and patterns:** See `doc/architecture/` and `doc/guides/`
 
 ## Current Specifications
 
-### 02_TUI_SPECIFICATION.md
-**Status:** `archived` — Legacy design, superseded
+### 01_ARCHITECTURE.md ✅ UPDATED
+**Status:** `active` — System overview for Phase 1+ TUI development
 
-**Describes:** Earlier chat-based terminal interface design (October 2026)
-- File browser + Chat + Input layout
-- Interactive file selection model
-- Session persistence
+**Describes:**
+- 3-layer architecture (Backend + Frontend Spec + Frontend Implementations)
+- Data flow (Request → Response → Display)
+- Phase roadmap (1: Foundation, 2: Integration, 3-5: Advanced)
+- Backend routes summary
+- Configuration & deployment
+
+**When to read:**
+- Before starting implementation (understand the big picture)
+- When making architectural decisions
+- To understand phase boundaries and success criteria
+
+**Related:**
+- `doc/architecture/FRONTEND_SPECIFICATION.md` — Interface contract
+- `doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md` — TUI vision
+- `doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md` — Backend details
+
+---
+
+### 02_TUI_SPECIFICATION.md
+**Status:** `archived` — Legacy chat-based design (Oct 2026)
+
+**Describes:** Earlier FileList + Chat + Input interface
 
 **Why Archived:** 
-- Project shifted to agent-backend interface approach (Nov 2026)
-- New approach leverages Phase 5.5.2 features (transparency, reasoning traces)
-- Better for operational use case (K8s jump hosts)
+- Pivoted to agent-backend approach (Nov 2026)
+- Leverages Phase 5.5.2 features (transparency, reasoning)
+- Better for operational context (K8s jump hosts)
 
-**See Also:**
-- `/home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md` — Decision context
-- `doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md` — Current active specification
-- `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md` — Implementation deep dive
+**See Also:** `doc/archive/tui_attempt_oct2026/` for historical reference
 
-## Implementation References
-
-### For TUI Developers
-
-**Start here:**
-1. Read `doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md` (what we're building)
-2. Read `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md` (how it's designed)
-3. Read `doc/guides/TEXTUAL_BEST_PRACTICES_REVIEW.md` (patterns & anti-patterns)
-
-**Key Code Files:**
-- `kicli_code_assist/ui/tui_client.py` (main app, 285 LOC)
-- `kicli_code_assist/ui/widgets/project_explorer.py` (file tree)
-- `kicli_code_assist/ui/widgets/agent_output_panel.py` (unified output display)
-- `kicli_code_assist/ui/widgets/input_panel.py` (request input)
-
-**Backend API (same as WebUI):**
-- `POST /api/agent/route` — Main orchestration endpoint
-- `GET /api/agent/explain`, `/suggest`, `/reason`, etc. — Individual modes
-- `WebSocket /socket.io` — Real-time streaming events
-
-### For Backend Developers
-
-- `kicli_code_assist/web/server.py` — Flask app, all agent routes
-- `kicli_code_assist/agent/` — Agent logic (meta_coordinator, code_implementation, etc.)
-- Specs documented in server.py docstrings and route comments
-
-### For Configuration/Operations
-
-- `doc/deployment/CONSOLIDATION_STRATEGY.md` — Deployment configuration
-- `doc/deployment/PHASE_1_REPORT.md` — Current deployment docs status
-- `ki.yaml` — Project configuration file
-
-## Directory Organization
-
-```
-doc/specifications/
-├── README.md (this file)
-├── 02_TUI_SPECIFICATION.md (archived - legacy chat design)
-└── [Future specs for CLI, Config, Plugins, etc.]
-
-doc/guides/
-├── TUI_CLIENT_IMPLEMENTATION_PLAN.md ← Active TUI spec
-├── TUI_QUICK_START.md ← User guide for TUI
-├── TEXTUAL_BEST_PRACTICES_REVIEW.md ← Best practices reference
-
-doc/architecture/
-├── TUI_TEXTUAL_ARCHITECTURE.md ← Deep dive into widget design
-├── PROJECT_STRUCTURE.md ← File organization
-└── [Other architecture docs]
-```
-
-## How to Use This Directory
-
-### I'm implementing a feature
-1. Find the spec in `guides/` that describes it
-2. Check `architecture/` for implementation patterns
-3. Verify against acceptance criteria in spec
-4. Write tests matching spec examples
-
-### I'm reviewing a PR
-1. Read the relevant spec
-2. Verify implementation matches spec requirements
-3. Check architecture docs for pattern compliance
-4. Use spec as acceptance criteria
-
-### I'm debugging something
-1. Check `architecture/` for component interaction diagrams
-2. Search `doc/guides/` for similar issues
-3. Review code walkthrough in architecture docs
-4. Look at git history for related changes
-
-### I'm writing documentation
-1. Link to specs as source of truth (don't duplicate)
-2. Implementation docs reference specs, not vice versa
-3. Archive old docs when superseded
-4. Use YAML headers for organization
-
-## Adding New Specifications
-
-**When to create a spec:**
-- New major component or feature
-- Significant architectural change
-- API contract or public interface
-- Non-obvious design decisions
-
-**Template:**
-```markdown
----
-title: Feature Name Specification
-scope: specification
-project: kicli-code-assist
-status: draft | active | archived
-created: YYYY-MM-DDThh:mm+01:00
-updated: YYYY-MM-DDThh:mm+01:00
-update_reason: Initial draft | Bug fixes | Superseded by new approach
-agent_project: kicli-code-assist
-cross_references: [links to related docs]
 ---
 
-# Feature Name Specification
+### 03_BACKEND_SPECIFICATION.md
+**Status:** `reference` — Route contracts & event formats
 
-## Overview
-[What is this? Who uses it? Why does it exist?]
+**Describes:**
+- `/api/agent/route` — Main entry point
+- Individual agent endpoints
+- JSON-L response format
+- WebSocket namespaces
 
-## Requirements
-[Functional and non-functional requirements]
+---
 
-## API/Interface
-[How to use it - with examples]
+### 04_FEATURE_CHECKLIST.md
+**Status:** `reference` — Phase completeness tracker
 
-## Examples
-[Real usage scenarios]
+**Describes:** What's done, in progress, blocked in each phase
 
-## Error Cases
-[What can go wrong and how to handle it]
+---
 
-## Performance Requirements
-[Speed, memory, scalability targets]
+### 05_IMPLEMENTATION_DETAILS.md
+**Status:** `reference` — Code patterns & conventions
 
-## Future Enhancements
-[Out of scope but worth noting]
-```
+**Describes:** Python/Textual best practices for this project
+
+---
+
+## Quick Navigation
+
+### "I want to understand the system"
+1. Start: `01_ARCHITECTURE.md` (5 min overview)
+2. Deep dive: `doc/architecture/FRONTEND_SPECIFICATION.md` (component details)
+3. Backend: `doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md`
+
+### "I want to implement Phase 1 TUI"
+1. Read: `01_ARCHITECTURE.md` (Phases 1-3)
+2. Read: `doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md` (Phase 1 breakdown)
+3. Read: `doc/architecture/FRONTEND_SPECIFICATION.md` (what to implement)
+4. Start coding: `kicli_code_assist/ui/tui_client.py`
+
+### "I want to understand the frontend spec"
+1. `doc/architecture/FRONTEND_SPECIFICATION.md` — Abstract interface
+2. `doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md` — Textual specifics
+3. Code: `kicli_code_assist/ui/` (widgets, client)
+
+### "I want to understand the backend"
+1. `01_ARCHITECTURE.md` (Backend section)
+2. `doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md` (agent routing)
+3. `doc/architecture/TRANSPARENCY_MODULES_ARCHITECTURE.md` (reasoning traces)
+4. Code: `kicli_code_assist/agent/`, `kicli_code_assist/web/server.py`
+
+### "I want to understand WebUI (host-1)"
+1. Skip TUI docs
+2. Read: `doc/architecture/WEB_FRONTEND_DESIGN.md`
+3. Code: `web/frontend/src/components/`
+
+---
+
+## Document Organization Philosophy
+
+**This directory (`doc/specifications/`):**
+- High-level "what to build"
+- Interface contracts
+- Success criteria
+- Stable reference documents
+
+**Related directory (`doc/architecture/`):**
+- HOW to build it
+- Design decisions & rationale
+- Component interaction
+- Phase-specific architecture
+
+**Related directory (`doc/guides/`):**
+- Step-by-step implementation walkthroughs
+- Best practices & patterns
+- Troubleshooting guides
+- Quick references
+
+**Related directory (`doc/archive/`):**
+- Old attempts & learnings
+- Historical context
+- What didn't work & why
+
+---
 
 ## Archival Policy
 
-Old specs are **archived, never deleted**, so we can:
+Old specs are **archived, never deleted**:
 - Understand historical decisions
 - See what approaches were considered
-- Learn what didn't work
+- Learn from past attempts
 - Preserve institutional memory
 
-**How to archive a spec:**
+**How to archive:**
 1. Add `status: archived` to YAML header
-2. Add `superseded_by: [link to new spec]` if applicable
-3. Add `update_reason: Archived because...`
-4. Keep file in `doc/specifications/` (don't move)
-5. Add note at top of document:
-   ```markdown
-   **STATUS: ARCHIVED** — See [TUI_STRATEGY_CLARIFICATION.md] for decision context.
-   ```
+2. Add note: `**STATUS: ARCHIVED** — See [reason doc] for context`
+3. Keep in `doc/specifications/` (don't move)
 
 ---
 
-**Last Updated:** 2026-11-05T19:55+01:00  
-**Scope:** Project-level documentation  
-**Related:** `/home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md` (cross-project standards)
+## Cross-Project Standards
+
+This project follows cross-project standards documented in:
+- `/home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md` (folder structure)
+- `/home/flow/dev_doc/DEPLOYMENT_STANDARDS.md` (YAML headers, formatting)
+
+**For new docs:** Use template from `DEPLOYMENT_STANDARDS.md`
+
+---
+
+**Last Updated:** 2026-11-05T21:45+01:00  
+**Next Review:** After Phase 1 completion (Nov 8)
