@@ -1,11 +1,17 @@
 ---
+title: TUI Client Implementation Plan - Agent Backend Interface
+scope: guide
 project: kicli-code-assist
-scope: guides
-created: 2026-11-05 16
-updated: 2026-11-05 16
-update_reason: Phase 1-3 complete, Phase 4 blocked on yaml_cfg_wizard dependency
-status: in_progress
+status: phase_3_complete, phase_4_in_progress
+created: 2026-11-05T16:03+01:00
+updated: 2026-11-05T19:50+01:00
+update_reason: Phase 4 CLI integration complete; now documenting completed work
 agent_project: kicli-code-assist
+cross_references:
+  - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
+  - doc/guides/TUI_QUICK_START.md
+  - doc/tracking/TUI_IMPLEMENTATION_SESSION_20261105.md
+  - doc/specifications/02_TUI_SPECIFICATION.md (archived - legacy design)
 ---
 
 # TUI Client Implementation Plan
