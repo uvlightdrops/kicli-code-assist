@@ -305,6 +305,65 @@ class BackendClient:
         self.ws_client.set_on_message(callback)
         await self.ws_client.listen()
     
+    async def stream_agent_response(
+        self,
+        request_text: str,
+        context_file: str = None,
+        on_token: Callable[[str], None] = None,
+        on_complete: Callable = None,
+        on_error: Callable[[str], None] = None,
+    ) -> None:
+        """Stream agent response tokens via WebSocket.
+        
+        Args:
+            request_text: User request
+            context_file: Optional context file
+            on_token: Callback for each token
+            on_complete: Callback when complete
+            on_error: Callback for errors
+        """
+        if not await self.ws_client.connect():
+            if on_error:
+                on_error("Cannot connect to backend")
+            return
+        
+        # Prepare streaming event handlers
+        def handle_message(msg: str) -> None:
+            try:
+                data = json.loads(msg)
+                event_type = data.get("type")
+                
+                if event_type == "token":
+                    if on_token:
+                        on_token(data.get("content", ""))
+                
+                elif event_type == "complete":
+                    if on_complete:
+                        on_complete(data.get("stats"))
+                
+                elif event_type == "error":
+                    if on_error:
+                        on_error(data.get("message", "Unknown error"))
+            
+            except json.JSONDecodeError:
+                if on_error:
+                    on_error(f"Invalid response format: {msg}")
+        
+        self.ws_client.set_on_message(handle_message)
+        
+        # Send initial request
+        payload = {
+            "type": "stream",
+            "request": request_text,
+        }
+        if context_file:
+            payload["context_file"] = context_file
+        
+        await self.ws_client.send(json.dumps(payload))
+        
+        # Listen for responses
+        await self.ws_client.listen()
+    
     async def get_logs(self, lines: int = 100) -> APIResponse:
         """Get recent logs.
         

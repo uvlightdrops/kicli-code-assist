@@ -15,7 +15,7 @@ from rich.text import Text
 logger = logging.getLogger(__name__)
 
 
-class AgentTabPanel(TabbedContent):
+class AgentTabPanel(Static):
     """Tabbed panel for agent responses.
     
     Features:
@@ -38,7 +38,12 @@ class AgentTabPanel(TabbedContent):
         background: $surface;
     }
     
-    AgentTabPanel > TabPane {
+    AgentTabPanel > TabbedContent {
+        width: 1fr;
+        height: 1fr;
+    }
+    
+    AgentTabPanel TabbedContent > TabPane {
         width: 1fr;
         height: 1fr;
     }
@@ -74,11 +79,19 @@ class AgentTabPanel(TabbedContent):
         self.default_tab = default_tab
         self.tab_panels: Dict[str, RichLog] = {}
         self.is_loading = reactive(False)
+        self.tabbed_content: Optional[TabbedContent] = None
         
         logger.info(f"AgentTabPanel initialized with tabs: {self.enabled_tabs}")
     
     def compose(self):
         """Compose tab panels."""
+        # Create TabbedContent container - panes are added in on_mount
+        self.tabbed_content = TabbedContent()
+        yield self.tabbed_content
+    
+    def on_mount(self) -> None:
+        """Initialize on mount."""
+        # Add panes to TabbedContent after it's mounted
         tab_map = {
             "explain": ("💡 Explain", "Code explanation and analysis"),
             "suggest": ("💡 Suggest", "Improvement suggestions"),
@@ -95,14 +108,17 @@ class AgentTabPanel(TabbedContent):
             log = RichLog(classes="tab-content")
             pane = TabPane(title, log, id=f"tab-{tab_name}")
             self.tab_panels[tab_name] = log
-            yield pane
-    
-    def on_mount(self) -> None:
-        """Initialize on mount."""
+            self.tabbed_content.add_pane(pane)
+        
         # Set active tab to default
-        if self.default_tab in self.tab_panels:
-            self.active_tab = self.default_tab
-            logger.debug(f"Default tab set: {self.default_tab}")
+        if self.tabbed_content and self.default_tab in self.tab_panels:
+            try:
+                pane_id = f"tab-{self.default_tab}"
+                self.tabbed_content.active = pane_id
+                self.active_tab = self.default_tab
+                logger.debug(f"Default tab set: {self.default_tab}")
+            except Exception as e:
+                logger.warning(f"Failed to set default tab: {e}")
     
     def display_response(self, response_data, flush: bool = True) -> None:
         """Display response data from backend.
@@ -211,6 +227,9 @@ class AgentTabPanel(TabbedContent):
     
     def action_next_tab(self) -> None:
         """Switch to next tab."""
+        if not self.tabbed_content:
+            return
+        
         tab_names = list(self.tab_panels.keys())
         if not tab_names:
             return
@@ -218,12 +237,17 @@ class AgentTabPanel(TabbedContent):
         try:
             current_idx = tab_names.index(self.active_tab)
             next_idx = (current_idx + 1) % len(tab_names)
-            self.active_tab = tab_names[next_idx]
+            next_tab = tab_names[next_idx]
+            self.tabbed_content.active = f"tab-{next_tab}"
+            self.active_tab = next_tab
         except (ValueError, IndexError):
             pass
     
     def action_prev_tab(self) -> None:
         """Switch to previous tab."""
+        if not self.tabbed_content:
+            return
+        
         tab_names = list(self.tab_panels.keys())
         if not tab_names:
             return
@@ -231,42 +255,68 @@ class AgentTabPanel(TabbedContent):
         try:
             current_idx = tab_names.index(self.active_tab)
             prev_idx = (current_idx - 1) % len(tab_names)
-            self.active_tab = tab_names[prev_idx]
+            prev_tab = tab_names[prev_idx]
+            self.tabbed_content.active = f"tab-{prev_tab}"
+            self.active_tab = prev_tab
         except (ValueError, IndexError):
             pass
     
     def action_tab_1(self) -> None:
         """Switch to tab 1."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 0:
+            self.tabbed_content.active = f"tab-{tabs[0]}"
             self.active_tab = tabs[0]
     
     def action_tab_2(self) -> None:
         """Switch to tab 2."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 1:
+            self.tabbed_content.active = f"tab-{tabs[1]}"
             self.active_tab = tabs[1]
     
     def action_tab_3(self) -> None:
         """Switch to tab 3."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 2:
+            self.tabbed_content.active = f"tab-{tabs[2]}"
             self.active_tab = tabs[2]
     
     def action_tab_4(self) -> None:
         """Switch to tab 4."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 3:
+            self.tabbed_content.active = f"tab-{tabs[3]}"
             self.active_tab = tabs[3]
     
     def action_tab_5(self) -> None:
         """Switch to tab 5."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 4:
+            self.tabbed_content.active = f"tab-{tabs[4]}"
             self.active_tab = tabs[4]
     
     def action_tab_6(self) -> None:
         """Switch to tab 6."""
+        if not self.tabbed_content:
+            return
+        
         tabs = list(self.tab_panels.keys())
         if len(tabs) > 5:
+            self.tabbed_content.active = f"tab-{tabs[5]}"
             self.active_tab = tabs[5]

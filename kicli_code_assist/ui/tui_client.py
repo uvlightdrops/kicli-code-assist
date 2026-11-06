@@ -8,7 +8,7 @@ Composes file tree, agent tabs, input bar, and status bar.
 from pathlib import Path
 import logging
 import asyncio
-from textual.app import ComposeResult, on
+from textual.app import ComposeResult, on, App
 from textual.containers import Container, Horizontal, Vertical
 from textual.widgets import Header, Footer, Static
 from textual import work
@@ -25,7 +25,7 @@ from .widgets.vi_editor_modal import VIEditorModal
 logger = logging.getLogger(__name__)
 
 
-class KICLITUIApp:
+class KICLITUIApp(App):
     """Main KI Code Assistant TUI Application.
     
     Layout:
@@ -89,13 +89,13 @@ class KICLITUIApp:
         height: 1fr;
     }
     
-    #input-container {
+    InputBar {
         width: 1fr;
         height: 3;
         border-top: solid $primary;
     }
     
-    #status-container {
+    StatusBar {
         width: 1fr;
         height: 1;
         border-top: solid $primary;
@@ -118,6 +118,7 @@ class KICLITUIApp:
     
     def __init__(self, config_path: str = None):
         """Initialize TUI app with configuration."""
+        super().__init__()
         self.config_loader = ConfigLoader(config_path)
         self.config = self.config_loader.config
         self.backend_client: BackendClient = None
@@ -151,12 +152,10 @@ class KICLITUIApp:
                         )
         
         # Input bar (always visible)
-        with Vertical(id="input-container"):
-            yield InputBar(multiline=True)
+        yield InputBar(multiline=True)
         
         # Status bar (always visible)
-        with Vertical(id="status-container"):
-            yield StatusBar()
+        yield StatusBar()
         
         # Footer
         yield Footer()
@@ -315,16 +314,7 @@ class KICLITUIApp:
 
 def run_tui(config_path: str = None) -> None:
     """Run the TUI application."""
-    # Note: Textual App is imported dynamically to avoid import at module level
-    from textual.app import App
-    
-    class TextualApp(App, KICLITUIApp):
-        """Combine Textual App with our KICLITUIApp implementation."""
-        def __init__(self, config_path: str = None):
-            App.__init__(self)
-            KICLITUIApp.__init__(self, config_path)
-    
-    app = TextualApp(config_path)
+    app = KICLITUIApp(config_path)
     app.run()
 
 

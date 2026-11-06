@@ -74,6 +74,21 @@ class BackendConfig(BaseModel):
         extra = "allow"
 
 
+class StreamingConfig(BaseModel):
+    """Streaming configuration (Phase 1.2)."""
+    enabled: bool = True
+    protocol: str = "websocket"  # websocket | http
+    fallback_to_http: bool = True
+    min_token_delay_ms: int = 20
+    max_buffer_size: int = 100
+    auto_reconnect: bool = True
+    reconnect_delay_ms: int = 1000
+    max_reconnect_attempts: int = 5
+
+    class Config:
+        extra = "allow"
+
+
 class TUIConfig(BaseModel):
     """Main TUI configuration."""
     file_tree: FileTreeConfig = Field(default_factory=FileTreeConfig)
@@ -81,6 +96,7 @@ class TUIConfig(BaseModel):
     logs: LogsPanelConfig = Field(default_factory=LogsPanelConfig)
     chat: ChatPanelConfig = Field(default_factory=ChatPanelConfig)
     backend: BackendConfig = Field(default_factory=BackendConfig)
+    streaming: 'StreamingConfig' = Field(default_factory=lambda: StreamingConfig())
     
     # Editor modes
     vi_mode: bool = True

@@ -30,6 +30,17 @@ backend:
   timeout: 30
   retry_count: 3
 
+# Streaming configuration (Phase 1.2)
+streaming:
+  enabled: true
+  protocol: websocket  # websocket | http
+  fallback_to_http: true
+  min_token_delay_ms: 20  # Minimum milliseconds between token renders
+  max_buffer_size: 100    # Maximum buffered tokens before backpressure
+  auto_reconnect: true
+  reconnect_delay_ms: 1000
+  max_reconnect_attempts: 5
+
 # Editor modes
 editor:
   vi_mode: true
@@ -40,10 +51,11 @@ ui:
   theme: dark
   layout: split  # split | focused
   debug: false
+  show_progress: true  # Show progress bar during streaming
+  show_metrics: true   # Show token count and timing in status bar
 
 # Logging
 logs:
   enabled: true
   max_lines: 100
   level: INFO
-
