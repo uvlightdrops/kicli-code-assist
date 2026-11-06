@@ -421,3 +421,73 @@ class AgentTabPanel(Static):
         if len(tabs) > 5:
             self.tabbed_content.active = f"tab-{tabs[5]}"
             self.active_tab = tabs[5]
+
+    # === INTERACTIVE RESPONSE EDITING (Phase 1.2.4) ===
+    
+    async def get_tab_content(self, tab_name: str) -> str:
+        """Get full content of a tab.
+        
+        Args:
+            tab_name: Tab to retrieve
+            
+        Returns:
+            Text content of tab
+        """
+        if tab_name not in self.tab_panels:
+            return ""
+        
+        # RichLog doesn't provide direct content retrieval
+        # This is a placeholder - full implementation requires
+        # storing content separately or using TextArea instead
+        logger.warning(f"get_tab_content not fully implemented for {tab_name}")
+        return ""
+    
+    async def set_tab_content(self, tab_name: str, content: str) -> None:
+        """Replace tab content with new text.
+        
+        Args:
+            tab_name: Tab to update
+            content: New content
+        """
+        if tab_name not in self.tab_panels:
+            logger.warning(f"Tab not found: {tab_name}")
+            return
+        
+        log = self.tab_panels[tab_name]
+        log.clear()
+        log.write(Text(content))
+        logger.debug(f"Tab {tab_name} content updated")
+    
+    async def copy_tab_content(self, tab_name: str) -> bool:
+        """Copy tab content to clipboard.
+        
+        Args:
+            tab_name: Tab to copy from
+            
+        Returns:
+            True if successful
+        """
+        # Requires pyperclip or similar
+        # Placeholder for Phase 1.3
+        logger.info(f"Copy {tab_name} content (requires clipboard integration)")
+        return False
+    
+    async def export_tab_content(self, tab_name: str, filepath: str) -> bool:
+        """Export tab content to file.
+        
+        Args:
+            tab_name: Tab to export
+            filepath: Target file path
+            
+        Returns:
+            True if successful
+        """
+        try:
+            content = await self.get_tab_content(tab_name)
+            with open(filepath, 'w') as f:
+                f.write(content)
+            logger.info(f"Tab {tab_name} exported to {filepath}")
+            return True
+        except Exception as e:
+            logger.error(f"Export failed: {e}")
+            return False

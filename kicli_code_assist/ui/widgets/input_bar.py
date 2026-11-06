@@ -362,3 +362,24 @@ class StatusBar(Static):
             self.connection_status = status
         
         self.update_status()
+
+    # === RESPONSE ACTIONS (Phase 1.2.4) ===
+    
+    async def show_action_menu(self, tab_name: str) -> None:
+        """Show response action menu (Edit, Copy, Export, Regenerate).
+        
+        Args:
+            tab_name: Tab to show actions for
+        """
+        # Placeholder for Phase 1.3
+        # Will show modal with action buttons
+        logger.info(f"Action menu for {tab_name} (Phase 1.3)")
+    
+    def set_action_state(self, action: str, enabled: bool) -> None:
+        """Enable/disable response action.
+        
+        Args:
+            action: Action name (edit, copy, export, regenerate)
+            enabled: True to enable
+        """
+        logger.debug(f"Action {action}: {enabled}")
