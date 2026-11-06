@@ -220,7 +220,7 @@ class KICLITUIApp(App):
     
     @work(exclusive=True)
     async def _on_input_submit(self, user_input: str) -> None:
-        """Handle user input submission."""
+        """Handle user input submission with streaming."""
         if not user_input.strip():
             return
         
@@ -228,7 +228,7 @@ class KICLITUIApp(App):
         tabs = self.query_one(AgentTabPanel)
         
         try:
-            status_bar.set_loading(True)
+            status_bar.set_streaming(True, "starting...")
             status_bar.set_status(f"Processing: {user_input[:40]}...")
             
             # Send request to backend
@@ -236,27 +236,100 @@ class KICLITUIApp(App):
                 status_bar.set_error("Not connected to backend")
                 return
             
-            response = await self.backend_client.send_request(
-                request_text=user_input,
-                context_file=self.selected_file,
-            )
-            
-            if response.success:
-                # Display response in tabs
-                tabs.display_response(response.data)
-                status_bar.set_status("✅ Complete")
-                logger.info(f"Response processed: {response.status_code}")
+            # Check if streaming is enabled in config
+            if self.config.streaming.enabled:
+                await self._stream_agent_response(user_input, tabs, status_bar)
             else:
-                error_msg = response.error or "Unknown error"
-                status_bar.set_error(f"Error: {error_msg}")
-                logger.error(f"Request failed: {error_msg}")
+                # Fallback to regular HTTP request
+                response = await self.backend_client.send_request(
+                    request_text=user_input,
+                    context_file=self.selected_file,
+                )
+                
+                if response.success:
+                    tabs.display_response(response.data)
+                    status_bar.set_status("✅ Complete")
+                    logger.info(f"Response processed: {response.status_code}")
+                else:
+                    error_msg = response.error or "Unknown error"
+                    status_bar.set_error(f"Error: {error_msg}")
+                    logger.error(f"Request failed: {error_msg}")
         
         except Exception as e:
             logger.error(f"Input submission error: {e}")
             status_bar.set_error(f"Error: {e}")
         
         finally:
-            status_bar.set_loading(False)
+            status_bar.set_streaming(False)
+    
+    async def _stream_agent_response(self, user_input: str, tabs: 'AgentTabPanel', status_bar: 'StatusBar') -> None:
+        """Stream agent response via WebSocket.
+        
+        Args:
+            user_input: User request text
+            tabs: Agent tabs widget
+            status_bar: Status bar for updates
+        """
+        from .streaming import StreamingResponseHandler, StreamingStats
+        
+        # Create streaming handler
+        handler = StreamingResponseHandler(
+            min_token_delay_ms=self.config.streaming.min_token_delay_ms,
+            max_buffer_size=self.config.streaming.max_buffer_size,
+        )
+        
+        # Prepare tab for streaming (stream to "Explain" tab by default)
+        default_tab = self.config.agent_tabs.default_tab.lower()
+        token_callback = await tabs.stream_to_tab(default_tab, flush=True)
+        
+        # Create handlers for streaming events
+        def on_token(token: str) -> None:
+            """Render token to tab."""
+            token_callback(token)
+            
+            # Update status with token count
+            stats = handler.get_stats()
+            if stats.tokens_received % 10 == 0:  # Update every 10 tokens
+                status_bar.set_token_stats(
+                    received=stats.tokens_received,
+                    rate=stats.tokens_per_second
+                )
+        
+        async def on_complete(stats: StreamingStats) -> None:
+            """Handle streaming completion."""
+            await tabs.complete_streaming(default_tab)
+            status_bar.set_status(f"✅ Complete: {stats}")
+            logger.info(f"Streaming complete: {stats}")
+        
+        async def on_error(error_msg: str) -> None:
+            """Handle streaming error."""
+            await tabs.stream_error(default_tab, error_msg)
+            status_bar.set_error(f"Streaming error: {error_msg}")
+            logger.error(f"Streaming error: {error_msg}")
+        
+        handler.on_token = on_token
+        handler.on_complete = on_complete
+        handler.on_error = on_error
+        
+        # Start streaming
+        try:
+            await handler.start_streaming()
+            
+            # Stream via WebSocket
+            await self.backend_client.stream_agent_response(
+                request_text=user_input,
+                context_file=self.selected_file,
+                on_token=handler.add_token,
+                on_complete=handler.complete,
+                on_error=handler.add_error,
+            )
+        
+        except Exception as e:
+            await handler.add_error(f"Streaming failed: {str(e)}")
+            logger.error(f"Streaming error: {e}")
+        
+        finally:
+            await handler.cancel()
     
     def _on_file_selected(self, file_path: str) -> None:
         """Handle file selection from tree."""

@@ -308,3 +308,57 @@ class StatusBar(Static):
         """
         self.connection_status = message
         self.update_status()
+    
+    # === STREAMING STATUS METHODS (Phase 1.2.3) ===
+    
+    def set_streaming(self, active: bool, stats_summary: str = "") -> None:
+        """Update status for streaming activity.
+        
+        Args:
+            active: True if streaming
+            stats_summary: Statistics string (e.g., "42 tokens (12.5 t/s)")
+        """
+        if active:
+            status = f"🌊 Streaming {stats_summary}".strip()
+        else:
+            status = "🟢 Ready"
+        
+        self.connection_status = status
+        self.update_status()
+    
+    def set_progress(self, percent: int, label: str = "") -> None:
+        """Set progress bar display.
+        
+        Args:
+            percent: Progress percentage (0-100)
+            label: Optional progress label
+        """
+        if percent >= 100:
+            status = f"✅ Complete {label}".strip()
+        else:
+            # Simple progress indicator
+            bars = int(percent / 10)
+            status = f"⏳ {percent}% {'█' * bars}{'░' * (10 - bars)} {label}".strip()
+        
+        self.connection_status = status
+        self.update_status()
+    
+    def set_token_stats(self, received: int, rendered: int = None, rate: float = None) -> None:
+        """Update token statistics display.
+        
+        Args:
+            received: Tokens received
+            rendered: Tokens rendered (if different from received)
+            rate: Tokens per second
+        """
+        if rendered is not None:
+            self.token_count = f"{rendered}/{received}"
+        else:
+            self.token_count = str(received)
+        
+        if rate is not None:
+            # Add rate info to status
+            status = f"🌊 Streaming: {rate:.1f} t/s"
+            self.connection_status = status
+        
+        self.update_status()
