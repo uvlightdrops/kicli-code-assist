@@ -173,8 +173,10 @@ class FileTree(Tree):
         path = node.data["path"]
         
         # Replace placeholder with real contents
-        if len(node.children) == 1 and node.children[0].label == "...":
-            node.children = []
+        if len(node.children) == 1 and str(node.children[0].label) == "...":
+            # Remove placeholder
+            node.remove_children()
+            # Add actual directory contents
             self._add_directory(node, path)
     
     def on_tree_expand(self, event: Tree.NodeExpanded) -> None:
