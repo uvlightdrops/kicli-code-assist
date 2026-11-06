@@ -1,3 +1,15 @@
+---
+title: "AI-Powered Application Architecture Review"
+project: "kicli-code-assist"
+scope: "roadmap-ai-patterns"
+type: "review"
+created: 2026-10-01T00:00:00+01:00
+updated: 2026-11-06T09:58:14+01:00
+update_reason: "Reorganized into roadmap-todo/ - status and relevance need review"
+status: "archived-roadmap"
+note: "This is historical documentation. Review for relevance before use in new work."
+---
+
 # AI-Powered Application Architecture Review
 **Repository:** uvlightdrops/kicli-code-assist  
 **Date:** 2026-10-17  

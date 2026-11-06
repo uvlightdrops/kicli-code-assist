@@ -1,3 +1,15 @@
+---
+title: "KI Code Assistant - Codebase Quality & Improvement Roadmap"
+project: "kicli-code-assist"
+scope: "roadmap-quality"
+type: "assessment"
+created: 2026-10-01T00:00:00+01:00
+updated: 2026-11-06T09:58:14+01:00
+update_reason: "Reorganized into roadmap-todo/ - status and relevance need review"
+status: "archived-roadmap"
+note: "This is historical documentation. Review for relevance before use in new work."
+---
+
 # KI Code Assistant - Codebase Quality & Improvement Roadmap
 
 **Status:** Phase 2 Config System Complete | Phase 3 UI/Integration Ready  

@@ -1,3 +1,15 @@
+---
+title: "Agent Routing Intelligence Plan"
+project: "kicli-code-assist"
+scope: "roadmap-agent-behavior"
+type: "plan"
+created: 2026-10-01T00:00:00+01:00
+updated: 2026-11-06T09:58:14+01:00
+update_reason: "Reorganized into roadmap-todo/ - status and relevance need review"
+status: "archived-roadmap"
+note: "This is historical documentation. Review for relevance before use in new work."
+---
+
 # Agent Routing Intelligence Plan: From Keyword Matching to Real Agentic Behavior
 
 **Status**: Architecture Design Phase  

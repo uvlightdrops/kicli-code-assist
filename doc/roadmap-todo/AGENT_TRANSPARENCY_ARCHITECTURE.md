@@ -1,3 +1,15 @@
+---
+title: "Agent Transparency Architecture (Archived Concept)"
+project: "kicli-code-assist"
+scope: "roadmap-observability"
+type: "architecture-draft"
+created: 2026-10-01T00:00:00+01:00
+updated: 2026-11-06T09:58:14+01:00
+update_reason: "Reorganized into roadmap-todo/ - status and relevance need review"
+status: "archived-roadmap"
+note: "This is historical documentation. Review for relevance before use in new work."
+---
+
 # Agent Transparency Architecture
 ## Live Agent Thinking Visualization in WebUI
 
