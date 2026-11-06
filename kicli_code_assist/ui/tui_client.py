@@ -209,6 +209,8 @@ class KICLITUIApp(App):
         try:
             file_tree = self.query_one(FileTree, expect_type=FileTree)
             file_tree.set_on_file_selected(self._on_file_selected)
+            file_tree.focus()  # Give focus to FileTree so user can interact with it
+            logger.debug("FileTree focused")
         except Exception as e:
             logger.debug(f"FileTree not found or not enabled: {e}")
     

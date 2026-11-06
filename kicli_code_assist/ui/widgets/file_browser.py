@@ -161,8 +161,9 @@ class FileTree(Tree):
                 except Exception as e:
                     logger.error(f"File selection callback error: {e}")
     
-    def on_tree_select(self, event: Tree.NodeSelected) -> None:
-        """Handle file selection."""
+    def on_tree_node_selected(self, event: Tree.NodeSelected) -> None:
+        """Handle file selection (Textual event: Tree.NodeSelected)."""
+        logger.debug(f"on_tree_node_selected called for node: {event.node.label}")
         self._handle_selection(event.node)
     
     def _populate_node(self, node: TreeNode) -> None:
