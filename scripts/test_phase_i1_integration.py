@@ -28,7 +28,7 @@ sys.path.insert(0, str(project_root))
 from kicli_code_assist.ui.http_client import TUIBackendClient, AnalysisResponse
 
 
-def test_backend_health(base_url: str = "http://localhost:3000") -> bool:
+def test_backend_health(base_url: str = "http://localhost:8000") -> bool:
     """Test if backend is running."""
     logger.info(f"Testing backend health at {base_url}...")
     
@@ -53,7 +53,7 @@ def test_backend_health(base_url: str = "http://localhost:3000") -> bool:
 
 
 def test_file_analysis(
-    base_url: str = "http://localhost:3000",
+    base_url: str = "http://localhost:8000",
     file_path: str = "README.md",
     project_root: str = None
 ) -> bool:
@@ -109,7 +109,7 @@ def main():
     print("Phase I1: Real LLM Integration Test")
     print("=" * 60 + "\n")
     
-    backend_url = "http://localhost:3000"
+    backend_url = "http://localhost:8000"
     project_root = str(Path.cwd())
     
     logger.info(f"Project root: {project_root}")

@@ -31,11 +31,11 @@ class AnalysisResponse:
 class TUIBackendClient:
     """HTTP client for TUI to query backend."""
     
-    def __init__(self, base_url: str = "http://localhost:3000"):
+    def __init__(self, base_url: str = "http://localhost:8000"):
         """Initialize client.
         
         Args:
-            base_url: Backend URL (default: http://localhost:3000)
+            base_url: Backend URL (default: http://localhost:8000)
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = 32  # 32 second timeout per AGENT_ROUTE_SPEC
