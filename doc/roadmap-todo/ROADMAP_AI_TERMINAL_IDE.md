@@ -1,16 +1,17 @@
 ---
-title: TUI Intelligent Terminal IDE - Vision & Roadmap
-scope: guide
-project: kicli-code-assist
-status: active
+title: "Roadmap: AI Terminal IDE Vision"
+project: "kicli-code-assist"
+scope: "roadmap-tui-vision"
+type: "roadmap"
+status: "active-roadmap"
 created: 2026-11-05T21:25+01:00
-updated: 2026-11-05T21:25+01:00
-update_reason: TUI 2.0 vision - building intelligent terminal IDE based on advanced backend
-agent_project: kicli-code-assist
+updated: 2026-11-06T10:11:02+01:00
+update_reason: "Moved to roadmap-todo/ for clarity - active TUI feature list"
 cross_references:
-  - doc/architecture/FRONTEND_SPECIFICATION.md (Abstract interface)
-  - doc/features/UI_TABS.md (Tab system reference)
-  - doc/archive/tui_attempt_oct2026/02_TUI_SPECIFICATION_LEGACY.md (Earlier attempt)
+  - doc/frontend-tui/README.md (current TUI docs)
+  - doc/backend/README.md (API available)
+  - doc/phases/PHASE_1_TUI_IMPLEMENTATION_COMPLETE.md (current status)
+note: "This is the TUI feature roadmap. For current implementation status, see Phase 1 docs."
 ---
 
 # TUI Intelligent Terminal IDE - Vision & Roadmap

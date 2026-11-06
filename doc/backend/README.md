@@ -1,93 +1,72 @@
 ---
-title: "Backend Documentation Hub"
-project: "kicli-code-assist"
-scope: "backend"
+title: Backend API & Architecture Documentation
+project: kicli-code-assist
+scope: backend
+type: reference
+status: active
 created: 2026-11-06T09:20:00+01:00
-updated: 2026-11-06T09:20:00+01:00
-update_reason: "Created backend doc hub for API + orchestration clarity"
-status: "active"
-cross_references:
-  - doc/CODE_ANALYSIS_STRUCTURE.md (5-layer overview)
-  - doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md (deep dive)
-  - doc/architecture/AGENT_COORDINATION_ARCHITECTURE.md (agent pipeline)
+updated: 2026-11-06T10:25:00+01:00
+update_reason: Reorganized into 3-layer intelligence model with subfolders
 ---
 
-# Backend Documentation Hub
+# Backend API & Architecture Documentation
 
-Quick navigation for clients (TUI, WebUI, ki-knowledge, etc) integrating with kicli backend.
+Hub for backend system architecture, API specifications, and integration guides.
 
-## 🎯 Start Here
+Organized by **3-layer intelligence model** for progressive complexity.
 
-**First time?** → Read `AGENT_ROUTE_SPEC.md` (5-min overview)
-**Implementing?** → Follow `INTEGRATION_GUIDE.md` (step-by-step)
-**Debugging?** → Check `doc/CODE_ANALYSIS_STRUCTURE.md` (5-layer flow)
+## 🎯 Quick Navigation
 
-## 📚 Organization
+**TUI Integration (Phase I1)?**
+→ [layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md](layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md)
 
-### API Level (What you call)
-- **`AGENT_ROUTE_SPEC.md`** — `/api/agent/route` endpoint
-  - Request/Response schema
-  - Query patterns (Explain, Metrics, Refactor, etc)
-  - Error responses
-  - Real examples from TUI
+**Understanding Full Architecture?**
+→ Start with [layer-1-raw-llm/](layer-1-raw-llm/) → [layer-2-workflow-orchestration/](layer-2-workflow-orchestration/) → [layer-3-autonomous-agent/](layer-3-autonomous-agent/)
 
-### Architecture Level (How it works)
-- **`doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md`**
-  - 6-stage pipeline (intent → routing → agent selection → execution → aggregation → generation)
-  - MetaCoordinationAgent + specialized agents
-  
-- **`doc/architecture/AGENT_COORDINATION_ARCHITECTURE.md`**
-  - Internal agent communication
-  - Data flow between Explain/Metrics/Dependencies/Refactor agents
-  
-- **`doc/architecture/WEBSOCKET_STREAMING_ARCHITECTURE.md`**
-  - Real-time chunk streaming (Phase 1.2)
-  - Event structure for TUI/WebUI
+## 📊 3-Layer Model
 
-- **`doc/architecture/ASYNC_LLM_SECURITY_ARCHITECTURE.md`**
-  - Async LLM processing (ki-core)
-  - Secret filtering + error handling
+```
+Layer 3: Autonomous Agent Layer
+├── Multi-agent reasoning & self-correction
+├── Transparency & observability (traces, WebSocket streaming)
+└── Decision-making based on outcomes
+         ↓ uses ↓
+Layer 2: Workflow Orchestration Layer
+├── 6-stage pipeline (intent → routing → execution → aggregation → generation)
+├── Session management & state
+└── Structured error handling
+         ↓ uses ↓
+Layer 1: Raw LLM Layer
+├── OpenAI API (sync/async)
+├── Secret filtering & security
+└── File I/O & OS commands
+```
 
-### Implementation Guides
-- **`INTEGRATION_GUIDE.md`** — Step-by-step for new clients
-- **`CHUNK_FORMAT_SPEC.md`** — Standard chunk structure (observation/issue/solution)
-- **`ERROR_HANDLING.md`** — What to do when backend fails
+## 📚 Layer Documentation
 
-### Deployment (handled by stackctl)
-- See `doc/deployment/` (not here)
+| Layer | Folder | Entry Point | Purpose |
+|-------|--------|------------|---------|
+| **Layer 1** | `layer-1-raw-llm/` | [README.md](layer-1-raw-llm/README.md) | LLM primitives, file I/O, OS commands |
+| **Layer 2** | `layer-2-workflow-orchestration/` | [README.md](layer-2-workflow-orchestration/README.md) | Orchestration pipeline, REST API, TUI integration |
+| **Layer 3** | `layer-3-autonomous-agent/` | [README.md](layer-3-autonomous-agent/README.md) | Multi-agent reasoning, transparency, streaming |
 
 ## 🔄 Cross-Project Usage
 
 This backend is shared by:
 - **kicli-code-assist** — TUI + WebUI
-- **ki-knowledge** — Coding Agent
-- Future projects (new clients welcome)
+- **ki-knowledge** — Coding Agent (uses Layers 1-2)
+- Future projects
 
-Standard pattern for new clients:
-```
-1. Read AGENT_ROUTE_SPEC.md
-2. Follow INTEGRATION_GUIDE.md
-3. Use same chunk format (CHUNK_FORMAT_SPEC.md)
-4. Report issues/extensions to this hub
-```
+**For new clients:** Read Layer 2 AGENT_ROUTE_SPEC.md, follow examples, reuse error handling patterns.
 
-## 📊 Status
+## 📝 Contributing
 
-- ✅ API endpoint: `/api/agent/route` (Phase 5.1 complete)
-- ✅ Agent orchestration: 6-stage pipeline (Phase 5.1)
-- ✅ Transparency: Reasoning traces + WebSocket streaming (Phase 5.5.2)
-- 🟡 TUI integration: Starting Phase I1
-- 🟡 WebUI integration: Full (Phase 1 complete, Phase 5.5.2 integrated)
-- 🟡 ki-knowledge integration: Ready to consume
-
-## 📝 Contributing to Backend Docs
-
-When updating backend code:
-1. Update YAML headers in modified docs (status, updated, update_reason)
-2. If breaking API changes → update AGENT_ROUTE_SPEC.md + INTEGRATION_GUIDE.md
-3. Keep Architecture docs in sync (link in cross_references)
-4. Archive old docs in doc/architecture/archive/ (don't delete)
+When updating backend:
+1. Update YAML headers (updated date, update_reason)
+2. Breaking API changes? Update AGENT_ROUTE_SPEC.md
+3. Link to cross-layer dependencies in cross_references
+4. Keep docs in sync with code
 
 ---
 
-**Last updated:** 2026-11-06 | **By:** Copilot | **Phase:** I1-TUI-Integration
+**Phase:** I1-TUI-Integration | **Status:** Restructured 2026-11-06
