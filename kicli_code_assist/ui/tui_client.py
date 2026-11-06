@@ -18,6 +18,7 @@ from .api_client import BackendClient
 from .widgets.file_browser import FileTree
 from .widgets.agent_tabs import AgentTabPanel
 from .widgets.input_bar import InputBar, StatusBar
+from .widgets.preview_panel import PreviewPanel
 from .widgets.preview_modal import FilePreviewModal
 from .widgets.vi_editor_modal import VIEditorModal
 
@@ -82,6 +83,20 @@ class KICLITUIApp(App):
         width: 25%;
         height: 1fr;
         border-right: solid $primary;
+        layout: vertical;
+    }
+    
+    #left-panel FileTree {
+        width: 1fr;
+        height: 50%;
+        border-bottom: solid $primary;
+        overflow: auto;
+    }
+    
+    #left-panel PreviewPanel {
+        width: 1fr;
+        height: 50%;
+        overflow: auto;
     }
     
     #right-panel {
@@ -135,13 +150,14 @@ class KICLITUIApp(App):
         # Main content area
         with Vertical(id="main-container"):
             with Horizontal(id="content-area"):
-                # Left panel: File tree
+                # Left panel: File tree + Preview
                 if self.config_loader.is_enabled("file_tree"):
                     with Vertical(id="left-panel"):
                         yield FileTree(
                             project_root=self.config.file_tree.project_root,
                             ignore_patterns=self.config.file_tree.ignore_patterns,
                         )
+                        yield PreviewPanel()  # Add preview panel below file tree
                 
                 # Right panel: Agent tabs
                 with Vertical(id="right-panel"):
@@ -186,9 +202,15 @@ class KICLITUIApp(App):
         try:
             input_bar = self.query_one(InputBar)
             input_bar.on_submit_callback = self._on_input_submit
-            input_bar.on_file_selected_callback = self._on_file_selected
         except Exception as e:
             logger.warning(f"InputBar not found: {e}")
+        
+        # Bind FileTree selection to handler (if FileTree is enabled)
+        try:
+            file_tree = self.query_one(FileTree, expect_type=FileTree)
+            file_tree.set_on_file_selected(self._on_file_selected)
+        except Exception as e:
+            logger.debug(f"FileTree not found or not enabled: {e}")
     
     def action_quit(self) -> None:
         """Handle quit action."""
@@ -335,6 +357,13 @@ class KICLITUIApp(App):
         """Handle file selection from tree."""
         self.selected_file = file_path
         logger.debug(f"File selected: {file_path}")
+        
+        # Update preview panel if available
+        try:
+            preview_panel = self.query_one(PreviewPanel)
+            preview_panel.preview_file(file_path)
+        except Exception as e:
+            logger.debug(f"Could not update preview panel: {e}")
     
     def action_tab_1(self) -> None:
         """Tab 1."""

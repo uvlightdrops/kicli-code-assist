@@ -136,10 +136,8 @@ class FileTree(Tree):
         except ValueError:
             return 0
     
-    def on_tree_select(self, event: Tree.NodeSelected) -> None:
-        """Handle file selection."""
-        node = event.node
-        
+    def _handle_selection(self, node) -> None:
+        """Internal method to handle file selection (called from both event and external)."""
         if node.data and "path" in node.data:
             path = node.data["path"]
             is_dir = node.data["is_dir"]
@@ -149,17 +147,23 @@ class FileTree(Tree):
             
             # Expand/collapse on select
             if is_dir:
-                if node.is_expanded:
+                if not node.is_expanded:  # Only populate if NOT already expanded
                     self._populate_node(node)
+                # Toggle expand state
+                node.toggle()
             
             logger.debug(f"Selected: {self.selected_path}")
             
-            # Call file selection callback
+            # Call file selection callback (files only)
             if not is_dir and self.on_file_selected_callback:
                 try:
                     self.on_file_selected_callback(self.selected_path)
                 except Exception as e:
                     logger.error(f"File selection callback error: {e}")
+    
+    def on_tree_select(self, event: Tree.NodeSelected) -> None:
+        """Handle file selection."""
+        self._handle_selection(event.node)
     
     def _populate_node(self, node: TreeNode) -> None:
         """Populate a directory node on first expand."""
