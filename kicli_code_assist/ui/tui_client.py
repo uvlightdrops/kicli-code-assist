@@ -77,30 +77,44 @@ class KICLITUIApp(App):
     #content-area {
         width: 1fr;
         height: 1fr;
+        layout: horizontal;
     }
     
     #left-panel {
-        width: 25%;
+        width: 1fr;
+        height: 1fr;
+        border-right: solid $primary;
+        layout: vertical;
+        min-width: 20;
+    }
+    
+    #left-panel FileTree {
+        width: 1fr;
+        height: 1fr;
+        border: none;
+        overflow: auto;
+    }
+    
+    #center-panel {
+        width: 2fr;
         height: 1fr;
         border-right: solid $primary;
         layout: vertical;
     }
     
-    #left-panel FileTree {
+    #center-panel PreviewPanel {
         width: 1fr;
-        height: 50%;
-        border-bottom: solid $primary;
-        overflow: auto;
-    }
-    
-    #left-panel PreviewPanel {
-        width: 1fr;
-        height: 50%;
-        overflow: auto;
+        height: 1fr;
     }
     
     #right-panel {
-        width: 75%;
+        width: 2fr;
+        height: 1fr;
+        layout: vertical;
+    }
+    
+    #right-panel AgentTabPanel {
+        width: 1fr;
         height: 1fr;
     }
     
@@ -143,25 +157,29 @@ class KICLITUIApp(App):
             self.config_loader.debug_print()
     
     def compose(self) -> ComposeResult:
-        """Compose main UI layout."""
+        """Compose main UI layout: FileTree (left) | Preview (center, 50%) | Agent (right, 50%)"""
         # Header
         yield Header()
         
         # Main content area
         with Vertical(id="main-container"):
             with Horizontal(id="content-area"):
-                # Left panel: File tree + Preview
+                # Left panel: File tree (narrow)
                 if self.config_loader.is_enabled("file_tree"):
                     with Vertical(id="left-panel"):
                         yield FileTree(
                             project_root=self.config.file_tree.project_root,
                             ignore_patterns=self.config.file_tree.ignore_patterns,
                         )
-                        yield PreviewPanel()  # Add preview panel below file tree
                 
-                # Right panel: Agent tabs
-                with Vertical(id="right-panel"):
-                    if self.config_loader.is_enabled("agent_tabs"):
+                # Center panel: Preview with tabs
+                if self.config_loader.is_enabled("preview"):
+                    with Vertical(id="center-panel"):
+                        yield PreviewPanel()
+                
+                # Right panel: Agent tabs (50% of remaining)
+                if self.config_loader.is_enabled("agent_tabs"):
+                    with Vertical(id="right-panel"):
                         yield AgentTabPanel(
                             enabled_tabs=self.config.agent_tabs.enabled_tabs,
                             default_tab=self.config.agent_tabs.default_tab,

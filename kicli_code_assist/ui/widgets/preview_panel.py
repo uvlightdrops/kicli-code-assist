@@ -29,7 +29,7 @@ class PreviewPanel(Container):
     CSS = """
     PreviewPanel {
         width: 1fr;
-        height: 100%;
+        height: 1fr;
         border: solid $primary;
         layout: vertical;
     }

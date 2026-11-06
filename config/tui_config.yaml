@@ -12,6 +12,10 @@ file_tree:
     - node_modules
     - .pytest_cache
 
+# Preview panel
+preview:
+  enabled: true
+
 # Agent tabs panel
 agent_tabs:
   enabled: true

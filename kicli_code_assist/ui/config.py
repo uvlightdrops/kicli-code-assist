@@ -56,6 +56,16 @@ class ChatPanelConfig(BaseModel):
         extra = "allow"
 
 
+class PreviewPanelConfig(BaseModel):
+    """Preview panel configuration."""
+    enabled: bool = True
+    max_file_size_mb: int = 1  # Max 1MB for display
+    syntax_highlighting: bool = True
+
+    class Config:
+        extra = "allow"
+
+
 class BackendConfig(BaseModel):
     """Backend API configuration."""
     url: str = "http://localhost:8000"
@@ -93,6 +103,7 @@ class TUIConfig(BaseModel):
     """Main TUI configuration."""
     file_tree: FileTreeConfig = Field(default_factory=FileTreeConfig)
     agent_tabs: AgentTabsConfig = Field(default_factory=AgentTabsConfig)
+    preview: PreviewPanelConfig = Field(default_factory=PreviewPanelConfig)
     logs: LogsPanelConfig = Field(default_factory=LogsPanelConfig)
     chat: ChatPanelConfig = Field(default_factory=ChatPanelConfig)
     backend: BackendConfig = Field(default_factory=BackendConfig)
@@ -162,6 +173,7 @@ class ConfigLoader:
             return TUIConfig(
                 file_tree=FileTreeConfig(**tui_data.get("file_tree", {})),
                 agent_tabs=AgentTabsConfig(**tui_data.get("agent_tabs", {})),
+                preview=PreviewPanelConfig(**tui_data.get("preview", {})),
                 logs=LogsPanelConfig(**tui_data.get("logs", {})),
                 chat=ChatPanelConfig(**tui_data.get("chat", {})),
                 backend=BackendConfig(**tui_data.get("backend", {})),
@@ -196,6 +208,7 @@ class ConfigLoader:
         panels = {
             "file_tree": self.config.file_tree.enabled,
             "agent_tabs": self.config.agent_tabs.enabled,
+            "preview": self.config.preview.enabled,
             "logs": self.config.logs.enabled,
             "chat": self.config.chat.enabled,
         }
@@ -203,7 +216,7 @@ class ConfigLoader:
     
     def get_enabled_panels(self) -> List[str]:
         """Get list of enabled panel names."""
-        return [p for p in ["file_tree", "agent_tabs", "logs", "chat"] if self.is_enabled(p)]
+        return [p for p in ["file_tree", "preview", "agent_tabs", "logs", "chat"] if self.is_enabled(p)]
     
     def debug_print(self) -> None:
         """Print current configuration for debugging."""

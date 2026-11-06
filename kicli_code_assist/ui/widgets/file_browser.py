@@ -37,7 +37,7 @@ class FileTree(Tree):
     DEFAULT_CSS = """
     FileTree {
         width: 1fr;
-        height: 100%;
+        height: 1fr;
         border: solid $primary;
     }
     
@@ -146,11 +146,10 @@ class FileTree(Tree):
             self.current_selection = node
             
             # Expand/collapse on select
-            if is_dir:
-                if not node.is_expanded:  # Only populate if NOT already expanded
-                    self._populate_node(node)
-                # Toggle expand state
-                node.toggle()
+            if is_dir and not node.is_expanded:  # Only populate if NOT already expanded
+                self._populate_node(node)
+            # Toggle expand state
+            node.toggle()
             
             logger.debug(f"Selected: {self.selected_path}")
             
