@@ -105,7 +105,9 @@ class FileTree(Tree):
                 icon = "📁" if item.is_dir() else "📄"
                 label = f"{icon} {item.name}"
                 
-                node = parent.add(label, expand=item.is_dir())
+                # Start all nodes collapsed (expand=False)
+                # They will be expanded on-demand via on_tree_node_expanded
+                node = parent.add(label, expand=False)
                 node.data = {"path": item, "is_dir": item.is_dir()}
                 
                 # Lazy load subdirectories only if not too deep
@@ -171,6 +173,7 @@ class FileTree(Tree):
             return
         
         path = node.data["path"]
+        logger.debug(f"Populating: {node.label}")
         
         # Replace placeholder with real contents
         if len(node.children) == 1 and str(node.children[0].label) == "...":
@@ -178,9 +181,36 @@ class FileTree(Tree):
             node.remove_children()
             # Add actual directory contents
             self._add_directory(node, path)
+            logger.debug(f"Populated {node.label} with {len(node.children)} children")
     
-    def on_tree_expand(self, event: Tree.NodeExpanded) -> None:
-        """Handle directory expansion."""
+    def action_select_cursor(self) -> None:
+        """Override action_select_cursor (ENTER key) to handle lazy loading."""
+        if self.cursor_node:
+            # First call parent to post the NodeSelected event
+            super().action_select_cursor()
+            # Now handle lazy loading manually
+            node = self.cursor_node
+            if node.data and node.data.get("is_dir") and not node.is_expanded:
+                self._populate_node(node)
+                # Toggle to expand
+                node.toggle()
+        else:
+            super().action_select_cursor()
+    
+    def action_toggle_node(self) -> None:
+        """Override toggle_node action to handle lazy loading."""
+        if self.cursor_node:
+            # Toggle the node
+            self.cursor_node.toggle()
+            # If it's now expanded and it's a directory, populate it
+            if self.cursor_node.is_expanded and self.cursor_node.data and self.cursor_node.data.get("is_dir"):
+                self._populate_node(self.cursor_node)
+        else:
+            # Call parent if no cursor node
+            super().action_toggle_node()
+    
+    def on_tree_node_expanded(self, event: Tree.NodeExpanded) -> None:
+        """Handle directory expansion (Textual event: Tree.NodeExpanded)."""
         self._populate_node(event.node)
     
     def get_selected_path(self) -> Optional[Path]:
