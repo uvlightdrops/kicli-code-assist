@@ -374,7 +374,12 @@ class KICLITUIApp(App):
             await handler.cancel()
     
     def _on_file_selected(self, file_path: str) -> None:
-        """Handle file selection from tree."""
+        """Handle file selection from tree.
+        
+        Updates:
+        1. Preview panel (shows file content)
+        2. Agent tabs (sets context for analysis)
+        """
         self.selected_file = file_path
         logger.debug(f"File selected: {file_path}")
         
@@ -384,6 +389,15 @@ class KICLITUIApp(App):
             preview_panel.preview_file(file_path)
         except Exception as e:
             logger.debug(f"Could not update preview panel: {e}")
+        
+        # Update agent tabs with file context (Phase I1 Real LLM Integration)
+        try:
+            agent_tabs = self.query_one(AgentTabPanel)
+            project_root = str(Path.cwd())
+            agent_tabs.set_file_context(file_path, project_root)
+            logger.info(f"Agent tabs context updated: {file_path}")
+        except Exception as e:
+            logger.debug(f"Could not update agent tabs context: {e}")
     
     def action_tab_1(self) -> None:
         """Tab 1."""
