@@ -34,7 +34,8 @@ Direct interfaces to LLM providers, system commands, and file I/O primitives.
 
 | Document | Purpose | Status |
 |----------|---------|--------|
-| *TBD* | LLM Client API Specification | ❌ Missing |
+| IDE_CAPABILITIES.md | What the TUI/WebUI can do with Layer 1 | ✅ Complete |
+| *TBD* | LLM Client API Specification (ki_core AsyncOpenAIClient) | ⚠️ Partial |
 | *TBD* | OS Command Execution Architecture | ❌ Missing |
 | *TBD* | File I/O & Git Operations | ❌ Missing |
 
