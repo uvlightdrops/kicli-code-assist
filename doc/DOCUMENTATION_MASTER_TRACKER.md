@@ -1,6 +1,6 @@
 # 📋 Documentation Master Tracker
 **Project:** kicli-code-assist  
-**Last Updated:** 2026-11-07 18:54
+**Last Updated:** 2026-11-07 19:13
 
 ---
 
@@ -20,13 +20,30 @@
 | **doc/frontend-tui/** | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ✅ |
 | **doc/frontend-web/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/backend/** | ✅ | ⚠️ | 🔶 | ⚠️ | ✅ | 🔶 | ⚠️ |
-| **doc/deployment/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
+| **doc/deployment/** | ✅ | ✅ | ✅ | - | ✅ | ✅ | ✅ |
 | **doc/phases/** | ✅ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/tracking/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 
 ---
 
 ## 📝 File Status by Folder
+
+### ✅ doc/deployment/ (13 files, 3611 LOC)
+| File | YAML | Blocks | Status | Notes |
+|------|:---:|:---:|:---:|---|
+| ANTI_PATTERNS_FAILED_APPROACHES.md | ✅ | ✅ | active | Added title, scope, blocks |
+| CONSOLIDATION_STRATEGY.md | ✅ | ✅ | archived | Scope: deployment (was docs) |
+| CURRENT_STATUS.md | ✅ | ✅ | active | Fixed timestamp |
+| DEVELOPMENT_STACK_TROUBLESHOOTING.md | ✅ | ✅ | active | Added title, blocks |
+| FUTURE_ROADMAP.md | ✅ | ✅ | active | Added title, blocks |
+| OPTION2_STACKCTL_SYSTEMD.md | ✅ | ✅ | archived | Updated timestamp |
+| PHASE_1_REPORT.md | ✅ | ✅ | archived | Scope: deployment (was docs) |
+| README.md | ✅ | ✅ | active | Updated timestamp |
+| SEMI_PROD_DEPLOYMENT.md | ✅ | ✅ | archived | Updated timestamp |
+| STACKCTL_ARCHITECTURE.md | ✅ | ✅ | active | Updated timestamp |
+| STACKCTL_IMPLEMENTATION.md | ✅ | ✅ | active | Updated timestamp |
+| STACKCTL_STATUS.md | ✅ | ✅ | active | Updated timestamp |
+| STACK_YAML_VARIANTS.md | ✅ | ✅ | active | Updated title (de→en) |
 
 ### ✅ doc/frontend-tui/ (8 files, 1956 LOC)
 | File | YAML | Blocks | Scope | Status | Notes |
@@ -40,7 +57,7 @@
 | UI_TABS.md | ✅ | ⚠️ | ✅ | active | 8 H2, 10 blocks (check dup) |
 | README.md | ✅ | ❌ | ✅ | active | 2 H2, 0 blocks (2 missing) |
 
-### ✅ doc/architecture/ (4+ files)
+### ⚠️ doc/architecture/ (4+ files)
 | File | YAML | Blocks | Notes |
 |------|:---:|:---:|---|
 | CODE_ANALYSIS_STRUCTURE.md | ✅ | ⚠️ | Moved; incomplete blocks |
@@ -48,7 +65,7 @@
 | WEBSOCKET_STREAMING_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
 | ASYNC_LLM_SECURITY_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
 
-### ✅ doc/backend/
+### ⚠️ doc/backend/
 | Folder | Status |
 |--------|:---:|
 | **layer-1-raw-llm/** | ⚠️ |
@@ -67,6 +84,7 @@
 | 2026-11-07 18:36 | Fix scope/title/timestamp | 5 files | ✅ |
 | 2026-11-07 18:46 | Remove PHASE from names | 2 files | ✅ |
 | 2026-11-07 18:54 | Trim to lean format | master | ✅ |
+| 2026-11-07 19:13 | Standardize doc/deployment/ | 13 files | ✅ |
 
 ---
 
