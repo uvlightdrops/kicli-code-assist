@@ -1,22 +1,55 @@
 ---
-title: "Layer 1: IDE Capabilities with Raw Primitives"
+title: Layer 1 IDE Capabilities with Raw Primitives
 project: kicli-code-assist
-scope: backend
-type: reference
-status: active
+agent_project: kicli-code-assist
+scope: Backend Architecture / Layer 1 Capabilities
+purpose: Document what IDE (TUI/Web) can do with Layer 1 primitives
 created: 2026-11-06T10:28:00+01:00
-updated: 2026-11-06T10:28:00+01:00
-update_reason: Define what TUI + WebUI can do with Layer 1 primitives
-cross_references:
-  - README.md
-  - ../layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
+updated: 2026-11-07T12:38:00+01:00
+update_reason: Upgraded to semantic schema
+status: stable
+
+semantic_blocks:
+  - id: llm-capabilities
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: file-io-operations
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: git-operations
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: command-execution
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: streaming-responses
+    type: architecture
+    status: stable
+    version: 1.0
+
+relations:
+  - target: README
+    type: part-of
+    reason: "Concrete capabilities from Layer 1 architecture"
+    
+  - target: ../layer-2-workflow-orchestration/AGENT_ROUTE_SPEC
+    type: references
+    reason: "Layer 2 endpoint uses these capabilities"
 ---
 
-# IDE Capabilities with Layer 1 Primitives
+# Layer 1 IDE Capabilities with Raw Primitives
 
 What the IDE (TUI + WebUI) can do with Raw LLM Layer.
 
-## Core Capabilities
+## Core Capabilities [llm-capabilities]
 
 ### 1. Query LLM for Analysis
 - Send code snippets + context to OpenAI

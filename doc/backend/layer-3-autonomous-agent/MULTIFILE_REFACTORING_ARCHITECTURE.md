@@ -1,12 +1,28 @@
 ---
-title: "Multi-File Refactoring Coordinator"
-project: "kicli-code-assist"
-scope: "architecture"
+title: Multi-File Refactoring Coordinator
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Backend Architecture / Layer 3 Autonomous Agents / Phase 5.5.1
+purpose: Design multi-file refactoring coordination for Phase 5.5.1
 created: 2026-11-02T00:10:00+01:00
-updated: 2026-11-02T00:10:00+01:00
-update_reason: "New module for Phase 5.5.1 implementation"
-status: "active"
-author: "Copilot"
+updated: 2026-11-07T12:38:00+01:00
+update_reason: Upgraded to semantic schema
+status: stable
+
+semantic_blocks:
+  - id: refactoring-coordinator
+    type: architecture
+    status: stable
+    version: 1.0
+
+relations:
+  - target: README
+    type: part-of
+    reason: "Phase 5.5.1 multi-file refactoring capability"
+    
+  - target: AGENT_COORDINATION_ARCHITECTURE
+    type: depends-on
+    reason: "Uses base agent coordination from 6-stage pipeline"
 ---
 
 # Multi-File Refactoring Coordinator (Phase 5.5.1)

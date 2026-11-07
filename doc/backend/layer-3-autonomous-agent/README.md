@@ -1,19 +1,48 @@
 ---
-title: "Layer 3: Autonomous Agent Layer"
+title: Layer 3 - Autonomous Agent Layer
 project: kicli-code-assist
-scope: backend
-type: architecture
-status: active
+agent_project: kicli-code-assist
+scope: Backend Architecture / Autonomous Agent Layer
+purpose: Index and overview for Layer 3 autonomous agent orchestration documentation
 created: 2026-11-06T10:25:00+01:00
-updated: 2026-11-06T10:25:00+01:00
-update_reason: Initial layer structure documentation
-cross_references:
-  - ../layer-1-raw-llm/README.md
-  - ../layer-2-workflow-orchestration/README.md
-  - ../../phases/PHASE_5_5_2_SUMMARY.md
+updated: 2026-11-07T12:38:00+01:00
+update_reason: Upgraded to semantic schema
+status: stable
+
+semantic_blocks:
+  - id: layer-3-overview
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: agent-docs-index
+    type: implementation
+    status: stable
+    version: 1.0
+
+relations:
+  - target: ../layer-1-raw-llm/README.md
+    type: depends-on
+    reason: "Uses Layer 1 via Layer 2"
+    
+  - target: ../layer-2-workflow-orchestration/README.md
+    type: depends-on
+    reason: "Orchestrates Layer 2 workflows autonomously"
+    
+  - target: AGENT_COORDINATION_ARCHITECTURE
+    type: part-of
+    reason: "Meta-coordination design for autonomy"
+    
+  - target: MULTIFILE_REFACTORING_ARCHITECTURE
+    type: part-of
+    reason: "Phase 5.5.1 implementation"
+    
+  - target: TRANSPARENCY_INTEGRATION_ARCHITECTURE
+    type: part-of
+    reason: "Phase 5.5.2 implementation"
 ---
 
-# Layer 3: Autonomous Agent Layer
+# Layer 3 - Autonomous Agent Layer
 
 Multi-agent reasoning with self-correction, transparency, and adaptive decision-making.
 

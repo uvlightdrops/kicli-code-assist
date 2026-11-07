@@ -1,18 +1,34 @@
 ---
-title: "Agent Coordination Architecture"
-project: "kicli-code-assist"
-scope: "backend-agent-pipeline"
-type: "architecture"
+title: Agent Coordination Architecture
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Backend Architecture / Layer 3 Autonomous Agents
+purpose: Design Layer 3 agent orchestration pipeline with 6-stage coordination
 created: 2026-10-01T00:00:00+01:00
-updated: 2026-11-06T09:57:10+01:00
-update_reason: "Moved to doc/backend/ - core backend documentation"
-status: "active"
-cross_references:
-  - doc/backend/README.md (hub)
-  - doc/CODE_ANALYSIS_STRUCTURE.md (5-layer flow)
-  - kicli_code_assist/agent/meta_coordinator.py (implementation)
----
+updated: 2026-11-07T12:38:00+01:00
+update_reason: Upgraded to semantic schema
+status: stable
 
+semantic_blocks:
+  - id: 6-stage-orchestration
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: agent-selection
+    type: architecture
+    status: stable
+    version: 1.0
+
+relations:
+  - target: README
+    type: part-of
+    reason: "Core orchestration architecture for Layer 3"
+    
+  - target: ../layer-2-workflow-orchestration/AGENT_ROUTE_SPEC
+    type: extends
+    reason: "Layer 3 autonomously orchestrates Layer 2 workflows"
+---
 
 # Agent Coordination Architecture
 
