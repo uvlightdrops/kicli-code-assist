@@ -22,6 +22,7 @@ from .widgets.preview_panel import PreviewPanel
 from .widgets.preview_modal import FilePreviewModal
 from .widgets.vi_editor_modal import VIEditorModal
 from .widgets.project_analysis_panel import ProjectAnalysisPanel
+from .app import CodeAssistantApp
 
 
 logger = logging.getLogger(__name__)
@@ -144,6 +145,8 @@ class KICLITUIApp(App):
         ("ctrl+4", "tab_4", "Tab 4"),
         ("ctrl+5", "tab_5", "Tab 5"),
         ("ctrl+6", "tab_6", "Tab 6"),
+        ("n", "new_file", "New File"),
+        ("ctrl+s", "save_current_file", "Save File"),
     ]
     
     def __init__(self, config_path: str = None):
@@ -456,6 +459,22 @@ class KICLITUIApp(App):
             tabs.action_tab_6()
         except Exception:
             pass
+
+    def action_new_file(self) -> None:
+        """Create a new file (delegates to CodeAssistantApp)."""
+        try:
+            app = self.query_one(CodeAssistantApp)
+            app.action_new_file()
+        except Exception as e:
+            self.notify(f"❌ Error: {e}", severity="error", timeout=2)
+
+    def action_save_current_file(self) -> None:
+        """Save current file (delegates to CodeAssistantApp)."""
+        try:
+            app = self.query_one(CodeAssistantApp)
+            app.action_save_current_file()
+        except Exception as e:
+            self.notify(f"❌ Error: {e}", severity="error", timeout=2)
 
 
 def run_tui(config_path: str = None) -> None:
