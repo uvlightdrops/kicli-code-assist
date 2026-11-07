@@ -22,7 +22,7 @@
 | **doc/guides/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/architecture/** | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
 | **doc/features/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
-| **doc/frontend-tui/** | ✅ | ⚠️ | ✅ | ⚠️ | ✅ | ⚠️ | ⚠️ |
+| **doc/frontend-tui/** | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ✅ |
 | **doc/frontend-web/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/backend/** | ✅ | ⚠️ | 🔶 | ⚠️ | ✅ | 🔶 | ⚠️ |
 | **doc/deployment/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
@@ -33,17 +33,17 @@
 
 ## 📝 File Status by Folder
 
-### ✅ doc/frontend-tui/ (8 files, 1956 LOC)
+### ✅ doc/frontend-tui/ (8 files, 1956 LOC) - Session Fixes Applied
 | File | YAML | Blocks | Scope | Status | Updated | Notes |
 |------|:---:|:---:|:---:|:---:|:---:|---|
-| TEXTUAL_HOWTO.md | ✅ | ❌ | "Dev Guide" | active | 06-07 | Moved today; needs block tags |
-| I1_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | frontend-tui | active | 14:30 | Complete YAML; needs blocks |
-| I2_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | frontend-tui-i2 | stable | 16:20 | Good YAML; missing blocks |
-| PHASE_I1_LAYER_2_REASONING_DISPLAY.md | ✅ | ⚠️ | frontend-tui | active | 17:25 | Timestamp-corrected; has `semantic_blocks:` field |
-| PHASE_I1_REAL_LLM_IMPLEMENTATION.md | ✅ | ❌ | frontend-tui | in_progress | 17:25 | **PHASE prefix in title** ⚠️; needs blocks |
-| TUI_TEXTUAL_ARCHITECTURE.md | ✅ | ❌ | architecture ⚠️ | in_progress | 17:25 | **scope=architecture** (should be frontend-tui!) |
-| UI_TABS.md | ✅ | ❌ | TUI Feature | active | 14:45 | **Note says "temp location"** ⚠️ |
-| README.md | ✅ | ❌ | frontend-tui | active | 18:07 | Index doc; needs verification |
+| TEXTUAL_HOWTO.md | ✅ | ✅ | ✅ | active | 18:36 | ✅ FIXED: Added 10 semantic blocks, scope corrected, update_reason added |
+| I1_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | active | 14:30 | Ready for blocks (next) |
+| I2_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | stable | 16:20 | Ready for blocks (next) |
+| PHASE_I1_LAYER_2_REASONING_DISPLAY.md | ✅ | ⚠️ | ✅ | active | 17:25 | ✅ FIXED: Removed PHASE prefix from title |
+| PHASE_I1_REAL_LLM_IMPLEMENTATION.md | ✅ | ❌ | ✅ | in_progress | 17:25 | ✅ FIXED: Removed Phase prefix from title |
+| TUI_TEXTUAL_ARCHITECTURE.md | ✅ | ❌ | ✅ | in_progress | 17:25 | ✅ FIXED: Scope corrected (architecture→frontend-tui) |
+| UI_TABS.md | ✅ | ⚠️ | ✅ | active | 18:36 | ✅ FIXED: Scope standardized, timestamp updated |
+| README.md | ✅ | ❌ | ✅ | active | 18:07 | Index doc; needs verification |
 
 ### ✅ doc/architecture/
 | File | YAML | Blocks | Folder | Readme | Notes |
@@ -166,9 +166,24 @@
 |------|--------|-------|:---:|
 | 2026-11-07 18:26 | Create master tracker | DOCUMENTATION_MASTER_TRACKER.md | ✅ |
 | 2026-11-07 18:26 | Reorganize docs + commit | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | ✅ |
-| 2026-11-07 (next) | Fix timestamps | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | 🔶 |
-| 2026-11-07 (next) | Add semantic blocks | frontend-tui/, architecture/ | ⏭️ |
-| 2026-11-07 (next) | Audit folders | doc/* | ⏭️ |
+| 2026-11-07 18:36 | Fix TEXTUAL_HOWTO YAML + blocks + PHASE removals | 6 files | ✅ |
+| 2026-11-07 18:36 | Add semantic blocks to remaining 6 files | frontend-tui/ | 🔶 |
+
+---
+
+## 🎯 Nächste kleine Schritte in doc/frontend-tui/
+
+### Sofort Ready (5 min pro File)
+1. ✅ **TEXTUAL_HOWTO.md** - ERLEDIGT (commit 3934962)
+2. ⏳ **I1_ENDPOINT_CONSUMPTION_TUI.md** - 2 H2 headings, 2 block tags → 0 FEHLEND → READY
+3. ⏳ **I2_ENDPOINT_CONSUMPTION_TUI.md** - 4 H2 headings, 3 block tags → **1 FEHLEND**
+4. ⏳ **README.md** - 2 H2 headings, 0 block tags → **2 FEHLEND**
+
+### Teilweise Done (10-15 min pro File)
+5. 🟡 **PHASE_I1_LAYER_2_REASONING_DISPLAY.md** - 11 H2, 7 tags → **4 FEHLEND**
+6. 🟡 **PHASE_I1_REAL_LLM_IMPLEMENTATION.md** - 11 H2, 9 tags → **2 FEHLEND**
+7. ✅ **TUI_TEXTUAL_ARCHITECTURE.md** - 8 H2, 8 tags → COMPLETE
+8. ⚠️ **UI_TABS.md** - 8 H2, 10 tags → CHECK DUPLIKATE
 
 ---
 
