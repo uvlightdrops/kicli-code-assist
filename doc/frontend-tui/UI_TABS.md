@@ -1,11 +1,11 @@
 ---
 title: Terminal UI - Tabs Guide
 project: kicli-code-assist
-scope: TUI Feature (Temporary Location)
+scope: frontend-tui
 status: active
 created: 2026-10-19T11:00:00+01:00
-updated: 2026-11-03T14:45:00+01:00
-update_reason: Added YAML header; note temporary location in frontend-web/ (will move to frontend-tui/ in Phase 2)
+updated: 2026-11-07T18:36:00+01:00
+update_reason: Standardized scope to frontend-tui (moved from temp location); updated timestamp
 agent_project: null
 cross_references:
   - "doc/specifications/01_ARCHITECTURE.md"

@@ -1,11 +1,23 @@
 ---
 title: Textual UI Patterns & Recipes
 project: kicli-code-assist
-scope: Development Guide
+scope: frontend-tui
 purpose: Quick reference for common Textual patterns, gotchas, and recipes used in this project
 created: 2026-11-06T07:50:00+01:00
-updated: 2026-11-06T07:50:00+01:00
+updated: 2026-11-07T18:36:00+01:00
+update_reason: Moved to frontend-tui folder; added scope, update_reason, and semantic block tags
 status: active
+semantic_blocks:
+  - event-handlers-message-dispatch
+  - treenode-gotchas
+  - css-layout
+  - widget-composition-containers
+  - reactive-state-watchers
+  - keybindings-actions
+  - debugging-logging
+  - tui-layout-schema
+  - common-patterns
+  - checklist-new-features
 ---
 
 # Textual HowTo: Patterns & Recipes
@@ -14,7 +26,7 @@ Quick reference for Textual patterns in kicli-code-assist. Each section: brief i
 
 ---
 
-## Event Handlers & Message Dispatch
+## Event Handlers & Message Dispatch [event-handlers-message-dispatch]
 
 Textual posts messages when user interacts (clicks, keys, state changes). You handle them via event handlers.
 
@@ -45,7 +57,7 @@ def action_select_cursor(self) -> None:
 
 ---
 
-## TreeNode Gotchas
+## TreeNode Gotchas [treenode-gotchas]
 
 TreeNodes look like simple objects, but have quirks:
 
@@ -78,7 +90,7 @@ if len(node.children) == 1 and str(node.children[0].label) == "...":
 
 ---
 
-## CSS & Layout
+## CSS & Layout [css-layout]
 
 Textual uses CSS-like syntax for styling and layout. Fractional units (`1fr`, `2fr`) divide space proportionally.
 
@@ -123,7 +135,7 @@ AgentTabPanel {
 
 ---
 
-## Widget Composition & Containers
+## Widget Composition & Containers [widget-composition-containers]
 
 Textual widgets must be composed inside `compose()` method. Containers group children.
 
@@ -159,7 +171,7 @@ def compose(self) -> ComposeResult:
 
 ---
 
-## Reactive State & Watchers
+## Reactive State & Watchers [reactive-state-watchers]
 
 Textual widgets can have reactive attributes that trigger watchers.
 
@@ -189,7 +201,7 @@ class MyWidget(Widget):
 
 ---
 
-## Keybindings & Actions
+## Keybindings & Actions [keybindings-actions]
 
 Textual maps keys to actions. Override `action_*()` methods to customize behavior.
 
@@ -225,7 +237,7 @@ class MyTree(Tree):
 
 ---
 
-## Debugging & Logging
+## Debugging & Logging [debugging-logging]
 
 Textual is hard to debug interactively. Use logging + stderr.
 
@@ -244,7 +256,7 @@ Textual is hard to debug interactively. Use logging + stderr.
 
 ---
 
-## kicli-code-assist TUI Layout Schema
+## kicli-code-assist TUI Layout Schema [tui-layout-schema]
 
 **Canonical 3-panel horizontal layout (Phase 1.3+):**
 
@@ -285,7 +297,7 @@ Textual is hard to debug interactively. Use logging + stderr.
 
 ---
 
-## Common Patterns
+## Common Patterns [common-patterns]
 
 ### Modal / Dialog
 ```python
@@ -331,7 +343,7 @@ async def stream_status(self) -> None:
 
 ---
 
-## Checklist for New Features
+## Checklist for New Features [checklist-new-features]
 
 - [ ] **Layout**: Specify `width`/`height` explicitly (no `auto`)
 - [ ] **Events**: Test if `on_*()` fires; fallback to `action_*()` override

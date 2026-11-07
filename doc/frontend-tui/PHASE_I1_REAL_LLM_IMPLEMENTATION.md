@@ -1,5 +1,5 @@
 ---
-title: "Phase I1: Real LLM Integration Implementation"
+title: Real LLM Integration Implementation
 project: kicli-code-assist
 scope: frontend-tui
 type: implementation

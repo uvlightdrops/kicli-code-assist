@@ -1,6 +1,6 @@
 ---
 title: TUI Textual Architecture - Widget Design & Event Flow
-scope: architecture
+scope: frontend-tui
 project: kicli-code-assist
 status: in_progress
 created: 2026-11-05T21:29:23+01:00

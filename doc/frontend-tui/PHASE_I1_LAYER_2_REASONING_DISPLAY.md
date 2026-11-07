@@ -1,5 +1,5 @@
 ---
-title: PHASE I1 LAYER 2 REASONING DISPLAY
+title: Layer 2 Reasoning Display
 project: kicli-code-assist
 scope: frontend-tui
 purpose: Phase I1 - Implementation of Layer 2 reasoning display in TUI
