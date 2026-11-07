@@ -1,35 +1,25 @@
 ---
-title: WEB DEPLOYMENT GUIDE
+title: Web Frontend Deployment & Usage Guide
 project: kicli-code-assist
 scope: guides
 purpose: Guide for deploying kicli-code-assist web frontend and services
-created: 2026-10-20T03:44:52+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: quick-start
-    title: Quick Start
-  - id: architecture
-    title: Architecture
-  - id: api-endpoints
-    title: API Endpoints
-  - id: configuration-kiyaml
-    title: Configuration (ki.yaml)
-  - id: features
-    title: Features
-  - id: known-limitations
-    title: Known Limitations
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: file-structure
-    title: File Structure
-  - id: deployment-production
-    title: Deployment (Production)
-  - id: next-steps
-    title: Next Steps
-  - id: support
-    title: Support
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - quick-start
+  - architecture
+  - api-endpoints
+  - configuration-kiyaml
+  - features
+  - known-limitations
+  - testing
+  - troubleshooting
+  - file-structure
+  - deployment-production
+  - next-steps
+  - support
 ---
 
 # Web Frontend Deployment & Usage Guide
@@ -201,7 +191,7 @@ storage:
 
 ---
 
-## Testing
+## Testing [testing]
 
 ### Run Integration Tests
 

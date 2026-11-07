@@ -1,29 +1,22 @@
 ---
-title: SECRETS MANAGEMENT
+title: Secrets Management Strategy
 project: kicli-code-assist
 scope: guides
 purpose: Guide for managing secrets, environment variables, and credentials
-created: 2026-10-19T17:32:11+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: core-principle
-    title: Core Principle
-  - id: the-9-layer-model-with-secrets
-    title: The 9-Layer Model with Secrets
-  - id: where-secrets-live
-    title: Where Secrets Live
-  - id: deployment-workflow
-    title: Deployment Workflow
-  - id: secret-filtering-in-logs
-    title: Secret Filtering in Logs
-  - id: validation-discovery
-    title: Validation & Discovery
-  - id: checklist-deploying-a-new-app
-    title: Checklist: Deploying a New App
-  - id: faq
-    title: FAQ
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - core-principle
+  - the-9-layer-model-with-secrets
+  - where-secrets-live
+  - deployment-workflow
+  - secret-filtering-in-logs
+  - validation-discovery
+  - checklist-deploying-a-new-app
+  - faq
+  - see-also
 ---
 
 # Secrets Management Strategy
@@ -259,7 +252,7 @@ A: Yes, against schema structure (types, required fields). No, against key valid
 **Q: Can I override creds.yaml with KI_CFG_*?**  
 A: No. creds.yaml always wins (layer 1 priority). This ensures secrets can't be accidentally overridden by casual env var mistakes.
 
-## See Also
+## See Also [see-also]
 
 - `YAML_CONFIG_SYSADMIN.md`: Full 9-layer reference
 - `YAML_CONFIG_CONCEPTS.md`: Architectural reasoning

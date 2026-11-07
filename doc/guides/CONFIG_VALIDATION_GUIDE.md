@@ -1,23 +1,20 @@
 ---
-title: CONFIG VALIDATION GUIDE
+title: Config Validation Guide
 project: kicli-code-assist
 scope: guides
 purpose: Guide for validating configuration files and understanding ConfigManager validation rules
-created: 2026-10-19T17:32:11+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: quick-diagnosis
-    title: Quick Diagnosis
-  - id: validation-in-appconfig
-    title: Validation in AppConfig
-  - id: debugging-tips
-    title: Debugging Tips
-  - id: common-mistakes
-    title: Common Mistakes
-  - id: schema-extension-for-app-developers
-    title: Schema Extension (For App Developers)
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - quick-diagnosis
+  - validation-in-appconfig
+  - debugging-tips
+  - common-mistakes
+  - testing-your-config
+  - schema-extension-for-app-developers
+  - see-also
 ---
 
 # Config Validation & Error Handling Guide
@@ -283,7 +280,7 @@ logging:
 
 ---
 
-## Common Mistakes [common-mistakes]
+## Testing Your Config [testing-your-config]
 
 | Mistake | Issue | Fix |
 |---------|-------|-----|
@@ -297,9 +294,9 @@ logging:
 
 ---
 
-## Testing Your Config
+### Testing Your Config
 
-### Before Deployment
+#### Before Deployment
 
 ```bash
 #!/bin/bash
@@ -340,6 +337,20 @@ EOF
 
 ---
 
+## Common Mistakes [common-mistakes]
+
+| Mistake | Issue | Fix |
+|---------|-------|-----|
+| `foo: bar` in ki.yaml | Field not in schema | Remove or define in schema |
+| Placeholder key in ki.yaml, nothing in creds.yaml | Secret is literally `"${KEY}"` string | Add real key to creds.yaml |
+| creds.yaml has new sections | Schema mismatch | creds.yaml can only override, not extend |
+| Different structure in profile | Profile can't add new top-level keys | Profile must match base schema |
+| `config/runtime/` missing | Runtime layer skipped silently | Create directory if using runtime overrides |
+| `.active_profile` file doesn't exist | Profile layer skipped (no error) | Create marker file with profile name |
+| KI_PROFILE env var typo | Wrong profile loaded, no error | Check spelling: `export KI_PROFILE=local` |
+
+---
+
 ## Schema Extension (For App Developers) [schema-extension-for-app-developers]
 
 If your app needs config beyond ki-core's base schema:
@@ -372,9 +383,7 @@ If your app needs config beyond ki-core's base schema:
 
 ConfigManager auto-discovers `schema/*.schema.yaml`, so no extra setup needed.
 
----
-
-## See Also
+## See Also [see-also]
 
 - `SECRETS_MANAGEMENT.md`: How to store secrets safely
 - `YAML_CONFIG_SYSADMIN.md`: The 9-layer reference

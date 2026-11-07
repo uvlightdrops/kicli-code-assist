@@ -1,25 +1,19 @@
 ---
-title: YAML CONFIG SYSADMIN
+title: "YAML-Konfiguration: Betrieb und Bedienung"
 project: kicli-code-assist
 scope: guides
 purpose: YAML configuration reference and sysadmin guide for ki.yaml and stack.yaml
-created: 2026-10-15T09:58:40+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: zuerst-den-tatsaechlichen-verbraucher-
-    title: Zuerst den tatsaechlichen Verbraucher bestimmen
-  - id: gemeinsamer-wizard-schichten-cli-und-i
-    title: Gemeinsamer Wizard: Schichten, CLI und Installation
-  - id: ki-core-schichten-ki-knowledge-und-kic
-    title: ki-core-Schichten: ki-knowledge und kicli-code-assist
-  - id: kicli-bewusst-abweichender-alt-loader
-    title: kicli: bewusst abweichender Alt-Loader
-  - id: ia3simworld-mehrere-reale-konfiglinien
-    title: ia3simworld: mehrere reale Konfiglinien
-  - id: sicher-speichern-und-fehler-eingrenzen
-    title: Sicher speichern und Fehler eingrenzen
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - zuerst-den-tatsaechlichen-verbraucher-bestimmen
+  - gemeinsamer-wizard-schichten-cli-und-installation
+  - ki-core-schichten-ki-knowledge-und-kicli-code-assist
+  - kicli-bewusst-abweichender-alt-loader
+  - ia3simworld-mehrere-reale-konfiglinien
+  - sicher-speichern-und-fehler-eingrenzen
 ---
 
 # YAML-Konfiguration: Betrieb und Bedienung
@@ -39,7 +33,7 @@ Das Konzept und die weitere Entwicklung stehen separat in
 `yaml_cfg_wizard/doc/YAML_CONFIG_CONCEPTS.md`; historische Auszuege in
 `yaml_cfg_wizard/doc/YAML_CONFIG_ARCHIVE.md` (jeweils relativ zum Workspace).
 
-## Zuerst den tatsaechlichen Verbraucher bestimmen [zuerst-den-tatsaechlichen-verbraucher-]
+## Zuerst den tatsaechlichen Verbraucher bestimmen [zuerst-den-tatsaechlichen-verbraucher-bestimmen]
 
 | Projekt | Verbraucher und heutige Bedienung |
 | --- | --- |
@@ -54,7 +48,7 @@ Eine vorhandene YAML-Datei oder Schema-Definition bedeutet nicht, dass alle
 Dienste sie lesen. Insbesondere ia3simworld und kicli nicht nach der ki-core-
 Rangfolge administrieren.
 
-## Gemeinsamer Wizard: Schichten, CLI und Installation [gemeinsamer-wizard-schichten-cli-und-i]
+## Gemeinsamer Wizard: Schichten, CLI und Installation [gemeinsamer-wizard-schichten-cli-und-installation]
 
 `ConfigResolver` merged von niedrig nach hoch: Defaults-Verzeichnis, explizite
 Defaults-Dateien, Profil-Verzeichnis/-Dateien, Stage-Verzeichnis/-Dateien,
@@ -108,7 +102,7 @@ ohne die danach fuer stdout aufgefuellten Schema-Defaults. `ConfigResolver`
 validiert nur mit explizitem `schema_file` (Draft 7, dort ohne FormatChecker).
 Keine pauschale Zusage vollstaendiger App-/Formatvalidierung ableiten.
 
-## ki-core-Schichten: ki-knowledge und kicli-code-assist [ki-core-schichten-ki-knowledge-und-kic]
+## ki-core-Schichten: ki-knowledge und kicli-code-assist [ki-core-schichten-ki-knowledge-und-kicli-code-assist]
 
 Niedrig nach hoch:
 

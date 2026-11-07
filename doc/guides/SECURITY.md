@@ -1,31 +1,24 @@
 ---
-title: SECURITY
+title: Security Feature - Path Restriction
 project: kicli-code-assist
 scope: guides
 purpose: Security best practices, vulnerability response, and data protection
-created: 2026-09-05T21:59:40+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: overview
-    title: Overview
-  - id: configuration
-    title: Configuration
-  - id: usage
-    title: Usage
-  - id: security-guarantees
-    title: Security Guarantees
-  - id: enforcement-modes
-    title: Enforcement Modes
-  - id: integration-points
-    title: Integration Points
-  - id: deployment-considerations
-    title: Deployment Considerations
-  - id: error-handling
-    title: Error Handling
-  - id: future-enhancements
-    title: Future Enhancements
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - overview
+  - configuration
+  - usage
+  - security-guarantees
+  - enforcement-modes
+  - integration-points
+  - testing
+  - deployment-considerations
+  - error-handling
+  - future-enhancements
+  - related-documentation
 ---
 
 # Security Feature - Path Restriction
@@ -228,7 +221,7 @@ When CLI commands access files:
 2. Validate output paths
 3. Clear error messages for violations
 
-## Testing
+## Testing [testing]
 
 ### Test Coverage
 
@@ -342,7 +335,7 @@ All file operations must stay within the allowed directory.
 - [ ] TUI settings panel for security configuration
 - [ ] CLI command for testing path validation
 
-## Related Documentation
+## Related Documentation [related-documentation]
 
 - [CONFIG_CLI.md](./CONFIG_CLI.md) - Config system documentation
 - [FEATURE_STATUS.md](./FEATURE_STATUS.md) - Overall feature tracking

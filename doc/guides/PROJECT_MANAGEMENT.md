@@ -1,27 +1,20 @@
 ---
-title: PROJECT MANAGEMENT
+title: Project Management System
 project: kicli-code-assist
 scope: guides
 purpose: Project tracking, phase status, and management guidelines
-created: 2026-10-27T10:31:30+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: features
-    title: Features
-  - id: api-endpoints
-    title: API Endpoints
-  - id: frontend-components
-    title: Frontend Components
-  - id: security
-    title: Security
-  - id: file-structure
-    title: File Structure
-  - id: development
-    title: Development
-  - id: future-enhancements
-    title: Future Enhancements
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - features
+  - api-endpoints
+  - frontend-components
+  - security
+  - file-structure
+  - development
+  - future-enhancements
 ---
 
 # Project Management System

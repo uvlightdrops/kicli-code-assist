@@ -1,31 +1,22 @@
 ---
-title: PRODUCTION DEPLOYMENT
+title: Production Deployment Guide for Phase 4
 project: kicli-code-assist
 scope: guides
 purpose: Production deployment guide and best practices for kicli-code-assist
-created: 2026-10-17T16:05:17+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: executive-summary
-    title: Executive Summary
-  - id: deployment-checklist
-    title: Deployment Checklist
-  - id: configuration-for-production
-    title: Configuration for Production
-  - id: monitoring-troubleshooting
-    title: Monitoring & Troubleshooting
-  - id: performance-benchmarks
-    title: Performance Benchmarks
-  - id: rollback-plan
-    title: Rollback Plan
-  - id: post-deployment-monitoring
-    title: Post-Deployment Monitoring
-  - id: support-escalation
-    title: Support & Escalation
-  - id: sign-off
-    title: Sign-Off
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - executive-summary
+  - deployment-checklist
+  - configuration-for-production
+  - monitoring-troubleshooting
+  - performance-benchmarks
+  - rollback-plan
+  - post-deployment-monitoring
+  - support-escalation
+  - sign-off
 ---
 
 # Production Deployment Guide for Phase 4

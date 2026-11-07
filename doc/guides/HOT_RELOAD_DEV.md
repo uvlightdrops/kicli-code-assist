@@ -1,31 +1,22 @@
 ---
-title: HOT RELOAD DEV
+title: Hot Reload Development Guide
 project: kicli-code-assist
 scope: guides
 purpose: Development guide for enabling hot-reload during local development
-created: 2026-10-18T18:12:45+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: problem
-    title: Problem
-  - id: solution-separate-llm-service
-    title: Solution: Separate LLM Service
-  - id: how-it-works
-    title: How It Works
-  - id: workflow-make-change-test-without-rest
-    title: Workflow: Make Change → Test Without Restart
-  - id: api-endpoints
-    title: API Endpoints
-  - id: configuration
-    title: Configuration
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: when-to-use
-    title: When to Use
-  - id: future-auto-reload
-    title: Future: Auto-Reload
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - problem
+  - solution-separate-llm-service
+  - how-it-works
+  - workflow-make-change-test-without-restart
+  - api-endpoints
+  - configuration
+  - troubleshooting
+  - when-to-use
+  - future-auto-reload
 ---
 
 # Hot-Reload Development Guide

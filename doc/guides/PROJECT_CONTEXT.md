@@ -1,47 +1,31 @@
 ---
-title: PROJECT CONTEXT
+title: Project Context for Chat
 project: kicli-code-assist
 scope: guides
 purpose: Project overview, architecture overview, and context for contributors
-created: 2026-09-02T07:28:07+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: overview
-    title: Overview
-  - id: how-it-works
-    title: How It Works
-  - id: features
-    title: Features
-  - id: api-reference
-    title: API Reference
-  - id: integration-with-tui-chat
-    title: Integration with TUI Chat
-  - id: language-detection
-    title: Language Detection
-  - id: dependency-detection
-    title: Dependency Detection
-  - id: configuration-ignored
-    title: Configuration Ignored
-  - id: performance
-    title: Performance
-  - id: token-limits
-    title: Token Limits
-  - id: example-context-output
-    title: Example Context Output
-  - id: dependencies
-    title: Dependencies
-  - id: structure
-    title: Structure
-  - id: key-files-content
-    title: Key Files Content
-  - id: customization
-    title: Customization
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: future-enhancements
-    title: Future Enhancements
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - overview
+  - how-it-works
+  - features
+  - api-reference
+  - usage-examples
+  - integration-with-tui-chat
+  - language-detection
+  - dependency-detection
+  - configuration-ignored
+  - performance
+  - token-limits
+  - example-context-output
+  - dependencies
+  - structure
+  - key-files-content
+  - customization
+  - troubleshooting
+  - future-enhancements
 ---
 
 # Project Context for Chat
@@ -181,6 +165,8 @@ for file_info in info.files:
 ```
 
 ## Usage Examples
+
+## Usage Examples [usage-examples]
 
 ### Example 1: Simple Project Analysis
 
@@ -344,15 +330,10 @@ Different models have different token limits:
 
 Default: `to_context_string(max_tokens=4000)` is safe for most models
 
-## Example Context Output [example-context-output]
-
-```markdown
-# Project: kicli-code-assist
-**Language:** python
-**Files:** 23
-**Size:** 83.1 KB
-
 ## Dependencies [dependencies]
+- python:pyproject.toml
+
+## Structure [structure]
 - python:pyproject.toml
 
 ## Structure [structure]

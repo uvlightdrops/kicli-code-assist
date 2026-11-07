@@ -1,22 +1,26 @@
 ---
-title: Guides Documentation
+title: Guides Documentation Index
 project: kicli-code-assist
 scope: guides
 purpose: Central reference for guides documentation
-created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-07T18:07:00+01:00
-update_reason: "readme-table-generation skill: semantic navigation table"
+created: 2026-11-02 13:54
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - documentation-index
+  - navigation
+  - subfolders
 relations:
   - target: ../README.md
     type: parent
 ---
 
-# Guides Documentation
+# Guides Documentation Index
 
 **Scope:** Development Guides & How-Tos
 
-## Documentation Index
+## Documentation Index [documentation-index]
 
 | File | Status | Purpose | Semantic Blocks |
 |------|--------|---------|-----------------|
@@ -34,12 +38,12 @@ relations:
 | WEB_DEPLOYMENT_GUIDE.md | unknown | Guide for deploying kicli-code-assist web frontend and services | quick-start, architecture, api-endpoints, configuration-kiyaml, features, kno... |
 | YAML_CONFIG_SYSADMIN.md | unknown | YAML configuration reference and sysadmin guide for ki.yaml and stack.yaml | zuerst-den-tatsaechlichen-verbraucher-, gemeinsamer-wizard-schichten-cli-und-... |
 
-## Navigation
+## Navigation [navigation]
 
 - Browse by status: active, draft, archived
 - Block IDs enable precise cross-document linking
 - See parent directory: [../README.md](../README.md)
 
-## Subfolders
+## Subfolders [subfolders]
 
 - **archive/**

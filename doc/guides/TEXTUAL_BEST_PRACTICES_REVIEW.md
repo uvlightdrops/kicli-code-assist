@@ -1,27 +1,21 @@
 ---
-title: TEXTUAL BEST PRACTICES REVIEW
+title: Textual TUI Best Practices Review
 project: kicli-code-assist
 scope: guides
 purpose: Best practices review for TUI implementation using Textual framework
-created: 2026-10-17T13:51:42+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: executive-summary
-    title: Executive Summary
-  - id: part-1-architecture-patterns
-    title: Part 1: Architecture & Patterns
-  - id: part-2-textual-specific-best-practices
-    title: Part 2: Textual-Specific Best Practices
-  - id: part-3-common-anti-patterns-found-fixe
-    title: Part 3: Common Anti-Patterns Found & Fixes
-  - id: part-4-css-organization-typography
-    title: Part 4: CSS Organization & Typography
-  - id: summary-textual-best-practices-grade
-    title: Summary: Textual Best Practices Grade
-  - id: recommended-immediate-actions
-    title: Recommended Immediate Actions
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - executive-summary
+  - part-1-architecture-patterns
+  - part-2-textual-specific-best-practices
+  - part-3-common-anti-patterns-found-fixes
+  - part-4-css-organization-typography
+  - part-5-testing-documentation
+  - summary-textual-best-practices-grade
+  - recommended-immediate-actions
 ---
 
 # Textual TUI Best Practices Review
@@ -523,7 +517,7 @@ class PromptsModal(Screen):
 
 ---
 
-## Part 3: Common Anti-Patterns Found & Fixes [part-3-common-anti-patterns-found-fixe]
+## Part 3: Common Anti-Patterns Found & Fixes [part-3-common-anti-patterns-found-fixes]
 
 ### ❌ Anti-Pattern 1: Direct Component Access
 ```python
@@ -667,7 +661,7 @@ LeftPanel {
 
 ---
 
-## Part 5: Testing & Documentation
+## Part 5: Testing & Documentation [part-5-testing-documentation]
 
 ### 5.1 Unit Testing
 **Status:** ❌ No TUI tests found

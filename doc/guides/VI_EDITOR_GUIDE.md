@@ -1,39 +1,25 @@
 ---
-title: VI EDITOR GUIDE
+title: Vi/Vim Editor Quick Guide
 project: kicli-code-assist
 scope: guides
 purpose: Guide for using vi/vim editor integration with kicli-code-assist
-created: 2026-10-17T21:00:41+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: modes
-    title: Modes
-  - id: movement-normal-mode
-    title: Movement (NORMAL mode)
-  - id: editing-insert-mode
-    title: Editing (INSERT mode)
-  - id: operators-normal-mode
-    title: Operators (NORMAL mode)
-  - id: visual-mode
-    title: Visual Mode
-  - id: commands-command-mode
-    title: Commands (COMMAND mode)
-  - id: auto-save
-    title: Auto-Save
-  - id: how-it-works-technical
-    title: How It Works (Technical)
-  - id: how-it-works-technical
-    title: How It Works (Technical)
-  - id: common-workflows
-    title: Common Workflows
-  - id: tips
-    title: Tips
-  - id: status-indicator
-    title: Status Indicator
-  - id: buttons
-    title: Buttons
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging, fixed duplicate heading
 status: active
+semantic_blocks:
+  - modes
+  - movement-normal-mode
+  - editing-insert-mode
+  - operators-normal-mode
+  - visual-mode
+  - commands-command-mode
+  - auto-save
+  - how-it-works-technical
+  - common-workflows
+  - tips
+  - status-indicator
+  - buttons
 ---
 
 # Vi/Vim Editor Quick Guide
@@ -154,8 +140,6 @@ The editor automatically saves your changes:
   - No vim commands to remember  
   - Automatic background saves prevent data loss
   - Familiar to VS Code / modern editor users
-
-## How It Works (Technical) [how-it-works-technical]
 
 ## Common Workflows [common-workflows]
 

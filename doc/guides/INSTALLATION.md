@@ -1,35 +1,24 @@
 ---
-title: INSTALLATION
+title: Installation Guide - KI Code Assistant
 project: kicli-code-assist
 scope: guides
 purpose: Installation guide for setting up kicli-code-assist development environment
-created: 2026-09-02T09:27:38+01:00
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-semantic_blocks:
-  - id: requirements
-    title: Requirements
-  - id: step-1-clone-repository
-    title: Step 1: Clone Repository
-  - id: step-2-create-virtual-environment
-    title: Step 2: Create Virtual Environment
-  - id: step-3-install-dependencies
-    title: Step 3: Install Dependencies
-  - id: step-4-generate-config
-    title: Step 4: Generate Config
-  - id: step-5-test-installation
-    title: Step 5: Test Installation
-  - id: configuration-details
-    title: Configuration Details
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: advanced-setup
-    title: Advanced Setup
-  - id: updating
-    title: Updating
-  - id: support
-    title: Support
+created: 2026-10-28 13:38
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
 status: active
+semantic_blocks:
+  - requirements
+  - step-1-clone-repository
+  - step-2-create-virtual-environment
+  - step-3-install-dependencies
+  - step-4-generate-config
+  - step-5-test-installation
+  - configuration-details
+  - troubleshooting
+  - advanced-setup
+  - updating
+  - support
 ---
 
 # Installation Guide - KI Code Assistant

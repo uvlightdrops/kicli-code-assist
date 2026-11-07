@@ -1,31 +1,24 @@
 ---
+title: TUI Client Quick Start
 project: kicli-code-assist
 scope: guides
-created: 2026-11-05 16
-updated: 2026-11-07T17:10:00+01:00
-update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
-status: current
+purpose: Quick start guide for using the TUI client for remote code assistance
+created: 2026-11-05 16:11
+updated: 2026-11-07T20
+update_reason: Standardized YAML header and semantic block tagging
+status: active
 semantic_blocks:
-  - id: motivation
-    title: Motivation
-  - id: installation
-    title: Installation
-  - id: usage
-    title: Usage
-  - id: controls
-    title: Controls
-  - id: workflow
-    title: Workflow
-  - id: example-session
-    title: Example Session
-  - id: architecture-diagram
-    title: Architecture Diagram
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: advanced
-    title: Advanced
-  - id: next-steps
-    title: Next Steps
+  - motivation
+  - installation
+  - usage
+  - controls
+  - workflow
+  - example-session
+  - architecture-diagram
+  - troubleshooting
+  - advanced
+  - next-steps
+  - related-docs
 agent_project: kicli-code-assist
 ---
 
@@ -197,7 +190,7 @@ kicli-assist tui --api-url http://localhost:8000
 - **WebSocket Streaming**: Real-time event updates (Phase 5)
 - **Automation**: Batch requests from shell scripts
 
-## Related Docs
+## Related Docs [related-docs]
 
 - Architecture: `/doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md`
 - Backend API: `/doc/guides/API_REFERENCE.md` (WIP)
