@@ -159,7 +159,9 @@ class ProjectAnalysisPanel(Static):
     
     def on_mount(self) -> None:
         """Setup handlers."""
-        self.query_one("#btn-analyze-project", Button).press()
+        # Don't auto-analyze - wait for user to select project
+        # or for FileTree to set project_root via set_project_root()
+        pass
     
     def set_project_root(self, project_root: str) -> None:
         """Update project root and trigger analysis.
@@ -194,7 +196,7 @@ class ProjectAnalysisPanel(Static):
         # Schedule update after 300ms
         self.call_later(self._update_display, delay=0.3)
     
-    @work(thread=False)
+    @work(thread=True)
     async def _analyze_project(self) -> None:
         """Analyze project asynchronously."""
         if not self.project_root:
@@ -363,6 +365,7 @@ class ProjectAnalysisPanel(Static):
     
     def _update_spinner(self) -> None:
         """Update spinner animation (Phase I2.3)."""
+        # Check if analysis is still running
         if not self.is_analyzing or self._analysis_start_time is None:
             return
         
@@ -381,8 +384,9 @@ class ProjectAnalysisPanel(Static):
         except Exception:
             pass
         
-        # Schedule next spinner update (every 100ms)
-        self.call_later(self._update_spinner)
+        # Schedule next spinner update (every 100ms) - ONLY if still analyzing
+        if self.is_analyzing:
+            self.call_later(self._update_spinner)
     
     def _update_stats(self, text: str, is_error: bool = False) -> None:
         """Update status label with optional error styling (Phase I2.3).
