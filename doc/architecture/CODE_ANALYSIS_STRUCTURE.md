@@ -282,7 +282,7 @@ curl -X POST http://localhost:3000/api/agent/route \
 
 ## References
 
-- [Meta Coordinator Docs](../agent/meta_coordinator.py) - 6-stage pipeline
-- [Project Analyzer Docs](../agent/analysis/PHASE_1_README.md) - AST, dependencies, metrics
-- [Server Routes](../web/server_routes.py) - All endpoints (lines 39-1100)
-- [Textual HowTo](./TEXTUAL_HOWTO.md) - UI patterns for streaming/tabs
+- [Meta Coordinator Docs](../backend/layer-2-workflow-orchestration/) - 6-stage pipeline
+- [Project Analyzer Docs](../backend/layer-2-workflow-orchestration/) - AST, dependencies, metrics
+- [Server Routes](../../kicli_code_assist/web/server_routes.py) - All endpoints (lines 39-1100)
+- [Textual HowTo](../frontend-tui/TEXTUAL_HOWTO.md) - UI patterns for streaming/tabs

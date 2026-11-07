@@ -29,6 +29,8 @@ Complete documentation for the KI Code Assistant project, organized by topic and
 - **[Features Implemented](features/FEATURES_IMPLEMENTED.md)** - Feature status
 - **[Project Context](guides/PROJECT_CONTEXT.md)** - Context detection and management
 - **[Security Guide](guides/SECURITY.md)** - Security best practices
+- **[Textual HowTo](frontend-tui/TEXTUAL_HOWTO.md)** - TUI patterns and recipes
+- **[Code Analysis Architecture](architecture/CODE_ANALYSIS_STRUCTURE.md)** - Analysis pipeline
 
 ### 🚀 Deployment
 - **[Production Deployment](guides/PRODUCTION_DEPLOYMENT.md)** - Production setup
@@ -103,23 +105,37 @@ doc/
 - PRODUCTION_DEPLOYMENT.md
 - SECRETS_MANAGEMENT.md
 - SECURITY.md
-- TEXTUAL_BEST_PRACTICES_REVIEW.md
 - VI_EDITOR_GUIDE.md
 - WEB_DEPLOYMENT_GUIDE.md
 - YAML_CONFIG_SYSADMIN.md
 
 ### Architecture
 - AI_ARCHITECTURE_BEST_PRACTICES_REVIEW.md
+- AGENT_COORDINATION_ARCHITECTURE.md
+- AGENT_ORCHESTRATION_ARCHITECTURE.md
+- ASYNC_LLM_SECURITY_ARCHITECTURE.md
 - CLI_ARCHITECTURE_ROADMAP.md
 - CODEBASE_ASSESSMENT.md
+- CODE_ANALYSIS_STRUCTURE.md
 - CONFIG_INTEGRATION.md
 - PHASE_4_ARCHITECTURE.md
 - PROJECT_STRUCTURE.md
 - SHELL_EXECUTION_ARCHITECTURE_REVIEW.md
+- TRANSPARENCY_MODULES_ARCHITECTURE.md
+- WEBSOCKET_STREAMING_ARCHITECTURE.md
 - WEB_EDITOR_EDIT_CAPABILITIES.md
 - WEB_EDITOR_FRAMEWORKS_COMPARISON.md
 - WEB_FRONTEND_DESIGN.md
 - WEB_IMPLEMENTATION_PLAYBOOK.md
+
+### Frontend TUI
+- I1_ENDPOINT_CONSUMPTION_TUI.md
+- I2_ENDPOINT_CONSUMPTION_TUI.md
+- PHASE_I1_LAYER_2_REASONING_DISPLAY.md
+- PHASE_I1_REAL_LLM_IMPLEMENTATION.md
+- TEXTUAL_HOWTO.md
+- TUI_TEXTUAL_ARCHITECTURE.md
+- UI_TABS.md
 
 ### Features
 - AI_WORKFLOW.md
@@ -182,6 +198,6 @@ in `~/dev_doc/server-mngm/`.
 
 ---
 
-**Last Updated:** October 28, 2026
+**Last Updated:** November 7, 2026
 **Total Documents:** 100+
 **Sections:** 12

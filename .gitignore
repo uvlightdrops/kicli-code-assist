@@ -68,3 +68,6 @@ node_modules/
 package-lock.json
 static/
 _openai.env
+
+# Copilot skills (symlink to dev_doc/skills)
+.github/skills

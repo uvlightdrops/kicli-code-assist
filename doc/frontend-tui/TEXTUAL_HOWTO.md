@@ -345,3 +345,5 @@ async def stream_status(self) -> None:
 ---
 
 **See also:** kicli_code_assist/ui/widgets/, kicli_code_assist/ui/tui_client.py for working examples.
+
+**Related:** [Code Analysis Architecture](../architecture/CODE_ANALYSIS_STRUCTURE.md) - Backend integration patterns
