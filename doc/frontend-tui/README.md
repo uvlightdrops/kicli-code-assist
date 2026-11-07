@@ -5,7 +5,7 @@ scope: frontend-tui
 purpose: Central reference for frontend-tui documentation
 created: 2026-11-07T18:07:00+01:00
 updated: 2026-11-07 23
-update_reason: Added KEYBINDINGS reference
+update_reason: Added EDITOR_NAVIGATION reference
 status: active
 relations:
   - target: ../README.md
@@ -24,6 +24,7 @@ semantic_blocks:
 | File | Status | Purpose |
 |------|--------|---------|
 | KEYBINDINGS.md | active | Complete TUI keyboard shortcuts and navigation reference |
+| EDITOR_NAVIGATION.md | active | How to reach editor from FileTree, Preview, and new file workflows |
 | I1_ENDPOINT_CONSUMPTION_TUI.md | active | HTTP client integration and endpoint consumption |
 | I2_ENDPOINT_CONSUMPTION_TUI.md | stable | ProjectAnalysisPanel widget integration |
 | I1_REAL_LLM_IMPLEMENTATION.md | in_progress | Backend LLM flow and API contract |
@@ -34,5 +35,6 @@ semantic_blocks:
 ## Navigation [navigation]
 
 - See: [KEYBINDINGS.md](./KEYBINDINGS.md) for all shortcuts
+- See: [EDITOR_NAVIGATION.md](./EDITOR_NAVIGATION.md) for editor access workflows
 - Block IDs enable precise cross-document linking
 - Parent directory: [../README.md](../README.md)
