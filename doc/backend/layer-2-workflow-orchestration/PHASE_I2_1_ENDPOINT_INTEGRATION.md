@@ -19,11 +19,6 @@ semantic_blocks:
     type: implementation
     status: stable
     version: 1.0
-    
-  - id: error-handling
-    type: implementation
-    status: stable
-    version: 1.0
 
 relations:
   - target: PHASE_I2_PROJECTANALYZER_COMPLETE
@@ -41,7 +36,7 @@ relations:
 **Status**: ✅ COMPLETE - REST API endpoint ready  
 **Phase**: Multi-File Context Analysis (Continued)  
 
-## What Was Done
+## What Was Done [endpoint-spec]
 
 ### 1. New REST Endpoint: `/api/projects/analyze`
 

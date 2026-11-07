@@ -56,7 +56,7 @@ Phase I2.2 (TUI Integration) is **COMPLETE**. All components for displaying proj
 
 ---
 
-## Implementation Details
+## Implementation [http-client-interface]
 
 ### 1. HTTP Client Method: `analyze_project()`
 
@@ -119,7 +119,7 @@ def set_project_root(self, project_root: str) -> None:
 - Logs root updates for debugging
 - Integrates with existing `_analyze_project()` async worker
 
-### 3. TUI Layout Redesign
+### 3. TUI Layout Redesign [ui-redesign-tabbed]
 
 **File**: `kicli_code_assist/ui/tui_client.py`
 

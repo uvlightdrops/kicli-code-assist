@@ -10,12 +10,7 @@ update_reason: Initial completion documentation
 status: stable
 
 semantic_blocks:
-  - id: phase-i2-overview
-    type: decision
-    status: stable
-    version: 1.0
-    
-  - id: architecture-5-modules
+  - id: arch-5-modules
     type: architecture
     status: stable
     version: 2.0
@@ -50,7 +45,7 @@ relations:
 **Status**: ✅ COMPLETE - Core modules tested and verified  
 **Scope**: Multi-file project analysis foundation (Layer 2 Workflow)  
 
-## What Was Built
+## What Was Built [arch-5-modules]
 
 ### 1. **ProjectGraph** (`project_graph.py`)
 - FileNode: Represents single file with metadata (path, language, LOC, complexity, exports)
@@ -91,7 +86,7 @@ relations:
 - Project statistics and reporting
 - High-impact file identification
 
-## Test Results
+## Test Results [test-results-verification]
 
 ✅ **All 4 integration tests passed:**
 
@@ -152,7 +147,7 @@ Cascade Depth: 2 (utils.py → module_b.py → module_c.py)
 | `test_phase_i2_project_analyzer.py` | 350 | Tests |
 | **Total** | **~1,100 LOC** | Production-ready |
 
-## Next Steps
+## Next Steps [next-phase-roadmap]
 
 ### Phase I2.1: Backend Endpoint
 - [ ] Create `/api/project/analyze` endpoint  

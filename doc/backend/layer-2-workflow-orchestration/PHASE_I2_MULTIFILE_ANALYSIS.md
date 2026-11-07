@@ -19,11 +19,6 @@ semantic_blocks:
     type: architecture
     status: stable
     version: 1.0
-    
-  - id: impact-analysis-logic
-    type: implementation
-    status: stable
-    version: 1.0
 
 relations:
   - target: PHASE_I2_PROJECTANALYZER_COMPLETE
@@ -41,7 +36,7 @@ relations:
 **Layer**: Layer 2 (Workflow Orchestration - Extended)  
 **Focus**: Project-wide dependency analysis and impact detection  
 
-## Overview
+## Overview [architecture-overview]
 
 Phase I2 extends the system from analyzing **single files** to understanding **entire projects**. The ProjectAnalyzer module:
 
@@ -51,7 +46,7 @@ Phase I2 extends the system from analyzing **single files** to understanding **e
 4. Maps change impact zones
 5. Suggests cross-file coordination
 
-## Architecture
+## Architecture [data-structures]
 
 ### ProjectAnalyzer Module
 
