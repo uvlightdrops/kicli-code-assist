@@ -1,6 +1,6 @@
 # 📋 Documentation Master Tracker
 **Project:** kicli-code-assist  
-**Last Updated:** 2026-11-07 19:13
+**Last Updated:** 2026-11-07 19:37
 
 ---
 
@@ -15,7 +15,7 @@
 |--------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
 | **doc/** | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
 | **doc/guides/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
-| **doc/architecture/** | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
+| **doc/architecture/** | ✅ | ✅ | ✅ | - | ✅ | ✅ | ✅ |
 | **doc/features/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/frontend-tui/** | ✅ | ✅ | ✅ | ⚠️ | ✅ | ⚠️ | ✅ |
 | **doc/frontend-web/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
@@ -57,13 +57,16 @@
 | UI_TABS.md | ✅ | ⚠️ | ✅ | active | 8 H2, 10 blocks (check dup) |
 | README.md | ✅ | ❌ | ✅ | active | 2 H2, 0 blocks (2 missing) |
 
-### ⚠️ doc/architecture/ (4+ files)
-| File | YAML | Blocks | Notes |
-|------|:---:|:---:|---|
-| CODE_ANALYSIS_STRUCTURE.md | ✅ | ⚠️ | Moved; incomplete blocks |
-| AGENT_COORDINATION_ARCHITECTURE.md | ✅ | ⚠️ | Needs blocks |
-| WEBSOCKET_STREAMING_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
-| ASYNC_LLM_SECURITY_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
+### ✅ doc/architecture/ (7 files, 2520 LOC)
+| File | YAML | Blocks | Status | Notes |
+|------|:---:|:---:|:---:|---|
+| AGENT_COORDINATION_ARCHITECTURE.md | ✅ | ✅ | active | 10 blocks tagged |
+| AGENT_ORCHESTRATION_ARCHITECTURE.md | ✅ | ✅ | active | 9 blocks tagged, PHASE removed |
+| ASYNC_LLM_SECURITY_ARCHITECTURE.md | ✅ | ✅ | active | 8 blocks tagged, timestamps fixed |
+| CODE_ANALYSIS_STRUCTURE.md | ✅ | ✅ | active | 10 blocks tagged, scope fixed |
+| TRANSPARENCY_MODULES_ARCHITECTURE.md | ✅ | ✅ | active | 9 blocks tagged, PHASE removed |
+| WEBSOCKET_STREAMING_ARCHITECTURE.md | ✅ | ✅ | active | 6 blocks tagged, PHASE removed |
+| README.md | ✅ | ✅ | active | 3 blocks tagged |
 
 ### ⚠️ doc/backend/
 | Folder | Status |
@@ -85,6 +88,7 @@
 | 2026-11-07 18:46 | Remove PHASE from names | 2 files | ✅ |
 | 2026-11-07 18:54 | Trim to lean format | master | ✅ |
 | 2026-11-07 19:13 | Standardize doc/deployment/ | 13 files | ✅ |
+| 2026-11-07 19:37 | Standardize + tag doc/architecture/ | 7 files | ✅ |
 
 ---
 
