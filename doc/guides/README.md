@@ -1,171 +1,45 @@
 ---
-title: Guides & How-To Documentation
+title: Guides Documentation
 project: kicli-code-assist
 scope: guides
-purpose: Index and navigation for operational guides, tutorials, and setup instructions
-created: 2026-11-02T13:00:00+01:00
-updated: 2026-11-07T17:30:00+01:00
-update_reason: Added comprehensive navigation table, added semantic relations, PHASE 2 guides cleanup
+purpose: Central reference for guides documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation table"
 status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Guides & How-To Documentation
+# Guides Documentation
 
-**Purpose:** Operational guides, tutorials, and setup instructions for kicli-code-assist.
+**Scope:** Development Guides & How-Tos
 
----
+## Documentation Index
 
-## 📋 Guide Index
+| File | Status | Purpose | Semantic Blocks |
+|------|--------|---------|-----------------|
+| CONFIG_VALIDATION_GUIDE.md | unknown | Guide for validating configuration files and understanding ConfigManager validat | quick-diagnosis, validation-in-appconfig, debugging-tips, common-mistakes, sc... |
+| HOT_RELOAD_DEV.md | unknown | Development guide for enabling hot-reload during local development | problem, solution-separate-llm-service, how-it-works, workflow-make-change-te... |
+| INSTALLATION.md | unknown | Installation guide for setting up kicli-code-assist development environment | requirements, step-1-clone-repository, step-2-create-virtual-environment, ste... |
+| PRODUCTION_DEPLOYMENT.md | unknown | Production deployment guide and best practices for kicli-code-assist | executive-summary, deployment-checklist, configuration-for-production, monito... |
+| PROJECT_CONTEXT.md | unknown | Project overview, architecture overview, and context for contributors | overview, how-it-works, features, api-reference, integration-with-tui-chat, l... |
+| PROJECT_MANAGEMENT.md | unknown | Project tracking, phase status, and management guidelines | features, api-endpoints, frontend-components, security, file-structure, devel... |
+| SECRETS_MANAGEMENT.md | unknown | Guide for managing secrets, environment variables, and credentials | core-principle, the-9-layer-model-with-secrets, where-secrets-live, deploymen... |
+| SECURITY.md | unknown | Security best practices, vulnerability response, and data protection | overview, configuration, usage, security-guarantees, enforcement-modes, integ... |
+| TEXTUAL_BEST_PRACTICES_REVIEW.md | unknown | Best practices review for TUI implementation using Textual framework | executive-summary, part-1-architecture-patterns, part-2-textual-specific-best... |
+| TUI_QUICK_START.md | current | Documentation | motivation, installation, usage, controls, workflow, example-session, archite... |
+| VI_EDITOR_GUIDE.md | unknown | Guide for using vi/vim editor integration with kicli-code-assist | modes, movement-normal-mode, editing-insert-mode, operators-normal-mode, visu... |
+| WEB_DEPLOYMENT_GUIDE.md | unknown | Guide for deploying kicli-code-assist web frontend and services | quick-start, architecture, api-endpoints, configuration-kiyaml, features, kno... |
+| YAML_CONFIG_SYSADMIN.md | unknown | YAML configuration reference and sysadmin guide for ki.yaml and stack.yaml | zuerst-den-tatsaechlichen-verbraucher-, gemeinsamer-wizard-schichten-cli-und-... |
 
-| Category | Document | Purpose | Audience | Status |
-|----------|----------|---------|----------|--------|
-| **Installation/Setup** | [INSTALLATION.md](INSTALLATION.md) | Development environment setup | Developers | ✅ Complete |
-| | [TUI_QUICK_START.md](TUI_QUICK_START.md) | Quick start for TUI client | End Users | ✅ Complete |
-| **Configuration** | [CONFIG_VALIDATION_GUIDE.md](CONFIG_VALIDATION_GUIDE.md) | Config file validation & ConfigManager | Developers | ✅ Complete |
-| | [HOT_RELOAD_DEV.md](HOT_RELOAD_DEV.md) | Hot-reload during development | Developers | ✅ Complete |
-| | [YAML_CONFIG_SYSADMIN.md](YAML_CONFIG_SYSADMIN.md) | YAML config reference for admins | DevOps/Admins | ✅ Complete |
-| **Deployment** | [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) | Production deployment guide | DevOps/Admins | ✅ Complete |
-| | [WEB_DEPLOYMENT_GUIDE.md](WEB_DEPLOYMENT_GUIDE.md) | Web frontend & service deployment | DevOps/Admins | ✅ Complete |
-| **Security** | [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md) | Managing secrets & env vars | Developers/DevOps | ✅ Complete |
-| | [SECURITY.md](SECURITY.md) | Security best practices | All Roles | ✅ Complete |
-| **Project Context** | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | Architecture & project overview | Developers | ✅ Complete |
-| | [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) | Phase tracking & project status | PMs/Leads | ✅ Complete |
-| **Best Practices** | [TEXTUAL_BEST_PRACTICES_REVIEW.md](TEXTUAL_BEST_PRACTICES_REVIEW.md) | TUI/Textual framework best practices | Developers | ✅ Complete |
-| | [VI_EDITOR_GUIDE.md](VI_EDITOR_GUIDE.md) | Vi/vim integration guide | Developers | ✅ Complete |
+## Navigation
 
-**Legend:** ✅ Complete | 🚧 In Progress | ⚠️ Needs Review | 📝 Planned
+- Browse by status: active, draft, archived
+- Block IDs enable precise cross-document linking
+- See parent directory: [../README.md](../README.md)
 
----
+## Subfolders
 
-## Related Documentation Folders
-
-| Folder | Purpose | Link |
-|--------|---------|------|
-| **backend/** | REST API specs, workflow orchestration, data layer | [→ Backend Docs](../backend/) |
-| **features/** | Feature specifications and implementation details | [→ Features](../features/) |
-| **architecture/** | System design, patterns, and technical decisions | [→ Architecture](../architecture/) |
-| **refactorings/** | Code refactoring history and patterns | [→ Refactorings](../refactorings/) |
-| **phases/** | Phase summaries and completion reports | [→ Phases](../phases/) |
-| **tracking/** | Session progress and checkpoints | [→ Tracking](../tracking/) |
-
----
-
-### ✅ DO Include
-
-- **Setup Guides** (`INSTALLATION.md`, `SETUP.md`)
-  - How to install/initialize the project
-  - Prerequisites and dependencies
-  - Step-by-step setup instructions
-
-- **Configuration Guides** (`CONFIGURATION.md`, `CONFIG_*.md`)
-  - Configuration options
-  - Environment variables
-  - Settings and parameters
-
-- **How-To Tutorials** (`HOWTO_*.md`)
-  - How to use specific features
-  - Common workflows
-  - Step-by-step procedures
-
-- **Troubleshooting Guides** (`TROUBLESHOOTING.md`, `TROUBLESHOOT_*.md`)
-  - Common issues and solutions
-  - Debugging tips
-  - Error messages and fixes
-
-- **Admin Guides** (`ADMIN_*.md`)
-  - Operational procedures for non-experts
-  - Maintenance tasks
-  - Deployment procedures
-
-- **Quick Start** (`QUICKSTART.md`)
-  - Get up and running in 5-10 minutes
-  - Minimal setup
-  - Basic usage examples
-
-- **CLI Reference** (`CLI_REFERENCE.md`)
-  - Available commands
-  - Command syntax and options
-  - Examples
-
-### ❌ DO NOT Include
-
-- Architecture details → `/architecture/`
-- Test code or test results → `/testing/`
-- Phase summaries → `/phases/`
-- Feature-specific docs → `/features/`
-- Session progress → `/tracking/`
-
----
-
-## File Naming Convention
-
-```
-QUICKSTART.md                    # 5-10 minute getting started
-INSTALLATION.md                  # Detailed setup instructions
-CONFIGURATION.md                 # Configuration reference
-CLI_REFERENCE.md                 # Command-line interface reference
-HOWTO_*.md                       # How-to tutorials
-TROUBLESHOOTING.md               # Common issues & solutions
-ADMIN_*.md                       # Admin/operational procedures
-DEPLOYMENT_*.md                  # Deployment procedures
-```
-
----
-
-## YAML Header Template
-
-```yaml
----
-project: kicli-code-assist
-scope: guides
-created: 2026-MM-DD HH
-updated: 2026-MM-DD HH
-update_reason: "Created guide, updated instructions, etc"
-status: current
-agent_project: kicli-code-assist
-cross_references:
-  - /home/flow/dev_flow/kicli-code-assist/doc/features/FEATURE_X.md
----
-```
-
----
-
-## Example: QUICKSTART.md
-
-**What it includes:**
-1. Install dependencies
-2. Run initial setup
-3. Start the server
-4. Open browser to http://localhost:3000
-5. Try basic operations
-
-**Target audience:** New developers, just want to get it running  
-**Length:** ~1-2 pages max
-
----
-
-## Example: CONFIGURATION.md
-
-**What it includes:**
-- Configuration files overview
-- Environment variables (with descriptions)
-- Config file format
-- Common configuration scenarios
-- Where to set each option
-
----
-
-## Audience
-
-- **Developers** → QUICKSTART, INSTALLATION, CLI_REFERENCE, HOWTO_*
-- **Operators/DevOps** → DEPLOYMENT, CONFIGURATION, TROUBLESHOOTING
-- **Admins** → ADMIN_*, MAINTENANCE
-- **New Users** → QUICKSTART, HOWTO_*
-
----
-
-## Related Documentation
-
-- **Features**: `/features/` (what can you do)
-- **Architecture**: `/architecture/` (how it works internally)
-- **Troubleshooting**: Cross-reference `/architecture/` for root cause analysis
+- **archive/**

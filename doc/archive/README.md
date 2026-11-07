@@ -1,55 +1,40 @@
 ---
+title: Archive Documentation
 project: kicli-code-assist
 scope: archive
-created: 2026-11-02 14
-updated: 2026-11-02 14
-update_reason: Reorganized archive structure with per-folder subfolders
-status: current
-agent_project: kicli-code-assist
+purpose: Central reference for archive documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation table"
+status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Archive - Legacy Development Documentation
+# Archive Documentation
 
-This folder contains general historical documentation that doesn't fit into specific categories.
+**Scope:** Archive & Historical Documentation
 
-**Note:** Most archived docs have been moved to per-folder archives:
-- Phase docs → `/phases/archive/`
-- Architecture docs → `/architecture/archive/`
-- Test reports → `/testing/archive/`
-- Session tracking → `/tracking/archive/`
-- Guides → `/guides/archive/`
-- Features → `/features/archive/`
-- Deployment → `/deployment/archive/`
+## Documentation Index
 
----
+| File | Status | Purpose | Semantic Blocks |
+|------|--------|---------|-----------------|
+| DEVELOPMENT.md | unknown | Documentation | — |
+| FEATURE_ROADMAP.md | unknown | Documentation | — |
+| FIXES_APPLIED.md | unknown | Documentation | — |
+| INDEX_OLD.md | unknown | Documentation | — |
+| REORGANIZATION_SUMMARY.md | unknown | Documentation | — |
+| WEB_FRONTEND_SESSION_SUMMARY.md | unknown | Documentation | — |
+| WEB_MONACO_INTEGRATION.md | unknown | Documentation | — |
 
-## Contents in This Folder
+## Navigation
 
-- **DEVELOPMENT.md** - v0.2 to v1.0 development roadmap
-- **FEATURE_ROADMAP.md** - Earlier feature roadmap
-- **FIXES_APPLIED.md** - Critical fixes from earlier sessions
-- **INDEX_OLD.md** - Old documentation index
-- **REORGANIZATION_SUMMARY.md** - Documentation reorganization notes
-- **WEB_FRONTEND_SESSION_SUMMARY.md** - Historical frontend work
-- **WEB_MONACO_INTEGRATION.md** - Monaco editor integration attempts
+- Browse by status: active, draft, archived
+- Block IDs enable precise cross-document linking
+- See parent directory: [../README.md](../README.md)
 
----
+## Subfolders
 
-## Status
-
-These documents represent historical work from earlier project stages.
-
-**For current documentation**, see the appropriate folder:
-- Phases → `/phases/README.md`
-- Architecture → `/architecture/README.md`
-- Testing → `/testing/README.md`
-- Tracking → `/tracking/README.md`
-- Guides → `/guides/README.md`
-- Features → `/features/README.md`
-- Deployment → `/deployment/README.md`
-
----
-
-## Using This Archive
-
-This folder is for general miscellaneous docs that don't fit elsewhere. For category-specific archives, check the folder-specific archive/ subfolders.
+- **tui_attempt_oct2026/**
+- **webui_phase1_v1/**

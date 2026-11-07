@@ -1,153 +1,44 @@
 ---
-title: "Deployment Documentation (kicli-code-assist)"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Index and quick-start guide for deployment infrastructure"
-created: 2026-11-01
-updated: 2026-11-02T04:20:00+01:00
-update_reason: "Added YAML header for metadata tracking and consolidation"
-status: "active"
-cross_references:
-  - "STACKCTL_ARCHITECTURE.md: High-level design"
-  - "STACKCTL_IMPLEMENTATION.md: Implementation details"
-  - "CURRENT_STATUS.md: Deployment readiness"
-  - "stackctl/doc/README.md: General stackctl usage"
-  - "dev_doc/DEPLOYMENT_STANDARDS.md: Cross-project patterns"
+title: Deployment Documentation
+project: kicli-code-assist
+scope: deployment
+purpose: Central reference for deployment documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation table"
+status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Deployment Documentation (kicli-code-assist)
+# Deployment Documentation
 
-Complete guide to deploying and managing kicli-code-assist using StackCtl.
+**Scope:** Deployment & Infrastructure
 
-## Quick Start
+## Documentation Index
 
-### Development (with hot reload)
-```bash
-export KI_STAGE=development
-stackctl -t local start
-# Browser: http://localhost:5173 (frontend)
-# API: http://localhost:8000
-```
+| File | Status | Purpose | Semantic Blocks |
+|------|--------|---------|-----------------|
+| ANTI_PATTERNS_FAILED_APPROACHES.md | active | Document failed approaches and anti-patterns for development stack configuration | — |
+| CONSOLIDATION_STRATEGY.md | "analysis" | Documentation | — |
+| CURRENT_STATUS.md | "active" | Track deployment readiness and current configuration status | — |
+| DEVELOPMENT_STACK_TROUBLESHOOTING.md | in-progress | Troubleshooting guide for local development stack (stackctl + API + Vite fronten | — |
+| FUTURE_ROADMAP.md | active | Comprehensive future roadmap for deployment stack stabilization and developer ex | — |
+| OPTION2_STACKCTL_SYSTEMD.md | "archived" | Document alternative systemd integration approach (legacy) | — |
+| PHASE_1_REPORT.md | "in-progress" | Documentation | — |
+| SEMI_PROD_DEPLOYMENT.md | "archived" | Document alternative deployment patterns with Apache2 reverse proxy (legacy) | — |
+| STACKCTL_ARCHITECTURE.md | "active" | Explain design rationale for stackctl stage-based configuration | — |
+| STACKCTL_IMPLEMENTATION.md | "active" | Step-by-step guide for setting up stackctl in kicli-code-assist | — |
+| STACKCTL_STATUS.md | "active" | Document stackctl configuration implementation details and merge strategy | — |
+| STACK_YAML_VARIANTS.md | "active" | Document different stack configurations for various deployment scenarios | — |
 
-### Production (pre-built frontend)
-```bash
-cd web/frontend && npm run build  # one-time
-export KI_STAGE=production
-stackctl -t local start
-# Browser + API: http://localhost:8000
-```
+## Navigation
 
-### Minimal (API-only, no frontend)
-```bash
-export KI_STAGE=minimal
-stackctl -t local start
-# API only: http://localhost:8000/api/...
-```
+- Browse by status: active, draft, archived
+- Block IDs enable precise cross-document linking
+- See parent directory: [../README.md](../README.md)
 
-## Overview
+## Subfolders
 
-This directory contains comprehensive documentation for kicli-code-assist's deployment infrastructure:
-
-- **StackCtl**: Process orchestration tool for managing services
-- **Stages**: Configuration profiles for different deployment scenarios (development, production, minimal)
-- **Architecture**: How services, configuration, and deployment work together
-
-## Documentation Files
-
-| File | Purpose |
-|------|---------|
-| **STACKCTL_ARCHITECTURE.md** | High-level architecture overview; read this first |
-| **STACKCTL_IMPLEMENTATION.md** | Detailed implementation guide; how stages work internally |
-| **STACKCTL_STATUS.md** | Current deployment status and known issues |
-| **STACK_YAML_VARIANTS.md** | Legacy documentation (symlink-based system); archived |
-| **SEMI_PROD_DEPLOYMENT.md** | Semi-production deployment notes |
-| **OPTION2_STACKCTL_SYSTEMD.md** | systemd integration for production deployments |
-| **kicli-web-option*.conf** | systemd service configuration templates |
-
-## Stages
-
-### 1. Development (`development.yaml`)
-- **Services**: API (8000) + Frontend with HMR (5173)
-- **Use Case**: Local development
-- **Frontend**: Live reload via Vite
-- **Activation**: `export KI_STAGE=development` (default)
-
-### 2. Production (`production.yaml`)
-- **Services**: Single unified `web` service (8000)
-- **Use Case**: Production deployment, staging
-- **Frontend**: Pre-built static files served by Flask
-- **Activation**: `export KI_STAGE=production`
-- **Prerequisite**: `npm run build`
-
-### 3. Minimal (`minimal.yaml`)
-- **Services**: API only (8000)
-- **Use Case**: Testing, CI/CD, server-only deployments
-- **Frontend**: None
-- **Activation**: `export KI_STAGE=minimal`
-
-## Configuration
-
-Stage configuration resides in `config/stages/`:
-
-```bash
-config/
-├── defaults/
-│   └── stack.yaml           # Base stack definition
-├── stages/
-│   ├── development.yaml     # Dev stage
-│   ├── production.yaml      # Prod stage  
-│   └── minimal.yaml         # Minimal stage
-```
-
-**Stage selection** via environment variable:
-```bash
-export KI_STAGE=<stage_name>
-```
-
-The config system (ki_core) automatically loads the appropriate stage YAML.
-
-## Troubleshooting
-
-### Port Already in Use
-```bash
-lsof -i :8000
-kill -9 <PID>
-```
-
-### Service Not Starting
-```bash
-stackctl -t local logs
-tail -f var/log/api.log
-```
-
-### Frontend Not Loading
-Ensure you've built the frontend:
-```bash
-cd web/frontend && npm run build
-```
-
-## CI/CD
-
-GitHub Actions workflow in `.github/workflows/test.yml` uses the `minimal` stage for testing:
-- Minimal dependencies (API-only)
-- Fast startup and health checks
-- Validates configuration system
-
-## Key Features
-
-✅ **Stage-based configuration**: Clean, environment-aware configuration
-✅ **Multiple deployment modes**: Dev, production, minimal
-✅ **Health checks**: Auto-validate service readiness
-✅ **Process management**: StackCtl handles service lifecycle
-✅ **Logs**: Centralized logging to `var/log/`
-
-## Related
-
-- **Architecture**: See `doc/ARCHITECTURE.md` for system-wide overview
-- **Configuration**: See `ki_core.config` documentation for config system details
-- **Legacy**: Old symlink-based approach archived in `deploy/legacy/`
-
-## Questions?
-
-See individual documentation files above or check the commit history for recent changes.
+- **archive/**

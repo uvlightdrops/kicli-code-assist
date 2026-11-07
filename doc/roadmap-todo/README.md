@@ -1,43 +1,40 @@
 ---
-title: "Roadmap & Todo Documentation"
-project: "kicli-code-assist"
-scope: "roadmap-archive"
-created: 2026-11-06T09:57:10+01:00
-updated: 2026-11-06T09:57:10+01:00
-update_reason: "Created roadmap-todo hub for archived/historical docs"
-status: "active"
+title: Roadmap Todo Documentation
+project: kicli-code-assist
+scope: roadmap-todo
+purpose: Central reference for roadmap-todo documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation table"
+status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Roadmap & Todo Documentation
+# Roadmap Todo Documentation
 
-Historical documentation, archived plans, and needs-review items.
+**Scope:** Roadmap & Todo Items
 
-**⚠️ Important:** All files here are marked `status: archived-roadmap` or similar. Review relevance before using in new work.
+## Documentation Index
 
-## Files Here
+| File | Status | Purpose | Semantic Blocks |
+|------|--------|---------|-----------------|
+| AGENT_ROUTING_INTELLIGENCE_PLAN.md | "archived-roadmap" | Documentation | — |
+| AGENT_TRANSPARENCY_ARCHITECTURE.md | "archived-roadmap" | Documentation | — |
+| AGENT_UI_QUICK_REFERENCE.md | "archived-roadmap" | Documentation | — |
+| AI_ARCHITECTURE_BEST_PRACTICES_REVIEW.md | "archived-roadmap" | Documentation | — |
+| CLI_ARCHITECTURE_ROADMAP.md | "archived-roadmap" | Documentation | — |
+| CODEBASE_ASSESSMENT.md | "archived-roadmap" | Documentation | — |
+| CONFIG_INTEGRATION.md | "archived-roadmap" | Documentation | — |
+| HYBRID_AGENT_IMPLEMENTATION_PLAN.md | "archived-roadmap" | Documentation | — |
+| PROGRAMMING_AGENT_UI_ARCHITECTURE.md | "archived-roadmap" | Documentation | — |
+| ROADMAP_AI_TERMINAL_IDE.md | "active-roadmap" | Documentation | — |
+| SHELL_EXECUTION_ARCHITECTURE_REVIEW.md | "archived-roadmap" | Documentation | — |
+| STRUCTURE.md | "archived-roadmap" | Documentation | — |
 
-This folder contains:
-- **Roadmaps** — Old project plans (may be outdated)
-- **Todos** — Historical task lists (may have been completed elsewhere)
-- **Architecture Drafts** — Earlier design proposals (superseded by newer approaches)
-- **Historical Reviews** — Past assessment documents
+## Navigation
 
-## When to Use
-
-- ✅ Looking for historical context about a feature
-- ✅ Understanding why a decision was made
-- ✅ Finding old incomplete work to potentially continue
-- ❌ Copy-paste into active implementation (too risky)
-
-## Recommended Pattern
-
-If you find something useful:
-1. Read it for context
-2. Check YAML header for `updated` date and `status`
-3. Cross-reference with current `doc/backend/`, `doc/architecture/`, or `doc/phases/`
-4. Update the current doc if needed
-5. Don't duplicate — link back to this archive
-
----
-
-**Maintained by:** Documentation Team | **Phase:** Doc Reorganization
+- Browse by status: active, draft, archived
+- Block IDs enable precise cross-document linking
+- See parent directory: [../README.md](../README.md)

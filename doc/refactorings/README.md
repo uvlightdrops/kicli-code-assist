@@ -1,51 +1,25 @@
 ---
-title: Refactorings & Code Improvements
+title: Refactorings Documentation
 project: kicli-code-assist
 scope: refactorings
-purpose: Documentation of code refactoring work, improvements, and technical debt resolution
-created: 2026-11-07T17:35:00+01:00
-updated: 2026-11-07T17:35:00+01:00
-update_reason: Initial folder README
+purpose: Central reference for refactorings documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation for nested structure"
 status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Refactorings & Code Improvements
+# Refactorings Documentation
 
-**Purpose:** Historical documentation of major refactoring efforts, technical improvements, and debt resolution.
+**Scope:** Code Refactoring & Migrations
 
----
+## Subfolders
 
-## 📑 Refactoring Index
 
-| Document | Scope | Status | Impact |
-|----------|-------|--------|--------|
-| [SERVER_MODULARIZATION.md](SERVER_MODULARIZATION.md) | Backend server layer | ✅ Complete | Reduced server.py from 1480 → 138 lines (90.7% reduction) |
-| [ASYNC_LLM_INTEGRATION.md](ASYNC_LLM_INTEGRATION.md) | LLM client async processing | ✅ Complete | Async support in AIClient, OpenAI integration |
+## Navigation
 
----
-
-## What Goes Here
-
-### ✅ DO Include
-
-- **Completed Refactorings**: Documentation of finished code improvements
-- **Technical Decisions**: Why a refactoring was done, trade-offs
-- **Before/After Metrics**: Code size, performance, test coverage changes
-- **Migration Guides**: Steps for other developers to adapt to changes
-- **Lessons Learned**: What worked, what didn't, how to avoid future debt
-
-### ❌ DO NOT Include
-
-- Ongoing work → `/tracking/`
-- Feature implementations → `/features/`
-- Architecture discussions → `/architecture/`
-- Phase summaries → `/phases/`
-
----
-
-## Related Documentation
-
-- **Architecture**: `/architecture/` (design decisions)
-- **Features**: `/features/` (what was built)
-- **Phases**: `/phases/` (when work was done)
-- **Guides**: `/guides/` (operational instructions)
+- See subfolders above for specific documentation
+- Parent directory: [../README.md](../README.md)

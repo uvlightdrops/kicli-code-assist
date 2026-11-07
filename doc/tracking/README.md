@@ -1,118 +1,40 @@
 ---
+title: Tracking Documentation
 project: kicli-code-assist
 scope: tracking
-created: 2026-11-02 13
-updated: 2026-11-02 13
-update_reason: Created folder README with guidelines
-status: current
-agent_project: kicli-code-assist
-cross_references:
-  - /home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md
+purpose: Central reference for tracking documentation
+created: 2026-11-07T18:07:00+01:00
+updated: 2026-11-07T18:07:00+01:00
+update_reason: "readme-table-generation skill: semantic navigation table"
+status: active
+relations:
+  - target: ../README.md
+    type: parent
 ---
 
-# Session Tracking & Progress Documentation
+# Tracking Documentation
 
-**Purpose:** Track work-in-progress, session progress, and completion milestones for kicli-code-assist.
+**Scope:** Progress Tracking & Metrics
 
----
+## Documentation Index
 
-## What Goes Here
+| File | Status | Purpose | Semantic Blocks |
+|------|--------|---------|-----------------|
+| DEPLOYMENT_READINESS.md | unknown | Documentation | — |
+| DOCUMENTATION_AUDIT_PLAN.md | "active" | Documentation | — |
+| IMPLEMENTATION_STATUS.md | unknown | Documentation | — |
+| PHASE_5_5_2_I2_I3_COMPLETION.md | "complete" | Documentation | — |
+| PHASE_5_5_2_SESSION_PROGRESS.md | "in_progress" | Documentation | — |
+| PHASE_5_5_SESSION_SUMMARY_20261102.md | "active" | Documentation | — |
+| PROJECT_STATUS.md | unknown | Documentation | — |
+| customer_requests.md | unknown | Documentation | — |
 
-### ✅ DO Include
+## Navigation
 
-- **Session Summaries** (`*_SESSION_SUMMARY*.md`)
-  - Work done in a specific session
-  - Blockers encountered
-  - Commits made
-  - Next steps
+- Browse by status: active, draft, archived
+- Block IDs enable precise cross-document linking
+- See parent directory: [../README.md](../README.md)
 
-- **Phase Completion Tracking** (`PHASE_X_*_COMPLETION.md`)
-  - Which sub-tasks of a phase are complete
-  - Dependencies between phase components
-  - Validation checklist for completion
+## Subfolders
 
-- **Progress Updates** (`*_PROGRESS.md`)
-  - Daily/weekly progress on ongoing work
-  - What was completed
-  - What's blocked
-  - Priorities for next session
-
-- **Implementation Checklists** (`*_CHECKLIST.md`)
-  - Verification steps for completed work
-  - Sign-off items
-  - Quality checks
-
-- **Status Reports** (`*_STATUS_REPORT.md`)
-  - Current status of phases/features
-  - Timeline and milestones
-  - Resource allocation
-
-### ❌ DO NOT Include
-
-- Architecture details → `/architecture/`
-- Test results → `/testing/`
-- Phase summaries → `/phases/`
-- Setup guides → `/guides/`
-- Feature user guides → `/features/`
-- Archived sessions → `/archive/`
-
----
-
-## File Naming Convention
-
-```
-PHASE_X_COMPLETION.md          # Phase X completion status
-PHASE_X_*_PROGRESS.md          # Progress tracking for phase component
-SESSION_SUMMARY_YYYYMMDD.md    # Session summary with date
-IMPLEMENTATION_CHECKLIST.md    # Checklist of completion items
-BLOCKERS_AND_ISSUES.md         # Known blockers and resolutions
-```
-
----
-
-## YAML Header Template
-
-```yaml
----
-project: kicli-code-assist
-scope: tracking
-created: 2026-MM-DD HH
-updated: 2026-MM-DD HH
-update_reason: "Session progress, completion update, etc"
-status: current
-agent_project: kicli-code-assist
-cross_references:
-  - /home/flow/dev_flow/kicli-code-assist/doc/phases/PHASE_X_SUMMARY.md
-  - /home/flow/dev_flow/kicli-code-assist/doc/testing/PHASE_X_TEST_REPORT.md
----
-```
-
----
-
-## Example: PHASE_5_5_2_SESSION_PROGRESS.md
-
-**What it includes:**
-- Date/time of session start
-- What was accomplished
-  - ✅ Built module X
-  - ✅ Fixed bug Y
-  - 🔄 Still working on Z
-- Blockers
-  - Issue with deployment
-- Next steps
-  - Test integration
-  - Deploy to staging
-- Commits made
-
-**NOT:**
-- Phase summary (→ `/phases/PHASE_5_5_2_SUMMARY.md`)
-- Test results (→ `/testing/PHASE_5_5_2_TEST_REPORT.md`)
-- Architecture design (→ `/architecture/`)
-
----
-
-## Related Documentation
-
-- **Phase Summaries**: `/phases/README.md` (final deliverables)
-- **Test Reports**: `/testing/` (validation results)
-- **Architecture**: `/architecture/` (technical design)
+- **archive/**
