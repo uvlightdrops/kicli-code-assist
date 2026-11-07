@@ -1,11 +1,18 @@
 ---
+title: Readme
 project: kicli-code-assist
-scope: phases
+scope:
+- phases
+purpose: Document phase progress and strategy
 created: 2026-11-02 14
-updated: 2026-11-02 14
-update_reason: Created archive index for phase documentation
+updated: '2026-11-07'
 status: current
-agent_project: kicli-code-assist
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
 ---
 
 # Archived Phase Documentation
@@ -14,7 +21,7 @@ agent_project: kicli-code-assist
 
 ---
 
-## Why This Folder Exists
+## Why This Folder Exists [block-why-this-folder-exists]
 
 Phase documentation accumulates over time as the project evolves. Some docs become:
 - **Obsolete**: No longer accurate or relevant
@@ -28,7 +35,7 @@ Rather than delete these, we archive them here so:
 
 ---
 
-## Contents
+## Contents [block-contents]
 
 ### Old Phase Summaries & Reports
 - `phase-reports/` → Completion reports from earlier phases
@@ -37,7 +44,7 @@ Rather than delete these, we archive them here so:
 
 ---
 
-## How to Use This Archive
+## How to Use This Archive [block-how-to-use-this-archive]
 
 **When to read here:**
 - Understanding what was tried before
@@ -52,13 +59,13 @@ Rather than delete these, we archive them here so:
 
 ---
 
-## Status of Archived Docs
+## Status of Archived Docs [block-status-of-archived-docs]
 
 All docs here have `status: archived` in their YAML headers.
 
 ---
 
-## Related Documentation
+## Related Documentation [block-related-documentation]
 
 - **Current Phases**: `/phases/README.md` (active phase documentation)
 - **Lessons Learned**: `/home/flow/dev_doc/` (anti-patterns, failed approaches)

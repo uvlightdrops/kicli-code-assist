@@ -1,27 +1,33 @@
 ---
 title: Phase 1.3 - TUI Advanced Features & Optimization
-scope: implementation
 project: kicli-code-assist
-agent_project: kicli-code-assist
-status: in-progress
+scope:
+- phases
+purpose: Document phase progress and strategy
 created: 2026-11-06T04:06+01:00
-updated: 2026-11-06T04:06+01:00
-update_reason: Autonomous implementation after Phase 1.2 completion
-cross_references:
-  - doc/phases/PHASE_1_2_FINAL_SUMMARY.md (Phase 1.2 completion)
-  - doc/phases/PHASE_1_TUI_IMPLEMENTATION_COMPLETE.md (Phase 1 baseline)
-  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (vision)
+updated: '2026-11-07'
+status: in-progress
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
 ---
 
 # Phase 1.3 - TUI Advanced Features & Optimization
 
-## Overview
+## Overview [block-overview]
 
 **Objective:** Complete Phase 1 with advanced features, performance optimization, and production polish  
 **Duration:** 3-4 days (autonomous implementation)  
 **Target:** Fully-featured production TUI with responsive layout, themes, and advanced interactions  
 
-## Strategy
+## Strategy [block-strategy]
 
 Build Phase 1.3 in 5 interconnected sub-phases, each delivering testable functionality:
 
@@ -33,7 +39,7 @@ Build Phase 1.3 in 5 interconnected sub-phases, each delivering testable functio
 
 ---
 
-## Sub-Phases
+## Sub-Phases [block-sub-phases]
 
 ### Phase 1.3.1 - VI Editor Modal Integration
 **Deliverable:** Full-featured VI modal for response editing  
@@ -438,7 +444,7 @@ Phase 1.2.4 created action menu foundation. Phase 1.3.5 implements full workflow
 
 ---
 
-## Implementation Milestones
+## Implementation Milestones [block-implementation-milestones]
 
 ```
 Phase 1.3.1: VI Editor Modal
@@ -459,7 +465,7 @@ Phase 1.3.5: Advanced Interaction
 
 ---
 
-## Code Metrics Target
+## Code Metrics Target [block-code-metrics-target]
 
 | Component | Target Lines | Notes |
 |-----------|--------------|-------|
@@ -480,7 +486,7 @@ Phase 1.3.5: Advanced Interaction
 
 ---
 
-## Success Criteria (Phase 1.3 Complete)
+## Success Criteria (Phase 1.3 Complete) [block-success-criteria-phase-1-3-complete]
 
 - [x] VI modal: edit and save responses
 - [x] Performance: 1000+ token streams render smoothly
@@ -493,7 +499,7 @@ Phase 1.3.5: Advanced Interaction
 
 ---
 
-## Testing Strategy
+## Testing Strategy [block-testing-strategy]
 
 1. **Unit Tests** (per sub-phase)
    - VI modal: keybindings, file I/O, mode transitions
@@ -524,7 +530,7 @@ Phase 1.3.5: Advanced Interaction
 
 ---
 
-## Deferments to Phase 1.4+
+## Deferments to Phase 1.4+ [block-deferments-to-phase-1-4]
 
 1. **Advanced VI Features**
    - macros (:map commands)
@@ -549,7 +555,7 @@ Phase 1.3.5: Advanced Interaction
 
 ---
 
-## References
+## References [block-references]
 
 - **Phase 1.2 Completion:** doc/phases/PHASE_1_2_FINAL_SUMMARY.md
 - **TUI Vision:** doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md

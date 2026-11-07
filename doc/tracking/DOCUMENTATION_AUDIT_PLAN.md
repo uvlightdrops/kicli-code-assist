@@ -1,17 +1,29 @@
 ---
 title: "kicli-code-assist Documentation Audit & Remediation Plan"
-project: "kicli-code-assist"
-scope: "tracking"
+project: kicli-code-assist
+scope: tracking
+purpose: "Progress tracking and metrics documentation"
 created: 2026-11-01T23:58:00+01:00
-updated: 2026-11-01T23:58:00+01:00
-update_reason: "Full audit of doc/ directory - 111 files without YAML headers"
-status: "active"
-author: "Copilot"
+updated: 2026-11-07T20:58:29
+status: active
+semantic_blocks:
+  - id: executive-summary
+  - id: current-state-as-of-2026-11-01t2358000
+  - id: problem-categories
+  - id: remediation-plan
+  - id: architecture-active
+  - id: phases-completed
+  - id: guides
+  - id: tracking
+  - id: archive-deprecated
+  - id: known-blockers-decisions
+  - id: timeline-ownership
+  - id: definition-of-done
+  - id: next-steps
 ---
-
 # kicli-code-assist Documentation Audit & Remediation Plan
 
-## Executive Summary
+## Executive Summary [executive-summary]
 
 **Finding:** 111 out of ~112 markdown files in `doc/` **lack YAML headers** and proper metadata. This breaks:
 - Machine-readable documentation indexing
@@ -24,7 +36,7 @@ author: "Copilot"
 
 ---
 
-## Current State (as of 2026-11-01T23:58:00+01:00)
+## Current State (as of 2026-11-01T23:58:00+01:00) [current-state-as-of-2026-11-01t2358000]
 
 ### Compliance Matrix
 
@@ -57,7 +69,7 @@ doc/
 
 ---
 
-## Problem Categories
+## Problem Categories [problem-categories]
 
 ### 1. Missing YAML Headers (111 files)
 
@@ -122,7 +134,7 @@ doc/integration/        ← Some integration plans
 
 ---
 
-## Remediation Plan
+## Remediation Plan [remediation-plan]
 
 ### Phase 1: Quick Audit (1-2 hours)
 
@@ -250,31 +262,31 @@ status: "active"
 
 # Documentation Index
 
-## Architecture (Active)
+## Architecture (Active) [architecture-active]
 - [Agent Coordination](./architecture/AGENT_COORDINATION_ARCHITECTURE.md)
 - [Phase 4 Architecture](./architecture/PHASE_4_ARCHITECTURE.md)
 - ...
 
-## Phases (Completed)
+## Phases (Completed) [phases-completed]
 - [Phase 5.4: Full Autonomy](./phases/PHASE_5_4_SUMMARY.md) - Complete
 - ...
 
-## Guides
+## Guides [guides]
 - [Config Validation](./guides/CONFIG_VALIDATION_GUIDE.md)
 - ...
 
-## Tracking
+## Tracking [tracking]
 - [Project Status](./tracking/PROJECT_STATUS.md)
 - [Deployment Readiness](./tracking/DEPLOYMENT_READINESS.md)
 
-## Archive (Deprecated)
+## Archive (Deprecated) [archive-deprecated]
 - [Phase 2: Project-Aware Chat](./archive/PHASE2_PROJECT_AWARE_CHAT.md)
 - ...
 ```
 
 ---
 
-## Known Blockers & Decisions
+## Known Blockers & Decisions [known-blockers-decisions]
 
 ### Decision: Archive vs. Delete?
 
@@ -297,7 +309,7 @@ status: "active"
 
 ---
 
-## Timeline & Ownership
+## Timeline & Ownership [timeline-ownership]
 
 | Phase | Task | Owner | Hours | Deadline |
 |-------|------|-------|-------|----------|
@@ -311,7 +323,7 @@ status: "active"
 
 ---
 
-## Definition of Done
+## Definition of Done [definition-of-done]
 
 - [ ] All 112 `.md` files have YAML headers
 - [ ] All timestamps in ISO 8601 + timezone format
@@ -323,7 +335,7 @@ status: "active"
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 1. **Approve this plan** (scope, timeline, acceptance criteria)
 2. **Run audit script** to categorize all files

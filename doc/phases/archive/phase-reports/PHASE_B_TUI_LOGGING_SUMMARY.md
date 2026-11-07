@@ -1,3 +1,22 @@
+---
+title: Phase B Tui Logging Summary
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-19'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+---
+
 # Phase B: TUI Logging Tab Integration - Complete ✅
 
 **Status:** DONE  
@@ -6,7 +25,7 @@
 
 ---
 
-## What We Built
+## What We Built [block-what-we-built]
 
 ### LoggingPanel Widget
 **File:** `kicli_code_assist/ui/panels/logging_panel.py`
@@ -57,7 +76,7 @@ A **Textual-based widget** that displays log files in real-time with:
 
 ---
 
-## Demo & Verification
+## Demo & Verification [block-demo-verification]
 
 ### Running the Demo
 ```bash
@@ -100,7 +119,7 @@ Response received: 123 tokens, 0.042s latency
 
 ---
 
-## Architecture
+## Architecture [block-architecture]
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -151,7 +170,7 @@ Response received: 123 tokens, 0.042s latency
 
 ---
 
-## Files Changed
+## Files Changed [block-files-changed]
 
 ### New Files
 - `kicli_code_assist/ui/panels/logging_panel.py` - LoggingPanel widget
@@ -164,7 +183,7 @@ Response received: 123 tokens, 0.042s latency
 
 ---
 
-## How to Use (User Perspective)
+## How to Use (User Perspective) [block-how-to-use-user-perspective]
 
 1. **Launch the app:**
    ```bash
@@ -191,7 +210,7 @@ Response received: 123 tokens, 0.042s latency
 
 ---
 
-## What's Next (Phase C)
+## What's Next (Phase C) [block-what-s-next-phase-c]
 
 Now that the Logging Tab is ready, we need to **add logging calls** to the core modules:
 
@@ -229,7 +248,7 @@ logger_context.debug(f"Dedup check: file in cache? {is_cached}")
 
 ---
 
-## Summary
+## Summary [block-summary]
 
 ✅ **Phase A (Infrastructure):** Logging setup with flowpy, config files, 5 logfiles  
 ✅ **Phase B (TUI Integration):** LoggingPanel widget, dropdown selector, auto-refresh, color-coding  

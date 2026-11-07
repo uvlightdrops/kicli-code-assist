@@ -1,3 +1,25 @@
+---
+title: 3 2 Summary
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-11-06'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+---
+
 # Phase 1.3.2: PreviewPanel Integration & File Selection
 
 **Status:** ✅ COMPLETE  
@@ -5,11 +27,11 @@
 **Date:** 2026-11-02  
 **Test Coverage:** 5/5 E2E tests passing
 
-## Overview
+## Overview [block-overview]
 
 Integrated file preview functionality into the TUI. When users select a file from the FileTree widget, the content is automatically displayed in the PreviewPanel with syntax highlighting.
 
-## Implementation
+## Implementation [block-implementation]
 
 ### Components Created
 - **PreviewPanel** (`kicli_code_assist/ui/widgets/preview_panel.py`)
@@ -30,7 +52,7 @@ Integrated file preview functionality into the TUI. When users select a file fro
   - Refactored on_tree_select() → _handle_selection() for reusable logic
   - Maintains backward compatibility
 
-## Layout
+## Layout [block-layout]
 
 ```
 ┌─────────────────┬──────────────────────────────────────────────┐
@@ -42,7 +64,7 @@ Integrated file preview functionality into the TUI. When users select a file fro
 └─────────────────┴──────────────────────────────────────────────┘
 ```
 
-## Event Flow
+## Event Flow [block-event-flow]
 
 1. User selects file in FileTree (keyboard/mouse)
 2. Textual triggers Tree.NodeSelected event
@@ -52,7 +74,7 @@ Integrated file preview functionality into the TUI. When users select a file fro
 6. app._on_file_selected() calls PreviewPanel.preview_file()
 7. PreviewPanel displays content with syntax highlighting
 
-## Features
+## Features [block-features]
 
 ✅ File preview with syntax highlighting
 ✅ Large file handling (truncation at 1MB)
@@ -62,7 +84,7 @@ Integrated file preview functionality into the TUI. When users select a file fro
 ✅ File size formatting (B, KB, MB)
 ✅ Error handling for non-existent files
 
-## Testing
+## Testing [block-testing]
 
 Created `test_tui_e2e.py` with 5 integration tests:
 - ✅ TUI initialization
@@ -80,7 +102,7 @@ All tests passing (5/5):
 ✓ File selected and PreviewPanel updated
 ```
 
-## Known Limitations
+## Known Limitations [block-known-limitations]
 
 ### Textual Pilot Test Limitation
 The Textual framework's Pilot test utility does not trigger Tree.NodeSelected events when using select_node(). This is a framework limitation, not a bug in our code.
@@ -89,7 +111,7 @@ The Textual framework's Pilot test utility does not trigger Tree.NodeSelected ev
 
 **Real-world:** In production (interactive TUI), Tree events are triggered normally.
 
-## Next Phase (1.3.3)
+## Next Phase (1.3.3) [block-next-phase-1-3-3]
 
 **Performance Optimization:**
 - Adaptive token buffering for streaming responses
@@ -98,7 +120,7 @@ The Textual framework's Pilot test utility does not trigger Tree.NodeSelected ev
 - Memory profiling and leak detection
 - Benchmarks for 100/500/1000/5000 token streams
 
-## Files Changed
+## Files Changed [block-files-changed]
 
 | File | Changes | Lines |
 |------|---------|-------|
@@ -109,7 +131,7 @@ The Textual framework's Pilot test utility does not trigger Tree.NodeSelected ev
 
 **Total:** 392 lines of production code + 95 lines of test code
 
-## Verification
+## Verification [block-verification]
 
 ```bash
 # Run E2E test

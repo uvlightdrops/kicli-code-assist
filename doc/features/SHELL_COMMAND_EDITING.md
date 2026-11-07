@@ -1,39 +1,68 @@
 ---
 title: Shell Command Editing & Manual Entry
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / Shell Integration
-purpose: Interactive shell command editing and manual entry
+scope: features
+purpose: Feature documentation
 created: 2026-10-16T20:38:27+02:00
-updated: 2026-11-07T13:44:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: shell-command-editing-overview
+  - id: overview
     type: implementation
     status: stable
     version: 1.0
-  - id: command-editor-architecture
-    type: architecture
+  - id: architecture
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: updated-approval-modal
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: usage-examples
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: features-in-detail
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: error-handling
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: risk-classification-updates
+    type: implementation
     status: stable
     version: 1.0
   - id: batch-editing-workflow
-    type: operations
+    type: implementation
     status: stable
     version: 1.0
-  - id: risk-classification-system
-    type: reference
+  - id: testing
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: SHELL_EXECUTION_IMPLEMENTATION.md
-    type: part-of
-    reason: "Editing layer for shell execution"
-  - target: ../backend/layer-1-raw-llm/FILE_IO_GIT_OPERATIONS.md
-    type: depends-on
-    reason: "Executes OS commands and file operations"
+  - id: integration-with-chat
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: files-created
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: future-enhancements
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: compliance-notes
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: summary
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Shell Command Editing & Manual Entry [shell-command-editing-overview]
@@ -44,7 +73,7 @@ relations:
 
 ---
 
-## Overview [shell-command-editing-overview]
+## Overview [overview]
 
 Users can now:
 1. **Edit individual commands** - Fix/adjust LLM proposals
@@ -54,7 +83,7 @@ Users can now:
 
 ---
 
-## Architecture [command-editor-architecture]
+## Architecture [architecture]
 
 ### 1. CommandEditor Modal (`shell_command_editor.py`)
 
@@ -205,7 +234,7 @@ display_text = editor.format_commands_for_approval_modal()
 
 ---
 
-## Updated Approval Modal
+## Updated Approval Modal [updated-approval-modal]
 
 ### New Buttons
 
@@ -256,7 +285,7 @@ Return to approval modal
 
 ---
 
-## Usage Examples
+## Usage Examples [usage-examples]
 
 ### In textual_app.py
 
@@ -315,7 +344,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Features in Detail
+## Features in Detail [features-in-detail]
 
 ### CommandEditor (Single Command)
 
@@ -380,7 +409,7 @@ Command 3: ls -lh backup.tar.gz
 
 ---
 
-## Error Handling
+## Error Handling [error-handling]
 
 ### Invalid Command Input
 
@@ -416,7 +445,7 @@ result = ManualCommandEntry.parse_command_input("echo test")
 
 ---
 
-## Risk Classification Updates [risk-classification-system]
+## Risk Classification Updates [risk-classification-updates]
 
 When user edits a command, risk level is **immediately re-classified**:
 
@@ -458,7 +487,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Testing
+## Testing [testing]
 
 ### Manual Tests (TUI)
 
@@ -484,7 +513,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Integration with Chat
+## Integration with Chat [integration-with-chat]
 
 ### Full Workflow
 
@@ -518,7 +547,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Files Created
+## Files Created [files-created]
 
 | File | Lines | Purpose |
 |------|-------|---------|
@@ -528,7 +557,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 ### Phase 2
 - [ ] Undo/redo history for edits
@@ -544,7 +573,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Compliance Notes
+## Compliance Notes [compliance-notes]
 
 **Audit Trail:**
 - ✅ All edits are logged with original and modified commands
@@ -560,7 +589,7 @@ Changes: +1 added, -1 removed (Total: 2 commands)
 
 ---
 
-## Summary
+## Summary [summary]
 
 **New Capabilities:**
 - ✅ Edit individual commands from LLM

@@ -1,0 +1,184 @@
+================================================================================
+BACKEND DOCUMENTATION AUDIT SUMMARY
+================================================================================
+Scope: /home/flow/dev_flow/kicli-code-assist/doc/backend/
+Audit Date: 2026-11-07T20:57:12+01:00
+Total Files: 20 (.md files across 4 layers + root)
+
+================================================================================
+COMPLIANCE SCORE: 65% ✅ GOOD (but needs fixes)
+================================================================================
+
+YAML Headers:           20/20 ✅ 100% (All files compliant)
+Block ID Tagging:       13/20 ✅ 65% (7 files missing block IDs)
+Semantic Blocks Sync:   ⚠️ 50% alignment (mismatches between list & headings)
+Folder READMEs:         4/4 ✅ 100% (All layers have README.md)
+Hybrid Docs:            🚨 4 files (backend + frontend mixed content)
+
+================================================================================
+FOLDER STRUCTURE: 4 LAYERS
+================================================================================
+
+Layer 1: Raw LLM Layer (5 files)
+├── README.md                              ⚠️ 0/4 block IDs
+├── FILE_IO_GIT_OPERATIONS.md              ⚠️ 4/5 block IDs
+├── IDE_CAPABILITIES.md                    ❌ 1/4 block IDs (major gap)
+├── LLM_CLIENT_API_SPECIFICATION.md        ⚠️ 4/5 block IDs
+└── OS_COMMAND_EXECUTION_ARCHITECTURE.md   ⚠️ 4/5 block IDs
+
+Layer 2: Workflow Orchestration (8 files) 🚨 HYBRID CONTENT FOUND
+├── README.md                              ⚠️ 1/3 block IDs, HYBRID
+├── AGENT_ROUTE_SPEC.md                    ❌ 3/9 block IDs (critical)
+├── CHUNK_FORMAT_STANDARDIZATION.md        ⚠️ 4/6 block IDs, HYBRID
+├── PHASE_I2_1_ENDPOINT_INTEGRATION.md     ⚠️ 2/3 block IDs, HYBRID
+├── PHASE_I2_2_TUI_INTEGRATION_COMPLETE.md 🚨 NO H2s, HYBRID (move to frontend)
+├── PHASE_I2_MULTIFILE_ANALYSIS.md         ❌ 2/9 block IDs (critical)
+├── PHASE_I2_PROJECTANALYZER_COMPLETE.md   ⚠️ 3/6 block IDs
+└── SESSION_MANAGEMENT_STATE.md            ⚠️ 4/5 block IDs
+
+Layer 3: Autonomous Agent (6 files)
+├── README.md                              ❌ 0/5 block IDs
+├── AGENT_CAPABILITY_DISCOVERY.md          ⚠️ 4/6 block IDs
+├── AGENT_COORDINATION_ARCHITECTURE.md     ❌ 0/10 block IDs (critical)
+├── MULTIFILE_REFACTORING_ARCHITECTURE.md  ❌ 0/9 block IDs (critical)
+├── SELF_CORRECTION_FEEDBACK_LOOPS.md      ⚠️ 4/5 block IDs
+└── TRANSPARENCY_INTEGRATION_ARCHITECTURE.md ❌ 0/10 block IDs (critical)
+
+Root Level (1 file)
+└── README.md                              ⚠️ 0/2 block IDs
+
+================================================================================
+CRITICAL ISSUES (PRIORITY 1-2)
+================================================================================
+
+🚨 HYBRID DOCUMENTATION (backend + frontend mixed):
+   1. layer-2-workflow-orchestration/README.md
+   2. layer-2-workflow-orchestration/CHUNK_FORMAT_STANDARDIZATION.md
+   3. layer-2-workflow-orchestration/PHASE_I2_1_ENDPOINT_INTEGRATION.md
+   4. layer-2-workflow-orchestration/PHASE_I2_2_TUI_INTEGRATION_COMPLETE.md
+   
+   ACTION: Split into separate backend + frontend docs with cross-references
+
+❌ FILES WITH ZERO BLOCK IDS (40 headings untagged):
+   1. doc/backend/README.md (2 headings)
+   2. layer-1-raw-llm/README.md (4 headings)
+   3. layer-3-autonomous-agent/README.md (5 headings)
+   4. layer-3-autonomous-agent/AGENT_COORDINATION_ARCHITECTURE.md (10 headings)
+   5. layer-3-autonomous-agent/MULTIFILE_REFACTORING_ARCHITECTURE.md (9 headings)
+   6. layer-3-autonomous-agent/TRANSPARENCY_INTEGRATION_ARCHITECTURE.md (10 headings)
+   
+   ACTION: Tag all H2 headings with [block-id] format
+
+❌ SEMANTIC BLOCKS MISALIGNMENT:
+   - Over-specified: IDE_CAPABILITIES.md (5 listed vs 4 headings)
+   - Under-specified (critical): AGENT_COORDINATION_ARCHITECTURE.md (2 listed vs 10 headings)
+   - Under-specified (critical): MULTIFILE_REFACTORING_ARCHITECTURE.md (1 listed vs 9 headings)
+   - Under-specified (critical): TRANSPARENCY_INTEGRATION_ARCHITECTURE.md (1 listed vs 10 headings)
+   
+   ACTION: Update semantic_blocks YAML list to match actual tagged headings
+
+================================================================================
+H2 HEADING STATISTICS
+================================================================================
+
+Total H2 headings in all files:     92
+Headings with block IDs:            46 (50%)
+Headings WITHOUT block IDs:         46 (50%)
+
+By Layer:
+  Layer 1: 19 headings, 12 tagged (63%)
+  Layer 2: 37 headings, 13 tagged (35%)
+  Layer 3: 34 headings, 9 tagged (26%)
+  Root:    2 headings, 0 tagged (0%)
+
+Files needing complete re-tagging:  6 files (40 headings)
+Files needing partial fixes:        7 files (~6 headings)
+
+================================================================================
+YAML HEADER COMPLIANCE
+================================================================================
+
+Status: ✅ 100% COMPLIANT
+
+All 20 files have valid YAML headers with required fields:
+  ✅ title (no PHASE prefix violations)
+  ✅ project: kicli-code-assist
+  ✅ scope (backend or backend-layer-X)
+  ✅ purpose
+  ✅ created
+  ✅ updated
+  ✅ status
+
+No YAML header fixes needed.
+
+================================================================================
+README.md COMPLIANCE
+================================================================================
+
+Status: ✅ All 4 READMEs Present
+
+  ✅ doc/backend/README.md (folder navigator)
+  ✅ layer-1-raw-llm/README.md (layer overview)
+  ✅ layer-2-workflow-orchestration/README.md (layer overview, but HYBRID)
+  ✅ layer-3-autonomous-agent/README.md (layer overview)
+
+All follow semantic structure with YAML headers and documentation indexes.
+Note: Layer 2 README has hybrid content requiring cleanup.
+
+================================================================================
+RECOMMENDATIONS & ACTION ITEMS
+================================================================================
+
+PRIORITY 1: Fix Critical Block ID Gaps
+  • 40 H2 headings need block IDs in 6 files (2-3 hours work)
+  • Use format: ## Heading Text [block-id]
+  • After tagging: update semantic_blocks YAML lists
+
+PRIORITY 2: Fix Partial Block ID Gaps
+  • ~6 additional headings in 7 files need block IDs
+  • Most files have 80%+ coverage; easy to complete
+  • After fixing Priority 1, quickly wrap up these
+
+PRIORITY 3: Fix Semantic Blocks Declarations
+  • Update YAML lists to match actual tagged block IDs
+  • Remove over-specified entries
+  • Add missing entries (after tagging headings)
+
+PRIORITY 4: Split Hybrid Documentation
+  • Move PHASE_I2_2_TUI_INTEGRATION_COMPLETE.md → frontend folder (entire file)
+  • Split CHUNK_FORMAT_STANDARDIZATION.md (backend + frontend)
+  • Split PHASE_I2_1_ENDPOINT_INTEGRATION.md (backend + frontend)
+  • Update layer-2-workflow-orchestration/README.md (remove frontend refs)
+  • Update cross-references in both backend & frontend docs
+  • Estimated: 3-4 hours
+
+ESTIMATED TOTAL EFFORT: 6-8 hours for full standardization
+
+================================================================================
+WHAT'S WORKING WELL
+================================================================================
+
+✅ All YAML headers valid (100%)
+✅ No title format violations
+✅ All folder READMEs present and structured
+✅ Layer 1 has best compliance (63% block IDs)
+✅ Semantic schema partially implemented in most files
+✅ Relations/cross-references defined in many files
+
+================================================================================
+NEXT STEPS
+================================================================================
+
+1. Use semantic-block-tagging skill to tag 46 missing H2 headings
+2. Update all semantic_blocks YAML lists to match actual block counts
+3. Use hybrid-doc-splitting skill to separate backend + frontend content
+4. Run audit again to verify 100% compliance
+5. Commit all changes with message: "docs: standardize backend documentation"
+
+================================================================================
+DETAILED REPORT
+================================================================================
+
+See: BACKEND_DOCUMENTATION_AUDIT_REPORT.md (full analysis with all details)
+
+Report generated: 2026-11-07T20:57:12+01:00

@@ -1,6 +1,25 @@
+---
+title: Checklist
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-02'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+---
+
 # Phase 5: UI Integration - Implementation Checklist
 
-## Overview
+## Overview [block-overview]
 
 Phase 5 implements the complete user interface for the diff engine and task tracking system. This includes:
 
@@ -11,7 +30,7 @@ Phase 5 implements the complete user interface for the diff engine and task trac
 
 **Estimated Time**: ~10 hours over 1 day
 
-## Tasks
+## Tasks [block-tasks]
 
 ### 1. Focus Manager (2h)
 
@@ -206,7 +225,7 @@ Phase 5 implements the complete user interface for the diff engine and task trac
   - [ ] Add keyboard shortcut cheat sheet
   - [ ] Add workflow examples
 
-## Dependencies
+## Dependencies [block-dependencies]
 
 **Within kicli-code-assist**:
 - `kicli_code_assist/context/diff_engine.py` ✅ (Phase 3)
@@ -217,7 +236,7 @@ Phase 5 implements the complete user interface for the diff engine and task trac
 - `textual` (already installed)
 - `pygments` (for syntax highlighting - may need to add)
 
-## Success Criteria
+## Success Criteria [block-success-criteria]
 
 - [x] 38+ new tests, all passing
 - [x] Focus mode navigation works smoothly
@@ -229,7 +248,7 @@ Phase 5 implements the complete user interface for the diff engine and task trac
 - [x] No performance degradation with large diffs
 - [x] Customer requests satisfied (focus shortcuts, file preview)
 
-## Time Budget
+## Time Budget [block-time-budget]
 
 | Task | Time | Status |
 |------|------|--------|
@@ -240,14 +259,14 @@ Phase 5 implements the complete user interface for the diff engine and task trac
 | Testing & Polish | 1.5h | Pending |
 | **Total** | **~10h** | Ready to start |
 
-## Notes
+## Notes [block-notes]
 
 - Focus mode should highlight title bar in orange (per customer request)
 - File preview needs scrollbar (implement in Phase 5 polish)
 - Security path restriction (Phase 6)
 - Can parallelize diff viewer and task status development
 
-## Next Steps After Phase 5
+## Next Steps After Phase 5 [block-next-steps-after-phase-5]
 
 - Phase 6: Security (path restrictions) + Code review features
 - Phase 7: Enhanced LLM coordination (refinement loop)

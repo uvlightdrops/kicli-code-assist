@@ -1,42 +1,76 @@
 ---
 title: Shell Command Execution - Complete Implementation
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / Shell Execution
-purpose: Safe shell command execution with approval workflow and audit trail
+scope: features
+purpose: Feature documentation
 created: 2026-10-16T14:38:10+02:00
-updated: 2026-11-07T13:45:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: shell-execution-overview
+  - id: summary-whats-been-implemented
     type: implementation
     status: stable
     version: 1.0
-  - id: architecture-design
-    type: architecture
+  - id: task-1-message-types-complete
+    type: implementation
     status: stable
     version: 1.0
-  - id: approval-workflow
-    type: operations
+  - id: task-2-tui-approval-widget-complete
+    type: implementation
     status: stable
     version: 1.0
-  - id: audit-trail-system
-    type: architecture
+  - id: task-3-extended-executor-complete
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: SHELL_COMMAND_EDITING.md
-    type: composed-of
-    reason: "Editing interface for command execution"
-  - target: ../backend/layer-1-raw-llm/OS_COMMAND_EXECUTION_ARCHITECTURE.md
-    type: implements
-    reason: "Implements OS command execution backend"
-  - target: ../backend/layer-2-workflow-orchestration/CHUNK_FORMAT_STANDARDIZATION.md
-    type: depends-on
-    reason: "Uses standardized response chunk format"
+  - id: task-4-audit-trail-complete
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: task-5-system-prompt-complete
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: task-6-end-to-end-integration-complete
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: files-changed-complete-list
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: compliance-security
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: deployment
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: usage-guide
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: future-enhancements-phase-2
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: testing-validation
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: summary-statistics
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: support-troubleshooting
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: document-versions
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Shell Command Execution: Complete Implementation (Tasks 1-6) [shell-execution-overview]
@@ -45,7 +79,7 @@ relations:
 
 ---
 
-## Summary: What's Been Implemented [shell-execution-overview]
+## Summary: What's Been Implemented [summary-whats-been-implemented]
 
 **Total Code:** ~3,000 lines  
 **New Modules:** 7 (executor + UI + tests)  
@@ -100,7 +134,7 @@ relations:
 
 ---
 
-## Task 1: Message Types ✅ COMPLETE
+## Task 1: Message Types ✅ COMPLETE [task-1-message-types-complete]
 
 **File:** `executor/shell_execution.py` (356 lines)
 
@@ -150,7 +184,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 2: TUI Approval Widget ✅ COMPLETE [approval-workflow]
+## Task 2: TUI Approval Widget ✅ COMPLETE [task-2-tui-approval-widget-complete]
 
 **File:** `ui/shell_approval_widget.py` (265 lines)
 
@@ -179,7 +213,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 3: Extended Executor ✅ COMPLETE [architecture-design]
+## Task 3: Extended Executor ✅ COMPLETE [task-3-extended-executor-complete]
 
 **File:** `executor/safe_executor.py` (207 lines)
 
@@ -210,7 +244,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 4: Audit Trail ✅ COMPLETE [audit-trail-system]
+## Task 4: Audit Trail ✅ COMPLETE [task-4-audit-trail-complete]
 
 **File:** `executor/audit_trail.py` (285 lines)
 
@@ -243,7 +277,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 5: System Prompt ✅ COMPLETE
+## Task 5: System Prompt ✅ COMPLETE [task-5-system-prompt-complete]
 
 **File:** `prompts.py` (updated, +126 lines)
 
@@ -285,7 +319,7 @@ User has full control:
 
 ---
 
-## Task 6: End-to-End Integration ✅ COMPLETE
+## Task 6: End-to-End Integration ✅ COMPLETE [task-6-end-to-end-integration-complete]
 
 ### 6a. Response Parser ✅
 
@@ -409,7 +443,7 @@ if batch:
 
 ---
 
-## Files Changed: Complete List
+## Files Changed: Complete List [files-changed-complete-list]
 
 ### New Files (Created)
 1. ✅ `executor/response_parser.py` - LLM response parsing
@@ -428,7 +462,7 @@ if batch:
 
 ---
 
-## Compliance & Security
+## Compliance & Security [compliance-security]
 
 ### Standards Met
 - ✅ NIST AI RMF (governance, measurement, risk mitigation)
@@ -456,7 +490,7 @@ if batch:
 
 ---
 
-## Deployment
+## Deployment [deployment]
 
 ### Installation
 
@@ -491,7 +525,7 @@ Example:
 
 ---
 
-## Usage Guide
+## Usage Guide [usage-guide]
 
 ### For End Users
 
@@ -547,7 +581,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Future Enhancements (Phase 2+)
+## Future Enhancements (Phase 2+) [future-enhancements-phase-2]
 
 ### Immediate (Phase 2)
 - [ ] Full TUI integration with modal handler
@@ -572,7 +606,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Testing & Validation
+## Testing & Validation [testing-validation]
 
 ### Completed ✅
 1. Syntax validation (all 7 modules pass py_compile)
@@ -591,7 +625,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Summary Statistics
+## Summary Statistics [summary-statistics]
 
 | Metric | Value |
 |--------|-------|
@@ -607,7 +641,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Support & Troubleshooting
+## Support & Troubleshooting [support-troubleshooting]
 
 ### Common Issues
 
@@ -628,7 +662,7 @@ class CodeAssistantApp(Static):
 
 ---
 
-## Document Versions
+## Document Versions [document-versions]
 
 - v1.0 - Initial implementation spec (Tasks 1-5)
 - v2.0 - **CURRENT** - Complete implementation (Tasks 1-6 done)

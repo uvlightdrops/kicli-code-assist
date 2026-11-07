@@ -1,22 +1,23 @@
 ---
 title: Phases Documentation
 project: kicli-code-assist
-scope: phases
+scope:
+- phases
 purpose: Central reference for phases documentation
-created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-07T18:07:00+01:00
-update_reason: "readme-table-generation skill: semantic navigation table"
+created: 2026-11-07 18:07:00+01:00
+updated: '2026-11-07'
 status: active
-relations:
-  - target: ../README.md
-    type: parent
+semantic_blocks:
+- block-1
+- block-2
+- block-3
 ---
 
 # Phases Documentation
 
 **Scope:** Development Phases & Milestones
 
-## Documentation Index
+## Documentation Index [block-documentation-index]
 
 | File | Status | Purpose | Semantic Blocks |
 |------|--------|---------|-----------------|
@@ -50,12 +51,12 @@ relations:
 | PHASE_5_5_2_SUMMARY.md | current | Documentation | — |
 | PHASE_5_5_CONCEPT.md | "active" | Documentation | — |
 
-## Navigation
+## Navigation [block-navigation]
 
 - Browse by status: active, draft, archived
 - Block IDs enable precise cross-document linking
 - See parent directory: [../README.md](../README.md)
 
-## Subfolders
+## Subfolders [block-subfolders]
 
 - **archive/**

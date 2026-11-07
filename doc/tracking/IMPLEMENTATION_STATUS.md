@@ -1,10 +1,27 @@
+---
+title: "IMPLEMENTATION STATUS"
+project: kicli-code-assist
+scope: tracking
+purpose: "Progress tracking and metrics documentation"
+created: 2026-10-28T13:38:30+01:00
+updated: 2026-11-07T20:58:29
+status: active
+semantic_blocks:
+  - id: current-architecture-state
+  - id: what-to-do-in-each-project
+  - id: implementation-checklist
+  - id: testing-phase-2
+  - id: known-limitations-assumptions
+  - id: references
+  - id: questions-issues
+---
 # CLI Architecture - Implementation Status & Next Steps
 
 **Last Updated:** Phase 2 (In Progress)
 
 ---
 
-## Current Architecture State
+## Current Architecture State [current-architecture-state]
 
 The KI ecosystem is transitioning from isolated CLI implementations to a shared base architecture:
 
@@ -22,7 +39,7 @@ Consuming Apps:
 
 ---
 
-## What to Do in Each Project
+## What to Do in Each Project [what-to-do-in-each-project]
 
 ### kicli-code-assist ✅ DONE
 
@@ -118,7 +135,7 @@ ki-knowledge profile list           # (delegate to ki-core)
 
 ---
 
-## Implementation Checklist
+## Implementation Checklist [implementation-checklist]
 
 ### For Apps Adopting Phase 2
 
@@ -141,7 +158,7 @@ ki-knowledge profile list           # (delegate to ki-core)
 
 ---
 
-## Testing Phase 2
+## Testing Phase 2 [testing-phase-2]
 
 ```bash
 # Test ki-core base CLI
@@ -163,7 +180,7 @@ ki-chat doctor
 
 ---
 
-## Known Limitations / Assumptions
+## Known Limitations / Assumptions [known-limitations-assumptions]
 
 1. **Profile/Stage markers:** Currently use `.active_profile` and `.active_stage` files
    - These are text files in `config/profiles/` and `config/stages/` dirs
@@ -183,7 +200,7 @@ ki-chat doctor
 
 ---
 
-## References
+## References [references]
 
 - **CLI_ARCHITECTURE_ROADMAP.md** - This directory, full technical roadmap
 - **YAML_CONFIG_SYSADMIN.md** - This directory, config resolution details
@@ -192,7 +209,7 @@ ki-chat doctor
 
 ---
 
-## Questions / Issues?
+## Questions / Issues? [questions-issues]
 
 When in doubt:
 1. Check if it's a shared config command → should live in ki_core.commands

@@ -1,15 +1,20 @@
 ---
 title: Web Editor Frameworks - Comprehensive Comparison
 project: kicli-code-assist
-scope: WebUI Architecture
-status: active
+scope: frontend-web
+purpose: Compare web-based code editors for WebUI implementation selection
 created: 2026-10-28T10:00:00+01:00
-updated: 2026-11-03T14:50:00+01:00
-update_reason: Added YAML header; reference for editor framework selection
-agent_project: null
-cross_references:
-  - "doc/frontend-web/README.md"
-  - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+updated: 2026-11-07T20:57:37+01:00
+update_reason: Standardized YAML header; removed extra doc reference from semantic_blocks; fixed scope
+status: active
+agent_project: kicli-code-assist
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: WEB_EDITOR_EDIT_CAPABILITIES.md
+    type: reference
 semantic_blocks:
   - id: 1-monaco-editor
     title: 1️⃣ MONACO EDITOR
@@ -35,7 +40,6 @@ semantic_blocks:
     title: 🎬 FOR YOUR USE CASE
   - id: resources
     title: 📖 RESOURCES
-  - "doc/frontend-web/WEB_FRONTEND_DESIGN.md"
 ---
 
 # Web Editor Frameworks - Comprehensive Comparison

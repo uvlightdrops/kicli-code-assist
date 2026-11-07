@@ -1,6 +1,26 @@
+---
+title: Ui Integration
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-02'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+---
+
 # TUI Integration für Diff Engine & Task Tracking
 
-## Überblick der UI-Komponenten
+## Überblick der UI-Komponenten [block-berblick-der-ui-komponenten]
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -21,7 +41,7 @@
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Focus-Modi (Ctrl+X)
+## Focus-Modi (Ctrl+X) [block-focus-modi-ctrl-x]
 
 Die Anleitung oben in `customer_requests.md` nennt:
 
@@ -34,7 +54,7 @@ Die Anleitung oben in `customer_requests.md` nennt:
 
 Aktueller Status: Diese Shortcuts sind noch **nicht implementiert**.
 
-## Diff Viewer Panel (neu)
+## Diff Viewer Panel (neu) [block-diff-viewer-panel-neu]
 
 Wenn User `Ctrl+D` drückt → Diff-Viewer wird geöffnet:
 
@@ -60,7 +80,7 @@ Wenn User `Ctrl+D` drückt → Diff-Viewer wird geöffnet:
 └─────────────────────────────────────────────────────────────┘
 ```
 
-## Task Status Display (neu)
+## Task Status Display (neu) [block-task-status-display-neu]
 
 Im Status-Bar (untere Zeile):
 
@@ -89,7 +109,7 @@ Task Status                  Completion Rate
 └──────────────────────────┘
 ```
 
-## Implementation Plan für Phase 5
+## Implementation Plan für Phase 5 [block-implementation-plan-f-r-phase-5]
 
 ### 1. Focus Management (2h)
 
@@ -393,7 +413,7 @@ tests/
 
 Total: **38 neue UI-Tests**, ~400 LOC neue UI-Komponenten
 
-## Implementation Steps für nächste Session
+## Implementation Steps für nächste Session [block-implementation-steps-f-r-n-chste-session]
 
 1. **Focus Manager** (2h)
    - FocusMode enum
@@ -421,7 +441,7 @@ Total: **38 neue UI-Tests**, ~400 LOC neue UI-Komponenten
    - Edge cases
    - Error handling
 
-## Customer Requests einarbeiten
+## Customer Requests einarbeiten [block-customer-requests-einarbeiten]
 
 Basierend auf `customer_requests.md`:
 
@@ -429,7 +449,7 @@ Basierend auf `customer_requests.md`:
 - [x] File Preview scrollbar
 - [ ] Security: Path restriction (Phase 6)
 
-## Zeitschätzung
+## Zeitschätzung [block-zeitsch-tzung]
 
 - **Phase 5 (UI Integration)**: ~10h = 1 Tag
 - **Phase 6 (Security + Polish)**: ~3h

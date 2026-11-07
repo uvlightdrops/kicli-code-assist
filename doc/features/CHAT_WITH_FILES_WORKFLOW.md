@@ -1,47 +1,61 @@
 ---
 title: Chat With Files Workflow
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / User Workflow
-purpose: Interactive chat with file and project context
+scope: features
+purpose: Feature documentation
 created: 2026-09-02T07:28:07+02:00
-updated: 2026-11-07T13:42:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: chat-files-workflow
-    type: operations
-    status: stable
-    version: 1.0
-  - id: context-loading
-    type: architecture
-    status: stable
-    version: 1.0
-  - id: ai-analysis-integration
+  - id: quick-start
     type: implementation
     status: stable
     version: 1.0
-  - id: workflow-patterns
-    type: reference
+  - id: available-commands
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: AI_WORKFLOW.md
-    type: depends-on
-    reason: "Extends AI suggestions with file context"
-  - target: FILE_BROWSER.md
-    type: depends-on
-    reason: "Uses file browser for navigation"
-  - target: CHAT_HISTORY_AND_PROMPTS.md
-    type: depends-on
-    reason: "Uses chat history and session management"
+  - id: what-happens-when-you-send-a-message
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: implementation-details
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: dependencies
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: structure
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: key-files-content
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: keyboard-shortcuts
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: tips-tricks
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: troubleshooting
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: next-steps
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Chat Integration: Files + Comments + KI [chat-files-workflow]
 
-## Quick Start [workflow-patterns]
+## Quick Start [quick-start]
 
 ### Workflow 1: Simple Chat with Loaded File (EMPFOHLEN)
 
@@ -104,7 +118,7 @@ relations:
 4. ENTER → KI response mit vollem Kontext
 ```
 
-## Available Commands [context-loading]
+## Available Commands [available-commands]
 
 ### Navigation (File Browser)
 ```
@@ -124,7 +138,7 @@ Ctrl+L          → Load project context
 Ctrl+C          → Quit
 ```
 
-## What Happens When You Send a Message [ai-analysis-integration]
+## What Happens When You Send a Message [what-happens-when-you-send-a-message]
 
 1. **User Input**: "How does this work?"
 2. **UI adds to chat**: "You: How does this work?"
@@ -139,7 +153,7 @@ Ctrl+C          → Quit
 4. **Response appears**: "Assistant: [LLM response]"
 5. **Chat history updated**: Both messages in session
 
-## Implementation Details
+## Implementation Details [implementation-details]
 
 ### What the LLM Sees
 
@@ -158,10 +172,10 @@ You are assisting with the following project:
 **Files:** 27
 **Size:** 104.1 KB
 
-## Dependencies
+## Dependencies [dependencies]
 - python:pyproject.toml
 
-## Structure
+## Structure [structure]
 kicli-code-assist/
   README.md
   pyproject.toml
@@ -171,7 +185,7 @@ kicli-code-assist/
     chat_session.py     ← Loaded file
     ...
 
-## Key Files Content
+## Key Files Content [key-files-content]
 [README content]
 [Config file content]
 [Your loaded file content]
@@ -221,7 +235,7 @@ Add to ChatSession history
 Ready for next message
 ```
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts [keyboard-shortcuts]
 
 | Key | Action |
 |-----|--------|
@@ -234,7 +248,7 @@ Ready for next message
 | `?` | Show help |
 | `Ctrl+C` | Quit |
 
-## Tips & Tricks
+## Tips & Tricks [tips-tricks]
 
 ### Tip 1: Load Context First
 ```
@@ -270,7 +284,7 @@ More accurate responses!
 4. LLM has context from step 1, specific code from step 2
 ```
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### No Response from LLM
 
@@ -302,7 +316,7 @@ More accurate responses!
 3. Ask shorter questions
 4. Check token limit in ki.yaml
 
-## Next Steps
+## Next Steps [next-steps]
 
 Features to implement:
 - [ ] Multi-file selection

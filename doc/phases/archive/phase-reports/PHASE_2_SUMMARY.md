@@ -1,3 +1,25 @@
+---
+title: Summary
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-15'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+---
+
 # Phase 2 Implementation Summary
 
 **Completed:** Phase 2 - Centralize config/profile/stage commands  
@@ -6,7 +28,7 @@
 
 ---
 
-## What Was Accomplished
+## What Was Accomplished [block-what-was-accomplished]
 
 ### Phase 1 (Previously Completed)
 - ✅ Centralized "doctor" command in ki_core.commands.doctor
@@ -84,7 +106,7 @@ Propagated to (reference copies only):
 
 ---
 
-## Commands Now Available
+## Commands Now Available [block-commands-now-available]
 
 ### ki-chat (raw argv CLI)
 ```bash
@@ -119,7 +141,7 @@ kicli-assist stage active           # Show active stage
 
 ---
 
-## Architecture Pattern Used
+## Architecture Pattern Used [block-architecture-pattern-used]
 
 All commands follow the **cli-agnostic** pattern:
 
@@ -147,7 +169,7 @@ def run_config(**kwargs):
 
 ---
 
-## Dependency Direction (Maintained)
+## Dependency Direction (Maintained) [block-dependency-direction-maintained]
 
 ```
 Apps (kicli-assist, ki-chat, ...)
@@ -163,7 +185,7 @@ NEVER reverse: No circular dependencies allowed
 
 ---
 
-## What's Next (Phase 2b-c)
+## What's Next (Phase 2b-c) [block-what-s-next-phase-2b-c]
 
 1. **yaml-cfg integration (Phase 2b)**
    - Document that yaml-cfg is now wrapped by ki-core
@@ -186,7 +208,7 @@ NEVER reverse: No circular dependencies allowed
 
 ---
 
-## Testing Done
+## Testing Done [block-testing-done]
 
 ✅ Python syntax check: All files compile cleanly
 ✅ Import checks: Commands export correctly from __init__.py
@@ -201,7 +223,7 @@ NEVER reverse: No circular dependencies allowed
 
 ---
 
-## Key Files to Reference
+## Key Files to Reference [block-key-files-to-reference]
 
 | File | Purpose |
 |------|---------|
@@ -213,7 +235,7 @@ NEVER reverse: No circular dependencies allowed
 
 ---
 
-## Git Commits
+## Git Commits [block-git-commits]
 
 **ki-core:**
 1. `067dc41` - Phase 2: Centralize config/profile/stage commands in ki-core
@@ -225,7 +247,7 @@ NEVER reverse: No circular dependencies allowed
 
 ---
 
-## Deployment Note
+## Deployment Note [block-deployment-note]
 
 ⚠️ **After these changes:** Run `make prod-update` to deploy both:
 - `make prod-update` in ki-core/
@@ -235,7 +257,7 @@ This ensures both production deployments reflect the Phase 2 changes.
 
 ---
 
-## Summary for Team
+## Summary for Team [block-summary-for-team]
 
 🎯 **Goal achieved:** Config, profile, and stage management commands are now centralized in ki-core and delegated from kicli-assist.
 

@@ -1,3 +1,26 @@
+---
+title: Shell Execution Research
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-16'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+- block-11
+---
+
 # Shell Command Execution in AI Agents: Research & Implementation Guide
 
 **Status:** Planning phase  
@@ -6,7 +29,7 @@
 
 ---
 
-## Executive Summary
+## Executive Summary [block-executive-summary]
 
 Shell command execution is a **foundational capability** for sysadmin/DevOps AI agents. The 2024–2025 research landscape shows a clear consensus:
 
@@ -17,7 +40,7 @@ Shell command execution is a **foundational capability** for sysadmin/DevOps AI 
 
 ---
 
-## Part I: Tool Use & Function Calling (2024–2025)
+## Part I: Tool Use & Function Calling (2024–2025) [block-part-i-tool-use-function-calling-2024-2025]
 
 ### What's Emerging in Research
 
@@ -76,7 +99,7 @@ class ShellCommand:
 
 ---
 
-## Part II: Human-in-the-Loop (HITL) Guardrails (Mandatory 2024–2025)
+## Part II: Human-in-the-Loop (HITL) Guardrails (Mandatory 2024–2025) [block-part-ii-human-in-the-loop-hitl-guardrails-mandator]
 
 ### Current Research Consensus
 
@@ -142,7 +165,7 @@ class AuditEntry:
 
 ---
 
-## Part III: Permission Models for Shell Execution
+## Part III: Permission Models for Shell Execution [block-part-iii-permission-models-for-shell-execution]
 
 ### Session-Level Permissions (Your Model)
 
@@ -175,7 +198,7 @@ class ChatSession:
 
 ---
 
-## Part IV: Risk Classification & Guardrails
+## Part IV: Risk Classification & Guardrails [block-part-iv-risk-classification-guardrails]
 
 ### Research Recommendation: Multi-Level Approval
 
@@ -233,7 +256,7 @@ def classify_risk(command: str) -> str:
 
 ---
 
-## Part V: Audit Trail & Logging
+## Part V: Audit Trail & Logging [block-part-v-audit-trail-logging]
 
 ### Industry Best Practice (2024–2025)
 
@@ -289,7 +312,7 @@ class ExecutionAuditRecord:
 
 ---
 
-## Part VI: Workflow: Proposed → Approved → Executed
+## Part VI: Workflow: Proposed → Approved → Executed [block-part-vi-workflow-proposed-approved-executed]
 
 ### Complete Flow in kicli-assist TUI
 
@@ -323,7 +346,7 @@ User clicks "Execute Batch"
 
 ---
 
-## Part VII: Integration Checklist
+## Part VII: Integration Checklist [block-part-vii-integration-checklist]
 
 ### For kicli-assist Implementation
 
@@ -340,7 +363,7 @@ User clicks "Execute Batch"
 
 ---
 
-## Part VIII: Risks & Mitigations
+## Part VIII: Risks & Mitigations [block-part-viii-risks-mitigations]
 
 | Risk | Mitigation |
 |------|-----------|
@@ -353,7 +376,7 @@ User clicks "Execute Batch"
 
 ---
 
-## Part IX: References & Further Reading
+## Part IX: References & Further Reading [block-part-ix-references-further-reading]
 
 ### 2024–2025 Research Papers & Resources
 
@@ -383,7 +406,7 @@ User clicks "Execute Batch"
 
 ---
 
-## Next Steps
+## Next Steps [block-next-steps]
 
 1. **Define message types** (CommandExecutionRequest, ShellCommand, ShellExecutionApproval)
 2. **Build approval UI** (Textual widget with Execute/Skip/Edit/SessionMode buttons)

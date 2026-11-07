@@ -2,21 +2,30 @@
 title: Features Documentation
 project: kicli-code-assist
 scope: features
-purpose: Central reference for features documentation
+purpose: Feature documentation
 created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-07T18:07:00+01:00
-update_reason: "readme-table-generation skill: semantic navigation table"
-status: active
-relations:
-  - target: ../README.md
-    type: parent
+updated: 2026-11-07T20:58:20
+status: stable
+semantic_blocks:
+  - id: documentation-index
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: navigation
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: subfolders
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Features Documentation
 
 **Scope:** Feature Development & Planning
 
-## Documentation Index
+## Documentation Index [documentation-index]
 
 | File | Status | Purpose | Semantic Blocks |
 |------|--------|---------|-----------------|
@@ -29,13 +38,13 @@ relations:
 | SHELL_COMMAND_EDITING.md | stable | Interactive shell command editing and manual entry | shell-command-editing-overview, command-editor-architecture, risk-classificat... |
 | SHELL_EXECUTION_IMPLEMENTATION.md | stable | Safe shell command execution with approval workflow and audit trail | shell-execution-overview, approval-workflow, architecture-design, audit-trail... |
 
-## Navigation
+## Navigation [navigation]
 
 - Browse by status: active, draft, archived
 - Block IDs enable precise cross-document linking
 - See parent directory: [../README.md](../README.md)
 
-## Subfolders
+## Subfolders [subfolders]
 
 - **archive/**
 - **tui/**

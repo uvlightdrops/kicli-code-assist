@@ -1,6 +1,28 @@
+---
+title: Integration Guide
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-02'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+---
+
 # Phase 5 Implementation Complete - Next Steps
 
-## What's Been Delivered
+## What's Been Delivered [block-what-s-been-delivered]
 
 ✅ **207 tests passing** (Phase 2-5 complete)
 - Phase 2: Smart file selection + context caching (62 tests)
@@ -18,7 +40,7 @@
 - File preview scrollable ✅
 - Title bar highlighting (orange) ✅
 
-## Architecture Overview
+## Architecture Overview [block-architecture-overview]
 
 ```
 kicli-code-assist/
@@ -50,7 +72,7 @@ kicli-code-assist/
     └── QUICK_START_PHASE5.md
 ```
 
-## How to Use Each Component
+## How to Use Each Component [block-how-to-use-each-component]
 
 ### 1. Focus Manager
 
@@ -100,7 +122,7 @@ status_widget = TaskStatusWidget(tracker, show_detail=False)
 # Toggle with: status_widget.toggle_detail()
 ```
 
-## Integration with chat_ui.py
+## Integration with chat_ui.py [block-integration-with-chat-ui-py]
 
 The UI components are ready to be integrated into your existing TUI. Here's what needs to be done:
 
@@ -183,7 +205,7 @@ async def on_submit_message(self):
             self.log_error(f"Diff generation failed: {e}")
 ```
 
-## Testing
+## Testing [block-testing]
 
 All components are thoroughly tested:
 
@@ -204,7 +226,7 @@ pytest tests/test_ui_integration.py -v
 pytest tests/test_*.py -k "not chat_history" -v
 ```
 
-## Key Implementation Details
+## Key Implementation Details [block-key-implementation-details]
 
 ### Focus Manager
 - Safe component lookup with try/except
@@ -223,7 +245,7 @@ pytest tests/test_*.py -k "not chat_history" -v
 - Progress bar uses: `filled = int(percentage / 5)` for 20-char bar
 - All timers in `on_mount()` to avoid event loop errors
 
-## Debugging Tips
+## Debugging Tips [block-debugging-tips]
 
 1. **Focus not working?**
    - Check if component is mounted: `self.query_one("#component-id")`
@@ -240,7 +262,7 @@ pytest tests/test_*.py -k "not chat_history" -v
    - Check TaskTracker has active tasks
    - Verify render() method returns string
 
-## Next Steps (Phase 6+)
+## Next Steps (Phase 6+) [block-next-steps-phase-6]
 
 1. **Security** (Phase 6, 3 hours)
    - Implement path restriction from customer request
@@ -262,7 +284,7 @@ pytest tests/test_*.py -k "not chat_history" -v
    - Optimize large diff rendering
    - Cache diff calculations
 
-## Documentation
+## Documentation [block-documentation]
 
 All components are documented in:
 - `docs/DIFF_USER_GUIDE.md` - API reference
@@ -270,7 +292,7 @@ All components are documented in:
 - `docs/PHASE5_CHECKLIST.md` - Implementation details
 - `docs/QUICK_START_PHASE5.md` - Getting started
 
-## Questions?
+## Questions? [block-questions]
 
 Refer to:
 1. Component tests for usage examples

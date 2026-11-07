@@ -1,23 +1,12 @@
 ---
 title: TUI Endpoint Consumption & ProjectAnalysisPanel
 project: kicli-code-assist
-scope: frontend-tui-i2
+scope: frontend-tui
 purpose: Document HTTP client integration and ProjectAnalysisPanel widget for project analysis display
 created: 2026-11-07T10:00:00+01:00
-updated: 2026-11-07T16:20:00+01:00
-update_reason: Moved from hybrid backend doc; consolidated TUI-specific content
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks to use kebab-case IDs; fixed scope; added missing verification block
 status: stable
-
-  - id: http-client-interface
-    type: implementation
-    status: stable
-  - id: project-analysis-panel
-    type: implementation
-    status: stable
-  - id: tui-layout-redesign
-    type: implementation
-    status: stable
-
 relations:
   - target: ../backend/layer-2-workflow-orchestration/PHASE_I2_1_ENDPOINT_INTEGRATION.md
     type: depends-on
@@ -28,13 +17,10 @@ relations:
   - target: TUI_TEXTUAL_ARCHITECTURE.md
     type: reference
 semantic_blocks:
-  - id: http-client-method
-    title: HTTP Client Method
-  - id: projectanalysispanel-widget
-    title: ProjectAnalysisPanel Widget
-  - id: tui-layout-redesign
-    title: TUI Layout Redesign
-    reason: "Textual framework context"
+  - http-client-method
+  - projectanalysispanel-widget
+  - tui-layout-redesign
+  - verification-testing
 ---
 
 # TUI Endpoint Consumption & ProjectAnalysisPanel
@@ -133,7 +119,7 @@ def set_project_root(self, project_root: str) -> None:
 └─────────────────────────────────────────────┘
 ```
 
-## Verification & Testing
+## Verification & Testing [verification-testing]
 
 ### Test 1: Component Compilation
 ```bash

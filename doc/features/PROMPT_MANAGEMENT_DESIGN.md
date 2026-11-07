@@ -1,39 +1,48 @@
 ---
 title: Prompt Management - Design Document
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / Configuration
-purpose: Prompt templates, roles, and context management
+scope: features
+purpose: Feature documentation
 created: 2026-09-05T22:30:58+02:00
-updated: 2026-11-07T13:44:00+01:00
-update_reason: Added semantic schema documentation
-status: draft
-
+updated: 2026-11-07T20:58:20
+status: stable
 semantic_blocks:
-  - id: prompt-management-overview
-    type: design
-    status: draft
-    version: 1.0
-  - id: prompt-configuration-schema
-    type: architecture
-    status: draft
-    version: 1.0
-  - id: role-system-design
+  - id: overview
     type: implementation
-    status: draft
+    status: stable
     version: 1.0
-  - id: prompt-versioning-strategy
-    type: architecture
-    status: draft
+  - id: configuration-schema
+    type: implementation
+    status: stable
     version: 1.0
-
-relations:
-  - target: ../backend/layer-2-workflow-orchestration/SESSION_MANAGEMENT_STATE.md
-    type: depends-on
-    reason: "Prompt state stored in session management"
-  - target: AI_WORKFLOW.md
-    type: implements
-    reason: "Prompts drive AI workflow behavior"
+  - id: gui-design
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: file-structure
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: implementation-steps
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: python-api-design
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: test-coverage-plan
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: default-roles-built-in
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: open-questions
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Prompt Management - Design Document [prompt-management-overview]
@@ -44,7 +53,7 @@ relations:
 
 ---
 
-## 🎯 Overview [prompt-management-overview]
+## 🎯 Overview [overview]
 
 Prompt Management ermöglicht Benutzern:
 - Multiple vordefinierte **Rollen** (Developer, Tutor, Translator, etc.)
@@ -55,7 +64,7 @@ Prompt Management ermöglicht Benutzern:
 
 ---
 
-## 📋 Configuration Schema [prompt-configuration-schema]
+## 📋 Configuration Schema [configuration-schema]
 
 ### Schema-Erweiterung in `ki-core` (config.schema.yaml)
 
@@ -179,7 +188,7 @@ prompts:
 
 ---
 
-## 🖥️ GUI Design
+## 🖥️ GUI Design [gui-design]
 
 ### 1. Role Selection Panel (TUI)
 
@@ -290,7 +299,7 @@ Long-press → Schnelles Wechseln zu andere Rolle
 
 ---
 
-## 💾 File Structure [prompt-versioning-strategy]
+## 💾 File Structure [file-structure]
 
 ### In kicli-code-assist:
 
@@ -331,7 +340,7 @@ yaml_cfg_wizard/
 
 ---
 
-## 🔧 Implementation Steps [role-system-design]
+## 🔧 Implementation Steps [implementation-steps]
 
 ### Phase 1: Core Data Structure (1-2 days)
 - [ ] Add prompts section to ki-core schema
@@ -364,7 +373,7 @@ yaml_cfg_wizard/
 
 ---
 
-## 📚 Python API Design
+## 📚 Python API Design [python-api-design]
 
 ### PromptManager Class
 
@@ -418,7 +427,7 @@ config = {
 
 ---
 
-## 🧪 Test Coverage Plan
+## 🧪 Test Coverage Plan [test-coverage-plan]
 
 - **Unit Tests (40+):**
   - PromptManager CRUD operations
@@ -439,7 +448,7 @@ config = {
 
 ---
 
-## 🎁 Default Roles (Built-in)
+## 🎁 Default Roles (Built-in) [default-roles-built-in]
 
 ### 1. Developer
 ```
@@ -517,7 +526,7 @@ Review focus areas:
 
 ---
 
-## 📌 Open Questions
+## 📌 Open Questions [open-questions]
 
 1. **Role Versioning:** Sollten wir Versionen für built-in Roles tracken?
 2. **Prompt Library:** Externe Prompt-Library (von Community) unterstützen?

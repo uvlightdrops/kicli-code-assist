@@ -1,3 +1,28 @@
+---
+title: Integration Guide
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+- block-11
+- block-12
+- block-13
+---
+
 # Phase 2C: ResultAggregator Integration Guide
 
 **Purpose**: Connect Phase 2C ResultAggregator with Phase 2B ExecutorResult and Phase 2D UI  
@@ -6,7 +31,7 @@
 
 ---
 
-## Integration Overview
+## Integration Overview [block-integration-overview]
 
 ```
 Phase 2A (Intent Detection)
@@ -22,7 +47,7 @@ User Interface Display
 
 ---
 
-## How to Use ResultAggregator
+## How to Use ResultAggregator [block-how-to-use-resultaggregator]
 
 ### 1. Import the Classes
 
@@ -94,7 +119,7 @@ for step in aggregated_result.next_steps:
 
 ---
 
-## Data Flow Through Phases
+## Data Flow Through Phases [block-data-flow-through-phases]
 
 ### ExecutorResult (Phase 2B Output)
 
@@ -199,7 +224,7 @@ aggregated_result = AggregatedResult(
 
 ---
 
-## Integration Points
+## Integration Points [block-integration-points]
 
 ### 1. With Phase 2B (ExecutorResult)
 
@@ -276,7 +301,7 @@ function ResultsPanel({ aggregatedResult }) {
 
 ---
 
-## LLM Provider Configuration
+## LLM Provider Configuration [block-llm-provider-configuration]
 
 ### Option 1: Default OpenAI Provider
 
@@ -329,7 +354,7 @@ aggregator = ResultAggregator(provider="openai")
 
 ---
 
-## Error Handling Patterns
+## Error Handling Patterns [block-error-handling-patterns]
 
 ### Handling Failed Agents
 
@@ -391,7 +416,7 @@ aggregated_result = await aggregator.aggregate(executor_result, ...)
 
 ---
 
-## API Endpoint Example
+## API Endpoint Example [block-api-endpoint-example]
 
 How Phase 2C integrates in a REST API:
 
@@ -493,7 +518,7 @@ curl -X POST http://localhost:8000/api/analyze \
 
 ---
 
-## Testing Integration
+## Testing Integration [block-testing-integration]
 
 ### Unit Test Example
 
@@ -559,7 +584,7 @@ async def test_api_endpoint(client):
 
 ---
 
-## Performance Considerations
+## Performance Considerations [block-performance-considerations]
 
 ### Latency Budget
 
@@ -592,7 +617,7 @@ Total analysis latency:
 
 ---
 
-## Debugging Tips
+## Debugging Tips [block-debugging-tips]
 
 ### Enable Debug Logging
 
@@ -645,7 +670,7 @@ result = await aggregator.aggregate(...)
 
 ---
 
-## Common Issues & Solutions
+## Common Issues & Solutions [block-common-issues-solutions]
 
 ### Issue: LLM Synthesis Always Falls Back to Template
 
@@ -703,7 +728,7 @@ if "Suggestions" in aggregated_result.tabs:
 
 ---
 
-## Next Phase: 2D UI Integration
+## Next Phase: 2D UI Integration [block-next-phase-2d-ui-integration]
 
 Phase 2D will:
 1. Render AggregatedResult summary as chat message
@@ -733,7 +758,7 @@ Expected output:
 
 ---
 
-## Summary
+## Summary [block-summary]
 
 **Phase 2C Integration provides**:
 - ✅ Seamless connection from Phase 2B ExecutorResult

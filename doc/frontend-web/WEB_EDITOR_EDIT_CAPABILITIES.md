@@ -1,16 +1,22 @@
 ---
 title: Web IDE Editor - Current Status & Implementation Roadmap
 project: kicli-code-assist
-scope: WebUI Feature
-status: active
+scope: frontend-web
+purpose: Document current editor capabilities, implementation gaps, and roadmap for edit functionality
 created: 2026-10-28T09:00:00+01:00
-updated: 2026-11-03T14:48:00+01:00
-update_reason: Added YAML header; current status reflects Phase 1 (read-only); Phase 5.5.2 enables backend for edit mode
+updated: 2026-11-07T20:57:37+01:00
+update_reason: Standardized YAML header; removed extra doc reference from semantic_blocks
+status: active
 agent_project: CodeImplementationAgent
-cross_references:
-  - "doc/frontend-web/README.md"
-  - "doc/frontend-web/WEB_EDITOR_FRAMEWORKS_COMPARISON.md"
-  - "doc/PHASE_5_5_2_SUMMARY.md"
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: WEB_EDITOR_FRAMEWORKS_COMPARISON.md
+    type: reference
+  - target: ../PHASE_5_5_2_SUMMARY.md
+    type: reference
 semantic_blocks:
   - id: edit-capabilities-not-implemented
     title: ❌ EDIT CAPABILITIES: NOT IMPLEMENTED
@@ -24,7 +30,6 @@ semantic_blocks:
     title: Files Involved
   - id: questions-to-answer
     title: Questions to Answer
-  - "doc/specifications/01_ARCHITECTURE.md"
 ---
 
 # Web IDE Editor - Current Status

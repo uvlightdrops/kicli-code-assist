@@ -5,33 +5,23 @@ scope: frontend-tui
 type: implementation
 status: in_progress
 created: 2026-11-06T10:46:43+01:00
-updated: 2026-11-07T17:25:00+01:00
-update_reason: Applied @timestamp-correction-from-git and @semantic-knowledge-organization
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks to simple list format
 cross_references:
   - ../../doc/backend/layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
   - ../../doc/backend/README.md
 semantic_blocks:
-  - id: what-changed
-    title: What Changed
-  - id: architecture-tui-backend-flow
-    title: Architecture: TUI → Backend Flow
-  - id: api-contract
-    title: API Contract
-  - id: known-limitations-gaps
-    title: Known Limitations & Gaps
-  - id: next-steps-priority-order
-    title: Next Steps (Priority Order)
-  - id: code-structure
-    title: Code Structure
-  - id: files-changed-commit-b20980e
-    title: Files Changed (Commit b20980e)
-  - id: performance-characteristics
-    title: Performance Characteristics
-  - id: debugging
-    title: Debugging
-  - id: integration-checkpoint
-    title: Integration Checkpoint
-  - ./TUI_TEXTUAL_ARCHITECTURE.md
+  - what-changed
+  - architecture-tui-backend-flow
+  - api-contract
+  - testing
+  - known-limitations-gaps
+  - next-steps-priority-order
+  - code-structure
+  - files-changed-commit-b20980e
+  - performance-characteristics
+  - debugging
+  - integration-checkpoint
 ---
 
 # Phase I1: Real LLM Integration Implementation
@@ -185,7 +175,7 @@ User sees: Real agent analysis + chunks in split panels
 
 See: [AGENT_ROUTE_SPEC.md](../../doc/backend/layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md)
 
-## Testing
+## Testing [testing]
 
 ### Prerequisites
 ```bash

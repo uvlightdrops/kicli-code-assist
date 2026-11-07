@@ -1,3 +1,23 @@
+---
+title: 3 3 Plan
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-11-06'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+---
+
 # Phase 1.3.3: Performance Optimization & Streaming
 
 **Objective:** Optimize TUI for large files, high-frequency updates, and real-time streaming responses.
@@ -6,7 +26,7 @@
 **Est. Duration:** 4-6 hours  
 **Dependencies:** Phase 1.3.2 (complete)
 
-## Goals
+## Goals [block-goals]
 
 1. ✅ Adaptive token buffering for WebSocket streams
 2. ✅ Response caching (10MB per response)
@@ -14,7 +34,7 @@
 4. ✅ Memory profiling and leak detection
 5. ✅ Performance benchmarks (100/500/1000/5000 tokens)
 
-## Sub-Phases
+## Sub-Phases [block-sub-phases]
 
 ### 1.3.3.1: Adaptive Token Buffering (200 LOC)
 
@@ -236,7 +256,7 @@ def benchmark_token_buffer():
 - Virtual scroll: < 16ms frame time (60fps)
 - Memory: < 200MB baseline + streaming data
 
-## Testing Strategy
+## Testing Strategy [block-testing-strategy]
 
 ### Unit Tests (600 lines)
 - TokenBuffer batching logic
@@ -256,7 +276,7 @@ def benchmark_token_buffer():
 - Generate baseline JSON
 - CI: fail if regression > 10%
 
-## Files to Create/Modify
+## Files to Create/Modify [block-files-to-create-modify]
 
 | File | Type | LOC | Purpose |
 |------|------|-----|---------|
@@ -272,7 +292,7 @@ def benchmark_token_buffer():
 
 **Total:** ~1,800 LOC (1,200 production + 600 tests)
 
-## Verification
+## Verification [block-verification]
 
 ```bash
 # Unit tests
@@ -285,7 +305,7 @@ python3 tests/test_performance_benchmarks.py
 python3 -m memory_profiler kicli-assist tui --project ~/dev_flow/ki-core
 ```
 
-## Success Criteria
+## Success Criteria [block-success-criteria]
 
 ✅ Token buffering achieves > 50k tokens/sec throughput
 ✅ Response caching provides < 1ms lookup time
@@ -295,7 +315,7 @@ python3 -m memory_profiler kicli-assist tui --project ~/dev_flow/ki-core
 ✅ All benchmarks passing
 ✅ Memory tracker detects leaks within 5 minutes
 
-## Next Phase
+## Next Phase [block-next-phase]
 
 **Phase 1.3.4 - Theme Customization:**
 - Dark/Light theme toggle (config-driven)
@@ -303,7 +323,7 @@ python3 -m memory_profiler kicli-assist tui --project ~/dev_flow/ki-core
 - Font size adjustments
 - UI element visibility toggle
 
-## References
+## References [block-references]
 
 - Textual Docs: https://textual.textualize.io/
 - Rich Docs: https://rich.readthedocs.io/

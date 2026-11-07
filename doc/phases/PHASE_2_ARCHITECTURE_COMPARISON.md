@@ -1,10 +1,31 @@
+---
+title: Architecture Comparison
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+---
+
 # Phase 1 vs Phase 2: Architecture Comparison
 
 **Purpose**: Visual comparison showing what changes and what stays the same
 
 ---
 
-## Current Architecture (Phase 1)
+## Current Architecture (Phase 1) [block-current-architecture-phase-1]
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -41,7 +62,7 @@
 
 ---
 
-## Proposed Architecture (Phase 2)
+## Proposed Architecture (Phase 2) [block-proposed-architecture-phase-2]
 
 ```
 ┌───────────────────────────────────────────────────────────────┐
@@ -105,7 +126,7 @@
 
 ---
 
-## Component Mapping
+## Component Mapping [block-component-mapping]
 
 ### Files That Exist (Phase 1)
 
@@ -170,7 +191,7 @@ DependencyAnalyzer.analyze()
 
 ---
 
-## Data Flow Comparison
+## Data Flow Comparison [block-data-flow-comparison]
 
 ### Phase 1: Keyword Matching → Sequential Execution
 
@@ -231,7 +252,7 @@ Cached queries: 50% faster (reuse explain results)
 
 ---
 
-## API Response Comparison
+## API Response Comparison [block-api-response-comparison]
 
 ### Phase 1 Response
 
@@ -325,7 +346,7 @@ Phase 2 response **includes all Phase 1 fields**:
 
 ---
 
-## Testing Coverage
+## Testing Coverage [block-testing-coverage]
 
 ### Phase 1 Tests
 
@@ -385,7 +406,7 @@ def test_phase1_clients_work():
 
 ---
 
-## Performance Benchmarking
+## Performance Benchmarking [block-performance-benchmarking]
 
 ### Before Phase 2
 
@@ -453,7 +474,7 @@ Intent accuracy: 90%+ (LLM understands intent)
 
 ---
 
-## Integration Checklist
+## Integration Checklist [block-integration-checklist]
 
 ### Backend Changes
 - [ ] Create `AgentIntentDetector` class
@@ -481,7 +502,7 @@ Intent accuracy: 90%+ (LLM understands intent)
 
 ---
 
-## Success: Before & After
+## Success: Before & After [block-success-before-after]
 
 ### Before (Phase 1)
 

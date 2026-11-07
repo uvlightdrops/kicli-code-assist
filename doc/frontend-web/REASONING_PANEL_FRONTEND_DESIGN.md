@@ -1,15 +1,20 @@
 ---
-title: "Phase 5.5.2.I4: Frontend ReasoningPanel - Concept"
+title: "Frontend ReasoningPanel - Phase 5.5.2.I4 Concept"
 project: "kicli-code-assist"
-scope: "WebUI Architecture"
+scope: "frontend-web"
+purpose: "React component design for real-time agent transparency data visualization"
 created: 2026-11-02T03:58:00+01:00
-updated: 2026-11-03T14:52:00+01:00
-update_reason: "Verified current for Phase 5.5.2 implementation; updated status and scope"
+updated: 2026-11-07T20:57:37+01:00
+update_reason: "Standardized YAML header; updated scope and relations; fixed title format"
 status: "active"
-author: "Copilot"
-cross_references:
-  - "doc/frontend-web/README.md"
-  - "doc/PHASE_5_5_2_SUMMARY.md"
+agent_project: "kicli-code-assist"
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: ../architecture/PHASE_5_5_2_I2_WEBSOCKET_ARCHITECTURE.md
+    type: reference
 semantic_blocks:
   - id: component-architecture
     title: Component Architecture
@@ -23,14 +28,15 @@ semantic_blocks:
     title: Integration Points
   - id: performance-considerations
     title: Performance Considerations
+  - id: testing-strategy
+    title: Testing Strategy
   - id: implementation-checklist
     title: Implementation Checklist
   - id: next-steps
     title: Next Steps
-  - "doc/architecture/PHASE_5_5_2_I2_WEBSOCKET_ARCHITECTURE.md"
 ---
 
-# Phase 5.5.2.I4: Frontend ReasoningPanel - Concept
+# Frontend ReasoningPanel - Phase 5.5.2.I4 Concept
 
 **Objective:** Create React component for displaying real-time agent transparency data
 
@@ -476,7 +482,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Testing Strategy
+## Testing Strategy [testing-strategy]
 
 ### Unit Tests (30 min)
 - Hook tests (useReasoningStream, useExecutionHistory)

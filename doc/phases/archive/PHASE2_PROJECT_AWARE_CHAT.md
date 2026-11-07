@@ -1,10 +1,25 @@
+---
+title: Project Aware Chat
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-02'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+---
+
 # Phase 2: Project-Aware Chat Integration
 
-## Overview
+## Overview [block-overview]
 
 Phase 2 integrates the ProjectContextManager into the TUI chat interface, enabling users to ask questions about their entire project with full context awareness.
 
-## What's New
+## What's New [block-what-s-new]
 
 ### ChatSession Class
 A new session management layer that combines chat history with project context:
@@ -48,7 +63,7 @@ Shows current context status at bottom of TUI:
 #### 3. **Project-Aware System Prompt**
 Every question now includes project context in the system prompt.
 
-## Usage in TUI
+## Usage in TUI [block-usage-in-tui]
 
 ### Basic Workflow
 

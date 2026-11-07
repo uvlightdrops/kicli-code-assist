@@ -1,15 +1,20 @@
 ---
 title: Terminal UI - Tabs Guide
 project: kicli-code-assist
-scope: TUI Feature (Temporary Location)
-status: active
+scope: frontend-web
+purpose: Comprehensive guide to Terminal UI tabs, workflows, and debugging patterns
 created: 2026-10-19T11:00:00+01:00
-updated: 2026-11-03T14:45:00+01:00
-update_reason: Added YAML header; note temporary location in frontend-web/ (will move to frontend-tui/ in Phase 2)
-agent_project: null
-cross_references:
-  - "doc/specifications/01_ARCHITECTURE.md"
-  - "doc/frontend-web/README.md"
+updated: 2026-11-07T20:57:37+01:00
+update_reason: Standardized YAML header; removed extra doc reference from semantic_blocks; moved from frontend-tui to frontend-web
+status: active
+agent_project: kicli-code-assist
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: ../specifications/01_ARCHITECTURE.md
+    type: reference
 semantic_blocks:
   - id: tab-übersicht
     title: Tab-Übersicht
@@ -27,10 +32,9 @@ semantic_blocks:
     title: Troubleshooting
   - id: best-practices
     title: Best Practices
-  - "doc/archive/tui_attempt_oct2026/README.md"
 ---
 
-# kicli-assist TUI Tabs Guide
+# Terminal UI - Tabs Guide
 
 **Location Note:** This document describes Terminal UI (TUI) features. Currently stored in `doc/frontend-web/` temporarily; will be moved to `doc/frontend-tui/` in Phase 2 when TUI 2.0 development begins.
 

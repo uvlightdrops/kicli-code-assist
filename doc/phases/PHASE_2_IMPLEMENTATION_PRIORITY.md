@@ -1,3 +1,24 @@
+---
+title: Implementation Priority
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+---
+
 # Phase 2 Implementation Priority & Quick Start
 
 **Document**: Implementation execution guide  
@@ -6,7 +27,7 @@
 
 ---
 
-## Quick Summary: What's Wrong Now?
+## Quick Summary: What's Wrong Now? [block-quick-summary-what-s-wrong-now]
 
 ### Current `/api/agent/route` (Phase 1)
 
@@ -34,7 +55,7 @@ if "metrics" in agents_to_run:
 
 ---
 
-## Phase 2 Implementation Order
+## Phase 2 Implementation Order [block-phase-2-implementation-order]
 
 ### ✅ STEP 1: Intent Detection (1-2 days)
 
@@ -284,7 +305,7 @@ Query #2: "Now optimize" + session_id
 
 ---
 
-## Implementation Reality Check
+## Implementation Reality Check [block-implementation-reality-check]
 
 ### Time Estimates (Best Case)
 - Step 1 (Intent): 8-12 hours
@@ -326,7 +347,7 @@ Query #2: "Now optimize" + session_id
 
 ---
 
-## Testing Strategy
+## Testing Strategy [block-testing-strategy]
 
 ### Unit Tests (Per Step)
 
@@ -406,7 +427,7 @@ def test_api_flow():
 
 ---
 
-## Git Workflow
+## Git Workflow [block-git-workflow]
 
 ### Branch Strategy
 ```bash
@@ -440,7 +461,7 @@ git branch -d phase2-step1-intent-detection
 
 ---
 
-## Quality Checklist (Each Step)
+## Quality Checklist (Each Step) [block-quality-checklist-each-step]
 
 Before marking a step complete:
 
@@ -456,7 +477,7 @@ Before marking a step complete:
 
 ---
 
-## Common Pitfalls to Avoid
+## Common Pitfalls to Avoid [block-common-pitfalls-to-avoid]
 
 ### Pitfall 1: Not Testing Incrementally
 ❌ Build all 6 steps, then test  
@@ -480,7 +501,7 @@ Before marking a step complete:
 
 ---
 
-## Success Criteria per Step
+## Success Criteria per Step [block-success-criteria-per-step]
 
 | Step | Done When... |
 |------|--------------|
@@ -493,7 +514,7 @@ Before marking a step complete:
 
 ---
 
-## Next: Implementation
+## Next: Implementation [block-next-implementation]
 
 → See `PHASE_2_TECHNICAL_SPEC.md` for API contracts and detailed interfaces  
 → Start with Step 1: `AgentIntentDetector`  

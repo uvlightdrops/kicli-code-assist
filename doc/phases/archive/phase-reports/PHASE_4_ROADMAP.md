@@ -1,3 +1,26 @@
+---
+title: Roadmap
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-17'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+- block-11
+---
+
 # Phase 4: Critical Fixes & AI Integration Roadmap
 
 **Goal:** Transform Phase 3 from prototype to production-ready AI assistant  
@@ -6,7 +29,7 @@
 
 ---
 
-## Phase 4.1: Critical Production Fixes (Week 1) - 🔴 BLOCKER
+## Phase 4.1: Critical Production Fixes (Week 1) - 🔴 BLOCKER [block-phase-4-1-critical-production-fixes-week-1-blocker]
 
 ### 4.1.1: Async LLM Processing
 **Severity:** 🔴 CRITICAL  
@@ -191,7 +214,7 @@ class LLMAuthError(LLMError):
 
 ---
 
-## Phase 4.2: Robustness & Reliability (Week 2)
+## Phase 4.2: Robustness & Reliability (Week 2) [block-phase-4-2-robustness-reliability-week-2]
 
 ### 4.2.1: LLM Provider Fallback Chain
 **Severity:** 🟡 HIGH  
@@ -244,7 +267,7 @@ class ProviderChain:
 
 ---
 
-## Phase 4.3: AI Workflow Integration (Week 3-4)
+## Phase 4.3: AI Workflow Integration (Week 3-4) [block-phase-4-3-ai-workflow-integration-week-3-4]
 
 ### 4.3.1: AI Suggestions Approval Workflow
 **Flow:**
@@ -277,7 +300,7 @@ class ProviderChain:
 
 ---
 
-## Phase 4.4: Quality & Launch (Week 5)
+## Phase 4.4: Quality & Launch (Week 5) [block-phase-4-4-quality-launch-week-5]
 
 ### 4.4.1: Unit Tests
 **Target:** > 60% coverage  
@@ -304,7 +327,7 @@ class ProviderChain:
 
 ---
 
-## Implementation Order (Recommended)
+## Implementation Order (Recommended) [block-implementation-order-recommended]
 
 ### Week 1 (Critical Fixes)
 ```
@@ -343,7 +366,7 @@ Day 5: Review & iterate
 
 ---
 
-## Success Criteria
+## Success Criteria [block-success-criteria]
 
 ### Phase 4.1 (Critical)
 - [ ] LLM calls don't freeze UI
@@ -371,7 +394,7 @@ Day 5: Review & iterate
 
 ---
 
-## Risk Mitigation
+## Risk Mitigation [block-risk-mitigation]
 
 | Risk | Likelihood | Impact | Mitigation |
 |------|-----------|--------|-----------|
@@ -382,7 +405,7 @@ Day 5: Review & iterate
 
 ---
 
-## Go/No-Go Decision Points
+## Go/No-Go Decision Points [block-go-no-go-decision-points]
 
 ### After 4.1.1 (Async)
 **Decision:** Can we reliably make non-blocking API calls?
@@ -411,7 +434,7 @@ Day 5: Review & iterate
 
 ---
 
-## Questions & Decisions Needed
+## Questions & Decisions Needed [block-questions-decisions-needed]
 
 1. **Priority of Phase 4.2 items:** Must all complete before 4.3, or can we defer some?
 2. **Encryption algorithm:** Fernet (symmetric) vs. others?
@@ -421,7 +444,7 @@ Day 5: Review & iterate
 
 ---
 
-## Dependencies & Blockers
+## Dependencies & Blockers [block-dependencies-blockers]
 
 ### External Dependencies
 - OpenAI API availability
@@ -438,7 +461,7 @@ All needed infrastructure already exists.
 
 ---
 
-## Estimated Timeline
+## Estimated Timeline [block-estimated-timeline]
 
 | Phase | Effort | Start | End | Status |
 |-------|--------|-------|-----|--------|

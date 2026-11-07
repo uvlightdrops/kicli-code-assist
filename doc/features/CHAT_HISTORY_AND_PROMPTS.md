@@ -1,48 +1,61 @@
 ---
 title: Chat History & Session Management
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / Data Persistence
-purpose: Persistent chat sessions with automatic save/restore
+scope: features
+purpose: Feature documentation
 created: 2026-09-02T11:09:04+02:00
-updated: 2026-11-07T13:42:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: chat-persistence-overview
+  - id: overview
     type: implementation
     status: stable
     version: 1.0
-  - id: session-management-api
-    type: architecture
+  - id: quick-start
+    type: implementation
     status: stable
     version: 1.0
-  - id: session-workflow
-    type: operations
+  - id: features
+    type: implementation
     status: stable
     version: 1.0
-  - id: data-storage-format
-    type: architecture
+  - id: llm-roles-system-prompts
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: ../backend/layer-2-workflow-orchestration/SESSION_MANAGEMENT_STATE.md
-    type: implements
-    reason: "Implements session state management"
-  - target: AI_WORKFLOW.md
-    type: referenced-by
-    reason: "Provides context for AI workflows"
+  - id: core-behavioral-rules
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: prompt-templates
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: file-structure
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: best-practices
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: limitations-future-features
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: troubleshooting
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # Chat History & Session Management [chat-persistence-overview]
 
-## Overview [chat-persistence-overview]
+## Overview [overview]
 
 kicli-code-assist now supports persistent chat sessions with automatic save/restore functionality. Sessions are stored locally in `$HOME/dev_data/kicli-code-assist/chat_history/` and can be resumed at any time.
 
-## Quick Start
+## Quick Start [quick-start]
 
 ### Starting a New Session
 ```bash
@@ -67,7 +80,7 @@ session = ChatSession.load_session("my-chat-name")
 print(session.history.get_messages())  # All previous messages
 ```
 
-## Features [session-management-api]
+## Features [features]
 
 ### 1. Automatic Persistence [session-workflow]
 - Every message is automatically saved to disk
@@ -111,7 +124,7 @@ python3 -c "from kicli_code_assist.chat_history import ChatHistory; print(ChatHi
 python3 -c "from kicli_code_assist.chat_history import ChatHistory; print(ChatHistory.export_session('debug-session', 'json'))" > debug.json
 ```
 
-## LLM Roles & System Prompts
+## LLM Roles & System Prompts [llm-roles-system-prompts]
 
 ### Available Roles
 
@@ -193,14 +206,14 @@ Your primary responsibilities:
 - Identify issues and suggest fixes with reasoning
 ...
 
-## Core Behavioral Rules
+## Core Behavioral Rules [core-behavioral-rules]
 
 1. **Accuracy & Confidence**
    - Always distinguish between certainty and speculation
    ...
 ```
 
-## Prompt Templates
+## Prompt Templates [prompt-templates]
 
 ### Common Task Templates
 
@@ -236,7 +249,7 @@ prompt = PromptTemplates.code_review(
 )
 ```
 
-## File Structure
+## File Structure [file-structure]
 
 ```
 $HOME/dev_data/kicli-code-assist/
@@ -269,7 +282,7 @@ Each session file contains:
 }
 ```
 
-## Best Practices
+## Best Practices [best-practices]
 
 ### Session Naming
 Use descriptive names for easy identification:
@@ -291,7 +304,7 @@ Use descriptive names for easy identification:
 - Use specific sessions for different projects
 - Export completed sessions for documentation
 
-## Limitations & Future Features
+## Limitations & Future Features [limitations-future-features]
 
 ### Current Limitations
 - Maximum 100 messages per session (for context window limits)
@@ -307,7 +320,7 @@ Use descriptive names for easy identification:
 - [ ] Web UI for session browser
 - [ ] Collaboration features (share sessions)
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Sessions Not Loading
 ```bash

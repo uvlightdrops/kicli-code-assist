@@ -1,6 +1,27 @@
+---
+title: Complete
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-05'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+---
+
 # Prompt Management - Phase 1 Complete ✅
 
-## What Was Implemented
+## What Was Implemented [block-what-was-implemented]
 
 ### Core Dataclasses (models.py)
 - **CustomTemplate**: User-defined prompt templates with full CRUD support
@@ -37,7 +58,7 @@
 - Import from existing configuration
 - Backward compatible initialization from legacy SystemPrompts
 
-## Test Coverage
+## Test Coverage [block-test-coverage]
 
 ✅ **47 Unit Tests** - All passing
 - 8 tests for CustomTemplate model
@@ -47,7 +68,7 @@
 - 25 tests for PromptManager
 - 2 integration tests (complete workflows)
 
-## Built-in Roles
+## Built-in Roles [block-built-in-roles]
 
 ```
 1. Developer (id: "developer")
@@ -71,7 +92,7 @@
    - Security and performance analysis
 ```
 
-## Architecture
+## Architecture [block-architecture]
 
 ```
 kicli_code_assist/prompts/
@@ -83,14 +104,14 @@ tests/
 └── test_prompt_manager.py  # 47 comprehensive unit tests
 ```
 
-## Backward Compatibility
+## Backward Compatibility [block-backward-compatibility]
 
 ✅ **Legacy code still works:**
 - Old `from kicli_code_assist.prompts import SystemPrompts, PromptRole` still works
 - ChatSession and other legacy code unaffected
 - New and old can coexist during transition
 
-## Next Steps (Phase 2)
+## Next Steps (Phase 2) [block-next-steps-phase-2]
 
 ### CLI Commands (yaml-cfg-wizard)
 ```bash
@@ -111,7 +132,7 @@ ki prompts import <file>
 - Prompts section merged from all layers
 - Schema-driven validation and defaults
 
-## Files Created
+## Files Created [block-files-created]
 
 ```
 kicli_code_assist/prompts/__init__.py       (50 lines)
@@ -120,7 +141,7 @@ kicli_code_assist/prompts/manager.py        (380 lines)
 tests/test_prompt_manager.py               (620 lines)
 ```
 
-## Schema Integration
+## Schema Integration [block-schema-integration]
 
 Schema updated in ki-core with:
 ```yaml
@@ -134,7 +155,7 @@ prompts:
     favorites:        # Favorited role/template IDs
 ```
 
-## Status
+## Status [block-status]
 
 - ✅ Core implementation complete
 - ✅ All tests passing (47/47)

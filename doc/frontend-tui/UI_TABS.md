@@ -4,30 +4,21 @@ project: kicli-code-assist
 scope: frontend-tui
 status: active
 created: 2026-10-19T11:00:00+01:00
-updated: 2026-11-07T18:36:00+01:00
-update_reason: Standardized scope to frontend-tui (moved from temp location); updated timestamp
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks to simple list format
 agent_project: null
 cross_references:
   - "doc/specifications/01_ARCHITECTURE.md"
   - "doc/frontend-web/README.md"
 semantic_blocks:
-  - id: tab-übersicht
-    title: Tab-Übersicht
-  - id: llm-query-transparency-was-der-log-zei
-    title: LLM Query Transparency (Was der Log zeigt)
-  - id: workflow-übersicht
-    title: Workflow-Übersicht
-  - id: beispiel-ki-vorschläge-debugging
-    title: Beispiel: KI-Vorschläge Debugging
-  - id: taste-keybindings-für-tabs
-    title: Taste & Keybindings für Tabs
-  - id: was-die-debug-messages-bedeuten
-    title: Was die Debug-Messages bedeuten
-  - id: troubleshooting
-    title: Troubleshooting
-  - id: best-practices
-    title: Best Practices
-  - "doc/archive/tui_attempt_oct2026/README.md"
+  - tab-übersicht
+  - llm-query-transparency-was-der-log-zei
+  - workflow-übersicht
+  - beispiel-ki-vorschläge-debugging
+  - taste-keybindings-für-tabs
+  - was-die-debug-messages-bedeuten
+  - troubleshooting
+  - best-practices
 ---
 
 # kicli-assist TUI Tabs Guide

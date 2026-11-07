@@ -1,15 +1,20 @@
 ---
 title: Diff Engine & Code Edit Features - User Guide
 project: kicli-code-assist
-scope: WebUI Feature
-status: active
+scope: frontend-web
+purpose: Documentation for diff engine features and code editing workflows
 created: 2026-09-15T10:00:00+01:00
-updated: 2026-11-03T14:40:00+01:00
-update_reason: Added YAML header for doc organization
+updated: 2026-11-07T20:57:37+01:00
+update_reason: Standardized YAML header; updated scope and relations
+status: active
 agent_project: CodeImplementationAgent
-cross_references:
-  - "doc/frontend-web/README.md"
-  - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: WEB_EDITOR_EDIT_CAPABILITIES.md
+    type: reference
 semantic_blocks:
   - id: überblick
     title: Überblick
@@ -23,11 +28,12 @@ semantic_blocks:
     title: Workflows
   - id: debugging
     title: Debugging
+  - id: testing
+    title: Testing
   - id: tipps-für-robuste-diffs
     title: Tipps für robuste Diffs
   - id: nächste-schritte
     title: Nächste Schritte
-  - "doc/specifications/01_ARCHITECTURE.md"
 ---
 
 # Diff Engine & Code Edit Features - Benutzerhandbuch
@@ -308,7 +314,7 @@ User:  Manual edit needed
 Chat:  "Use: git mergetool config.yaml"
 ```
 
-## Testing
+## Testing [testing]
 
 ```bash
 # Alle Diff-Tests laufen

@@ -4,19 +4,22 @@ project: kicli-code-assist
 scope: frontend-tui
 purpose: Central reference for frontend-tui documentation
 created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-07T18:07:00+01:00
-update_reason: "readme-table-generation skill: semantic navigation table"
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Added semantic_blocks field and block IDs to all H2 headings
 status: active
 relations:
   - target: ../README.md
     type: parent
+semantic_blocks:
+  - documentation-index
+  - navigation
 ---
 
 # Frontend Tui Documentation
 
 **Scope:** Frontend TUI Development
 
-## Documentation Index
+## Documentation Index [documentation-index]
 
 | File | Status | Purpose | Semantic Blocks |
 |------|--------|---------|-----------------|
@@ -27,7 +30,7 @@ relations:
 | TUI_TEXTUAL_ARCHITECTURE.md | in_progress | Documentation | widget-hierarchy, css-layout-strategy, widget-implementation-details, event-f... |
 | UI_TABS.md | active | Documentation | llm-query-transparency-was-der-log-zei, was-die-debug-messages-bedeuten, trou... |
 
-## Navigation
+## Navigation [navigation]
 
 - Browse by status: active, draft, archived
 - Block IDs enable precise cross-document linking

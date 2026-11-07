@@ -4,30 +4,21 @@ project: kicli-code-assist
 scope: frontend-tui
 purpose: Phase I1 - Implementation of Layer 2 reasoning display in TUI
 created: 2026-11-07T03:35:46+01:00
-updated: 2026-11-07T17:25:00+01:00
-update_reason: Applied @timestamp-correction-from-git and @semantic-knowledge-organization
-semantic_blocks:
-  - id: overview
-    title: Overview
-  - id: architecture
-    title: Architecture
-  - id: layer-2-reasoning
-    title: Layer 2 Reasoning
-  - id: response-parsing-http-client
-    title: Response Parsing (HTTP Client)
-  - id: chunk-types
-    title: Chunk Types
-  - id: example-response
-    title: Example Response
-  - id: phase-i11-streaming-reasoning-future
-    title: Phase I1.1: Streaming Reasoning (Future)
-  - id: implementation-details
-    title: Implementation Details
-  - id: next-steps
-    title: Next Steps
-  - id: references
-    title: References
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks to simple list format
 status: active
+semantic_blocks:
+  - overview
+  - architecture
+  - layer-2-reasoning
+  - response-parsing-http-client
+  - chunk-types
+  - example-response
+  - phase-i11-streaming-reasoning-future
+  - testing
+  - implementation-details
+  - next-steps
+  - references
 ---
 # Phase I1: Layer 2 Reasoning Display
 
@@ -192,7 +183,7 @@ Future (Phase I1.1):
 - User sees: "Intent detected..." → "Routing workflow..." → "Selecting agents..." → "Done!"
 - Much faster perceived responsiveness
 
-## Testing
+## Testing [testing]
 
 ### Via TUI (Manual)
 1. Start Backend: `KI_STAGE=development python -m stackenv start`

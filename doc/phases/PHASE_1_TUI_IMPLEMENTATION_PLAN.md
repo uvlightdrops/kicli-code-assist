@@ -1,22 +1,26 @@
 ---
 title: Phase 1 - TUI Implementation Plan (Nov 5-8, 2026)
-scope: implementation
 project: kicli-code-assist
-status: active
+scope:
+- phases
+purpose: Document phase progress and strategy
 created: 2026-11-05T23:57+01:00
-updated: 2026-11-05T23:57+01:00
-update_reason: Comprehensive implementation roadmap - inside-out modular approach
-agent_project: kicli-code-assist
-cross_references:
-  - doc/architecture/FRONTEND_SPECIFICATION.md (abstract interface)
-  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (vision & phases)
-  - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md (implementation patterns)
-  - doc/specifications/02_PHASE_1_CHECKLIST.md (acceptance criteria)
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
 ---
 
 # Phase 1 - TUI Implementation Plan
 
-## Strategy: Inside-Out Modular Approach
+## Strategy: Inside-Out Modular Approach [block-strategy-inside-out-modular-approach]
 
 Build **independent, self-contained modules first**, then compose them into the final TUI.
 
@@ -29,7 +33,7 @@ This approach enables:
 
 ---
 
-## Phase 1 Breakdown (5 Sub-Phases)
+## Phase 1 Breakdown (5 Sub-Phases) [block-phase-1-breakdown-5-sub-phases]
 
 ### 1.1: Core Infrastructure & Config
 **Duration:** 1-2 hours  
@@ -267,7 +271,7 @@ This approach enables:
 
 ---
 
-## Configuration System
+## Configuration System [block-configuration-system]
 
 All UI modules should be configurable. Example `tui_config.yaml`:
 
@@ -308,7 +312,7 @@ tui:
 
 ---
 
-## Implementation Order
+## Implementation Order [block-implementation-order]
 
 **Recommended sequence** (not strictly sequential - can parallelize):
 
@@ -324,7 +328,7 @@ tui:
 
 ---
 
-## Commit Strategy
+## Commit Strategy [block-commit-strategy]
 
 After each sub-phase (1.1, 1.2, etc.):
 1. Commit working code
@@ -348,7 +352,7 @@ Remaining:
 
 ---
 
-## Risk Mitigation
+## Risk Mitigation [block-risk-mitigation]
 
 **Risk:** Textual library learning curve  
 **Mitigation:** Start with simple widgets (1.4), progressively complex
@@ -364,7 +368,7 @@ Remaining:
 
 ---
 
-## Success Criteria for Phase 1
+## Success Criteria for Phase 1 [block-success-criteria-for-phase-1]
 
 By end of Phase 1:
 
@@ -382,7 +386,7 @@ By end of Phase 1:
 
 ---
 
-## Next Steps After Phase 1
+## Next Steps After Phase 1 [block-next-steps-after-phase-1]
 
 - **Phase 2:** Streaming responses, WebSocket integration
 - **Phase 3:** Reasoning traces, metrics visualization

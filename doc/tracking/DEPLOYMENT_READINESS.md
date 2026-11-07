@@ -1,3 +1,25 @@
+---
+title: "DEPLOYMENT READINESS"
+project: kicli-code-assist
+scope: tracking
+purpose: "Progress tracking and metrics documentation"
+created: 2026-10-28T13:38:30+01:00
+updated: 2026-11-07T20:58:29
+status: active
+semantic_blocks:
+  - id: current-release-phase-31-34
+  - id: critical-blockers-before-production
+  - id: high-priority-before-release
+  - id: medium-priority-nice-to-have
+  - id: pre-deployment-verification
+  - id: deployment-timeline
+  - id: gono-go-decision
+  - id: manual-testing-checklist-before-phase-
+  - id: deployment-checklist-when-ready
+  - id: rollback-plan
+  - id: success-criteria-for-phase-4
+  - id: sign-off
+---
 # Deployment Readiness Checklist
 
 **Repository:** uvlightdrops/kicli-code-assist  
@@ -6,7 +28,7 @@
 
 ---
 
-## Current Release: Phase 3.1-3.4
+## Current Release: Phase 3.1-3.4 [current-release-phase-31-34]
 
 ### Features Implemented ✅
 - [x] File browser with directory navigation
@@ -31,7 +53,7 @@
 
 ---
 
-## Critical Blockers Before Production
+## Critical Blockers Before Production [critical-blockers-before-production]
 
 ### 🔴 CRITICAL: Async LLM Blocking
 **Impact:** HIGH - TUI freezes during AI processing  
@@ -69,7 +91,7 @@ class SensitiveDataFilter:
 
 ---
 
-## High Priority Before Release
+## High Priority Before Release [high-priority-before-release]
 
 ### 🟡 HIGH: No Fallback Providers
 **Impact:** MEDIUM - One provider failure = app unusable  
@@ -91,7 +113,7 @@ class SensitiveDataFilter:
 
 ---
 
-## Medium Priority (Nice-to-Have)
+## Medium Priority (Nice-to-Have) [medium-priority-nice-to-have]
 
 ### 🟢 MEDIUM: Response Quality Metrics
 **Impact:** LOW - Improves UX over time  
@@ -110,7 +132,7 @@ class SensitiveDataFilter:
 
 ---
 
-## Pre-Deployment Verification
+## Pre-Deployment Verification [pre-deployment-verification]
 
 ### Code Quality ✅
 - [x] No syntax errors
@@ -153,7 +175,7 @@ class SensitiveDataFilter:
 
 ---
 
-## Deployment Timeline
+## Deployment Timeline [deployment-timeline]
 
 ### Phase 4.1: Critical Fixes (Week 1)
 ```
@@ -188,7 +210,7 @@ Unit tests, docs, user guide, feedback cycle
 
 ---
 
-## Go/No-Go Decision
+## Go/No-Go Decision [gono-go-decision]
 
 ### Current Assessment
 ```
@@ -217,7 +239,7 @@ Documentation                     ✅ OK       NO
 
 ---
 
-## Manual Testing Checklist (Before Phase 4)
+## Manual Testing Checklist (Before Phase 4) [manual-testing-checklist-before-phase-]
 
 ### File Browser & Preview
 - [ ] Navigate directories with ↑/↓
@@ -247,7 +269,7 @@ Documentation                     ✅ OK       NO
 
 ---
 
-## Deployment Checklist (When Ready)
+## Deployment Checklist (When Ready) [deployment-checklist-when-ready]
 
 ### Pre-Deploy
 - [ ] All critical issues fixed & tested
@@ -286,7 +308,7 @@ watch -n 1 'logs | tail -20'
 
 ---
 
-## Rollback Plan
+## Rollback Plan [rollback-plan]
 
 ### If Production Issues Arise
 ```bash
@@ -306,7 +328,7 @@ kicli-assist tui
 
 ---
 
-## Success Criteria for Phase 4
+## Success Criteria for Phase 4 [success-criteria-for-phase-4]
 
 ### Functional
 - [x] Phase 3 features all working
@@ -330,7 +352,7 @@ kicli-assist tui
 
 ---
 
-## Sign-Off
+## Sign-Off [sign-off]
 
 **Current Status:**  
 **Phase 3:** ✅ COMPLETE  

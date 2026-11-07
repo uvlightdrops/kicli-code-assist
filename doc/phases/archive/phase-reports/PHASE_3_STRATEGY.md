@@ -1,3 +1,25 @@
+---
+title: Strategy
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-17'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+---
+
 # Phase 3 Strategy: File Editor Workflow
 
 **Status:** Planning  
@@ -6,7 +28,7 @@
 
 ---
 
-## Overview
+## Overview [block-overview]
 
 Phase 3 focuses on implementing the **File Editor Workflow**—transforming the TUI from a read-only preview tool into an interactive editor with AI assistance. This is critical foundation for Phase 4 (AI-powered code changes).
 
@@ -14,7 +36,7 @@ Phase 3 focuses on implementing the **File Editor Workflow**—transforming the 
 
 ---
 
-## Phase 3 Breakdown (4 Sub-phases)
+## Phase 3 Breakdown (4 Sub-phases) [block-phase-3-breakdown-4-sub-phases]
 
 ### Phase 3.1: Enter-to-Edit Workflow
 **Objective:** Enable file preview → edit tab transition with dual-view support
@@ -128,7 +150,7 @@ Phase 3 focuses on implementing the **File Editor Workflow**—transforming the 
 
 ---
 
-## Implementation Order
+## Implementation Order [block-implementation-order]
 
 ### Recommended Sequence
 1. **Phase 3.1** (Enter-to-Edit) — Foundation, unblocks testing
@@ -144,7 +166,7 @@ Phase 3 focuses on implementing the **File Editor Workflow**—transforming the 
 
 ---
 
-## Phase 3.1 Detailed Implementation Plan
+## Phase 3.1 Detailed Implementation Plan [block-phase-3-1-detailed-implementation-plan]
 
 ### Files to Create/Modify
 ```
@@ -228,7 +250,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## Risks & Mitigation
+## Risks & Mitigation [block-risks-mitigation]
 
 | Risk | Impact | Mitigation |
 |------|--------|-----------|
@@ -239,7 +261,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## Success Criteria
+## Success Criteria [block-success-criteria]
 
 ### Phase 3.1 Success
 - [ ] User can preview file → press Enter → new editor tab opens
@@ -269,7 +291,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## Dependencies & Blockers
+## Dependencies & Blockers [block-dependencies-blockers]
 
 **Blocked by:** Nothing (ready to start)  
 **Blocks:** Phase 4 (AI Code Changes)
@@ -281,7 +303,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## Rollout Plan
+## Rollout Plan [block-rollout-plan]
 
 ### After Phase 3 Complete
 1. **make prod-update** required for both repos (ki-core may have changes)
@@ -291,7 +313,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## Next Steps
+## Next Steps [block-next-steps]
 
 1. **Start Phase 3.1** when ready
 2. **Iterate with user** on editor UX (tab placement, shortcuts, etc)
@@ -300,7 +322,7 @@ class LeftPanel(TabbedContent):
 
 ---
 
-## References
+## References [block-references]
 - Customer Requests: [docs/customer_requests.md](customer_requests.md)
 - Previous Work: [docs/PHASE_2_SUMMARY.md](PHASE_2_SUMMARY.md)
 - Session Checkpoint: [Refactor TUI + Shell Foundation](./../.copilot/session-state/.../008-phase-1-tui-header-cleanup-and.md)

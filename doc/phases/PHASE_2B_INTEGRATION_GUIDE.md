@@ -1,3 +1,25 @@
+---
+title: Integration Guide
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+---
+
 # Phase 2A → 2B Integration Guide
 
 **For**: Phase 2B (AgentExecutor) implementation  
@@ -5,7 +27,7 @@
 
 ---
 
-## What Phase 2A Provides
+## What Phase 2A Provides [block-what-phase-2a-provides]
 
 ### Export Points
 
@@ -46,7 +68,7 @@ intent.to_dict()            # Dict - JSON serializable
 
 ---
 
-## How Phase 2B Uses It
+## How Phase 2B Uses It [block-how-phase-2b-uses-it]
 
 ### 1. Query Intent Classification
 
@@ -114,7 +136,7 @@ else:
 
 ---
 
-## Integration Checklist
+## Integration Checklist [block-integration-checklist]
 
 ### Phase 2B Implementation
 
@@ -144,7 +166,7 @@ else:
 
 ---
 
-## Sample Phase 2B Code Structure
+## Sample Phase 2B Code Structure [block-sample-phase-2b-code-structure]
 
 ```python
 # kicli_code_assist/agent/executor.py (NEW)
@@ -210,7 +232,7 @@ class AgentExecutor:
 
 ---
 
-## Performance Impact of Phase 2A Integration
+## Performance Impact of Phase 2A Integration [block-performance-impact-of-phase-2a-integration]
 
 ### Before Phase 2A
 ```
@@ -233,7 +255,7 @@ Query → LLM intent detection → Correct agents → Run in parallel
 
 ---
 
-## Testing Phase 2A in Phase 2B Context
+## Testing Phase 2A in Phase 2B Context [block-testing-phase-2a-in-phase-2b-context]
 
 ### Test Template for Phase 2B
 
@@ -284,7 +306,7 @@ class TestAgentExecutorWithIntentDetector:
 
 ---
 
-## Dependency Graph
+## Dependency Graph [block-dependency-graph]
 
 ```
 Phase 2A (IntentDetector)
@@ -304,7 +326,7 @@ Phase 2D (SessionManager)
 
 ---
 
-## Common Pitfalls to Avoid
+## Common Pitfalls to Avoid [block-common-pitfalls-to-avoid]
 
 ### ❌ Don't
 ```python
@@ -338,7 +360,7 @@ intent = await detector.detect_intent(query)
 
 ---
 
-## Questions for Phase 2B Developer
+## Questions for Phase 2B Developer [block-questions-for-phase-2b-developer]
 
 1. **How to pass ProviderChain?**
    ```python
@@ -371,7 +393,7 @@ intent = await detector.detect_intent(query)
 
 ---
 
-## Success Criteria for Phase 2B
+## Success Criteria for Phase 2B [block-success-criteria-for-phase-2b]
 
 ✅ Intent detection integrates smoothly  
 ✅ Agents selected correctly for each intent  

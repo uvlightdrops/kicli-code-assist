@@ -1,44 +1,53 @@
 ---
 title: AI Auto-Completion & Suggestions Workflow
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / User Workflow
-purpose: AI-assisted code analysis and suggestion workflow for editor
+scope: features
+purpose: Feature documentation
 created: 2026-10-17T22:23:19+02:00
-updated: 2026-11-07T13:41:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: ai-workflow-overview
+  - id: quick-start
     type: implementation
     status: stable
     version: 1.0
-  - id: quick-start-guide
-    type: operations
+  - id: how-it-works
+    type: implementation
     status: stable
     version: 1.0
-  - id: workflow-execution
-    type: architecture
+  - id: context-suggestions
+    type: implementation
     status: stable
     version: 1.0
-  - id: ai-operations-matrix
-    type: reference
+  - id: current-limitations
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: CHAT_HISTORY_AND_PROMPTS.md
-    type: depends-on
-    reason: "Uses chat history for context"
-  - target: ../backend/layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
-    type: implements
-    reason: "Implements agent routing for AI suggestions"
+  - id: future-auto-completion-while-typing
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: keyboard-shortcuts-proposed
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: troubleshooting
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: configuration
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: see-also
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # AI Auto-Completion & Suggestions Workflow [ai-workflow-overview]
 
-## Quick Start [quick-start-guide]
+## Quick Start [quick-start]
 
 ### Get AI Suggestions for Code
 
@@ -59,7 +68,7 @@ relations:
    - Or "❌ Reject" to discard
    - Changes applied to editor with auto-save
 
-## How It Works [workflow-execution]
+## How It Works [how-it-works]
 
 ### Step-by-Step
 
@@ -90,7 +99,7 @@ relations:
 | **Refactoring** | Describe in chat what to do | AI refactors code |
 | **Documentation** | Ask in chat | AI adds comments/docstrings |
 
-## Context & Suggestions
+## Context & Suggestions [context-suggestions]
 
 ### What AI Sees
 
@@ -117,14 +126,14 @@ When you check "🤖 AI Suggestions", AI analyzes:
 5. AI sees both files → better understanding → better suggestions
 ```
 
-## Current Limitations
+## Current Limitations [current-limitations]
 
 - ⚠️ Auto-completion **not yet supported** while typing
 - ✓ Batch analysis via "🤖 AI Suggestions" checkbox works
 - ✓ Chat-based suggestions work (describe changes in chat)
 - ⚠️ No inline tooltips during editing
 
-## Future: Auto-Completion While Typing
+## Future: Auto-Completion While Typing [future-auto-completion-while-typing]
 
 Planned for Phase 3.6+:
 - Press `Ctrl+Space` for suggestions while editing
@@ -132,7 +141,7 @@ Planned for Phase 3.6+:
 - Keystroke-aware context
 - Local & LLM-based completion
 
-## Keyboard Shortcuts (Proposed)
+## Keyboard Shortcuts (Proposed) [keyboard-shortcuts-proposed]
 
 ```
 Ctrl+Space     AI auto-complete (while editing)
@@ -143,7 +152,7 @@ Ctrl+/         Toggle AI suggestions pane
 
 (Not yet implemented, for future consideration)
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### "No suggestions appeared"
 - Check Chat tab - suggestions might be showing there
@@ -160,7 +169,7 @@ Ctrl+/         Toggle AI suggestions pane
 - Click ✅ Apply button explicitly
 - Check if auto-save is running (might conflict)
 
-## Configuration
+## Configuration [configuration]
 
 AI behavior is controlled by:
 - `ki.yaml` - LLM settings, model, temperature
@@ -169,7 +178,7 @@ AI behavior is controlled by:
 
 Check these with: `kicli-assist doctor`
 
-## See Also
+## See Also [see-also]
 
 - [VI_EDITOR_GUIDE.md](./VI_EDITOR_GUIDE.md) - How to use vim editor
 - [WORKFLOW.md](./WORKFLOW.md) - Overall TUI workflow

@@ -1,48 +1,77 @@
 ---
 title: TUI File Browser
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Feature Implementation / Navigation
-purpose: File browser and project navigation in TUI
+scope: features
+purpose: Feature documentation
 created: 2026-09-02T07:28:07+02:00
-updated: 2026-11-07T13:43:00+01:00
-update_reason: Added semantic schema documentation
+updated: 2026-11-07T20:58:20
 status: stable
-
 semantic_blocks:
-  - id: file-browser-overview
+  - id: overview
     type: implementation
     status: stable
     version: 1.0
-  - id: navigation-features
-    type: operations
+  - id: features
+    type: implementation
     status: stable
     version: 1.0
-  - id: file-selection-workflow
-    type: architecture
+  - id: keyboard-shortcuts
+    type: implementation
     status: stable
     version: 1.0
-  - id: ui-layout-reference
-    type: reference
+  - id: layout
+    type: implementation
     status: stable
     version: 1.0
-
-relations:
-  - target: CHAT_WITH_FILES_WORKFLOW.md
-    type: implements
-    reason: "Provides file selection for chat workflows"
-  - target: AI_WORKFLOW.md
-    type: depends-on
-    reason: "Loads files for AI analysis"
+  - id: usage-examples
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: python-api
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: features-current
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: future-enhancements
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: technical-details
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: keyboard-binding-details
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: examples
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: tips-tricks
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: troubleshooting
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: api-stability
+    type: implementation
+    status: stable
+    version: 1.0
 ---
 
 # TUI File Browser [file-browser-overview]
 
-## Overview [file-browser-overview]
+## Overview [overview]
 
 The kicli-code-assist TUI now includes an integrated **file browser** that lets you browse and preview files in your project directory without leaving the terminal UI.
 
-## Features [navigation-features]
+## Features [features]
 
 ✅ **File Navigation**
 - Browse directories with arrow keys
@@ -70,7 +99,7 @@ The kicli-code-assist TUI now includes an integrated **file browser** that lets 
 - 🔧 Shell scripts
 - And more...
 
-## Keyboard Shortcuts [file-selection-workflow]
+## Keyboard Shortcuts [keyboard-shortcuts]
 
 | Key | Action |
 |-----|--------|
@@ -82,7 +111,7 @@ The kicli-code-assist TUI now includes an integrated **file browser** that lets 
 | `?` | Show help |
 | `Ctrl+C` | Quit |
 
-## Layout [ui-layout-reference]
+## Layout [layout]
 
 The TUI now uses a split-screen layout:
 
@@ -105,7 +134,7 @@ The TUI now uses a split-screen layout:
 ═══════════════════════════════════════════════════════════════
 ```
 
-## Usage Examples
+## Usage Examples [usage-examples]
 
 ### 1. Browse Project Files
 
@@ -153,7 +182,7 @@ Current: /home/user/project
 4. Press Enter on .. to go back
 ```
 
-## Python API
+## Python API [python-api]
 
 ### FileBrowser Class
 
@@ -187,7 +216,7 @@ browser.go_to_path("/some/path")    # Jump to path
 browser.refresh()                   # Refresh file list
 ```
 
-## Features (Current)
+## Features (Current) [features-current]
 
 ✅ **Navigation**
 - Browse files and directories
@@ -204,7 +233,7 @@ browser.refresh()                   # Refresh file list
 - Keyboard shortcuts
 - Real-time updates
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 - [ ] Syntax highlighting in preview
 - [ ] Search/filter files
@@ -215,7 +244,7 @@ browser.refresh()                   # Refresh file list
 - [ ] Fuzzy find with Ctrl+F
 - [ ] Multiple file selection
 
-## Technical Details
+## Technical Details [technical-details]
 
 ### File Sorting
 
@@ -241,7 +270,7 @@ Large directories (1000+ files) are handled efficiently:
 - Unreadable files: Show "[Unable to read file]"
 - Invalid paths: Fallback to current directory
 
-## Keyboard Binding Details
+## Keyboard Binding Details [keyboard-binding-details]
 
 | Mode | Binding | Action |
 |------|---------|--------|
@@ -256,7 +285,7 @@ Large directories (1000+ files) are handled efficiently:
 | Changes | `Y` / `N` | Accept/reject |
 | Help | `?` | Show help text |
 
-## Examples
+## Examples [examples]
 
 ### Example 1: Load Python File
 
@@ -292,7 +321,7 @@ Press L
 Chat: "Validate this YAML configuration"
 ```
 
-## Tips & Tricks
+## Tips & Tricks [tips-tricks]
 
 1. **Quick Navigation:** Press `H` to jump to home, then navigate from there
 2. **Refresh:** Press `R` if files were modified externally
@@ -300,7 +329,7 @@ Chat: "Validate this YAML configuration"
 4. **Keyboard Only:** All operations work without mouse
 5. **Parent Dir:** Always shows `..` at top for quick navigation
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 **Q: Files not showing up**
 - A: Press `R` to refresh, or check file permissions
@@ -314,7 +343,7 @@ Chat: "Validate this YAML configuration"
 **Q: Can't navigate to a directory**
 - A: Check permissions: `ls -la /path/to/dir`
 
-## API Stability
+## API Stability [api-stability]
 
 The FileBrowser API is stable and ready for production use.
 

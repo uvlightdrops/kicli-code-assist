@@ -1,17 +1,26 @@
 ---
-title: "Phase 5.5: Advanced Autonomy - Concept & Roadmap"
-project: "kicli-code-assist"
-scope: "phases"
-created: 2026-11-02T00:09:00+01:00
-updated: 2026-11-02T00:26:00+01:00
-update_reason: "5.5.1 & 5.5.2 complete, 5.5.3 architecture documented"
-status: "active"
-author: "Copilot"
+title: 'Phase 5.5: Advanced Autonomy - Concept & Roadmap'
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: 2026-11-02 00:09:00+01:00
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
 ---
 
 # Phase 5.5: Advanced Autonomy - Concept & Roadmap
 
-## Executive Summary
+## Executive Summary [block-executive-summary]
 
 **Vision:** Extend agent autonomy beyond single-file generation to multi-file refactoring, transparent reasoning, and deployment orchestration.
 
@@ -27,7 +36,7 @@ author: "Copilot"
 
 ---
 
-## Phase 5.5.1: Multi-File Refactoring (Week 1)
+## Phase 5.5.1: Multi-File Refactoring (Week 1) [block-phase-5-5-1-multi-file-refactoring-week-1]
 
 ### Problem Statement
 Current `CodeImplementationAgent.apply_with_full_autonomy()` handles **one file at a time**. Real refactorings need:
@@ -99,7 +108,7 @@ User Request: "Rename UserAccount to User across project"
 
 ---
 
-## Phase 5.5.2: Transparency & Observability (Week 2)
+## Phase 5.5.2: Transparency & Observability (Week 2) [block-phase-5-5-2-transparency-observability-week-2]
 
 ### Problem Statement
 When agent executes, user has no visibility into:
@@ -180,7 +189,7 @@ CoordinationResult.reasoning_trace
 
 ---
 
-## Phase 5.5.3: Orchestration Integration (Week 3-4)
+## Phase 5.5.3: Orchestration Integration (Week 3-4) [block-phase-5-5-3-orchestration-integration-week-3-4]
 
 ### Problem Statement
 After agent commits code to `devel` branch, what happens?
@@ -271,7 +280,7 @@ Result:
 
 ---
 
-## Implementation Timeline
+## Implementation Timeline [block-implementation-timeline]
 
 | Phase | Duration | Start | End | Deliverables |
 |-------|----------|-------|-----|--------------|
@@ -283,7 +292,7 @@ Result:
 
 ---
 
-## Success Metrics
+## Success Metrics [block-success-metrics]
 
 ### Phase 5.5.1
 - Agent successfully refactors class name across 5+ files
@@ -302,7 +311,7 @@ Result:
 
 ---
 
-## Risk Mitigation
+## Risk Mitigation [block-risk-mitigation]
 
 | Risk | Impact | Mitigation |
 |------|--------|-----------|
@@ -313,7 +322,7 @@ Result:
 
 ---
 
-## References
+## References [block-references]
 
 - Current implementation: `kicli_code_assist/agent/code_implementation.py`
 - Phase 5.4 reference: `doc/phases/PHASE_5_4_SUMMARY.md`

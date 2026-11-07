@@ -1,3 +1,28 @@
+---
+title: Quick Reference
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+- block-11
+- block-12
+- block-13
+---
+
 # Phase 2C: ResultAggregator - Quick Reference
 
 **What**: Synthesizes parallel agent outputs into organized, user-friendly results  
@@ -6,7 +31,7 @@
 
 ---
 
-## 60-Second Overview
+## 60-Second Overview [block-60-second-overview]
 
 ```python
 from kicli_code_assist.agent import AgentExecutor, ResultAggregator
@@ -37,7 +62,7 @@ print(result.next_steps)           # ["Step 1", ...]
 
 ---
 
-## Key Classes
+## Key Classes [block-key-classes]
 
 ### AggregatedResult
 The main output containing:
@@ -72,7 +97,7 @@ Main orchestrator:
 
 ---
 
-## What Gets Generated
+## What Gets Generated [block-what-gets-generated]
 
 ### Tabs (from agent outputs)
 
@@ -105,7 +130,7 @@ Query keyword suggestions:
 
 ---
 
-## Configuration
+## Configuration [block-configuration]
 
 ### With LLM (Default)
 ```python
@@ -129,7 +154,7 @@ aggregator = ResultAggregator(provider_chain=chain)
 
 ---
 
-## Error Handling
+## Error Handling [block-error-handling]
 
 ### Automatic Fallbacks
 ```python
@@ -148,7 +173,7 @@ len(result.actions)      # How many actions
 
 ---
 
-## API Integration
+## API Integration [block-api-integration]
 
 ### REST Endpoint
 ```python
@@ -179,7 +204,7 @@ async def analyze_code(query: str, file_path: str):
 
 ---
 
-## Testing
+## Testing [block-testing]
 
 ### Run All Tests
 ```bash
@@ -199,7 +224,7 @@ pytest tests/test_aggregator.py -v
 
 ---
 
-## Performance
+## Performance [block-performance]
 
 | Operation | Time |
 |-----------|------|
@@ -211,7 +236,7 @@ pytest tests/test_aggregator.py -v
 
 ---
 
-## Common Tasks
+## Common Tasks [block-common-tasks]
 
 ### Get Structure Information
 ```python
@@ -251,7 +276,7 @@ json_str = json.dumps(result.to_dict(), indent=2)
 
 ---
 
-## Troubleshooting
+## Troubleshooting [block-troubleshooting]
 
 ### Problem: Always falls back to template
 **Solution**: Check OPENAI_API_KEY or use `enable_llm=False`
@@ -267,7 +292,7 @@ json_str = json.dumps(result.to_dict(), indent=2)
 
 ---
 
-## Integration Timeline
+## Integration Timeline [block-integration-timeline]
 
 ```
 Phase 2A: Intent Detection
@@ -281,7 +306,7 @@ Phase 2D: UI Rendering ← Render result.summary, result.tabs, etc.
 
 ---
 
-## Related Documentation
+## Related Documentation [block-related-documentation]
 
 - **Technical Details**: `docs/PHASE_2C_IMPLEMENTATION_COMPLETE.md`
 - **Integration Guide**: `docs/PHASE_2C_INTEGRATION_GUIDE.md`
@@ -290,7 +315,7 @@ Phase 2D: UI Rendering ← Render result.summary, result.tabs, etc.
 
 ---
 
-## Status
+## Status [block-status]
 
 ✅ **Functionality**: Complete  
 ✅ **Tests**: 29/29 passing  

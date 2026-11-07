@@ -1,27 +1,30 @@
 ---
 title: Phase 1.2 - TUI WebSocket Streaming & Real-Time Features
-scope: implementation
 project: kicli-code-assist
-agent_project: kicli-code-assist
-status: complete
+scope:
+- phases
+purpose: Document phase progress and strategy
 created: 2026-11-06T02:30+01:00
-updated: 2026-11-06T04:42+01:00
-update_reason: All 7 sub-phases completed and tested
-cross_references:
-  - doc/phases/PHASE_1_TUI_IMPLEMENTATION_COMPLETE.md (Phase 1 baseline)
-  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (vision)
-  - doc/architecture/PHASE_5_5_2_I2_WEBSOCKET_ARCHITECTURE.md (WebSocket patterns)
+updated: '2026-11-07'
+status: complete
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
 ---
 
 # Phase 1.2 - TUI WebSocket Streaming & Real-Time Features
 
-## Overview
+## Overview [block-overview]
 
 **Objective:** Extend Phase 1 TUI with real-time streaming, live progress, and interactive response handling  
 **Duration:** 3 days (autonomous implementation)  
 **Target:** Production-ready streaming agent interface  
 
-## Sub-Phases
+## Sub-Phases [block-sub-phases]
 
 ### Phase 1.2.1 - WebSocket Integration Foundation
 **Deliverable:** Streaming infrastructure for agent responses  
@@ -245,7 +248,7 @@ Tasks:
 
 ---
 
-## Implementation Order
+## Implementation Order [block-implementation-order]
 
 ```
 1. Phase 1.2.1 - WebSocket Foundation
@@ -265,7 +268,7 @@ Tasks:
 ✅ COMPLETE → Ready for Phase 1.3 (Polish & Optimization)
 ```
 
-## Key Technical Decisions
+## Key Technical Decisions [block-key-technical-decisions]
 
 1. **Streaming Protocol:** WebSocket (async, low-latency)
 2. **Fallback:** HTTP streaming if WebSocket unavailable
@@ -273,7 +276,7 @@ Tasks:
 4. **Error Display:** Inline in tab (red background)
 5. **Progress Tracking:** Spinner + token counter in status bar
 
-## Success Criteria
+## Success Criteria [block-success-criteria]
 
 - ✅ Tokens appear in tabs as they arrive (no buffering)
 - ✅ User can submit input while streaming (queued)
@@ -282,7 +285,7 @@ Tasks:
 - ✅ 32+ tests passing
 - ✅ No performance degradation vs Phase 1
 
-## Next Phase (1.3)
+## Next Phase (1.3) [block-next-phase-1-3]
 
 After 1.2 complete:
 - Responsive layout (terminal resize handling)

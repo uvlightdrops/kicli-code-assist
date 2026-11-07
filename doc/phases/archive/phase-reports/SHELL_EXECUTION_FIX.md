@@ -1,6 +1,27 @@
+---
+title: Shell Execution Fix
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-16'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+---
+
 # Shell Execution Worker Fix
 
-## Issue
+## Issue [block-issue]
 After integrating shell command execution into the TUI, executing a command batch resulted in:
 ```
 WorkerError: Request to run a non-async function as an async worker
@@ -11,7 +32,7 @@ Then, after making the function async:
 TypeError: CodeAssistantApp._execute_shell_batch_worker() missing 2 required positional arguments: 'batch' and 'result'
 ```
 
-## Root Cause
+## Root Cause [block-root-cause]
 
 ### First Error
 Textual's `run_worker()` requires an async coroutine function, but `_execute_shell_batch_worker` was synchronous.
@@ -23,7 +44,7 @@ Textual's `run_worker()` requires an async coroutine function, but `_execute_she
 
 So calling `self.run_worker(self._execute_shell_batch_worker, batch, result)` fails because `run_worker()` tries to call the method with **no** arguments.
 
-## Solution
+## Solution [block-solution]
 
 ### Part 1: Make Function Async
 ```python
@@ -47,7 +68,7 @@ self.run_worker(self._execute_shell_batch_worker, batch, result)
 self.run_worker(lambda: self._execute_shell_batch_worker(batch, result))
 ```
 
-## Files Changed
+## Files Changed [block-files-changed]
 
 ### kicli_code_assist/ui/textual_app.py
 1. Added `import asyncio` at top
@@ -55,14 +76,14 @@ self.run_worker(lambda: self._execute_shell_batch_worker(batch, result))
 3. Used `asyncio.get_event_loop().run_in_executor()` to wrap the blocking `chat_session.execute_shell_batch()` call
 4. Changed `run_worker()` call to use a lambda wrapper: `self.run_worker(lambda: self._execute_shell_batch_worker(batch, result))`
 
-## How It Works
+## How It Works [block-how-it-works]
 
 1. **Lambda Wrapper**: Captures `batch` and `result` in closure
 2. **Async Function**: Declared as `async def` so Textual recognizes it
 3. **Executor Pattern**: Uses `run_in_executor()` to run blocking I/O in thread pool without blocking async event loop
 4. **UI Update**: Updates chat display with results from async context (Textual handles thread safety)
 
-## Textual Best Practices
+## Textual Best Practices [block-textual-best-practices]
 
 ### run_worker() Pattern
 - Always wrap worker callables in a lambda if you need to pass arguments
@@ -84,13 +105,13 @@ async def worker_method(self, arg1, arg2):
     self.chat_display.write(result)
 ```
 
-## Verification
+## Verification [block-verification]
 - ✅ Syntax check passed (py_compile)
 - ✅ TUI starts without worker errors
 - ✅ Lambda wrapper captures arguments correctly
 - ✅ Async function definition recognized by Textual
 
-## Testing
+## Testing [block-testing]
 To manually test the flow:
 1. Start: `kicli-assist tui`
 2. Press `Ctrl+X` to open command dialog
@@ -99,7 +120,7 @@ To manually test the flow:
 5. Click "Execute" in approval modal
 6. Command should execute and output appears in chat
 
-## Related Issues
+## Related Issues [block-related-issues]
 - Previous checkpoint: Shell execution UI integration complete (006)
 - CSS validation: Fixed with separated .tcss files
 - Message class scoping: Fixed with nested classes in modals

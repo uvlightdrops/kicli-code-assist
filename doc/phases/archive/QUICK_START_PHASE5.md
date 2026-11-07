@@ -1,6 +1,31 @@
+---
+title: Quick Start Phase5
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-09-02'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+- block-10
+- block-11
+- block-12
+- block-13
+---
+
 # Phase 5 Quick Start Guide
 
-## What You Need to Know
+## What You Need to Know [block-what-you-need-to-know]
 
 ### Current Status (Ende Phase 4)
 ✅ **Phase 2-4 Complete** (122 tests passing)
@@ -18,7 +43,7 @@ Build the **User Interface** to use all these features:
 
 ---
 
-## Quick Reference: How to Use Features
+## Quick Reference: How to Use Features [block-quick-reference-how-to-use-features]
 
 ### 1. Generate Diffs from LLM Response
 
@@ -80,7 +105,7 @@ print(tracker.get_status_display())
 
 ---
 
-## Navigation Shortcuts (Phase 5)
+## Navigation Shortcuts (Phase 5) [block-navigation-shortcuts-phase-5]
 
 | Shortcut | Action |
 |----------|--------|
@@ -104,7 +129,7 @@ print(tracker.get_status_display())
 
 ---
 
-## Complete Workflow Example
+## Complete Workflow Example [block-complete-workflow-example]
 
 ### Step 1: User asks question
 ```
@@ -167,7 +192,7 @@ Completion: 100% ████████████████████
 
 ---
 
-## File Structure
+## File Structure [block-file-structure]
 
 ```
 kicli-code-assist/
@@ -197,7 +222,7 @@ kicli-code-assist/
 
 ---
 
-## Starting Phase 5
+## Starting Phase 5 [block-starting-phase-5]
 
 ### Option 1: Do it yourself (recommended for learning)
 ```bash
@@ -233,7 +258,7 @@ git add -A && git commit -m "Phase 5: UI integration complete"
 
 ---
 
-## Key Concepts for Phase 5
+## Key Concepts for Phase 5 [block-key-concepts-for-phase-5]
 
 ### Focus Manager
 Switches focus between 5 UI panels:
@@ -269,7 +294,7 @@ Displays progress of LLM workflow:
 
 ---
 
-## Debugging Phase 5 Issues
+## Debugging Phase 5 Issues [block-debugging-phase-5-issues]
 
 ### "Diff viewer doesn't appear"
 1. Check if `ctrl+d` action is bound in `chat_ui.py`
@@ -288,7 +313,7 @@ Displays progress of LLM workflow:
 
 ---
 
-## Performance Tips
+## Performance Tips [block-performance-tips]
 
 - Diff viewer: Syntax highlighting only for files <100KB
 - Task widget: Update every 200ms (not 100ms)
@@ -297,7 +322,7 @@ Displays progress of LLM workflow:
 
 ---
 
-## Testing Phase 5
+## Testing Phase 5 [block-testing-phase-5]
 
 Run all tests:
 ```bash
@@ -318,7 +343,7 @@ pytest tests/test_ui_integration.py::test_full_workflow_user_request_to_diff_vie
 
 ---
 
-## Next After Phase 5
+## Next After Phase 5 [block-next-after-phase-5]
 
 - **Phase 6**: Security (path restrictions per customer request)
 - **Phase 7**: LLM feedback loop (refine diffs with LLM)
@@ -326,7 +351,7 @@ pytest tests/test_ui_integration.py::test_full_workflow_user_request_to_diff_vie
 
 ---
 
-## Resources
+## Resources [block-resources]
 
 📚 **Documentation**:
 - `docs/DIFF_USER_GUIDE.md` - Complete API reference
@@ -345,7 +370,7 @@ pytest tests/test_ui_integration.py::test_full_workflow_user_request_to_diff_vie
 
 ---
 
-## Summary
+## Summary [block-summary]
 
 | Phase | Features | Tests | Status |
 |-------|----------|-------|--------|

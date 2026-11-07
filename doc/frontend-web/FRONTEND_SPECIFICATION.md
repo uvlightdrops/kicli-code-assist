@@ -1,15 +1,23 @@
 ---
 title: Frontend Specification - Abstract Interface Design
-scope: architecture
 project: kicli-code-assist
+scope: frontend-web
+purpose: Define a frontend interface that can be implemented in multiple technologies without changing the backend
+created: 2026-11-05T21:23:00+01:00
+updated: 2026-11-07T20:57:37+01:00
+update_reason: Standardized YAML header; updated scope and relations
 status: active
-created: 2026-11-05T21:23+01:00
-updated: 2026-11-05T21:23+01:00
-update_reason: Initial abstract specification for multi-frontend architecture
 agent_project: kicli-code-assist
-cross_references:
-  - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (TUI implementation)
-  - doc/features/UI_TABS.md (Tab system reference)
+relations:
+  - target: ../README.md
+    type: parent
+  - target: README.md
+    type: parent
+  - target: ../architecture/TUI_INTELLIGENT_TERMINAL_IDE.md
+    type: reference
+    reason: TUI implementation reference
+  - target: UI_TABS.md
+    type: reference
 semantic_blocks:
   - id: core-principles
     title: Core Principles
@@ -31,7 +39,8 @@ semantic_blocks:
     title: Keyboard Shortcuts (Frontend-Agnostic)
   - id: frontend-implementation-checklist
     title: Frontend Implementation Checklist
-  - doc/phases/archive/PHASE5_UI_INTEGRATION.md (Earlier UI thinking)
+  - id: api-contract-examples
+    title: API Contract Examples
 ---
 
 # Frontend Specification
@@ -386,7 +395,7 @@ For each frontend (Textual TUI, GTK, Web):
 
 ---
 
-## API Contract Examples
+## API Contract Examples [api-contract-examples]
 
 ### Request
 

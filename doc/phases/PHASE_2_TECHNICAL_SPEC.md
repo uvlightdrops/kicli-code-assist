@@ -1,3 +1,24 @@
+---
+title: Technical Spec
+project: kicli-code-assist
+scope:
+- phases
+purpose: Document phase progress and strategy
+created: '2026-10-27'
+updated: '2026-11-07'
+status: active
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
+- block-8
+- block-9
+---
+
 # Phase 2 Technical Specification: Agent Intelligence System
 
 **Document Purpose**: Detailed API contracts, data structures, and implementation checklist  
@@ -6,7 +27,7 @@
 
 ---
 
-## Table of Contents
+## Table of Contents [block-table-of-contents]
 
 1. [Data Structures](#data-structures)
 2. [API Contracts](#api-contracts)
@@ -17,7 +38,7 @@
 
 ---
 
-## Data Structures
+## Data Structures [block-data-structures]
 
 ### Intent Classification
 
@@ -243,7 +264,7 @@ class AgentSession:
 
 ---
 
-## API Contracts
+## API Contracts [block-api-contracts]
 
 ### POST /api/agent/route (Updated)
 
@@ -372,7 +393,7 @@ class AgentSession:
 
 ---
 
-## Component Responsibilities
+## Component Responsibilities [block-component-responsibilities]
 
 ### AgentIntentDetector
 
@@ -589,7 +610,7 @@ def test_session_caching():
 
 ---
 
-## Integration Points
+## Integration Points [block-integration-points]
 
 ### Backend Flow
 
@@ -702,7 +723,7 @@ const tabs = response.data.tabs_to_show;  // ["Analysis", "Metrics"]
 
 ---
 
-## Backward Compatibility
+## Backward Compatibility [block-backward-compatibility]
 
 ### Phase 1 → Phase 2 Migration
 
@@ -744,7 +765,7 @@ def test_phase1_request_still_works():
 
 ---
 
-## Implementation Checklist
+## Implementation Checklist [block-implementation-checklist]
 
 ### Phase 2A: Intent Detection
 
@@ -839,7 +860,7 @@ def test_phase1_request_still_works():
 
 ---
 
-## Success Metrics
+## Success Metrics [block-success-metrics]
 
 | Metric | Target | Phase |
 |--------|--------|-------|
@@ -852,7 +873,7 @@ def test_phase1_request_still_works():
 
 ---
 
-## Related Documents
+## Related Documents [block-related-documents]
 
 - `AGENT_ROUTING_INTELLIGENCE_PLAN.md` - Strategic overview
 - `HYBRID_AGENT_IMPLEMENTATION_PLAN.md` - Phase 1-2 roadmap

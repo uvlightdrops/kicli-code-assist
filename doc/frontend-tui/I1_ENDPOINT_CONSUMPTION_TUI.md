@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: frontend-tui
 purpose: Document how TUI consumes the REST endpoint for project-wide analysis
 created: 2026-11-07T14:30:00+01:00
-updated: 2026-11-07T14:30:00+01:00
-update_reason: Extracted from backend I2.1 doc; TUI-specific implementation
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks structure (kebab-case IDs only)
 status: active
 relations:
   - target: ../backend/layer-2-workflow-orchestration/PHASE_I2_1_ENDPOINT_INTEGRATION.md
@@ -15,11 +15,8 @@ relations:
   - target: README.md
     type: parent
 semantic_blocks:
-  - id: integration-points
-    title: Integration Points
-  - id: next-steps
-    title: Next Steps
-    reason: TUI documentation hub
+  - integration-points
+  - next-steps
 ---
 
 # Project Analysis Endpoint - TUI Implementation

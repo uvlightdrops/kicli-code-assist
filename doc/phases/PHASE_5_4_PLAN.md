@@ -1,11 +1,20 @@
 ---
+title: 4 Plan
 project: kicli-code-assist
-scope: phases
+scope:
+- phases
+purpose: Document phase progress and strategy
 created: 2026-10-XX XX
-updated: 2026-11-02 13
-update_reason: Added canonical YAML header
+updated: '2026-11-07'
 status: current
-agent_project: kicli-code-assist
+semantic_blocks:
+- block-1
+- block-2
+- block-3
+- block-4
+- block-5
+- block-6
+- block-7
 ---
 
 # Phase 5.4 Plan: Full Autonomy
@@ -15,7 +24,7 @@ agent_project: kicli-code-assist
 **Current capability:** 9/10  
 **Target capability:** 10/10  
 
-## Why Phase 5.4
+## Why Phase 5.4 [block-why-phase-5-4]
 
 The agent can now:
 - ✅ Analyze external projects
@@ -25,7 +34,7 @@ The agent can now:
 
 **Missing:** Integration with development workflow (git, testing, state tracking)
 
-## Proposed Sub-Phases
+## Proposed Sub-Phases [block-proposed-sub-phases]
 
 ### 5.4.1: Git Workflow Integration (2-3 hours)
 **Goal:** Agent can create branches, commit changes, push to repo
@@ -151,7 +160,7 @@ The agent can now:
 - Cleans up git branches
 - Logs reason for rollback
 
-## Implementation Timeline
+## Implementation Timeline [block-implementation-timeline]
 
 | Phase | Task | Effort | Timeline |
 |-------|------|--------|----------|
@@ -163,7 +172,7 @@ The agent can now:
 
 **Total estimated effort:** 8-11 hours of development
 
-## Quick Start for Phase 5.4.1
+## Quick Start for Phase 5.4.1 [block-quick-start-for-phase-5-4-1]
 
 ```bash
 # Start with git integration
@@ -186,7 +195,7 @@ touch kicli_code_assist/agent/git_manager.py
 # Test with external project
 ```
 
-## Quality Gates for Phase 5.4
+## Quality Gates for Phase 5.4 [block-quality-gates-for-phase-5-4]
 
 Before each phase is considered complete:
 - ✅ All unit tests pass
@@ -195,7 +204,7 @@ Before each phase is considered complete:
 - ✅ Documentation complete
 - ✅ Error handling for edge cases
 
-## Next Checkpoint
+## Next Checkpoint [block-next-checkpoint]
 
 After Phase 5.4 complete:
 - Create checkpoint: `011-phase-5-4-full-autonomy.md`
@@ -203,7 +212,7 @@ After Phase 5.4 complete:
 - Ready for: Extended autonomous work
 - Recommended: Phase 5.5 (multi-goal workflows)
 
-## Phase 5.5 Preview (Future)
+## Phase 5.5 Preview (Future) [block-phase-5-5-preview-future]
 
 Once fully autonomous, consider:
 - **Multi-goal workflows:** Chain goals together

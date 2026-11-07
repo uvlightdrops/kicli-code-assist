@@ -4,30 +4,21 @@ scope: frontend-tui
 project: kicli-code-assist
 status: in_progress
 created: 2026-11-05T21:29:23+01:00
-updated: 2026-11-07T17:25:00+01:00
-update_reason: Applied @timestamp-correction-from-git and @semantic-knowledge-organization
+updated: 2026-11-07T20:57:00+01:00
+update_reason: Fixed semantic_blocks to simple list format
 agent_project: kicli-code-assist
 cross_references:
   - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
   - doc/features/tui/I1_IMPLEMENTATION_PLAN.md
 semantic_blocks:
-  - id: widget-hierarchy
-    title: Widget Hierarchy
-  - id: css-layout-strategy
-    title: CSS Layout Strategy
-  - id: widget-implementation-details
-    title: Widget Implementation Details
-  - id: event-flow
-    title: Event Flow
-  - id: async-pattern-http-to-tui
-    title: Async Pattern: HTTP to TUI
-  - id: error-handling
-    title: Error Handling
-  - id: performance-considerations
-    title: Performance Considerations
-  - id: future-enhancements-phase-5
-    title: Future Enhancements (Phase 5+)
-  - doc/guides/TEXTUAL_BEST_PRACTICES_REVIEW.md
+  - widget-hierarchy
+  - css-layout-strategy
+  - widget-implementation-details
+  - event-flow
+  - async-pattern-http-to-tui
+  - error-handling
+  - performance-considerations
+  - future-enhancements-phase-5
 ---
 
 # TUI Textual Architecture
