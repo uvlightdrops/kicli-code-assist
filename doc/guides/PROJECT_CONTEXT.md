@@ -1,6 +1,52 @@
+---
+title: PROJECT CONTEXT
+project: kicli-code-assist
+scope: guides
+purpose: Project overview, architecture overview, and context for contributors
+created: 2026-09-02T07:28:07+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: overview
+    title: Overview
+  - id: how-it-works
+    title: How It Works
+  - id: features
+    title: Features
+  - id: api-reference
+    title: API Reference
+  - id: integration-with-tui-chat
+    title: Integration with TUI Chat
+  - id: language-detection
+    title: Language Detection
+  - id: dependency-detection
+    title: Dependency Detection
+  - id: configuration-ignored
+    title: Configuration Ignored
+  - id: performance
+    title: Performance
+  - id: token-limits
+    title: Token Limits
+  - id: example-context-output
+    title: Example Context Output
+  - id: dependencies
+    title: Dependencies
+  - id: structure
+    title: Structure
+  - id: key-files-content
+    title: Key Files Content
+  - id: customization
+    title: Customization
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: future-enhancements
+    title: Future Enhancements
+status: active
+---
+
 # Project Context for Chat
 
-## Overview
+## Overview [overview]
 
 The **ProjectContextManager** enables kicli-assist to understand your entire project and answer questions about it intelligently.
 
@@ -10,7 +56,7 @@ When you ask a question in the chat, the LLM receives:
 - Key file contents (README, config, main files)
 - Code statistics
 
-## How It Works
+## How It Works [how-it-works]
 
 ### 1. Project Scanning
 ```
@@ -56,7 +102,7 @@ ProjectContextManager adds context:
 LLM responds with full project understanding
 ```
 
-## Features
+## Features [features]
 
 ### ✅ Project Detection
 - Automatically detects primary language (Python, JavaScript, Go, etc.)
@@ -85,7 +131,7 @@ LLM responds with full project understanding
 - Includes key file contents
 - Adds project summary
 
-## API Reference
+## API Reference [api-reference]
 
 ### ProjectContextManager
 
@@ -221,7 +267,7 @@ kicli_code_assist/ui/tui_app.py (python) - 0
 kicli_code_assist/ui/file_browser.py (python) - 0
 ```
 
-## Integration with TUI Chat
+## Integration with TUI Chat [integration-with-tui-chat]
 
 ### Current Flow
 ```
@@ -243,7 +289,7 @@ Sends to LLM with full project understanding
 LLM provides informed answer
 ```
 
-## Language Detection
+## Language Detection [language-detection]
 
 Automatically detects:
 - **Python** - .py, .pyx, .pyi files
@@ -258,7 +304,7 @@ Automatically detects:
 
 If multiple languages found, returns "mixed"
 
-## Dependency Detection
+## Dependency Detection [dependency-detection]
 
 ### Python
 - `requirements.txt`
@@ -269,7 +315,7 @@ If multiple languages found, returns "mixed"
 - `package.json`
 - Format: `node:package_name`
 
-## Configuration Ignored
+## Configuration Ignored [configuration-ignored]
 
 Files matching these patterns are automatically ignored:
 - `.git`, `.gitignore`
@@ -280,13 +326,13 @@ Files matching these patterns are automatically ignored:
 - `.pytest_cache`, `coverage`
 - `.vscode`, `.idea`
 
-## Performance
+## Performance [performance]
 
 - **Scan time:** ~100ms for typical project (< 1000 files)
 - **Memory:** ~1 KB per file entry
 - **Context size:** 7-10 KB average (configurable)
 
-## Token Limits
+## Token Limits [token-limits]
 
 Different models have different token limits:
 
@@ -298,7 +344,7 @@ Different models have different token limits:
 
 Default: `to_context_string(max_tokens=4000)` is safe for most models
 
-## Example Context Output
+## Example Context Output [example-context-output]
 
 ```markdown
 # Project: kicli-code-assist
@@ -306,10 +352,10 @@ Default: `to_context_string(max_tokens=4000)` is safe for most models
 **Files:** 23
 **Size:** 83.1 KB
 
-## Dependencies
+## Dependencies [dependencies]
 - python:pyproject.toml
 
-## Structure
+## Structure [structure]
 ```
 kicli-code-assist/
   README.md (4.8KB)
@@ -324,13 +370,13 @@ kicli-code-assist/
 ```
 ```
 
-## Key Files Content
+## Key Files Content [key-files-content]
 ### README.md
 # KI Code Assistant
 Headless code generation and review tool with interactive TUI...
 ```
 
-## Customization
+## Customization [customization]
 
 ### Add Files Dynamically
 ```python
@@ -352,7 +398,7 @@ manager = ProjectContextManager("/path/to/my/project")
 context = info.to_context_string(max_tokens=2000)
 ```
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 **Q: Project not detected**
 - A: Ensure project root has common files (README, setup.py, package.json, etc.)
@@ -366,7 +412,7 @@ context = info.to_context_string(max_tokens=2000)
 **Q: Wrong language detected**
 - A: Language detection is heuristic; verify your project language
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 - [ ] Git history analysis
 - [ ] Test coverage information

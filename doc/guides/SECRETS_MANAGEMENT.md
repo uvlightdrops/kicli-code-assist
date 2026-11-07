@@ -1,13 +1,41 @@
+---
+title: SECRETS MANAGEMENT
+project: kicli-code-assist
+scope: guides
+purpose: Guide for managing secrets, environment variables, and credentials
+created: 2026-10-19T17:32:11+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: core-principle
+    title: Core Principle
+  - id: the-9-layer-model-with-secrets
+    title: The 9-Layer Model with Secrets
+  - id: where-secrets-live
+    title: Where Secrets Live
+  - id: deployment-workflow
+    title: Deployment Workflow
+  - id: secret-filtering-in-logs
+    title: Secret Filtering in Logs
+  - id: validation-discovery
+    title: Validation & Discovery
+  - id: checklist-deploying-a-new-app
+    title: Checklist: Deploying a New App
+  - id: faq
+    title: FAQ
+status: active
+---
+
 # Secrets Management Strategy
 
 **Status:** Documented and implemented (Phase 2+)  
 **Scope:** All ki ecosystem apps (ki-knowledge, kicli-code-assist, ki-chat, stackctl)
 
-## Core Principle
+## Core Principle [core-principle]
 
 Secrets are **host-local responsibility**. The config system doesn't classify what's secret—the host does.
 
-## The 9-Layer Model with Secrets
+## The 9-Layer Model with Secrets [the-9-layer-model-with-secrets]
 
 Config resolution order (highest to lowest priority):
 
@@ -24,7 +52,7 @@ Config resolution order (highest to lowest priority):
 
 **Critical rule:** `creds.yaml` wins even over `KI_CFG_*` environment variables.
 
-## Where Secrets Live
+## Where Secrets Live [where-secrets-live]
 
 Store secrets **at the path where they're consumed**, e.g.:
 
@@ -50,7 +78,7 @@ llm:
 
 **No wrapper paths** like `creds:` or `secrets:`. The secret goes directly where it's used.
 
-## Deployment Workflow
+## Deployment Workflow [deployment-workflow]
 
 ### Local Development
 
@@ -110,7 +138,7 @@ kicli-assist config resolve  # Will merge creds.yaml on top
 kicli-assist tui             # Reads resolved config
 ```
 
-## Secret Filtering in Logs
+## Secret Filtering in Logs [secret-filtering-in-logs]
 
 The `SensitiveDataFilter` (in `ki_core.security.filters`) automatically redacts:
 
@@ -142,7 +170,7 @@ logger.debug(f"OpenAI key: {openai_key}")
 # Log output: "OpenAI key: sk-proj-[REDACTED]" (even at DEBUG level, never leaks)
 ```
 
-## Validation & Discovery
+## Validation & Discovery [validation-discovery]
 
 ConfigManager validates secrets against schema **only for structure**, never for content:
 
@@ -165,7 +193,7 @@ llm:
 
 No attempt to check whether a key is "real" or "fake"—validation only checks types and schema shape.
 
-## Checklist: Deploying a New App
+## Checklist: Deploying a New App [checklist-deploying-a-new-app]
 
 1. **Schema section** (schema/*.schema.yaml): Define where secrets go
    ```yaml
@@ -208,7 +236,7 @@ No attempt to check whether a key is "real" or "fake"—validation only checks t
    kicli-assist config resolve    # Should show merged config (secrets masked in output)
    ```
 
-## FAQ
+## FAQ [faq]
 
 **Q: Why not encrypt creds.yaml?**  
 A: Host security (file permissions, SELinux, disk encryption) is simpler and more reliable than format-specific encryption. If creds.yaml is at risk, the host itself is compromised.

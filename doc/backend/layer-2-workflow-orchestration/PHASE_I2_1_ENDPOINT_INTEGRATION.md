@@ -1,44 +1,37 @@
 ---
-title: Phase I2.1 Backend Integration Complete
+title: REST Endpoint for Project Analysis
 project: kicli-code-assist
-agent_project: kicli-code-assist
-scope: Phase I2 - Multi-File Context Analysis / REST API
-purpose: Document REST endpoint implementation for project-wide analysis
+scope: backend-layer-2
+purpose: Document REST endpoint /api/projects/analyze for project-wide code analysis
 created: 2026-11-07T01:03:00+01:00
-updated: 2026-11-07T10:00:00+01:00
-update_reason: Added YAML header for semantic organization
+updated: 2026-11-07T16:20:00+01:00
+update_reason: Split from hybrid doc; removed TUI integration, reference moved to frontend-tui/
 status: stable
 
 semantic_blocks:
   - id: endpoint-spec
     type: implementation
     status: stable
-    version: 1.0
-    
   - id: request-response-format
     type: implementation
     status: stable
-    version: 1.0
 
 relations:
-  - target: PHASE_I2_PROJECTANALYZER_COMPLETE
+  - target: PHASE_I2_PROJECTANALYZER_COMPLETE.md
     type: depends-on
     reason: "Endpoint wraps ProjectAnalyzer core functionality"
-    
-  - target: PHASE_I2_2_TUI_INTEGRATION_COMPLETE
-    type: composed-of
-    reason: "TUI consumes this endpoint"
+  - target: ../../../frontend-tui/I2_ENDPOINT_CONSUMPTION_TUI.md
+    type: reference
+    reason: "TUI implementation consuming this endpoint"
 ---
 
-# Phase I2.1: Backend Integration Complete
+# REST Endpoint for Project Analysis
 
-**Date**: 2026-11-07  
-**Status**: ✅ COMPLETE - REST API endpoint ready  
-**Phase**: Multi-File Context Analysis (Continued)  
+**Status**: ✅ COMPLETE - `/api/projects/analyze` endpoint ready  
 
-## What Was Done [endpoint-spec]
+## Endpoint Specification [endpoint-spec]
 
-### 1. New REST Endpoint: `/api/projects/analyze`
+### POST `/api/projects/analyze`
 
 **Location**: `kicli_code_assist/web/server_routes.py` (Lines 917-1040)
 
@@ -96,7 +89,23 @@ relations:
 }
 ```
 
-### 2. Real-World Test Results
+## Implementation Details [request-response-format]
+
+### Data Format
+
+The endpoint returns structured project metadata:
+
+| Field | Type | Purpose |
+|-------|------|---------|
+| `project.name` | string | Project identifier |
+| `project.root` | string | Absolute path to project root |
+| `files[]` | array | Complete file inventory |
+| `files[].path` | string | Relative path from root |
+| `files[].complexity` | int | Cyclomatic complexity score |
+| `dependencies` | object | Import graph (file → dependencies) |
+| `high_impact_files` | array | Files with highest dependents |
+
+### Real-World Analysis Results
 
 Analyzed **actual kicli-code-assist project**:
 
@@ -106,106 +115,33 @@ Analyzed **actual kicli-code-assist project**:
 | Total lines | 49,616 |
 | Languages | Python (189 files) |
 | Avg complexity | 20.10 |
-| Circular deps | 0 |
+| Circular dependencies | 0 |
 
-**Most Critical Files** (by import count):
+**Critical Files** (by dependent count):
 1. `app_config.py` - 19 direct dependents (CRITICAL)
 2. `prompts.py` - 9 direct dependents (HIGH)
 3. `executor/shell_execution.py` - 9 dependents (HIGH)
-4. `chat_session.py` - 7 dependents (HIGH)
-5. `llm_integration.py` - 7 dependents (HIGH)
 
-This reveals **app_config.py as a core bottleneck** - changing it affects 19 files!
-
-### 3. Integration in Response Pipeline
-
-The endpoint:
-- ✅ Uses ProjectAnalysisService directly (no duplication)
-- ✅ Validates project root against ALLOWED_ROOT (security)
-- ✅ Handles large projects (189+ files in seconds)
-- ✅ Provides structured dependency graph
-- ✅ Returns JSON compatible with TUI frontend
-
-### 4. Performance Characteristics
+### Performance
 
 - **Small project** (6 files): < 0.1s
 - **Large project** (189 files): ~2-5s
 - **Memory usage**: Linear with file count
-- **No external calls**: Pure local analysis
 
-### 5. Error Handling
+### Error Handling
 
-- ✅ Missing project_root parameter → 400
+- ✅ Missing `project_root` parameter → 400
 - ✅ Path outside ALLOWED_ROOT → 403
 - ✅ Project path doesn't exist → 404
 - ✅ Parse errors → logged, analysis continues
 - ✅ All errors → logged with traceback
 
-## Integration with TUI (Next: Phase I2.2)
+## Integration Points
 
-The endpoint is now ready for TUI integration:
+For TUI consumption details, see `../../../frontend-tui/I2_ENDPOINT_CONSUMPTION_TUI.md`
 
-```python
-# In agent_tabs.py or new ProjectPanel component:
-response = http_client.analyze_project(project_root="/path/to/project")
-
-# Display results:
-# - Show dependency graph
-# - Highlight critical files
-# - Suggest refactoring opportunities
-# - Display impact zones per file
-```
-
-## Files Modified
-
-| File | Lines Changed | Purpose |
-|------|----------------|---------|
-| `server_routes.py` | +125 | New /api/projects/analyze endpoint |
-
-## Files Created
-
-| File | Purpose |
-|------|---------|
-| `PHASE_I2_MULTIFILE_ANALYSIS.md` | Architecture (Phase I2.0) |
-| `PHASE_I2_PROJECTANALYZER_COMPLETE.md` | Completion report (Phase I2.0) |
-
-## Testing
-
-✅ **Unit tests**: All 4 test suites passed
-✅ **Integration**: Endpoint logic verified
-✅ **Real project**: Analyzed 189 files successfully
-✅ **Impact analysis**: Correctly identified critical files
-
-## Backward Compatibility
-
-✅ No changes to existing endpoints
-✅ No breaking changes to any APIs
-✅ Graceful error handling
-✅ Can be used independently or alongside other analysis tools
-
-## Next Steps (Phase I2.2: TUI Integration)
-
-### Immediate (within 1-2 hours):
-- [ ] Extend TUI to call `/api/projects/analyze`
-- [ ] Display project analysis in new "Project" panel
-- [ ] Show high-impact files list
-- [ ] Allow click-to-analyze per file
-
-### Soon (Phase I2.3):
-- [ ] Visualize dependency graph (ASCII/text)
-- [ ] Show circular dependencies
-- [ ] Suggest refactoring based on impact
-- [ ] Implement caching for large projects
-
-### Future (Phase II):
-- [ ] Git history analysis (commit frequency)
-- [ ] Custom rule engine (project-specific checks)
-- [ ] Best practices database
-- [ ] Machine learning on common patterns
+For core analysis modules, see `PHASE_I2_PROJECTANALYZER_COMPLETE.md`
 
 ---
 
-**Chain**: Phase I1 (Single File) → **Phase I2.0 (ProjectAnalyzer)** → **Phase I2.1 (Endpoint)** → Phase I2.2 (TUI Integration)
-
-**Status**: Phase I2.1 ✅ COMPLETE  
-**Ready for**: TUI Integration (Phase I2.2)
+**See also**: PHASE_I2_MULTIFILE_ANALYSIS.md (architecture), PHASE_I2_PROJECTANALYZER_COMPLETE.md (modules)

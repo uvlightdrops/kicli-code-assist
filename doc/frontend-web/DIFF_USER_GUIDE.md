@@ -10,12 +10,29 @@ agent_project: CodeImplementationAgent
 cross_references:
   - "doc/frontend-web/README.md"
   - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+semantic_blocks:
+  - id: überblick
+    title: Überblick
+  - id: api-referenz
+    title: API-Referenz
+  - id: konfiguration
+    title: Konfiguration
+  - id: integration-in-tui
+    title: Integration in TUI
+  - id: workflows
+    title: Workflows
+  - id: debugging
+    title: Debugging
+  - id: tipps-für-robuste-diffs
+    title: Tipps für robuste Diffs
+  - id: nächste-schritte
+    title: Nächste Schritte
   - "doc/specifications/01_ARCHITECTURE.md"
 ---
 
 # Diff Engine & Code Edit Features - Benutzerhandbuch
 
-## Überblick
+## Überblick [überblick]
 
 Das Diff Engine System ermöglicht es:
 1. **LLM-Output analysieren** → Code-Blöcke extrahieren
@@ -23,7 +40,7 @@ Das Diff Engine System ermöglicht es:
 3. **Auto-Apply entscheiden** → Basierend auf Confidence Score
 4. **Code anwenden** → Patches auf Dateien auftragen
 
-## API-Referenz
+## API-Referenz [api-referenz]
 
 ### 1. Diffs aus LLM-Output generieren
 
@@ -147,7 +164,7 @@ for diff in diffs:
         print(f"Merge conflict in {diff.file_path}")
 ```
 
-## Konfiguration
+## Konfiguration [konfiguration]
 
 Alle Diff-Features werden via `Config` kontrolliert:
 
@@ -169,7 +186,7 @@ export DIFF_AUTO_APPLY_THRESHOLD=0.75
 export DIFF_FORMAT=unified
 ```
 
-## Integration in TUI
+## Integration in TUI [integration-in-tui]
 
 ### 1. Diff-View Widget
 
@@ -245,7 +262,7 @@ if "```" in llm_response:  # Code-Blöcke erkannt?
 | `Ctrl+I` | Focus Input |
 | `q` | Diff-Viewer schließen |
 
-## Workflows
+## Workflows [workflows]
 
 ### Workflow 1: Review & Approve
 
@@ -304,7 +321,7 @@ pytest tests/test_diff_engine.py --cov=kicli_code_assist.context.diff_engine
 pytest tests/test_diff_engine.py::TestDiffGenerator::test_should_auto_apply_high_confidence -v
 ```
 
-## Debugging
+## Debugging [debugging]
 
 ```python
 # Verbose output
@@ -326,7 +343,7 @@ for diff in diffs:
     print(f"  Auto-apply: {generator.should_auto_apply(diff)}")
 ```
 
-## Tipps für robuste Diffs
+## Tipps für robuste Diffs [tipps-für-robuste-diffs]
 
 1. **Syntax-Validierung**: Stelle sicher, dass LLM-Code valid ist
 2. **Größe-Limits**: Nutze `diff_max_file_size_kb` um OOM zu vermeiden
@@ -334,7 +351,7 @@ for diff in diffs:
 4. **Manual Review**: Bei Confidence < 70% immer reviewen
 5. **Git Integration**: Nutze `git apply` statt direktes Patchen für Merges
 
-## Nächste Schritte
+## Nächste Schritte [nächste-schritte]
 
 - [ ] Diff Viewer Widget in Textual implementieren
 - [ ] Side-by-side view für größere Diffs

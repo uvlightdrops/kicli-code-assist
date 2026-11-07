@@ -10,12 +10,37 @@ agent_project: null
 cross_references:
   - "doc/frontend-web/README.md"
   - "doc/frontend-web/WEB_EDITOR_EDIT_CAPABILITIES.md"
+semantic_blocks:
+  - id: 1-monaco-editor
+    title: 1️⃣ MONACO EDITOR
+  - id: 2-codemirror
+    title: 2️⃣ CODEMIRROR
+  - id: 3-ace-editor
+    title: 3️⃣ ACE EDITOR
+  - id: 4-vimwasm
+    title: 4️⃣ VIM.WASM
+  - id: 5-neovim-in-browser
+    title: 5️⃣ NEOVIM IN BROWSER
+  - id: 6-highlightjs
+    title: 6️⃣ HIGHLIGHT.JS
+  - id: 7-tinymce-rich-text-alternative
+    title: 7️⃣ TINYMCE (Rich Text Alternative)
+  - id: comparison-table
+    title: 🎯 COMPARISON TABLE
+  - id: vim-users-recommendations
+    title: 🧠 VIM USERS - RECOMMENDATIONS
+  - id: implementation-paths-for-kicli-webide
+    title: 🔧 IMPLEMENTATION PATHS FOR kicli WebIDE
+  - id: for-your-use-case
+    title: 🎬 FOR YOUR USE CASE
+  - id: resources
+    title: 📖 RESOURCES
   - "doc/frontend-web/WEB_FRONTEND_DESIGN.md"
 ---
 
 # Web Editor Frameworks - Comprehensive Comparison
 
-## 1️⃣ MONACO EDITOR
+## 1️⃣ MONACO EDITOR [1-monaco-editor]
 **By:** Microsoft (VSCode's engine)  
 **NPM:** `@monaco-editor/react`  
 **License:** MIT
@@ -52,7 +77,7 @@ const options = {
 
 ---
 
-## 2️⃣ CODEMIRROR
+## 2️⃣ CODEMIRROR [2-codemirror]
 **NPM:** `codemirror` (v6 current)  
 **License:** MIT
 
@@ -89,7 +114,7 @@ const editor = new EditorView({
 
 ---
 
-## 3️⃣ ACE EDITOR
+## 3️⃣ ACE EDITOR [3-ace-editor]
 **NPM:** `ace-builds`  
 **License:** BSD
 
@@ -122,7 +147,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 4️⃣ VIM.WASM
+## 4️⃣ VIM.WASM [4-vimwasm]
 **Repository:** `vim/vim`  
 **Build:** Vim compiled to WebAssembly
 
@@ -157,7 +182,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 5️⃣ NEOVIM IN BROWSER
+## 5️⃣ NEOVIM IN BROWSER [5-neovim-in-browser]
 **Repository:** `neovim/neovim`  
 **Build:** Neovim + WebAssembly
 
@@ -189,7 +214,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 6️⃣ HIGHLIGHT.JS
+## 6️⃣ HIGHLIGHT.JS [6-highlightjs]
 **NPM:** `highlight.js`  
 **License:** BSD
 
@@ -216,7 +241,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 7️⃣ TINYMCE (Rich Text Alternative)
+## 7️⃣ TINYMCE (Rich Text Alternative) [7-tinymce-rich-text-alternative]
 **NPM:** `tinymce`  
 **License:** LGPL
 
@@ -242,7 +267,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🎯 COMPARISON TABLE
+## 🎯 COMPARISON TABLE [comparison-table]
 
 ```
 ┌────────────────────┬─────────┬─────────┬──────────┬────────┐
@@ -260,7 +285,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🧠 VIM USERS - RECOMMENDATIONS
+## 🧠 VIM USERS - RECOMMENDATIONS [vim-users-recommendations]
 
 ### If you want **partial Vim** (emulation):
 1. **Monaco** with vim mode (best UX)
@@ -277,7 +302,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🔧 IMPLEMENTATION PATHS FOR kicli WebIDE
+## 🔧 IMPLEMENTATION PATHS FOR kicli WebIDE [implementation-paths-for-kicli-webide]
 
 ### Path A: Monaco (Recommended - Professional)
 ```
@@ -316,7 +341,7 @@ npm install @vim/wasm
 
 ---
 
-## 🎬 FOR YOUR USE CASE
+## 🎬 FOR YOUR USE CASE [for-your-use-case]
 
 **Question:** You're a Vim user, right?
 
@@ -332,7 +357,7 @@ npm install @vim/wasm
 
 ---
 
-## 📖 RESOURCES
+## 📖 RESOURCES [resources]
 
 | Framework | Docs | GitHub |
 |-----------|------|--------|

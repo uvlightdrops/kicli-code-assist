@@ -10,6 +10,27 @@ superseded_by: doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md
 agent_project: kicli-code-assist
 cross_references:
   - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
+semantic_blocks:
+  - id: layout
+    title: Layout
+  - id: file-list-widget-selectablefilelist
+    title: File List Widget (`SelectableFileList`)
+  - id: focus-management
+    title: Focus Management
+  - id: keyboard-shortcuts
+    title: Keyboard Shortcuts
+  - id: chat-display-richlog
+    title: Chat Display (`RichLog`)
+  - id: input-field-multilineinput
+    title: Input Field (`MultilineInput`)
+  - id: file-preview-section
+    title: File Preview Section
+  - id: state-indicators
+    title: State Indicators
+  - id: error-handling-ui
+    title: Error Handling UI
+  - id: planned-enhancements
+    title: Planned Enhancements
   - doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md
 ---
 
@@ -17,7 +38,7 @@ cross_references:
 
 **STATUS: ARCHIVED** — This represents an earlier chat-based terminal design (October 2026). The project now uses an agent-backend interface approach. See [TUI_STRATEGY_CLARIFICATION.md](/home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md) for decision context.
 
-## Layout
+## Layout [layout]
 
 ### Screen Structure
 
@@ -65,7 +86,7 @@ cross_references:
 | - Input Field | MultilineInput | User message composition with wrapping |
 | Status Bar | Static | Focus indicator + context status |
 
-## File List Widget (`SelectableFileList`)
+## File List Widget (`SelectableFileList`) [file-list-widget-selectablefilelist]
 
 ### Display Format
 
@@ -108,7 +129,7 @@ action_select_cursor()     # Handle ENTER key
 get_selected_file()        # Return path of selected item
 ```
 
-## Focus Management
+## Focus Management [focus-management]
 
 ### Three-Mode System
 
@@ -147,7 +168,7 @@ Curr-focus: B  |  ❌ No context loaded
   [B/C/I indicator]   [Project context status]
 ```
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts [keyboard-shortcuts]
 
 ### Browser Mode
 
@@ -189,7 +210,7 @@ Curr-focus: B  |  ❌ No context loaded
 
 **Note**: Text editing shortcuts (HOME, END, CTRL+A, etc.) work normally in INPUT mode via TextArea widget.
 
-## Chat Display (`RichLog`)
+## Chat Display (`RichLog`) [chat-display-richlog]
 
 ### Features
 
@@ -237,7 +258,7 @@ This function does X, Y, and Z...
 [bold yellow]⏳ Waiting for LLM response...[/]
 ```
 
-## Input Field (`MultilineInput`)
+## Input Field (`MultilineInput`) [input-field-multilineinput]
 
 ### Features
 
@@ -279,7 +300,7 @@ class MultilineInput(Static):
     def blur()                   # Remove focus
 ```
 
-## File Preview Section
+## File Preview Section [file-preview-section]
 
 ### Current State
 
@@ -295,7 +316,7 @@ When file selected (via L key):
 3. Render in Static widget with syntax highlighting
 4. Auto-scroll to relevant section (if context-aware)
 
-## State Indicators
+## State Indicators [state-indicators]
 
 ### Status Bar Components
 
@@ -317,7 +338,7 @@ Curr-focus: B              ← Focus indicator (B or I)
 | Input field | Multi-line visible | Can see all typed text at once |
 | Status bar | "B", "C", or "I" | Current focus mode indicator |
 
-## Error Handling UI
+## Error Handling UI [error-handling-ui]
 
 ### Error Display Locations
 
@@ -331,7 +352,7 @@ Curr-focus: B              ← Focus indicator (B or I)
 3. **Project Context**: Directory access errors
    - Caught during scan, reported in chat
 
-## Planned Enhancements
+## Planned Enhancements [planned-enhancements]
 
 1. **File Preview Auto-Update**: Show content when navigating
 2. **Syntax Highlighting**: In file preview

@@ -10,6 +10,23 @@ agent_project: null
 cross_references:
   - "doc/specifications/01_ARCHITECTURE.md"
   - "doc/frontend-web/README.md"
+semantic_blocks:
+  - id: tab-übersicht
+    title: Tab-Übersicht
+  - id: llm-query-transparency-was-der-log-zei
+    title: LLM Query Transparency (Was der Log zeigt)
+  - id: workflow-übersicht
+    title: Workflow-Übersicht
+  - id: beispiel-ki-vorschläge-debugging
+    title: Beispiel: KI-Vorschläge Debugging
+  - id: taste-keybindings-für-tabs
+    title: Taste & Keybindings für Tabs
+  - id: was-die-debug-messages-bedeuten
+    title: Was die Debug-Messages bedeuten
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: best-practices
+    title: Best Practices
   - "doc/archive/tui_attempt_oct2026/README.md"
 ---
 
@@ -19,7 +36,7 @@ cross_references:
 
 Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische Funktion für den Workflow.
 
-## Tab-Übersicht
+## Tab-Übersicht [tab-übersicht]
 
 ### 1. **Logging Tab** ⭐ (Default active)
 - **Funktion:** Real-time logs und debugging
@@ -87,9 +104,9 @@ Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische F
 
 ---
 
-## LLM Query Transparency (Was der Log zeigt)
+## LLM Query Transparency (Was der Log zeigt) [llm-query-transparency-was-der-log-zei]
 
-## Workflow-Übersicht
+## Workflow-Übersicht [workflow-übersicht]
 
 ```
 1. File öffnen
@@ -116,7 +133,7 @@ Die Terminal UI ist in mehrere Tabs unterteilt. Jeder Tab hat eine spezifische F
     Background Tab zeigt: Details der Applied Hunks
 ```
 
-## Beispiel: KI-Vorschläge Debugging
+## Beispiel: KI-Vorschläge Debugging [beispiel-ki-vorschläge-debugging]
 
 ### Szenario: "returned no suggestions"
 
@@ -143,7 +160,7 @@ ERROR: LLM call failed: All 1 providers exhausted: ['OpenAICompatibleClient']
 
 ---
 
-## Taste & Keybindings für Tabs
+## Taste & Keybindings für Tabs [taste-keybindings-für-tabs]
 
 | Taste | Aktion |
 |-------|--------|
@@ -154,7 +171,7 @@ ERROR: LLM call failed: All 1 providers exhausted: ['OpenAICompatibleClient']
 
 ---
 
-## Was die Debug-Messages bedeuten
+## Was die Debug-Messages bedeuten [was-die-debug-messages-bedeuten]
 
 ### AI Workflow Messages
 
@@ -195,7 +212,7 @@ File: test.py
 
 ---
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Problem: Modal erscheint nicht
 1. Schaue ins **AI Background Tab** (`Ctrl+A`)
@@ -217,7 +234,7 @@ File: test.py
 
 ---
 
-## Best Practices
+## Best Practices [best-practices]
 
 1. **Immer Background Tab offen halten** beim Debugging
    - `Ctrl+A` um schnell dahin zu springen

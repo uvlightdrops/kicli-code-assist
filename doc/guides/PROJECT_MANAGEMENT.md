@@ -1,8 +1,34 @@
+---
+title: PROJECT MANAGEMENT
+project: kicli-code-assist
+scope: guides
+purpose: Project tracking, phase status, and management guidelines
+created: 2026-10-27T10:31:30+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: features
+    title: Features
+  - id: api-endpoints
+    title: API Endpoints
+  - id: frontend-components
+    title: Frontend Components
+  - id: security
+    title: Security
+  - id: file-structure
+    title: File Structure
+  - id: development
+    title: Development
+  - id: future-enhancements
+    title: Future Enhancements
+status: active
+---
+
 # Project Management System
 
 Implementiert ein benutzerfreundliches Project Management System für die kicli-code-assist IDE.
 
-## Features
+## Features [features]
 
 ### 1. **Empty State**
 - Wenn keine Project aktiv ist, zeigt die IDE einen leeren Screen
@@ -31,7 +57,7 @@ Implementiert ein benutzerfreundliches Project Management System für die kicli-
 - Format: `PROJECT FILES → {ProjectName} → {folder1} → {folder2}`
 - Consistent mit Project Root Sicherheitsgrenze
 
-## API Endpoints
+## API Endpoints [api-endpoints]
 
 ### `GET /api/projects/current`
 Aktuelles offenes Project abrufen.
@@ -114,7 +140,7 @@ Recent Projects aus Cache.
 curl http://localhost:8000/api/projects/recent
 ```
 
-## Frontend Components
+## Frontend Components [frontend-components]
 
 ### `EmptyState.tsx`
 Leerer Zustand mit Aktionsbuttons.
@@ -157,13 +183,13 @@ import { useProject } from './hooks/useProject'
 const { current, isEmpty, openProject, createProject, closeProject } = useProject()
 ```
 
-## Security
+## Security [security]
 
 - **Path Validation**: Alle Paths sind auf `/home/flow/dev_flow` limitiert
 - **Safe Navigation**: FileBrowser kann nicht über Project Root hinaus
 - **Metadata Storage**: Projects speichern Metadata in `.kicli_project` JSON-Datei
 
-## File Structure
+## File Structure [file-structure]
 
 ```
 /home/flow/dev_flow/
@@ -184,7 +210,7 @@ const { current, isEmpty, openProject, createProject, closeProject } = useProjec
 └── .kicli_recent_projects       # Cache für Recent Projects
 ```
 
-## Development
+## Development [development]
 
 ### Run Frontend Dev Server
 ```bash
@@ -214,7 +240,7 @@ curl -X POST http://localhost:8000/api/projects/open \
 curl 'http://localhost:8000/api/projects/browse?path=/home/flow/dev_flow'
 ```
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 - [ ] Recent projects history persistence (cache file)
 - [ ] Project settings/metadata editor

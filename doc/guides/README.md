@@ -1,13 +1,12 @@
 ---
+title: Guides & How-To Documentation
 project: kicli-code-assist
 scope: guides
-created: 2026-11-02 13
-updated: 2026-11-02 13
-update_reason: Created folder README with guidelines
-status: current
-agent_project: kicli-code-assist
-cross_references:
-  - /home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md
+purpose: Index and navigation for operational guides, tutorials, and setup instructions
+created: 2026-11-02T13:00:00+01:00
+updated: 2026-11-07T17:30:00+01:00
+update_reason: Added comprehensive navigation table, added semantic relations, PHASE 2 guides cleanup
+status: active
 ---
 
 # Guides & How-To Documentation
@@ -16,7 +15,40 @@ cross_references:
 
 ---
 
-## What Goes Here
+## 📋 Guide Index
+
+| Category | Document | Purpose | Audience | Status |
+|----------|----------|---------|----------|--------|
+| **Installation/Setup** | [INSTALLATION.md](INSTALLATION.md) | Development environment setup | Developers | ✅ Complete |
+| | [TUI_QUICK_START.md](TUI_QUICK_START.md) | Quick start for TUI client | End Users | ✅ Complete |
+| **Configuration** | [CONFIG_VALIDATION_GUIDE.md](CONFIG_VALIDATION_GUIDE.md) | Config file validation & ConfigManager | Developers | ✅ Complete |
+| | [HOT_RELOAD_DEV.md](HOT_RELOAD_DEV.md) | Hot-reload during development | Developers | ✅ Complete |
+| | [YAML_CONFIG_SYSADMIN.md](YAML_CONFIG_SYSADMIN.md) | YAML config reference for admins | DevOps/Admins | ✅ Complete |
+| **Deployment** | [PRODUCTION_DEPLOYMENT.md](PRODUCTION_DEPLOYMENT.md) | Production deployment guide | DevOps/Admins | ✅ Complete |
+| | [WEB_DEPLOYMENT_GUIDE.md](WEB_DEPLOYMENT_GUIDE.md) | Web frontend & service deployment | DevOps/Admins | ✅ Complete |
+| **Security** | [SECRETS_MANAGEMENT.md](SECRETS_MANAGEMENT.md) | Managing secrets & env vars | Developers/DevOps | ✅ Complete |
+| | [SECURITY.md](SECURITY.md) | Security best practices | All Roles | ✅ Complete |
+| **Project Context** | [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) | Architecture & project overview | Developers | ✅ Complete |
+| | [PROJECT_MANAGEMENT.md](PROJECT_MANAGEMENT.md) | Phase tracking & project status | PMs/Leads | ✅ Complete |
+| **Best Practices** | [TEXTUAL_BEST_PRACTICES_REVIEW.md](TEXTUAL_BEST_PRACTICES_REVIEW.md) | TUI/Textual framework best practices | Developers | ✅ Complete |
+| | [VI_EDITOR_GUIDE.md](VI_EDITOR_GUIDE.md) | Vi/vim integration guide | Developers | ✅ Complete |
+
+**Legend:** ✅ Complete | 🚧 In Progress | ⚠️ Needs Review | 📝 Planned
+
+---
+
+## Related Documentation Folders
+
+| Folder | Purpose | Link |
+|--------|---------|------|
+| **backend/** | REST API specs, workflow orchestration, data layer | [→ Backend Docs](../backend/) |
+| **features/** | Feature specifications and implementation details | [→ Features](../features/) |
+| **architecture/** | System design, patterns, and technical decisions | [→ Architecture](../architecture/) |
+| **refactorings/** | Code refactoring history and patterns | [→ Refactorings](../refactorings/) |
+| **phases/** | Phase summaries and completion reports | [→ Phases](../phases/) |
+| **tracking/** | Session progress and checkpoints | [→ Tracking](../tracking/) |
+
+---
 
 ### ✅ DO Include
 

@@ -10,6 +10,27 @@ agent_project: kicli-code-assist
 cross_references:
   - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (TUI implementation)
   - doc/features/UI_TABS.md (Tab system reference)
+semantic_blocks:
+  - id: core-principles
+    title: Core Principles
+  - id: layout-components
+    title: Layout & Components
+  - id: data-flow-user-request
+    title: Data Flow: User Request
+  - id: backend-routes-required
+    title: Backend Routes Required
+  - id: component-states-transitions
+    title: Component States & Transitions
+  - id: input-handling
+    title: Input Handling
+  - id: visual-formatting
+    title: Visual Formatting
+  - id: error-handling
+    title: Error Handling
+  - id: keyboard-shortcuts-frontend-agnostic
+    title: Keyboard Shortcuts (Frontend-Agnostic)
+  - id: frontend-implementation-checklist
+    title: Frontend Implementation Checklist
   - doc/phases/archive/PHASE5_UI_INTEGRATION.md (Earlier UI thinking)
 ---
 
@@ -17,7 +38,7 @@ cross_references:
 
 **Purpose:** Define a frontend interface that can be implemented in multiple technologies (Textual TUI, GTK, Web, etc.) without changing the backend.
 
-## Core Principles
+## Core Principles [core-principles]
 
 1. **Backend Agnostic**: All layout/component decisions map to backend API calls
 2. **Stateless UI**: No UI-side logic beyond formatting and interaction
@@ -26,7 +47,7 @@ cross_references:
 
 ---
 
-## Layout & Components
+## Layout & Components [layout-components]
 
 ### Screen Structure (Abstract)
 
@@ -75,7 +96,7 @@ cross_references:
 
 ---
 
-## Data Flow: User Request
+## Data Flow: User Request [data-flow-user-request]
 
 ```
 1. User selects file in Project Tree
@@ -116,7 +137,7 @@ cross_references:
 
 ---
 
-## Backend Routes Required
+## Backend Routes Required [backend-routes-required]
 
 ### Project Operations
 
@@ -172,7 +193,7 @@ WebSocket /socket.io
 
 ---
 
-## Component States & Transitions
+## Component States & Transitions [component-states-transitions]
 
 ### Processing State
 
@@ -210,7 +231,7 @@ WebSocket /socket.io
 
 ---
 
-## Input Handling
+## Input Handling [input-handling]
 
 ### Input Field Behavior
 
@@ -233,7 +254,7 @@ WebSocket /socket.io
 
 ---
 
-## Visual Formatting
+## Visual Formatting [visual-formatting]
 
 ### Code Blocks
 
@@ -292,7 +313,7 @@ Cyclomatic:        3
 
 ---
 
-## Error Handling
+## Error Handling [error-handling]
 
 ### Backend Unavailable
 
@@ -333,7 +354,7 @@ Cyclomatic:        3
 
 ---
 
-## Keyboard Shortcuts (Frontend-Agnostic)
+## Keyboard Shortcuts (Frontend-Agnostic) [keyboard-shortcuts-frontend-agnostic]
 
 | Shortcut | Action |
 |----------|--------|
@@ -348,7 +369,7 @@ Cyclomatic:        3
 
 ---
 
-## Frontend Implementation Checklist
+## Frontend Implementation Checklist [frontend-implementation-checklist]
 
 For each frontend (Textual TUI, GTK, Web):
 

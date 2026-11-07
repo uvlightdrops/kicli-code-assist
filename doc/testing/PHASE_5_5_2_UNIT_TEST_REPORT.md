@@ -6,6 +6,19 @@ created: 2026-11-02T02:15:00+01:00
 updated: 2026-11-02T02:15:00+01:00
 update_reason: "Unit test execution for transparency modules complete"
 status: "active"
+semantic_blocks:
+  - id: test-summary
+    title: Test Summary
+  - id: test-details
+    title: Test Details
+  - id: test-execution-report
+    title: Test Execution Report
+  - id: quality-metrics
+    title: Quality Metrics
+  - id: recommendations
+    title: Recommendations
+  - id: next-steps
+    title: Next Steps
 author: "Copilot"
 ---
 
@@ -17,7 +30,7 @@ author: "Copilot"
 
 ---
 
-## Test Summary
+## Test Summary [test-summary]
 
 | Module | Tests | Passed | Failed | Coverage |
 |--------|-------|--------|--------|----------|
@@ -29,7 +42,7 @@ author: "Copilot"
 
 ---
 
-## Test Details
+## Test Details [test-details]
 
 ### ReasoningTracer Tests (12 tests)
 
@@ -126,7 +139,7 @@ author: "Copilot"
 
 ---
 
-## Test Execution Report
+## Test Execution Report [test-execution-report]
 
 ```
 ============================= test session starts ==============================
@@ -207,7 +220,7 @@ tests/test_transparency_modules.py::TestIntegration::test_full_execution_trace P
 
 ---
 
-## Quality Metrics
+## Quality Metrics [quality-metrics]
 
 | Metric | Value |
 |--------|-------|
@@ -222,7 +235,7 @@ tests/test_transparency_modules.py::TestIntegration::test_full_execution_trace P
 
 ---
 
-## Recommendations
+## Recommendations [recommendations]
 
 ### For Production
 
@@ -254,7 +267,7 @@ tests/test_transparency_modules.py::TestIntegration::test_full_execution_trace P
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 ✅ **Phase 5.5.2.U1 Complete:** Unit tests passing
 

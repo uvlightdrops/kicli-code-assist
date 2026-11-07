@@ -10,6 +10,23 @@ author: "Copilot"
 cross_references:
   - "doc/frontend-web/README.md"
   - "doc/PHASE_5_5_2_SUMMARY.md"
+semantic_blocks:
+  - id: component-architecture
+    title: Component Architecture
+  - id: hooks-implementation
+    title: Hooks Implementation
+  - id: component-details
+    title: Component Details
+  - id: styling-strategy
+    title: Styling Strategy
+  - id: integration-points
+    title: Integration Points
+  - id: performance-considerations
+    title: Performance Considerations
+  - id: implementation-checklist
+    title: Implementation Checklist
+  - id: next-steps
+    title: Next Steps
   - "doc/architecture/PHASE_5_5_2_I2_WEBSOCKET_ARCHITECTURE.md"
 ---
 
@@ -22,7 +39,7 @@ cross_references:
 
 ---
 
-## Component Architecture
+## Component Architecture [component-architecture]
 
 ### Entry Point: ReasoningPanel
 
@@ -79,7 +96,7 @@ ReasoningPanel
 
 ---
 
-## Hooks Implementation
+## Hooks Implementation [hooks-implementation]
 
 ### 1. useReasoningStream
 
@@ -202,7 +219,7 @@ function useExecutionHistory(executionId: string): ExecutionHistory {
 
 ---
 
-## Component Details
+## Component Details [component-details]
 
 ### EventTimeline Component
 
@@ -355,7 +372,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Styling Strategy
+## Styling Strategy [styling-strategy]
 
 ### CSS Layout
 
@@ -418,7 +435,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Integration Points
+## Integration Points [integration-points]
 
 ### 1. With Existing Agent UI
 - Add ReasoningPanel to AgentChatContainer
@@ -437,7 +454,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Performance Considerations
+## Performance Considerations [performance-considerations]
 
 ### Memory Management
 - Limit displayed events to last 1000
@@ -479,7 +496,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Implementation Checklist
+## Implementation Checklist [implementation-checklist]
 
 ### Phase I4a: Hooks & Utilities (40 min)
 - [ ] useReasoningStream hook
@@ -505,7 +522,7 @@ function MetricsSidebar({ events, cost, metrics }: {
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 1. **Implement I4a:** Hooks and utilities
 2. **Implement I4b:** Components and rendering

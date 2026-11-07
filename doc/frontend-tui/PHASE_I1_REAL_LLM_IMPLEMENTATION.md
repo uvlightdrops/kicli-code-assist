@@ -4,12 +4,33 @@ project: kicli-code-assist
 scope: frontend-tui
 type: implementation
 status: in_progress
-created: 2026-11-06T10:28:00+01:00
-updated: 2026-11-06T10:45:00+01:00
-update_reason: Document Phase I1 real LLM backend integration for TUI
+created: 2026-11-06T10:46:43+01:00
+updated: 2026-11-07T17:25:00+01:00
+update_reason: Applied @timestamp-correction-from-git and @semantic-knowledge-organization
 cross_references:
   - ../../doc/backend/layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
   - ../../doc/backend/README.md
+semantic_blocks:
+  - id: what-changed
+    title: What Changed
+  - id: architecture-tui-backend-flow
+    title: Architecture: TUI → Backend Flow
+  - id: api-contract
+    title: API Contract
+  - id: known-limitations-gaps
+    title: Known Limitations & Gaps
+  - id: next-steps-priority-order
+    title: Next Steps (Priority Order)
+  - id: code-structure
+    title: Code Structure
+  - id: files-changed-commit-b20980e
+    title: Files Changed (Commit b20980e)
+  - id: performance-characteristics
+    title: Performance Characteristics
+  - id: debugging
+    title: Debugging
+  - id: integration-checkpoint
+    title: Integration Checkpoint
   - ./TUI_TEXTUAL_ARCHITECTURE.md
 ---
 
@@ -17,7 +38,7 @@ cross_references:
 
 Status: **In Progress** — HTTP client complete, integration wired, ready to test
 
-## What Changed
+## What Changed [what-changed]
 
 ### New Components
 
@@ -90,7 +111,7 @@ Per agent type:
 - Prevents UI blocking during LLM request
 - Status: `is_analyzing` flag prevents double-click
 
-## Architecture: TUI → Backend Flow
+## Architecture: TUI → Backend Flow [architecture-tui-backend-flow]
 
 ```
 TUI File Selection
@@ -115,7 +136,7 @@ AgentTabPanel._perform_analysis() [@work async]
 User sees: Real agent analysis + chunks in split panels
 ```
 
-## API Contract
+## API Contract [api-contract]
 
 **Endpoint**: `POST /api/agent/route` (Backend Layer 2)
 
@@ -209,7 +230,7 @@ python3 -m kicli_code_assist.ui.tui_client
 # 6. Watch panels populate with real LLM response
 ```
 
-## Known Limitations & Gaps
+## Known Limitations & Gaps [known-limitations-gaps]
 
 | Item | Status | Notes |
 |------|--------|-------|
@@ -223,7 +244,7 @@ python3 -m kicli_code_assist.ui.tui_client
 | Caching | 🔴 Missing | Same query = repeated requests (Layer 2 does cache) |
 | Large response handling | ⚠️ Partial | May need truncation/pagination for 10KB+ responses |
 
-## Next Steps (Priority Order)
+## Next Steps (Priority Order) [next-steps-priority-order]
 
 1. **Wire file selection → AgentTabPanel** (TUI Integration)
    - When user selects file in FileTree, update AgentTabPanel context
@@ -249,7 +270,7 @@ python3 -m kicli_code_assist.ui.tui_client
    - Cache file content + analysis results
    - Reuse if query/file unchanged
 
-## Code Structure
+## Code Structure [code-structure]
 
 ```
 kicli_code_assist/ui/
@@ -265,13 +286,13 @@ scripts/
 └── test_phase_i1_integration.py [NEW] Integration test
 ```
 
-## Files Changed (Commit b20980e)
+## Files Changed (Commit b20980e) [files-changed-commit-b20980e]
 
 - ✅ Created: `kicli_code_assist/ui/http_client.py` (210 lines, TUIBackendClient)
 - ✅ Created: `scripts/test_phase_i1_integration.py` (198 lines, integration test)
 - ✅ Updated: `kicli_code_assist/ui/widgets/agent_tabs.py` (+180 lines, async analysis)
 
-## Performance Characteristics
+## Performance Characteristics [performance-characteristics]
 
 **Latency** (from AGENT_ROUTE_SPEC)
 - First request: 2-5 seconds (model load, analysis)
@@ -288,7 +309,7 @@ scripts/
 - Response display: Updates when response received (~2-5s)
 - No UI blocking
 
-## Debugging
+## Debugging [debugging]
 
 **Enable debug logging**
 ```python
@@ -314,7 +335,7 @@ response = client.analyze_file(
 print(response)
 ```
 
-## Integration Checkpoint
+## Integration Checkpoint [integration-checkpoint]
 
 **Date**: 2026-11-06 10:45  
 **Branch**: devel  

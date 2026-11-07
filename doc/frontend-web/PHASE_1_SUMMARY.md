@@ -10,12 +10,37 @@ agent_project: CodeImplementationAgent
 cross_references:
   - "doc/frontend-web/README.md"
   - "doc/PHASE_5_5_2_SUMMARY.md"
+semantic_blocks:
+  - id: status
+    title: Status
+  - id: what-you-now-have
+    title: 🎯 What You Now Have
+  - id: implementation-stats
+    title: 📊 Implementation Stats
+  - id: what-works-now-without-restart
+    title: 🚀 What Works NOW (without restart)
+  - id: what-needs-server-restart
+    title: ⚡ What Needs Server Restart
+  - id: after-restart-test-it
+    title: 🧪 After Restart: Test It
+  - id: architecture-decisions
+    title: 📋 Architecture Decisions
+  - id: phase-2-roadmap-2-3-weeks
+    title: 🗺️ Phase 2 Roadmap (2-3 weeks)
+  - id: deployment-note
+    title: 📦 Deployment Note
+  - id: user-experience-now
+    title: 🎓 User Experience Now
+  - id: checklist-for-full-integration
+    title: ✅ Checklist for Full Integration
+  - id: pro-tips
+    title: 💡 Pro Tips
   - "doc/specifications/01_ARCHITECTURE.md"
 ---
 
 # ✅ Phase 1 Hybrid Agent UI Implementation - COMPLETE
 
-## Status
+## Status [status]
 
 📦 **Archived:** This document represents the Phase 1 WebUI implementation (September 2026). The architecture and agent coordination patterns described here were superseded by Phase 5.5.2 (November 2026), which introduced WebSocket streaming, transparency modules (ReasoningTracer, LLMCallTracker, PerformanceMetrics), and the ReasoningPanel frontend concept.
 
@@ -23,7 +48,7 @@ cross_references:
 
 ---
 
-## 🎯 What You Now Have
+## 🎯 What You Now Have [what-you-now-have]
 
 ### Backend Intelligence (`/api/agent/route`)
 ```
@@ -59,7 +84,7 @@ Returns: {intent, agents[], session_id, scope}
 
 ---
 
-## 📊 Implementation Stats
+## 📊 Implementation Stats [implementation-stats]
 
 | Aspect | Count |
 |--------|-------|
@@ -73,14 +98,14 @@ Returns: {intent, agents[], session_id, scope}
 
 ---
 
-## 🚀 What Works NOW (without restart)
+## 🚀 What Works NOW (without restart) [what-works-now-without-restart]
 
 ✅ Frontend builds successfully (TypeScript)  
 ✅ New CSS compiled  
 ✅ Components ready for use  
 ✅ Hooks ready to use  
 
-## ⚡ What Needs Server Restart
+## ⚡ What Needs Server Restart [what-needs-server-restart]
 
 ❌ `/api/agent/route` endpoint not yet active  
 ❌ Must restart Flask server to load new code  
@@ -95,7 +120,7 @@ python3 kicli_code_assist/web/server.py &
 
 ---
 
-## 🧪 After Restart: Test It
+## 🧪 After Restart: Test It [after-restart-test-it]
 
 ### Test 1: Health Check
 ```bash
@@ -127,7 +152,7 @@ Expected: Multiple agents run, Explain + Metrics always together
 
 ---
 
-## 📋 Architecture Decisions
+## 📋 Architecture Decisions [architecture-decisions]
 
 ### ✅ Explain + Metrics Always Together
 **Why:** These share AST/dependency context, makes no sense separately
@@ -146,7 +171,7 @@ Expected: Multiple agents run, Explain + Metrics always together
 
 ---
 
-## 🗺️ Phase 2 Roadmap (2-3 weeks)
+## 🗺️ Phase 2 Roadmap (2-3 weeks) [phase-2-roadmap-2-3-weeks]
 
 | Phase | Feature | Effort |
 |-------|---------|--------|
@@ -157,7 +182,7 @@ Expected: Multiple agents run, Explain + Metrics always together
 
 ---
 
-## 📦 Deployment Note
+## 📦 Deployment Note [deployment-note]
 
 After server restart, you may want:
 ```bash
@@ -167,7 +192,7 @@ to deploy to staging/production.
 
 ---
 
-## 🎓 User Experience Now
+## 🎓 User Experience Now [user-experience-now]
 
 ### Before (Analysis-First)
 ```
@@ -188,7 +213,7 @@ Conversational, intelligent, context-aware
 
 ---
 
-## ✅ Checklist for Full Integration
+## ✅ Checklist for Full Integration [checklist-for-full-integration]
 
 - [ ] Server restarted (new code loaded)
 - [ ] `/api/agent/route` endpoint tested
@@ -204,7 +229,7 @@ Conversational, intelligent, context-aware
 
 ---
 
-## 💡 Pro Tips
+## 💡 Pro Tips [pro-tips]
 
 1. **Fast Turnaround**: Use "folder" scope for feature work
 2. **Comprehensive Review**: Use "project" scope for refactoring

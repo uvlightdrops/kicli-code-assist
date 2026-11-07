@@ -11,12 +11,25 @@ cross_references:
   - "doc/frontend-web/README.md"
   - "doc/frontend-web/WEB_EDITOR_FRAMEWORKS_COMPARISON.md"
   - "doc/PHASE_5_5_2_SUMMARY.md"
+semantic_blocks:
+  - id: edit-capabilities-not-implemented
+    title: ❌ EDIT CAPABILITIES: NOT IMPLEMENTED
+  - id: what-would-be-needed
+    title: What Would Be Needed
+  - id: why-its-not-done
+    title: Why It's Not Done
+  - id: recommendation-for-next-step
+    title: Recommendation for Next Step
+  - id: files-involved
+    title: Files Involved
+  - id: questions-to-answer
+    title: Questions to Answer
   - "doc/specifications/01_ARCHITECTURE.md"
 ---
 
 # Web IDE Editor - Current Status
 
-## ❌ EDIT CAPABILITIES: NOT IMPLEMENTED
+## ❌ EDIT CAPABILITIES: NOT IMPLEMENTED [edit-capabilities-not-implemented]
 
 ### Current State (Session 029)
 ```
@@ -35,7 +48,7 @@ cross_references:
 
 ---
 
-## What Would Be Needed
+## What Would Be Needed [what-would-be-needed]
 
 ### 1. Frontend (React Components)
 
@@ -120,7 +133,7 @@ def update_file(file_id):
 
 ---
 
-## Why It's Not Done
+## Why It's Not Done [why-its-not-done]
 
 1. **Read-Only Made Sense First** 
    - File browser + preview were the MVP
@@ -147,7 +160,7 @@ def update_file(file_id):
 
 ---
 
-## Recommendation for Next Step
+## Recommendation for Next Step [recommendation-for-next-step]
 
 **If you want editing NOW:**
 
@@ -176,7 +189,7 @@ def update_file(file_id):
 
 ---
 
-## Files Involved
+## Files Involved [files-involved]
 
 ### Frontend
 - `web/frontend/src/components/CodePreview.tsx` (currently read-only)
@@ -191,7 +204,7 @@ def update_file(file_id):
 
 ---
 
-## Questions to Answer
+## Questions to Answer [questions-to-answer]
 
 1. Should editing work on uploaded files, project files, or both?
 2. Should we support creation of new files?

@@ -1,13 +1,47 @@
+---
+title: INSTALLATION
+project: kicli-code-assist
+scope: guides
+purpose: Installation guide for setting up kicli-code-assist development environment
+created: 2026-09-02T09:27:38+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: requirements
+    title: Requirements
+  - id: step-1-clone-repository
+    title: Step 1: Clone Repository
+  - id: step-2-create-virtual-environment
+    title: Step 2: Create Virtual Environment
+  - id: step-3-install-dependencies
+    title: Step 3: Install Dependencies
+  - id: step-4-generate-config
+    title: Step 4: Generate Config
+  - id: step-5-test-installation
+    title: Step 5: Test Installation
+  - id: configuration-details
+    title: Configuration Details
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: advanced-setup
+    title: Advanced Setup
+  - id: updating
+    title: Updating
+  - id: support
+    title: Support
+status: active
+---
+
 # Installation Guide - KI Code Assistant
 
-## Requirements
+## Requirements [requirements]
 
 - Python 3.10+
 - Git
 - Basic terminal knowledge
 - SSH access (optional, for remote use)
 
-## Step 1: Clone Repository
+## Step 1: Clone Repository [step-1-clone-repository]
 
 ```bash
 # Create dev directory
@@ -21,7 +55,7 @@ git clone <ki-core-repo-url> ki-core
 git clone <kicli-repo-url> kicli-code-assist
 ```
 
-## Step 2: Create Virtual Environment
+## Step 2: Create Virtual Environment [step-2-create-virtual-environment]
 
 ```bash
 cd kicli-code-assist
@@ -36,7 +70,7 @@ source .venv/bin/activate
 pip install --upgrade pip
 ```
 
-## Step 3: Install Dependencies
+## Step 3: Install Dependencies [step-3-install-dependencies]
 
 ```bash
 # Install ki-core first (must be in ../ki-core)
@@ -46,7 +80,7 @@ pip install -e ../ki-core
 pip install -e .
 ```
 
-## Step 4: Generate Config
+## Step 4: Generate Config [step-4-generate-config]
 
 ```bash
 # Auto-generate config skeleton
@@ -65,7 +99,7 @@ vim ki.yaml
 - `kicli.workspace_root` - Project directory (auto-detected)
 - `storage.cache_dir` - Cache directory
 
-## Step 5: Test Installation
+## Step 5: Test Installation [step-5-test-installation]
 
 ```bash
 # Check environment
@@ -80,7 +114,7 @@ kicli-assist tui
 
 ---
 
-## Configuration Details
+## Configuration Details [configuration-details]
 
 ### Layered Config System
 
@@ -159,7 +193,7 @@ kicli-assist tui
 
 ---
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Command Not Found
 
@@ -206,7 +240,7 @@ pip show ki-core yaml-cfg-wizard
 
 ---
 
-## Advanced Setup
+## Advanced Setup [advanced-setup]
 
 ### Remote Development (SSH)
 
@@ -253,7 +287,7 @@ ruff format .
 
 ---
 
-## Updating
+## Updating [updating]
 
 ```bash
 # Activate venv
@@ -269,7 +303,7 @@ pip install -e . --upgrade
 
 ---
 
-## Support
+## Support [support]
 
 - **Diagnostics:** `kicli-assist doctor`
 - **Help:** `kicli-assist --help`

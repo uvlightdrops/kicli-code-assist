@@ -1,3 +1,33 @@
+---
+title: PRODUCTION DEPLOYMENT
+project: kicli-code-assist
+scope: guides
+purpose: Production deployment guide and best practices for kicli-code-assist
+created: 2026-10-17T16:05:17+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: executive-summary
+    title: Executive Summary
+  - id: deployment-checklist
+    title: Deployment Checklist
+  - id: configuration-for-production
+    title: Configuration for Production
+  - id: monitoring-troubleshooting
+    title: Monitoring & Troubleshooting
+  - id: performance-benchmarks
+    title: Performance Benchmarks
+  - id: rollback-plan
+    title: Rollback Plan
+  - id: post-deployment-monitoring
+    title: Post-Deployment Monitoring
+  - id: support-escalation
+    title: Support & Escalation
+  - id: sign-off
+    title: Sign-Off
+status: active
+---
+
 # Production Deployment Guide for Phase 4
 
 **Status**: ✅ **READY FOR PRODUCTION DEPLOYMENT**
@@ -7,7 +37,7 @@
 
 ---
 
-## Executive Summary
+## Executive Summary [executive-summary]
 
 All Phase 4 (Critical Fixes → AI Workflow Integration → Production Quality) work is complete and tested. The application is production-ready with:
 
@@ -22,7 +52,7 @@ All Phase 4 (Critical Fixes → AI Workflow Integration → Production Quality) 
 
 ---
 
-## Deployment Checklist
+## Deployment Checklist [deployment-checklist]
 
 ### Pre-Deployment Verification
 
@@ -91,7 +121,7 @@ kicli-assist tui        # Start TUI, enable AI suggestions
 
 ---
 
-## Configuration for Production
+## Configuration for Production [configuration-for-production]
 
 ### 1. LLM Provider Configuration
 
@@ -161,7 +191,7 @@ export AI_FEATURES_ENABLED=false
 
 ---
 
-## Monitoring & Troubleshooting
+## Monitoring & Troubleshooting [monitoring-troubleshooting]
 
 ### Health Check
 
@@ -220,7 +250,7 @@ assert filter_obj.has_secrets("API key: sk-test123")  # Should be True
 
 ---
 
-## Performance Benchmarks
+## Performance Benchmarks [performance-benchmarks]
 
 Expected performance metrics in production:
 
@@ -234,7 +264,7 @@ Expected performance metrics in production:
 
 ---
 
-## Rollback Plan
+## Rollback Plan [rollback-plan]
 
 If critical issues arise after deployment:
 
@@ -266,7 +296,7 @@ make prod-update  # In both repos
 
 ---
 
-## Post-Deployment Monitoring
+## Post-Deployment Monitoring [post-deployment-monitoring]
 
 ### Log Monitoring
 ```bash
@@ -288,7 +318,7 @@ tail -f /var/log/kicli-assist.log | grep -E "ERROR|CRITICAL|EXCEPTION"
 
 ---
 
-## Support & Escalation
+## Support & Escalation [support-escalation]
 
 ### Report Issues
 1. **Check** `kicli-assist doctor` output
@@ -303,7 +333,7 @@ tail -f /var/log/kicli-assist.log | grep -E "ERROR|CRITICAL|EXCEPTION"
 
 ---
 
-## Sign-Off
+## Sign-Off [sign-off]
 
 **Deployed by**: [Copilot]  
 **Date**: [2024]  

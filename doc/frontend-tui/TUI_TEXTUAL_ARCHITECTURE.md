@@ -3,19 +3,36 @@ title: TUI Textual Architecture - Widget Design & Event Flow
 scope: architecture
 project: kicli-code-assist
 status: in_progress
-created: 2026-11-05T19:52+01:00
-updated: 2026-11-05T19:52+01:00
-update_reason: Document widget hierarchy, async patterns, CSS layout after Phase 3 completion
+created: 2026-11-05T21:29:23+01:00
+updated: 2026-11-07T17:25:00+01:00
+update_reason: Applied @timestamp-correction-from-git and @semantic-knowledge-organization
 agent_project: kicli-code-assist
 cross_references:
   - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
-  - doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md
+  - doc/features/tui/I1_IMPLEMENTATION_PLAN.md
+semantic_blocks:
+  - id: widget-hierarchy
+    title: Widget Hierarchy
+  - id: css-layout-strategy
+    title: CSS Layout Strategy
+  - id: widget-implementation-details
+    title: Widget Implementation Details
+  - id: event-flow
+    title: Event Flow
+  - id: async-pattern-http-to-tui
+    title: Async Pattern: HTTP to TUI
+  - id: error-handling
+    title: Error Handling
+  - id: performance-considerations
+    title: Performance Considerations
+  - id: future-enhancements-phase-5
+    title: Future Enhancements (Phase 5+)
   - doc/guides/TEXTUAL_BEST_PRACTICES_REVIEW.md
 ---
 
 # TUI Textual Architecture
 
-## Widget Hierarchy
+## Widget Hierarchy [widget-hierarchy]
 
 ```
 CodeAssistantTUIApp (App)
@@ -44,7 +61,7 @@ CodeAssistantTUIApp (App)
     └── Help text + key bindings
 ```
 
-## CSS Layout Strategy
+## CSS Layout Strategy [css-layout-strategy]
 
 ### Rationale
 
@@ -142,7 +159,7 @@ Screen {
 
 **Note:** On very small terminals (<80 chars), user can horizontally scroll each panel independently.
 
-## Widget Implementation Details
+## Widget Implementation Details [widget-implementation-details]
 
 ### ProjectExplorer
 
@@ -294,7 +311,7 @@ def update_metrics(self, status: str = None, time_ms: float = None,
     self.update(" | ".join(parts))
 ```
 
-## Event Flow
+## Event Flow [event-flow]
 
 ### User Selects File
 
@@ -352,7 +369,7 @@ Receive real-time events:
 ReasoningPanel.handle_event() updates display in real-time
 ```
 
-## Async Pattern: HTTP to TUI
+## Async Pattern: HTTP to TUI [async-pattern-http-to-tui]
 
 ### Problem
 - LLM API calls can take 5-30+ seconds
@@ -408,7 +425,7 @@ class CodeAssistantTUIApp(App):
 4. UI updates happen in event loop (reactive)
 5. Other UI events (keypresses) continue to work during processing
 
-## Error Handling
+## Error Handling [error-handling]
 
 ### Health Check at Startup
 
@@ -448,7 +465,7 @@ If output becomes unresponsive:
 - Press `q` to quit TUI
 - No data loss (stateless API)
 
-## Performance Considerations
+## Performance Considerations [performance-considerations]
 
 ### Tree Rendering
 
@@ -474,7 +491,7 @@ If output becomes unresponsive:
   - TUI processes events as they arrive
   - No buffering on client side
 
-## Future Enhancements (Phase 5+)
+## Future Enhancements (Phase 5+) [future-enhancements-phase-5]
 
 1. **Keyboard Macros:** Record/replay sequences (e.g., "analyze all Python files")
 2. **Split Panes:** Optional vertical split for side-by-side comparison

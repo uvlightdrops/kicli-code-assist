@@ -1,6 +1,44 @@
+---
+title: VI EDITOR GUIDE
+project: kicli-code-assist
+scope: guides
+purpose: Guide for using vi/vim editor integration with kicli-code-assist
+created: 2026-10-17T21:00:41+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: modes
+    title: Modes
+  - id: movement-normal-mode
+    title: Movement (NORMAL mode)
+  - id: editing-insert-mode
+    title: Editing (INSERT mode)
+  - id: operators-normal-mode
+    title: Operators (NORMAL mode)
+  - id: visual-mode
+    title: Visual Mode
+  - id: commands-command-mode
+    title: Commands (COMMAND mode)
+  - id: auto-save
+    title: Auto-Save
+  - id: how-it-works-technical
+    title: How It Works (Technical)
+  - id: how-it-works-technical
+    title: How It Works (Technical)
+  - id: common-workflows
+    title: Common Workflows
+  - id: tips
+    title: Tips
+  - id: status-indicator
+    title: Status Indicator
+  - id: buttons
+    title: Buttons
+status: active
+---
+
 # Vi/Vim Editor Quick Guide
 
-## Modes
+## Modes [modes]
 
 The editor has 4 modes, shown in the header with **BRIGHT BOLD COLORED ICONS**:
 
@@ -13,7 +51,7 @@ The editor has 4 modes, shown in the header with **BRIGHT BOLD COLORED ICONS**:
 
 **Mode Indicator**: Located in editor header top-right. Very visible with bright colors on dark background. Updates instantly as you type.
 
-## Movement (NORMAL mode)
+## Movement (NORMAL mode) [movement-normal-mode]
 
 | Key | Action |
 |-----|--------|
@@ -31,7 +69,7 @@ The editor has 4 modes, shown in the header with **BRIGHT BOLD COLORED ICONS**:
 | `n` | Next search result |
 | `N` | Previous search result |
 
-## Editing (INSERT mode)
+## Editing (INSERT mode) [editing-insert-mode]
 
 Press `i`, `a`, `o`, or `O` to enter INSERT mode:
 
@@ -44,7 +82,7 @@ Press `i`, `a`, `o`, or `O` to enter INSERT mode:
 | Type | Normal text input |
 | `Esc` | Return to NORMAL mode |
 
-## Operators (NORMAL mode)
+## Operators (NORMAL mode) [operators-normal-mode]
 
 Operators work with counts and motions:
 
@@ -64,7 +102,7 @@ Examples:
 - `cG` - Change to end of file
 - `yy` - Copy line
 
-## Visual Mode
+## Visual Mode [visual-mode]
 
 Press `v` in NORMAL mode to select text:
 
@@ -77,7 +115,7 @@ Press `v` in NORMAL mode to select text:
 | `y` | Copy selection |
 | `c` | Delete and insert |
 
-## Commands (COMMAND mode)
+## Commands (COMMAND mode) [commands-command-mode]
 
 Press `:` in NORMAL mode to enter COMMAND mode:
 
@@ -90,7 +128,7 @@ Press `:` in NORMAL mode to enter COMMAND mode:
 
 **Note**: `:w` (save) is **not needed**! The editor auto-saves after 2 seconds of inactivity, like VS Code.
 
-## Auto-Save
+## Auto-Save [auto-save]
 
 The editor automatically saves your changes:
 - You edit code → file marked as dirty
@@ -100,7 +138,7 @@ The editor automatically saves your changes:
 
 **Manual Save**: Click the 💾 Save button to save immediately.
 
-## How It Works (Technical)
+## How It Works (Technical) [how-it-works-technical]
 
 ### Mode Indicator Updates
 - **Event-Driven**: Uses VimTextArea.ModeChanged messages
@@ -117,9 +155,9 @@ The editor automatically saves your changes:
   - Automatic background saves prevent data loss
   - Familiar to VS Code / modern editor users
 
-## How It Works (Technical)
+## How It Works (Technical) [how-it-works-technical]
 
-## Common Workflows
+## Common Workflows [common-workflows]
 
 ### Edit a file
 1. Press Enter to open file in editor tab
@@ -149,7 +187,7 @@ The editor automatically saves your changes:
 1. Select lines with `V`
 2. Press `>` to indent (or `<` to dedent)
 
-## Tips
+## Tips [tips]
 
 - **Undo/Redo:** Not yet implemented (standard Vi doesn't have them either)
 - **Marks:** Not yet implemented
@@ -157,14 +195,14 @@ The editor automatically saves your changes:
 - **Status Bar:** Shows file path, dirty state, and mode
 - **Line Numbers:** Can be enabled with `:set number`
 
-## Status Indicator
+## Status Indicator [status-indicator]
 
 The editor tab shows:
 - `📝 filename.txt` - File being edited
 - `📝 filename.txt*` - File has unsaved changes
 - Mode indicator (NORMAL/INSERT/VISUAL/COMMAND) in top right
 
-## Buttons
+## Buttons [buttons]
 
 - **💾 Save** - Save file to disk (or `:w` in COMMAND mode)
 - **↶ Discard** - Reload from disk, discard all changes

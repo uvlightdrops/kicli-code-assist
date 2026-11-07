@@ -1,10 +1,25 @@
 ---
 # Option C Integration Guide: stackctl + server_management
 Status: In Progress (Phase 5.5.2)
+semantic_blocks:
+  - id: overview-clean-layer-separation
+    title: Overview: Clean Layer Separation
+  - id: layer-1-server_management-dev-time-pro
+    title: Layer 1: server_management (Dev-Time Process Supervisor)
+  - id: layer-2-stackctl-full-stack-orchestrat
+    title: Layer 2: stackctl (Full-Stack Orchestration)
+  - id: migration-from-old-system
+    title: Migration from Old System
+  - id: configuration-best-practices
+    title: Configuration Best Practices
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: future-enhancements
+    title: Future Enhancements
 Created: 2026-10-28
 ---
 
-## Overview: Clean Layer Separation
+## Overview: Clean Layer Separation [overview-clean-layer-separation]
 
 ```
 ┌─────────────────────────────────────────────────────┐
@@ -31,7 +46,7 @@ Created: 2026-10-28
 
 ---
 
-## Layer 1: server_management (Dev-Time Process Supervisor)
+## Layer 1: server_management (Dev-Time Process Supervisor) [layer-1-server_management-dev-time-pro]
 
 ### When to Use
 - **Debugging a single service** → Use `kicli-assist server`
@@ -90,7 +105,7 @@ Used for:
 
 ---
 
-## Layer 2: stackctl (Full-Stack Orchestration)
+## Layer 2: stackctl (Full-Stack Orchestration) [layer-2-stackctl-full-stack-orchestrat]
 
 ### When to Use
 - **Start entire stack locally** → `stackctl -t local start`
@@ -294,7 +309,7 @@ stackctl logs -f
 
 ---
 
-## Migration from Old System
+## Migration from Old System [migration-from-old-system]
 
 ### Before (No Option C):
 ```bash
@@ -314,7 +329,7 @@ stackctl -t minikube start                   # Production-like staging
 
 ---
 
-## Configuration Best Practices
+## Configuration Best Practices [configuration-best-practices]
 
 ### Rule 1: ki.yaml is Runtime Config
 ```yaml
@@ -378,7 +393,7 @@ stack:
 
 ---
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Q: I ran `stackctl start` but service didn't start?
 ```bash
@@ -417,7 +432,7 @@ kicli-assist server logs --service api --follow
 
 ---
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 1. **service_group in stack.yaml:** `start @backend` starts all services with group=backend
 2. **Automatic ki.yaml ↔ stack.yaml sync:** Derive stack from ki config

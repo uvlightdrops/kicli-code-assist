@@ -1,3 +1,29 @@
+---
+title: TEXTUAL BEST PRACTICES REVIEW
+project: kicli-code-assist
+scope: guides
+purpose: Best practices review for TUI implementation using Textual framework
+created: 2026-10-17T13:51:42+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: executive-summary
+    title: Executive Summary
+  - id: part-1-architecture-patterns
+    title: Part 1: Architecture & Patterns
+  - id: part-2-textual-specific-best-practices
+    title: Part 2: Textual-Specific Best Practices
+  - id: part-3-common-anti-patterns-found-fixe
+    title: Part 3: Common Anti-Patterns Found & Fixes
+  - id: part-4-css-organization-typography
+    title: Part 4: CSS Organization & Typography
+  - id: summary-textual-best-practices-grade
+    title: Summary: Textual Best Practices Grade
+  - id: recommended-immediate-actions
+    title: Recommended Immediate Actions
+status: active
+---
+
 # Textual TUI Best Practices Review
 **Repository:** uvlightdrops/kicli-code-assist  
 **Date:** 2026-10-17  
@@ -5,7 +31,7 @@
 
 ---
 
-## Executive Summary
+## Executive Summary [executive-summary]
 
 kicli-code-assist demonstrates **strong foundational patterns** for Textual TUI development:
 - ✅ **Excellent**: Modular component architecture, clear separation of concerns
@@ -17,7 +43,7 @@ kicli-code-assist demonstrates **strong foundational patterns** for Textual TUI 
 
 ---
 
-## Part 1: Architecture & Patterns
+## Part 1: Architecture & Patterns [part-1-architecture-patterns]
 
 ### 1.1 Component Organization ✅ EXCELLENT
 
@@ -233,7 +259,7 @@ def on_mount(self) -> None:
 
 ---
 
-## Part 2: Textual-Specific Best Practices
+## Part 2: Textual-Specific Best Practices [part-2-textual-specific-best-practices]
 
 ### 2.1 Styling & CSS ⚠️ NEEDS ATTENTION
 
@@ -497,7 +523,7 @@ class PromptsModal(Screen):
 
 ---
 
-## Part 3: Common Anti-Patterns Found & Fixes
+## Part 3: Common Anti-Patterns Found & Fixes [part-3-common-anti-patterns-found-fixe]
 
 ### ❌ Anti-Pattern 1: Direct Component Access
 ```python
@@ -582,7 +608,7 @@ def compose(self):
 
 ---
 
-## Part 4: CSS Organization & Typography
+## Part 4: CSS Organization & Typography [part-4-css-organization-typography]
 
 ### 4.1 Responsive Layout ✅ GOOD
 ```css
@@ -670,7 +696,7 @@ docs/
 
 ---
 
-## Summary: Textual Best Practices Grade
+## Summary: Textual Best Practices Grade [summary-textual-best-practices-grade]
 
 | Aspect | Grade | Status |
 |--------|-------|--------|
@@ -691,7 +717,7 @@ docs/
 
 ---
 
-## Recommended Immediate Actions
+## Recommended Immediate Actions [recommended-immediate-actions]
 
 ### 🔴 CRITICAL (Week 1)
 1. **Fix blocking LLM calls** - Implement async/to_thread pattern

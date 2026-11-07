@@ -12,12 +12,29 @@ cross_references:
   - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (TUI 2.0 vision & roadmap)
   - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md (Textual implementation details)
   - doc/architecture/AGENT_ORCHESTRATION_ARCHITECTURE.md (backend agent routing)
+semantic_blocks:
+  - id: executive-summary
+    title: Executive Summary
+  - id: architecture-diagram
+    title: Architecture Diagram
+  - id: core-concepts
+    title: Core Concepts
+  - id: data-flow-request-response
+    title: Data Flow: Request → Response
+  - id: backend-routes-summary
+    title: Backend Routes Summary
+  - id: configuration-deployment
+    title: Configuration & Deployment
+  - id: phase-roadmap
+    title: Phase Roadmap
+  - id: success-criteria
+    title: Success Criteria
   - doc/architecture/TRANSPARENCY_MODULES_ARCHITECTURE.md (reasoning traces & observability)
 ---
 
 # System Architecture Overview
 
-## Executive Summary
+## Executive Summary [executive-summary]
 
 **KI Code Assist** is a **server-client system** for intelligent code analysis via terminal or web UI. The architecture separates concerns into three layers:
 
@@ -29,7 +46,7 @@ cross_references:
 
 ---
 
-## Architecture Diagram
+## Architecture Diagram [architecture-diagram]
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -74,7 +91,7 @@ cross_references:
 
 ---
 
-## Core Concepts
+## Core Concepts [core-concepts]
 
 ### 1. Backend (Server Layer)
 
@@ -144,7 +161,7 @@ cross_references:
 
 ---
 
-## Data Flow: Request → Response
+## Data Flow: Request → Response [data-flow-request-response]
 
 ### User Request (TUI Example)
 
@@ -190,7 +207,7 @@ cross_references:
 
 ---
 
-## Backend Routes Summary
+## Backend Routes Summary [backend-routes-summary]
 
 See `doc/architecture/FRONTEND_SPECIFICATION.md` for full contract.
 
@@ -221,7 +238,7 @@ Historical Queries:
 
 ---
 
-## Configuration & Deployment
+## Configuration & Deployment [configuration-deployment]
 
 ### Local Development
 
@@ -253,7 +270,7 @@ KI_OLLAMA_URL=http://...     # Ollama endpoint (if using)
 
 ---
 
-## Phase Roadmap
+## Phase Roadmap [phase-roadmap]
 
 ### Phase 1: Foundation (This Week - Nov 5-8)
 - [x] Documentation: FRONTEND_SPECIFICATION + TUI_INTELLIGENT_TERMINAL_IDE
@@ -312,7 +329,7 @@ KI_OLLAMA_URL=http://...     # Ollama endpoint (if using)
 
 ---
 
-## Success Criteria
+## Success Criteria [success-criteria]
 
 **By End of Phase 1:**
 - TUI compiles and runs without errors

@@ -2,18 +2,39 @@
 project: kicli-code-assist
 scope: guides
 created: 2026-11-05 16
-updated: 2026-11-05 16
-update_reason: TUI client quick-start guide for jump host usage
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
 status: current
+semantic_blocks:
+  - id: motivation
+    title: Motivation
+  - id: installation
+    title: Installation
+  - id: usage
+    title: Usage
+  - id: controls
+    title: Controls
+  - id: workflow
+    title: Workflow
+  - id: example-session
+    title: Example Session
+  - id: architecture-diagram
+    title: Architecture Diagram
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: advanced
+    title: Advanced
+  - id: next-steps
+    title: Next Steps
 agent_project: kicli-code-assist
 ---
 
 # TUI Client Quick Start
 
-## Motivation
+## Motivation [motivation]
 The Terminal User Interface (TUI) enables agent-driven code analysis on **jump hosts without GUI access**, using the same backend as the web UI. Ideal for K8s cluster management nodes where graphical browsers are unavailable.
 
-## Installation
+## Installation [installation]
 
 No extra installation needed—TUI is built into kicli-code-assist:
 
@@ -27,7 +48,7 @@ Verify dependencies:
 python3 -c "import textual; import httpx; import rich; print('✅ All OK')"
 ```
 
-## Usage
+## Usage [usage]
 
 ### Local Development
 ```bash
@@ -49,7 +70,7 @@ kicli-assist tui \
   --api-url http://prod-backend.internal:8000
 ```
 
-## Controls
+## Controls [controls]
 
 | Key | Action |
 |-----|--------|
@@ -61,7 +82,7 @@ kicli-assist tui \
 | `h` | Show help |
 | `q` | Quit |
 
-## Workflow
+## Workflow [workflow]
 
 1. **Select File** (F1): Navigate project tree, click file
 2. **Enter Request** (F7): Type analysis request
@@ -71,7 +92,7 @@ kicli-assist tui \
 3. **View Results** (F2): Watch real-time reasoning trace
 4. **Review Output**: Syntax-highlighted code, metrics, suggestions
 
-## Example Session
+## Example Session [example-session]
 
 ```
 Project Tree          │ Output Panel
@@ -91,7 +112,7 @@ Input (F7)            │ • Maintainability: 8/10
 [Send]                Status: ✅ Ready
 ```
 
-## Architecture Diagram
+## Architecture Diagram [architecture-diagram]
 
 ```
 TUI Client (Your Terminal)
@@ -113,7 +134,7 @@ Backend (localhost:8000 or remote)
     └─► LLM API
 ```
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Backend Unreachable
 ```
@@ -141,7 +162,7 @@ kicli-assist tui --api-url http://my-backend:8000
 - Verify LLM provider configured: `echo $OPENAI_API_KEY`
 - For large files, expect 5-10s processing time
 
-## Advanced
+## Advanced [advanced]
 
 ### Custom Configuration
 Set environment variables before launch:
@@ -170,7 +191,7 @@ ssh -L 8000:backend.internal:8000 jump-host
 kicli-assist tui --api-url http://localhost:8000
 ```
 
-## Next Steps
+## Next Steps [next-steps]
 
 - **Integration Test**: See TUI_CLIENT_IMPLEMENTATION_PLAN.md Phase 4
 - **WebSocket Streaming**: Real-time event updates (Phase 5)

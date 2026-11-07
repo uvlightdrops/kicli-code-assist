@@ -1,14 +1,44 @@
+---
+title: SECURITY
+project: kicli-code-assist
+scope: guides
+purpose: Security best practices, vulnerability response, and data protection
+created: 2026-09-05T21:59:40+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: overview
+    title: Overview
+  - id: configuration
+    title: Configuration
+  - id: usage
+    title: Usage
+  - id: security-guarantees
+    title: Security Guarantees
+  - id: enforcement-modes
+    title: Enforcement Modes
+  - id: integration-points
+    title: Integration Points
+  - id: deployment-considerations
+    title: Deployment Considerations
+  - id: error-handling
+    title: Error Handling
+  - id: future-enhancements
+    title: Future Enhancements
+status: active
+---
+
 # Security Feature - Path Restriction
 
 **Status:** 🚧 In Progress  
 **Feature:** Absolute Path Security Setting  
 **Last Updated:** 2026-09-05
 
-## Overview
+## Overview [overview]
 
 The security feature restricts file operations to a configured base directory, preventing directory traversal attacks and unauthorized access outside the allowed scope.
 
-## Configuration
+## Configuration [configuration]
 
 ### Schema Section
 
@@ -45,7 +75,7 @@ security:
 # security section omitted or empty
 ```
 
-## Usage
+## Usage [usage]
 
 ### Python API
 
@@ -98,7 +128,7 @@ print(validator.is_allowed('/tmp/file.txt'))  # False
 "
 ```
 
-## Security Guarantees
+## Security Guarantees [security-guarantees]
 
 ### What Is Prevented
 
@@ -138,7 +168,7 @@ print(validator.is_allowed('/tmp/file.txt'))  # False
    "../other"                 # → /data/projects/other (depends on context)
    ```
 
-## Enforcement Modes
+## Enforcement Modes [enforcement-modes]
 
 ### Strict Mode (enforce=true)
 
@@ -175,7 +205,7 @@ path = validator.validate("/etc/passwd")
 
 **Use Case:** Development, debugging, gradual rollout.
 
-## Integration Points
+## Integration Points [integration-points]
 
 ### File Browser
 
@@ -241,7 +271,7 @@ print('Normalized:', v.validate('/data/projects/myapp/./src/../file.txt'))
 "
 ```
 
-## Deployment Considerations
+## Deployment Considerations [deployment-considerations]
 
 ### Gradual Rollout
 
@@ -279,7 +309,7 @@ kicli-assist config set security.allowed_base_path "/data/projects"
 kicli-assist config set security.enforce_path_restriction true
 ```
 
-## Error Handling
+## Error Handling [error-handling]
 
 ### PathSecurityError
 
@@ -302,7 +332,7 @@ Path '/etc/passwd' escapes allowed base '/data/projects/myapp'.
 All file operations must stay within the allowed directory.
 ```
 
-## Future Enhancements
+## Future Enhancements [future-enhancements]
 
 - [ ] Multiple allowed paths (whitelist)
 - [ ] Path exceptions/exclusions

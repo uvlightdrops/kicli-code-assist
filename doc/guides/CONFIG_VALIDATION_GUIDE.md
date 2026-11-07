@@ -1,9 +1,31 @@
+---
+title: CONFIG VALIDATION GUIDE
+project: kicli-code-assist
+scope: guides
+purpose: Guide for validating configuration files and understanding ConfigManager validation rules
+created: 2026-10-19T17:32:11+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: quick-diagnosis
+    title: Quick Diagnosis
+  - id: validation-in-appconfig
+    title: Validation in AppConfig
+  - id: debugging-tips
+    title: Debugging Tips
+  - id: common-mistakes
+    title: Common Mistakes
+  - id: schema-extension-for-app-developers
+    title: Schema Extension (For App Developers)
+status: active
+---
+
 # Config Validation & Error Handling Guide
 
 **Status:** Implemented (Phase 2+)  
 **Audience:** App users, developers, ops engineers  
 
-## Quick Diagnosis
+## Quick Diagnosis [quick-diagnosis]
 
 When you see a config error, the source is usually one of these:
 
@@ -135,7 +157,7 @@ http:
 
 ---
 
-## Validation in AppConfig
+## Validation in AppConfig [validation-in-appconfig]
 
 When you load config in Python:
 
@@ -182,7 +204,7 @@ validate_llm_config(config)  # Raises early with clear message
 
 ---
 
-## Debugging Tips
+## Debugging Tips [debugging-tips]
 
 ### 1. Dry-Run Config Resolution
 
@@ -261,7 +283,7 @@ logging:
 
 ---
 
-## Common Mistakes
+## Common Mistakes [common-mistakes]
 
 | Mistake | Issue | Fix |
 |---------|-------|-----|
@@ -318,7 +340,7 @@ EOF
 
 ---
 
-## Schema Extension (For App Developers)
+## Schema Extension (For App Developers) [schema-extension-for-app-developers]
 
 If your app needs config beyond ki-core's base schema:
 

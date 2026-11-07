@@ -1,3 +1,37 @@
+---
+title: WEB DEPLOYMENT GUIDE
+project: kicli-code-assist
+scope: guides
+purpose: Guide for deploying kicli-code-assist web frontend and services
+created: 2026-10-20T03:44:52+01:00
+updated: 2026-11-07T17:10:00+01:00
+update_reason: Applied semantic block tagging skill - added block IDs to H2 headings
+semantic_blocks:
+  - id: quick-start
+    title: Quick Start
+  - id: architecture
+    title: Architecture
+  - id: api-endpoints
+    title: API Endpoints
+  - id: configuration-kiyaml
+    title: Configuration (ki.yaml)
+  - id: features
+    title: Features
+  - id: known-limitations
+    title: Known Limitations
+  - id: troubleshooting
+    title: Troubleshooting
+  - id: file-structure
+    title: File Structure
+  - id: deployment-production
+    title: Deployment (Production)
+  - id: next-steps
+    title: Next Steps
+  - id: support
+    title: Support
+status: active
+---
+
 # Web Frontend Deployment & Usage Guide
 
 **Status:** Beta - Fully Functional  
@@ -6,7 +40,7 @@
 
 ---
 
-## Quick Start
+## Quick Start [quick-start]
 
 ### Prerequisites
 - Python 3.10+ (venv with flask, flask-socketio)
@@ -44,7 +78,7 @@ npm run build
 
 ---
 
-## Architecture
+## Architecture [architecture]
 
 ### Backend Stack
 - **Framework:** Flask + Flask-SocketIO
@@ -66,7 +100,7 @@ npm run build
 
 ---
 
-## API Endpoints
+## API Endpoints [api-endpoints]
 
 ### REST Endpoints
 
@@ -94,7 +128,7 @@ DELETE /api/files/{id}        - Remove file
 
 ---
 
-## Configuration (ki.yaml)
+## Configuration (ki.yaml) [configuration-kiyaml]
 
 Add web section to your ki.yaml:
 
@@ -114,7 +148,7 @@ storage:
 
 ---
 
-## Features
+## Features [features]
 
 ### Chat Interface
 - ✅ Send message + loaded files to LLM
@@ -147,7 +181,7 @@ storage:
 
 ---
 
-## Known Limitations
+## Known Limitations [known-limitations]
 
 1. **AsyncOllamaClient Missing** - Ollama provider calls fail (use OpenAI for testing)
    - Workaround: Set LLM provider to "openai" in ki.yaml
@@ -201,7 +235,7 @@ Results: 5 passed, 0 failed
 
 ---
 
-## Troubleshooting
+## Troubleshooting [troubleshooting]
 
 ### Backend won't start
 - Check: `python -c "import flask; print(flask.__version__)"`
@@ -229,7 +263,7 @@ Results: 5 passed, 0 failed
 
 ---
 
-## File Structure
+## File Structure [file-structure]
 
 ```
 kicli-code-assist/
@@ -268,7 +302,7 @@ kicli-code-assist/
 
 ---
 
-## Deployment (Production)
+## Deployment (Production) [deployment-production]
 
 ### Using Gunicorn + Systemd
 
@@ -327,7 +361,7 @@ server {
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 1. **Fix AsyncOllamaClient** in ki-core (blocks end-to-end chat)
 2. **Enhance File Handling** - Persist uploaded files, metadata
@@ -338,7 +372,7 @@ server {
 
 ---
 
-## Support
+## Support [support]
 
 **Issues & Questions:** See docs/architecture/WEB_FRONTEND_DESIGN.md (full architecture)
 

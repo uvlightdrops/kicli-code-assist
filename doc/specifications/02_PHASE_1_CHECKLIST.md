@@ -11,6 +11,21 @@ cross_references:
   - doc/architecture/01_ARCHITECTURE.md (Phase 1 overview)
   - doc/architecture/FRONTEND_SPECIFICATION.md (what to implement)
   - doc/architecture/TUI_INTELLIGENT_TERMINAL_IDE.md (vision & phases)
+semantic_blocks:
+  - id: component-implementation
+    title: Component Implementation
+  - id: backend-connectivity
+    title: Backend Connectivity
+  - id: user-interaction
+    title: User Interaction
+  - id: error-handling
+    title: Error Handling
+  - id: performance-targets
+    title: Performance Targets
+  - id: success-criteria-definition-of-done
+    title: Success Criteria (Definition of Done)
+  - id: notes-learnings-from-attempt-1-oct-202
+    title: Notes & Learnings from Attempt 1 (Oct 2026)
   - doc/architecture/TUI_TEXTUAL_ARCHITECTURE.md (implementation guide)
 ---
 
@@ -22,7 +37,7 @@ cross_references:
 
 ---
 
-## Component Implementation
+## Component Implementation [component-implementation]
 
 ### Project Tree Widget
 - [ ] File browser component (read-only tree of project files)
@@ -87,7 +102,7 @@ cross_references:
 
 ---
 
-## Backend Connectivity
+## Backend Connectivity [backend-connectivity]
 
 ### Health Check
 - [ ] Check backend health on startup
@@ -133,7 +148,7 @@ cross_references:
 
 ---
 
-## User Interaction
+## User Interaction [user-interaction]
 
 ### Keyboard Shortcuts
 
@@ -180,7 +195,7 @@ cross_references:
 
 ---
 
-## Error Handling
+## Error Handling [error-handling]
 
 ### Backend Unavailable
 - [ ] Detect on health check (timeout or status ≠ 200)
@@ -257,7 +272,7 @@ cross_references:
 
 ---
 
-## Performance Targets
+## Performance Targets [performance-targets]
 
 | Metric | Target | Notes |
 |--------|--------|-------|
@@ -270,7 +285,7 @@ cross_references:
 
 ---
 
-## Success Criteria (Definition of Done)
+## Success Criteria (Definition of Done) [success-criteria-definition-of-done]
 
 **Functional:**
 - ✅ TUI starts without errors
@@ -316,7 +331,7 @@ cross_references:
 
 ---
 
-## Notes & Learnings from Attempt 1 (Oct 2026)
+## Notes & Learnings from Attempt 1 (Oct 2026) [notes-learnings-from-attempt-1-oct-202]
 
 **What Worked:**
 - Textual framework solid for TUI
