@@ -3,13 +3,11 @@ title: Deployment Documentation
 project: kicli-code-assist
 scope: deployment
 purpose: Central reference for deployment documentation
-created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-07T18:07:00+01:00
-update_reason: "readme-table-generation skill: semantic navigation table"
+created: 2026-11-07T18
+updated: 2026-11-07T19
+update_reason: Standardize timestamp format
 status: active
-relations:
-  - target: ../README.md
-    type: parent
+semantic_blocks: [documentation-index, active-docs, archived-docs]
 ---
 
 # Deployment Documentation

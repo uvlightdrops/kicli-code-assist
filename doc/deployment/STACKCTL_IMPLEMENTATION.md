@@ -1,17 +1,20 @@
 ---
-title: "StackCtl Implementation Guide"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Step-by-step guide for setting up stackctl in kicli-code-assist"
-created: 2026-11-01
-updated: 2026-11-02T04:18:00+01:00
-update_reason: "Added YAML header for metadata tracking"
-status: "active"
-cross_references:
-  - "STACKCTL_ARCHITECTURE.md: Design rationale"
-  - "STACK_YAML_VARIANTS.md: Configuration examples"
-  - "stackctl/doc/README.md: General stackctl usage"
+title: StackCtl Implementation Guide
+project: kicli-code-assist
+scope: deployment
+purpose: Step-by-step guide for setting up stackctl in kicli-code-assist
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: active
+semantic_blocks: [overview, configuration-structure, stages, usage, environment-variables, config-loading, files-responsibilities, troubleshooting]
+relations:
+  - file: STACKCTL_ARCHITECTURE.md
+    type: reference
+    reason: Design rationale
+  - file: STACK_YAML_VARIANTS.md
+    type: reference
+    reason: Configuration examples
 ---
 
 # StackCtl Implementation Guide

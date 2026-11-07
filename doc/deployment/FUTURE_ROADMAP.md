@@ -1,12 +1,13 @@
 ---
+title: Development Stack Future Roadmap
 project: kicli-code-assist
-scope: development
-purpose: Comprehensive future roadmap for deployment stack stabilization and developer experience
-created: 2026-11-02T04:17:00+01:00
-updated: 2026-11-02T04:17:00+01:00
+scope: deployment
+purpose: Roadmap and planning for development stack stabilization, deployment automation, and developer experience improvements
+created: 2026-11-02T04:17
+updated: 2026-11-07T19
+update_reason: Add missing title, standardize scope and timestamps
 status: active
-agent_project: kicli-code-assist
-keywords: [roadmap, deployment, developer-experience, documentation, automation]
+semantic_blocks: [current-state, phase-1-immediate-fixes, phase-2-stabilization, phase-3-automation, monitoring-dashboard]
 ---
 
 # Development Stack: Future Planning & Roadmap

@@ -1,15 +1,14 @@
 ---
-title: "Deployment Status Report"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Track deployment readiness and current configuration status"
-created: 2026-11-01
-updated: 2026-11-02T04:15:00+01:00
-update_reason: "Added YAML header for metadata tracking and consolidation"
-status: "active"
-cross_references:
-  - "STACKCTL_STATUS.md: Implementation details"
+title: Deployment Status Report
+project: kicli-code-assist
+scope: deployment
+purpose: Track deployment readiness and current configuration status
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: active
+semantic_blocks: [current-status, readiness-assessment, configuration-summary, deployment-checklist]
+---
   - "stackctl/doc/README.md: General usage patterns"
   - "dev_doc/DEPLOYMENT_STANDARDS.md: Cross-project context"
 ---

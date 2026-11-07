@@ -1,18 +1,21 @@
 ---
-title: "StackCtl Configuration Status"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Document stackctl configuration implementation details and merge strategy"
-created: 2026-11-01
-updated: 2026-11-02T04:16:00+01:00
-update_reason: "Added YAML header for metadata tracking and consolidation"
-status: "active"
-cross_references:
-  - "CURRENT_STATUS.md: High-level status overview"
-  - "STACKCTL_ARCHITECTURE.md: Design rationale"
-  - "stackctl/doc/README.md: Configuration loader usage"
-  - "ki_core/src/ki_core/config.py: Merge semantics implementation"
+title: StackCtl Configuration Status
+project: kicli-code-assist
+scope: deployment
+purpose: Document stackctl configuration implementation details and merge strategy
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: active
+semantic_blocks: [current-state, required-tests, files-modified, ki-knowledge-reference, next-steps, architecture-decision]
+relations:
+  - file: CURRENT_STATUS.md
+    type: reference
+    reason: High-level status overview
+  - file: STACKCTL_ARCHITECTURE.md
+    type: reference
+    reason: Design rationale
+---
 ---
 
 # StackCtl Configuration Status

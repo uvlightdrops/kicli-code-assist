@@ -1,11 +1,13 @@
 ---
+title: Development Stack Troubleshooting Guide
 project: kicli-code-assist
-scope: development
-purpose: Troubleshooting guide for local development stack (stackctl + API + Vite frontend)
-created: 2026-11-02T04:10:00+01:00
-updated: 2026-11-02T04:15:00+01:00
-status: in-progress
-agent_project: kicli-code-assist
+scope: deployment
+purpose: Troubleshooting guide for development stack issues (stackctl, API, Vite frontend configuration)
+created: 2026-11-02T04:10
+updated: 2026-11-07T19
+update_reason: Add missing title, standardize scope and timestamps
+status: active
+semantic_blocks: [core-problems, problem-1-env-vars, vite-solutions, quick-start, debugging-checklist]
 ---
 
 # Development Stack Troubleshooting Guide

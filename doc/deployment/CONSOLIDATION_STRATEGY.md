@@ -1,13 +1,13 @@
 ---
-title: "Deployment Documentation Consolidation Strategy"
-project: "kicli-code-assist"
-scope: "documentation"
-created: 2026-11-02T04:12:00+01:00
-updated: 2026-11-02T04:12:00+01:00
-update_reason: "Analyze duplicated docs across repos and create consolidation plan"
-status: "analysis"
-agent_project: "kicli-code-assist"
-author: "Copilot"
+title: Deployment Documentation Consolidation Strategy
+project: kicli-code-assist
+scope: deployment
+purpose: Analysis of duplicated documentation across repos and consolidation planning
+created: 2026-11-02T04:12
+updated: 2026-11-07T19
+update_reason: Change scope from documentation to deployment, standardize timestamps
+status: archived
+semantic_blocks: [problem-statement, current-state, duplication-analysis, consolidation-plan, implementation-phases]
 ---
 
 # Deployment Documentation Consolidation Analysis

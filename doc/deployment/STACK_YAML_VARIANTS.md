@@ -1,18 +1,18 @@
 ---
-title: "stack.yaml Varianten für kicli-code-assist"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Document different stack configurations for various deployment scenarios"
-created: 2026-11-01
-updated: 2026-11-02T04:19:00+01:00
-update_reason: "Added YAML header for metadata tracking"
-status: "active"
-language: "de"
-cross_references:
-  - "STACKCTL_ARCHITECTURE.md: Architecture rationale"
-  - "config/defaults/stack.yaml: Base configuration"
-  - "config/stages/: Stage-specific overrides"
+title: stack.yaml Configuration Variants
+project: kicli-code-assist
+scope: deployment
+purpose: Document different stack configurations for various deployment scenarios
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format, update title to English
+status: active
+semantic_blocks: [kontext, variante-1-minimal, variante-2-dev, variante-3-production, variante-4-full-stack, empfehlung, naechste-schritte, questions]
+relations:
+  - file: STACKCTL_ARCHITECTURE.md
+    type: reference
+    reason: Architecture rationale
+---
 ---
 
 # stack.yaml Varianten für kicli-code-assist

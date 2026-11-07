@@ -1,12 +1,13 @@
 ---
+title: Failed Approaches & Anti-Patterns
 project: kicli-code-assist
-scope: development
-purpose: Document failed approaches and anti-patterns for development stack configuration
-created: 2026-11-02T04:16:00+01:00
-updated: 2026-11-02T04:16:00+01:00
+scope: deployment
+purpose: Catalog failed deployment approaches, anti-patterns, and lessons learned for development stack configuration
+created: 2026-11-02T04:16
+updated: 2026-11-07T19
+update_reason: Add missing title, standardize scope and timestamps
 status: active
-agent_project: kicli-code-assist
-keywords: [anti-patterns, failed-attempts, lessons-learned, vite, stackctl, configuration]
+semantic_blocks: [anti-pattern-1-env-vars, anti-pattern-2-docker-volume, anti-pattern-3-port-forwarding, anti-pattern-4-vite-config, anti-pattern-5-makefile]
 ---
 
 # Failed Approaches & Anti-Patterns: Development Stack

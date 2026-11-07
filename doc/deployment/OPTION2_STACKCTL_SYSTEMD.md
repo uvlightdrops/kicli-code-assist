@@ -1,18 +1,18 @@
 ---
-title: "Option 2 Deployment: stackctl + systemd"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Document alternative systemd integration approach (legacy)"
-created: 2026-11-01
-updated: 2026-11-02T04:22:00+01:00
-update_reason: "Added YAML header for metadata tracking and consolidation"
-status: "archived"
-language: "de"
-notes: "This is a dated proposal for systemd integration. Refer to STACKCTL_ARCHITECTURE.md for current approach."
-cross_references:
-  - "STACKCTL_ARCHITECTURE.md: Current recommended approach"
-  - "SEMI_PROD_DEPLOYMENT.md: Alternative Apache2 approach"
+title: Option 2 Deployment - stackctl + systemd
+project: kicli-code-assist
+scope: deployment
+purpose: Alternative systemd integration approach for deployment (legacy documentation)
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: archived
+semantic_blocks: [architektur, setup-semi-prod, verfuegbare-kommandos, webui-externe-zugriffe, tui-vs-webui, monitoring, firewall]
+relations:
+  - file: STACKCTL_ARCHITECTURE.md
+    type: reference
+    reason: Current recommended approach
+---
 ---
 
 # Option 2 Deployment: stackctl + systemd

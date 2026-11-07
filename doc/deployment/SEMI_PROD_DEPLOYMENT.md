@@ -1,18 +1,18 @@
 ---
-title: "Semi-Prod Deployment Guide"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Document alternative deployment patterns with Apache2 reverse proxy (legacy)"
-created: 2026-11-01
-updated: 2026-11-02T04:21:00+01:00
-update_reason: "Added YAML header for metadata tracking and consolidation"
-status: "archived"
-language: "de"
-notes: "This is a dated proposal for Apache2 integration. Refer to STACKCTL_ARCHITECTURE.md for current approach."
-cross_references:
-  - "STACKCTL_ARCHITECTURE.md: Current recommended approach"
-  - "OPTION2_STACKCTL_SYSTEMD.md: Alternative systemd approach"
+title: Semi-Prod Deployment Guide
+project: kicli-code-assist
+scope: deployment
+purpose: Alternative deployment patterns with Apache2 reverse proxy (legacy documentation)
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: archived
+semantic_blocks: [option-1-single-port, option-2-dual-port, firewall-testing, recommendation, static-files-setup]
+relations:
+  - file: STACKCTL_ARCHITECTURE.md
+    type: reference
+    reason: Current recommended approach
+---
 ---
 
 # Semi-Prod Deployment Guide

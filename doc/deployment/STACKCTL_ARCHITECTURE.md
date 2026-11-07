@@ -1,17 +1,20 @@
 ---
-title: "StackCtl Architecture & Configuration Strategy"
-project: "kicli-code-assist"
-agent_project: "kicli-code-assist"
-scope: "deployment"
-purpose: "Explain design rationale for stackctl stage-based configuration"
-created: 2026-11-01
-updated: 2026-11-02T04:17:00+01:00
-update_reason: "Added YAML header for metadata tracking"
-status: "active"
-cross_references:
-  - "STACKCTL_IMPLEMENTATION.md: How to apply this architecture"
-  - "STACK_YAML_VARIANTS.md: Concrete examples of stage files"
-  - "dev_doc/DEPLOYMENT_STANDARDS.md: Cross-project pattern"
+title: StackCtl Architecture & Configuration Strategy
+project: kicli-code-assist
+scope: deployment
+purpose: Explain design rationale for stackctl stage-based configuration approach
+created: 2026-11-01T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamps and YAML header format
+status: active
+semantic_blocks: [problem-statement, design-principles, configuration-hierarchy, config-resolution, usage, migration-symlink, why-matters, implementation-checklist]
+relations:
+  - file: STACKCTL_IMPLEMENTATION.md
+    type: reference
+    reason: How to apply this architecture
+  - file: STACK_YAML_VARIANTS.md
+    type: reference
+    reason: Concrete examples of stage files
 ---
 
 # StackCtl Architecture & Configuration Strategy
