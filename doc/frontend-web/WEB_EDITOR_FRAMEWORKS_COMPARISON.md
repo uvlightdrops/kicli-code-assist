@@ -4,47 +4,35 @@ project: kicli-code-assist
 scope: frontend-web
 purpose: Compare web-based code editors for WebUI implementation selection
 created: 2026-10-28T10:00:00+01:00
-updated: 2026-11-07T20:57:37+01:00
-update_reason: Standardized YAML header; removed extra doc reference from semantic_blocks; fixed scope
+updated: 2026-11-07T22:07:00+01:00
+update_reason: Remove emojis from H2 headings; fix semantic_blocks array (IDs only); consolidate duplicate relations
 status: active
 agent_project: kicli-code-assist
 relations:
   - target: ../README.md
     type: parent
-  - target: README.md
-    type: parent
+    reason: Parent documentation index for frontend-web folder
   - target: WEB_EDITOR_EDIT_CAPABILITIES.md
     type: reference
+    reason: Related capabilities document for editor features
 semantic_blocks:
-  - id: 1-monaco-editor
-    title: 1️⃣ MONACO EDITOR
-  - id: 2-codemirror
-    title: 2️⃣ CODEMIRROR
-  - id: 3-ace-editor
-    title: 3️⃣ ACE EDITOR
-  - id: 4-vimwasm
-    title: 4️⃣ VIM.WASM
-  - id: 5-neovim-in-browser
-    title: 5️⃣ NEOVIM IN BROWSER
-  - id: 6-highlightjs
-    title: 6️⃣ HIGHLIGHT.JS
-  - id: 7-tinymce-rich-text-alternative
-    title: 7️⃣ TINYMCE (Rich Text Alternative)
-  - id: comparison-table
-    title: 🎯 COMPARISON TABLE
-  - id: vim-users-recommendations
-    title: 🧠 VIM USERS - RECOMMENDATIONS
-  - id: implementation-paths-for-kicli-webide
-    title: 🔧 IMPLEMENTATION PATHS FOR kicli WebIDE
-  - id: for-your-use-case
-    title: 🎬 FOR YOUR USE CASE
-  - id: resources
-    title: 📖 RESOURCES
+  - monaco-editor
+  - codemirror
+  - ace-editor
+  - vimwasm
+  - neovim-in-browser
+  - highlightjs
+  - tinymce-rich-text-alternative
+  - comparison-table
+  - vim-users-recommendations
+  - implementation-paths-for-kicli-webide
+  - for-your-use-case
+  - resources
 ---
 
 # Web Editor Frameworks - Comprehensive Comparison
 
-## 1️⃣ MONACO EDITOR [1-monaco-editor]
+## Monaco Editor [monaco-editor]
 **By:** Microsoft (VSCode's engine)  
 **NPM:** `@monaco-editor/react`  
 **License:** MIT
@@ -81,7 +69,7 @@ const options = {
 
 ---
 
-## 2️⃣ CODEMIRROR [2-codemirror]
+## CodeMirror [codemirror]
 **NPM:** `codemirror` (v6 current)  
 **License:** MIT
 
@@ -118,7 +106,7 @@ const editor = new EditorView({
 
 ---
 
-## 3️⃣ ACE EDITOR [3-ace-editor]
+## Ace Editor [ace-editor]
 **NPM:** `ace-builds`  
 **License:** BSD
 
@@ -151,7 +139,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 4️⃣ VIM.WASM [4-vimwasm]
+## Vim.Wasm [vimwasm]
 **Repository:** `vim/vim`  
 **Build:** Vim compiled to WebAssembly
 
@@ -186,7 +174,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 5️⃣ NEOVIM IN BROWSER [5-neovim-in-browser]
+## Neovim in Browser [neovim-in-browser]
 **Repository:** `neovim/neovim`  
 **Build:** Neovim + WebAssembly
 
@@ -218,7 +206,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 6️⃣ HIGHLIGHT.JS [6-highlightjs]
+## Highlight.js [highlightjs]
 **NPM:** `highlight.js`  
 **License:** BSD
 
@@ -245,7 +233,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 7️⃣ TINYMCE (Rich Text Alternative) [7-tinymce-rich-text-alternative]
+## TinyMCE (Rich Text Alternative) [tinymce-rich-text-alternative]
 **NPM:** `tinymce`  
 **License:** LGPL
 
@@ -271,7 +259,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🎯 COMPARISON TABLE [comparison-table]
+## Comparison Table [comparison-table]
 
 ```
 ┌────────────────────┬─────────┬─────────┬──────────┬────────┐
@@ -289,7 +277,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🧠 VIM USERS - RECOMMENDATIONS [vim-users-recommendations]
+## Vim Users - Recommendations [vim-users-recommendations]
 
 ### If you want **partial Vim** (emulation):
 1. **Monaco** with vim mode (best UX)
@@ -306,7 +294,7 @@ editor.setKeyboardHandler("ace/keyboard/vim")
 
 ---
 
-## 🔧 IMPLEMENTATION PATHS FOR kicli WebIDE [implementation-paths-for-kicli-webide]
+## Implementation Paths for kicli WebIDE [implementation-paths-for-kicli-webide]
 
 ### Path A: Monaco (Recommended - Professional)
 ```
@@ -345,7 +333,7 @@ npm install @vim/wasm
 
 ---
 
-## 🎬 FOR YOUR USE CASE [for-your-use-case]
+## For Your Use Case [for-your-use-case]
 
 **Question:** You're a Vim user, right?
 
@@ -361,7 +349,7 @@ npm install @vim/wasm
 
 ---
 
-## 📖 RESOURCES [resources]
+## Resources [resources]
 
 | Framework | Docs | GitHub |
 |-----------|------|--------|
