@@ -167,7 +167,7 @@
 | 2026-11-07 18:26 | Create master tracker | DOCUMENTATION_MASTER_TRACKER.md | ✅ |
 | 2026-11-07 18:26 | Reorganize docs + commit | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | ✅ |
 | 2026-11-07 18:36 | Fix TEXTUAL_HOWTO YAML + blocks + PHASE removals | 6 files | ✅ |
-| 2026-11-07 18:36 | Add semantic blocks to remaining 6 files | frontend-tui/ | 🔶 |
+| 2026-11-07 18:46 | Remove PHASE prefix from filenames | I1_LAYER_2_*, I1_REAL_LLM_* | ✅ |
 
 ---
 
@@ -180,8 +180,8 @@
 4. ⏳ **README.md** - 2 H2 headings, 0 block tags → **2 FEHLEND**
 
 ### Teilweise Done (10-15 min pro File)
-5. 🟡 **PHASE_I1_LAYER_2_REASONING_DISPLAY.md** - 11 H2, 7 tags → **4 FEHLEND**
-6. 🟡 **PHASE_I1_REAL_LLM_IMPLEMENTATION.md** - 11 H2, 9 tags → **2 FEHLEND**
+5. 🟡 **I1_LAYER_2_REASONING_DISPLAY.md** - 11 H2, 7 tags → **4 FEHLEND**
+6. 🟡 **I1_REAL_LLM_IMPLEMENTATION.md** - 11 H2, 9 tags → **2 FEHLEND**
 7. ✅ **TUI_TEXTUAL_ARCHITECTURE.md** - 8 H2, 8 tags → COMPLETE
 8. ⚠️ **UI_TABS.md** - 8 H2, 10 tags → CHECK DUPLIKATE
 
