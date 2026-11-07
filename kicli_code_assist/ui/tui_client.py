@@ -10,7 +10,7 @@ import logging
 import asyncio
 from textual.app import ComposeResult, on, App
 from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Header, Footer, Static
+from textual.widgets import Header, Footer, Static, TabbedContent, TabPane
 from textual import work
 
 from .config import ConfigLoader, TUIConfig
@@ -21,6 +21,7 @@ from .widgets.input_bar import InputBar, StatusBar
 from .widgets.preview_panel import PreviewPanel
 from .widgets.preview_modal import FilePreviewModal
 from .widgets.vi_editor_modal import VIEditorModal
+from .widgets.project_analysis_panel import ProjectAnalysisPanel
 
 
 logger = logging.getLogger(__name__)
@@ -172,10 +173,16 @@ class KICLITUIApp(App):
                             ignore_patterns=self.config.file_tree.ignore_patterns,
                         )
                 
-                # Center panel: Preview with tabs
+                # Center panel: Preview + Project Analysis (tabs)
                 if self.config_loader.is_enabled("preview"):
                     with Vertical(id="center-panel"):
-                        yield PreviewPanel()
+                        with TabbedContent():
+                            with TabPane("Preview", id="tab-preview"):
+                                yield PreviewPanel()
+                            with TabPane("Project", id="tab-project"):
+                                yield ProjectAnalysisPanel(
+                                    project_root=self.config.file_tree.project_root
+                                )
                 
                 # Right panel: Agent tabs (50% of remaining)
                 if self.config_loader.is_enabled("agent_tabs"):
@@ -392,10 +399,13 @@ class KICLITUIApp(App):
         
         # Update agent tabs with file context (Phase I1 Real LLM Integration)
         try:
+            # Get project_root from FileTree (don't use cwd!)
+            file_tree = self.query_one(FileTree)
+            project_root = str(file_tree.project_root)
+            
             agent_tabs = self.query_one(AgentTabPanel)
-            project_root = str(Path.cwd())
             agent_tabs.set_file_context(file_path, project_root)
-            logger.info(f"Agent tabs context updated: {file_path}")
+            logger.info(f"Agent tabs context updated: file={file_path}, project_root={project_root}")
         except Exception as e:
             logger.debug(f"Could not update agent tabs context: {e}")
     

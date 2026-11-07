@@ -140,12 +140,13 @@ class TUIBackendClient:
         """Parse backend response into AnalysisResponse.
         
         Converts agent response + tabs into chunks format expected by UI.
+        The bottom panel displays these chunks as the agent's "thinking" / reasoning.
         
         Args:
             data: JSON response from /api/agent/route
         
         Returns:
-            AnalysisResponse with formatted chunks
+            AnalysisResponse with formatted chunks for thinking display
         """
         
         if not data.get("success"):
@@ -158,12 +159,13 @@ class TUIBackendClient:
                 error=data.get("error", "Unknown error")
             )
         
-        # Main answer
+        # Main answer (top panel)
         answer = data.get("answer", "")
         
-        # Extract chunks from tabs (each tab can have chunks)
+        # Extract chunks for thinking/reasoning display (bottom panel)
         chunks: List[Tuple[str, str]] = []
         
+        # Strategy 1: Extract explicit chunks from tabs
         tabs = data.get("tabs", {})
         for tab_name, tab_data in tabs.items():
             if isinstance(tab_data, dict):
@@ -175,21 +177,38 @@ class TUIBackendClient:
                         content = chunk.get("content", "")
                         chunks.append((chunk_type, content))
         
-        # If no chunks in tabs, create one from summary
+        # Strategy 2: Extract execution_results as thinking output (Layer 2 reasoning)
         if not chunks and tabs:
             for tab_name, tab_data in tabs.items():
                 if isinstance(tab_data, dict):
+                    # Extract execution results (what agents did)
+                    exec_results = tab_data.get("execution_results", {})
+                    if isinstance(exec_results, dict):
+                        for result_key, result_value in exec_results.items():
+                            if isinstance(result_value, str):
+                                chunks.append(("execution", result_value))
+                            elif isinstance(result_value, dict):
+                                # Flatten dict to readable text
+                                for k, v in result_value.items():
+                                    if isinstance(v, str):
+                                        chunks.append(("execution", f"{k}: {v}"))
+                    
+                    # Extract summary as fallback
                     summary = tab_data.get("summary", "")
-                    if summary:
+                    if summary and not chunks:
                         chunks.append(("observation", f"{tab_name}: {summary}"))
+        
+        # Strategy 3: Extract agents_used as thinking context
+        agents_used = data.get("agents_used", [])
+        if agents_used and not chunks:
+            chunk_text = "Coordination: Agents running: " + ", ".join(agents_used)
+            chunks.append(("execution", chunk_text))
         
         intent = data.get("intent", {})
         if isinstance(intent, dict):
             intent_type = intent.get("type", "analyze")
         else:
             intent_type = str(intent)
-        
-        agents_used = data.get("agents_used", [])
         
         return AnalysisResponse(
             success=True,
@@ -200,12 +219,65 @@ class TUIBackendClient:
             error=None
         )
 
+    def analyze_project(self, project_root: str) -> Optional[Dict[str, Any]]:
+        """Query backend for project-wide analysis.
+        
+        Phase I2.1: Full project analysis with dependency graph.
+        
+        Args:
+            project_root: Project root directory path
+        
+        Returns:
+            JSON response from /api/projects/analyze or None on error
+        """
+        try:
+            url = f"{self.base_url}/api/projects/analyze"
+            payload = {
+                "project_root": project_root,
+                "depth": 3,
+                "include_extensions": [".py", ".yaml", ".json"],
+                "exclude_patterns": [".git", "__pycache__", ".venv"]
+            }
+            
+            logger.info(f"Analyzing project: {project_root}")
+            request = Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            
+            with urlopen(request, timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                logger.info(f"Project analysis received: {data.get('project', {}).get('stats', {})}")
+                return data
+        
+        except HTTPError as e:
+            logger.error(f"HTTP error analyzing project: {e.code} - {e.reason}")
+            return {
+                "success": False,
+                "error": f"HTTP error {e.code}: {e.reason}"
+            }
+        
+        except URLError as e:
+            logger.error(f"Cannot reach backend: {e.reason}")
+            return {
+                "success": False,
+                "error": f"Connection error: {e.reason}"
+            }
+        
+        except Exception as e:
+            logger.error(f"Project analysis error: {e}")
+            return {
+                "success": False,
+                "error": f"Error: {str(e)}"
+            }
+
 
 # Global client instance
 _client: Optional[TUIBackendClient] = None
 
 
-def get_backend_client(base_url: str = "http://localhost:3000") -> TUIBackendClient:
+def get_backend_client(base_url: str = "http://localhost:8000") -> TUIBackendClient:
     """Get or create global backend client."""
     global _client
     if _client is None:

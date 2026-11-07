@@ -912,6 +912,149 @@ def register_project_routes(app: Flask):
         except Exception as e:
             app.logger.error(f"Open project error: {e}\n{traceback.format_exc()}")
             return jsonify({"success": False, "error": str(e)}), 500
+
+    @app.route("/api/projects/analyze", methods=["POST"])
+    def analyze_project():
+        """
+        Phase I2: Full project analysis with dependency graph.
+        
+        Analyzes project structure, imports, and metrics to build
+        complete dependency graph and impact zones.
+        
+        Request:
+        {
+            "project_root": "/path/to/project",
+            "depth": 3,
+            "include_extensions": [".py", ".yaml"],
+            "exclude_patterns": [".git", "__pycache__"]
+        }
+        
+        Response (Success):
+        {
+            "success": true,
+            "project": {
+                "name": "kicli-code-assist",
+                "root": "/path/to/project",
+                "stats": {
+                    "total_files": 127,
+                    "total_lines": 45230,
+                    "languages": {"python": 89, "yaml": 12},
+                    "avg_complexity": 2.5,
+                    "files_with_high_impact": [...]
+                }
+            },
+            "files": [
+                {
+                    "path": "kicli_code_assist/ui/tui_client.py",
+                    "language": "python",
+                    "lines": 421,
+                    "complexity": 12,
+                    "imports": ["kicli_code_assist.ui.widgets"],
+                    "exported": ["class KICLIApp", "def main"]
+                }
+            ],
+            "dependencies": {
+                "ui/tui_client.py": ["ui/widgets/file_browser.py"],
+                ...
+            },
+            "high_impact_files": [
+                {
+                    "file": "utils.py",
+                    "dependents": 12,
+                    "impact_level": "high"
+                }
+            ]
+        }
+        """
+        try:
+            from kicli_code_assist.agent.analysis.project_analyzer import ProjectAnalysisService
+            
+            data = request.json or {}
+            project_root_str = data.get("project_root", "").strip()
+            
+            if not project_root_str:
+                return jsonify({
+                    "success": False,
+                    "error": "Missing 'project_root' parameter"
+                }), 400
+            
+            # Validate path
+            if not is_safe_path(project_root_str):
+                return jsonify({
+                    "success": False,
+                    "error": f"Path must be within {ALLOWED_ROOT}"
+                }), 403
+            
+            project_root = Path(project_root_str).resolve()
+            if not project_root.exists() or not project_root.is_dir():
+                return jsonify({
+                    "success": False,
+                    "error": "Project path does not exist or is not a directory"
+                }), 404
+            
+            logger.info(f"Starting project analysis: {project_root}")
+            
+            # Perform analysis
+            service = ProjectAnalysisService(project_root)
+            graph = service.analyze_full()
+            stats = service.get_project_stats()
+            high_impact = service.get_high_impact_files()
+            
+            # Build response with file details
+            files_data = []
+            for rel_path, file_node in graph.files.items():
+                files_data.append({
+                    "path": rel_path,
+                    "language": file_node.language,
+                    "lines": file_node.lines,
+                    "size_bytes": file_node.size_bytes,
+                    "complexity": file_node.cyclomatic_complexity,
+                    "imports": list(file_node.imports),
+                    "exported": list(file_node.exported_symbols),
+                    "is_test": file_node.has_tests,
+                })
+            
+            # Build high-impact files list
+            high_impact_data = []
+            for file_path in high_impact[:10]:  # Top 10
+                impact = graph.get_impact_zone(file_path)
+                high_impact_data.append({
+                    "file": file_path,
+                    "direct_dependents": len(impact.direct_dependents),
+                    "indirect_dependents": len(impact.indirect_dependents),
+                    "total_affected": len(impact.all_affected),
+                    "impact_level": impact.impact_level.value,
+                    "cascade_depth": impact.cascade_depth,
+                })
+            
+            # Build dependency graph as adjacency list
+            dependencies = {}
+            for file, deps in graph.dependencies.items():
+                if deps:
+                    dependencies[file] = list(deps)
+            
+            logger.info(f"Project analysis complete: {len(graph.files)} files, "
+                       f"{stats['total_lines']} lines")
+            
+            return jsonify({
+                "success": True,
+                "project": {
+                    "name": project_root.name,
+                    "root": str(project_root),
+                    "stats": stats,
+                },
+                "files": files_data,
+                "dependencies": dependencies,
+                "high_impact_files": high_impact_data,
+                "timestamp": datetime.now().isoformat(),
+            }), 200
+            
+        except Exception as e:
+            logger.error(f"Project analysis error: {e}\n{traceback.format_exc()}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
     
     @app.route("/api/projects/create", methods=["POST"])
     def create_project():

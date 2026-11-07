@@ -85,7 +85,7 @@ class AgentTabPanel(Static):
         default_tab: str = "explain",
         file_path: Optional[str] = None,
         project_root: Optional[str] = None,
-        backend_url: str = "http://localhost:3000"
+        backend_url: str = "http://localhost:8000"
     ):
         """Initialize agent tabs.
         
@@ -156,6 +156,11 @@ class AgentTabPanel(Static):
         try:
             logger.info(f"Starting analysis: file={self.file_path}")
             
+            # Resolve paths to absolute (backend requires absolute paths)
+            file_path_abs = str(Path(self.file_path).resolve())
+            project_root_abs = str(Path(self.project_root).resolve())
+            logger.info(f"Resolved: file={file_path_abs}, project_root={project_root_abs}")
+            
             # Get active tab
             try:
                 tabbed = self.query_one(TabbedContent)
@@ -168,12 +173,12 @@ class AgentTabPanel(Static):
             # Build analysis query from agent type
             query = self._build_query(agent_type)
             
-            # Call backend
-            logger.info(f"Calling backend: query='{query}' file={self.file_path}")
+            # Call backend with absolute paths
+            logger.info(f"Calling backend: query='{query}' file={file_path_abs}")
             response = self.backend_client.analyze_file(
                 query=query,
-                file_path=self.file_path,
-                project_root=self.project_root,
+                file_path=file_path_abs,
+                project_root=project_root_abs,
                 scope="file"
             )
             
