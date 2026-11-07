@@ -347,6 +347,20 @@ def register_routes(app: Flask):
             app.logger.error(f"Project files error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
     
+    def _validate_file_path(project_root: Path, file_path: str) -> tuple[Path | None, str | None]:
+        """Validate file path is within project root and safe.
+        
+        Returns: (valid_path, error_message)
+        """
+        try:
+            full_path = (project_root / file_path).resolve()
+            full_path.relative_to(project_root)
+            return full_path, None
+        except ValueError:
+            return None, "Access denied: path outside project"
+        except Exception as e:
+            return None, f"Invalid path: {e}"
+    
     @app.route("/api/files/<path:file_path>", methods=["GET"])
     def read_file(file_path):
         """Read file contents."""
@@ -369,13 +383,9 @@ def register_routes(app: Flask):
                 except ValueError:
                     return jsonify({"error": "Access denied: path outside allowed root"}), 403
             
-            full_path = (project_root / file_path).resolve()
-            
-            # Security: ensure file is within project_root
-            try:
-                full_path.relative_to(project_root)
-            except ValueError:
-                return jsonify({"error": "Access denied: file outside project"}), 403
+            full_path, err = _validate_file_path(project_root, file_path)
+            if err:
+                return jsonify({"error": err}), 403
             
             if not full_path.is_file():
                 return jsonify({"error": "File not found"}), 404
@@ -390,6 +400,116 @@ def register_routes(app: Flask):
         except Exception as e:
             app.logger.error(f"File read error: {e}\n{traceback.format_exc()}")
             return jsonify({"error": str(e)}), 500
+    
+    @app.route("/api/files", methods=["POST"])
+    def create_file():
+        """Create new file in project.
+        
+        Request:
+        {
+            "path": "src/newfile.py",
+            "content": "# File content",
+            "project": "/path/to/project"
+        }
+        """
+        try:
+            data = request.get_json() or {}
+            file_path = data.get("path", "").strip()
+            content = data.get("content", "")
+            project_path = data.get("project", "").strip()
+            
+            if not file_path:
+                return jsonify({"success": False, "error": "Missing 'path'"}), 400
+            
+            if not project_path:
+                # Fallback to config
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Access denied"}), 403
+            
+            full_path, err = _validate_file_path(project_root, file_path)
+            if err:
+                return jsonify({"success": False, "error": err}), 403
+            
+            # Check if file already exists
+            if full_path.exists():
+                return jsonify({"success": False, "error": "File already exists"}), 409
+            
+            # Create parent directories if needed
+            full_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write file
+            full_path.write_text(content)
+            
+            logger.info(f"Created file: {file_path}")
+            return jsonify({
+                "success": True,
+                "path": file_path,
+                "message": "File created successfully"
+            }), 201
+            
+        except Exception as e:
+            app.logger.error(f"File create error: {e}\n{traceback.format_exc()}")
+            return jsonify({"success": False, "error": str(e)}), 500
+    
+    @app.route("/api/files/<path:file_path>", methods=["PUT"])
+    def update_file(file_path):
+        """Update existing file in project.
+        
+        Request:
+        {
+            "content": "# Updated content",
+            "project": "/path/to/project"
+        }
+        """
+        try:
+            data = request.get_json() or {}
+            content = data.get("content", "")
+            project_path = data.get("project", "").strip()
+            
+            if not project_path:
+                # Fallback to config
+                config = app.config["KICLI_CONFIG"]
+                project_root = Path(config.get("storage", {}).get("project_root", ".")).resolve()
+            else:
+                # Use provided project path
+                project_root = Path(project_path).resolve()
+                
+                # Verify path is safe (within /home/flow/dev_flow)
+                try:
+                    ALLOWED_ROOT = Path("/home/flow/dev_flow").resolve()
+                    project_root.relative_to(ALLOWED_ROOT)
+                except ValueError:
+                    return jsonify({"success": False, "error": "Access denied"}), 403
+            
+            full_path, err = _validate_file_path(project_root, file_path)
+            if err:
+                return jsonify({"success": False, "error": err}), 403
+            
+            if not full_path.exists():
+                return jsonify({"success": False, "error": "File not found"}), 404
+            
+            full_path.write_text(content)
+            
+            logger.info(f"Updated file: {file_path}")
+            return jsonify({
+                "success": True,
+                "path": file_path,
+                "message": "File updated successfully"
+            }), 200
+            
+        except Exception as e:
+            app.logger.error(f"File update error: {e}\n{traceback.format_exc()}")
+            return jsonify({"success": False, "error": str(e)}), 500
     
     @app.route("/api/agent/explain", methods=["POST"])
     def agent_explain():

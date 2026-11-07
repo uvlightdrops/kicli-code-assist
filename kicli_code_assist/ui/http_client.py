@@ -272,6 +272,89 @@ class TUIBackendClient:
                 "error": f"Error: {str(e)}"
             }
 
+    def create_file(self, path: str, content: str, project_root: str) -> Dict[str, Any]:
+        """Create new file via backend API.
+        
+        Args:
+            path: Relative file path (e.g., 'src/new_file.py')
+            content: File content
+            project_root: Project root directory
+        
+        Returns:
+            Response dict with success, path, message or error
+        """
+        try:
+            url = f"{self.base_url}/api/files"
+            payload = {
+                "path": path,
+                "content": content,
+                "project": project_root
+            }
+            
+            logger.info(f"Creating file: {path}")
+            request = Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="POST"
+            )
+            
+            with urlopen(request, timeout=10) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                logger.info(f"File created: {path}")
+                return data
+        
+        except HTTPError as e:
+            error_msg = f"HTTP error {e.code}"
+            if e.code == 409:
+                error_msg = "File already exists"
+            logger.error(f"Error creating file: {error_msg}")
+            return {"success": False, "error": error_msg}
+        except Exception as e:
+            logger.error(f"File create error: {e}")
+            return {"success": False, "error": str(e)}
+
+    def update_file(self, path: str, content: str, project_root: str) -> Dict[str, Any]:
+        """Update existing file via backend API.
+        
+        Args:
+            path: Relative file path (e.g., 'src/file.py')
+            content: File content
+            project_root: Project root directory
+        
+        Returns:
+            Response dict with success, path, message or error
+        """
+        try:
+            url = f"{self.base_url}/api/files/{path}"
+            payload = {
+                "content": content,
+                "project": project_root
+            }
+            
+            logger.info(f"Updating file: {path}")
+            request = Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"},
+                method="PUT"
+            )
+            
+            with urlopen(request, timeout=10) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                logger.info(f"File updated: {path}")
+                return data
+        
+        except HTTPError as e:
+            error_msg = f"HTTP error {e.code}"
+            if e.code == 404:
+                error_msg = "File not found"
+            logger.error(f"Error updating file: {error_msg}")
+            return {"success": False, "error": error_msg}
+        except Exception as e:
+            logger.error(f"File update error: {e}")
+            return {"success": False, "error": str(e)}
+
 
 # Global client instance
 _client: Optional[TUIBackendClient] = None

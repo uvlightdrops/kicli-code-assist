@@ -84,6 +84,10 @@ class SelectableFileList(Static):
             self.update_display()
             self._update_preview()
     
+    def action_new_file(self):
+        """Open dialog to create new file."""
+        self.parent_app.show_create_file_dialog(self.current_dir)
+    
     def action_select_cursor(self):
         """Enter directory or select file, or edit file if file selected."""
         if not self.entries:

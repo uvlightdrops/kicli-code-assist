@@ -58,9 +58,10 @@ class CodeAssistantApp(Static):
         Binding("ctrl+i", "focus_input", "Input", show=True),
         Binding("ctrl+x", "focus_shell", "Shell", show=True),
         Binding("ctrl+o", "open_prompts", "Prompts", show=True),
-        Binding("ctrl+s", "open_settings", "Settings", show=True),
+        Binding("ctrl+s", "save_current_file", "Save File", show=True),
         Binding("ctrl+l", "load_context", "Load Context", show=True),
         Binding("ctrl+g", "open_logs", "Logs [Ctrl+G]", show=True),
+        Binding("n", "new_file", "New File", show=True),
         Binding("s", "mark_selection_start", "Mark Start", show=True),
         Binding("e", "mark_selection_end", "Mark End", show=True),
         Binding("l", "load_file", "Load File to Context", show=True),
@@ -507,6 +508,14 @@ class CodeAssistantApp(Static):
             
         self.run_worker(lambda: self._load_file_to_context(selected), thread=True)
     
+    def action_new_file(self) -> None:
+        """Create new file in current directory."""
+        try:
+            file_browser = self.query_one(SelectableFileList)
+            self.show_create_file_dialog(file_browser.current_dir)
+        except Exception as e:
+            self.app.notify(f"❌ Error: {e}", severity="error", timeout=2)
+    
     def action_app_quit(self) -> None:
         """Quit the application."""
         self.app.exit()
@@ -892,3 +901,167 @@ File: {suggestion.file_path}[/dim]
             file_path=suggestion.file_path,
         )
         self.app.push_screen(modal, callback=on_diff_result)
+
+    def show_create_file_dialog(self, current_dir: Path):
+        """Show dialog to create new file.
+        
+        Args:
+            current_dir: Directory where to create file
+        """
+        from textual.containers import Vertical, Horizontal
+        from textual.widgets import Input, Button, Label
+        from textual.app import Screen
+        
+        class CreateFileDialog(Screen):
+            """Dialog for creating new file."""
+            
+            DEFAULT_CSS = """
+            CreateFileDialog {
+                align: center middle;
+            }
+            
+            CreateFileDialog > Vertical {
+                width: 60;
+                height: 11;
+                border: solid $primary;
+                background: $surface;
+            }
+            
+            CreateFileDialog Label {
+                margin: 1 0;
+            }
+            
+            CreateFileDialog Input {
+                margin: 0 1 1 1;
+            }
+            
+            CreateFileDialog Horizontal {
+                height: 1;
+                margin: 0 1 1 1;
+            }
+            
+            CreateFileDialog Button {
+                margin-right: 1;
+            }
+            """
+            
+            def __init__(self, app_ref, current_dir: Path):
+                super().__init__()
+                self.app_ref = app_ref
+                self.current_dir = current_dir
+            
+            def compose(self) -> ComposeResult:
+                with Vertical():
+                    yield Label("📄 Create New File")
+                    yield Input(id="filename-input", placeholder="Enter relative path (e.g., src/main.py)")
+                    with Horizontal():
+                        yield Button("Create", id="btn-create", variant="primary")
+                        yield Button("Cancel", id="btn-cancel")
+            
+            def on_mount(self):
+                self.query_one("#filename-input", Input).focus()
+            
+            def on_button_pressed(self, event: Button.Pressed):
+                if event.button.id == "btn-create":
+                    filename = self.query_one("#filename-input", Input).value.strip()
+                    if filename:
+                        self._create_file(filename)
+                    else:
+                        self.app.notify("❌ Please enter a filename", severity="error", timeout=2)
+                elif event.button.id == "btn-cancel":
+                    self.app.pop_screen()
+            
+            def _create_file(self, filename: str):
+                """Create file via backend."""
+                try:
+                    from kicli_code_assist.ui.http_client import get_backend_client
+                    
+                    # Ensure no absolute paths
+                    rel_path = filename.lstrip("/")
+                    
+                    # Get project root
+                    project_root = str(self.app_ref.get_allowed_base_path())
+                    
+                    # Call backend to create file
+                    client = get_backend_client()
+                    result = client.create_file(
+                        path=rel_path,
+                        content="",
+                        project_root=project_root
+                    )
+                    
+                    if result.get("success"):
+                        # Refresh file browser
+                        file_browser = self.app_ref.query_one(SelectableFileList)
+                        file_browser.load_directory()
+                        
+                        # Open in editor
+                        full_path = self.current_dir / rel_path
+                        editor = self.app_ref.left_panel.create_editor_tab(str(full_path), "")
+                        
+                        self.app.notify(f"✅ File created: {rel_path}", timeout=2)
+                        self.app.pop_screen()
+                    else:
+                        error = result.get("error", "Unknown error")
+                        if "already exists" in error.lower():
+                            self.app.notify(f"❌ File already exists", severity="error", timeout=2)
+                        else:
+                            self.app.notify(f"❌ Error: {error}", severity="error", timeout=2)
+                
+                except Exception as e:
+                    self.app.notify(f"❌ Error creating file: {e}", severity="error", timeout=2)
+        
+        dialog = CreateFileDialog(self, current_dir)
+        self.app.push_screen(dialog)
+
+    def save_current_file(self):
+        """Save currently active editor tab via backend."""
+        from kicli_code_assist.ui.http_client import get_backend_client
+        
+        # Get active editor
+        try:
+            left_panel = self.query_one(LeftPanel)
+            tabbed = left_panel.tabbed_content
+            
+            if not tabbed or not tabbed.active:
+                self.app.notify("❌ No file open to save", severity="error", timeout=2)
+                return
+            
+            active_tab_id = tabbed.active
+            
+            # Find the editor in the active tab
+            active_tab = tabbed.query_one(f"#{active_tab_id}", TabPane)
+            editors = active_tab.query(FileEditorPane)
+            
+            if not editors:
+                self.app.notify("❌ No editor found", severity="error", timeout=2)
+                return
+            
+            editor = editors.first()
+            
+            if not editor.editor:
+                self.app.notify("❌ Editor not ready", severity="error", timeout=2)
+                return
+            
+            # Get project root
+            project_root = str(self.get_allowed_base_path())
+            file_path = str(Path(editor.file_path).relative_to(project_root))
+            content = editor.editor.text
+            
+            # Call backend to save
+            client = get_backend_client()
+            result = client.update_file(
+                path=file_path,
+                content=content,
+                project_root=project_root
+            )
+            
+            if result.get("success"):
+                editor.is_dirty = False
+                self.app.notify(f"💾 Saved: {Path(editor.file_path).name}", timeout=1)
+            else:
+                error = result.get("error", "Unknown error")
+                self.app.notify(f"❌ Save failed: {error}", severity="error", timeout=2)
+        
+        except Exception as e:
+            self.app.notify(f"❌ Error saving file: {e}", severity="error", timeout=2)
