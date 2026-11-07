@@ -1014,7 +1014,7 @@ File: {suggestion.file_path}[/dim]
         dialog = CreateFileDialog(self, current_dir)
         self.app.push_screen(dialog)
 
-    def save_current_file(self):
+    def action_save_current_file(self):
         """Save currently active editor tab via backend."""
         from kicli_code_assist.ui.http_client import get_backend_client
         
