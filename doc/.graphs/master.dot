@@ -28,7 +28,7 @@ digraph "Doc Graph" {
   "FRONTEND_SPECIFICATION" [label="Frontend Specification - Abstr"];
   "FUTURE_ROADMAP" [label="FUTURE_ROADMAP"];
   "HYBRID_AGENT_IMPLEMENTATION_PLAN" [label="Hybrid Agent + Diff Viewer Imp"];
-  "IDE_CAPABILITIES" [label="Layer 1: IDE Capabilities with"];
+  "IDE_CAPABILITIES" [label="Layer 1 IDE Capabilities with "];
   "MULTIFILE_REFACTORING_ARCHITECTURE" [label="Multi-File Refactoring Coordin"];
   "OPTION2_STACKCTL_SYSTEMD" [label="Option 2 Deployment: stackctl "];
   "OPTION_C_INTEGRATION_GUIDE" [label="OPTION_C_INTEGRATION_GUIDE"];
@@ -54,7 +54,6 @@ digraph "Doc Graph" {
   "PHASE_5_5_SESSION_SUMMARY_20261102" [label="Phase 5.5 Session Summary (202"];
   "PHASE_I1_REAL_LLM_IMPLEMENTATION" [label="Phase I1: Real LLM Integration"];
   "PHASE_I2_1_ENDPOINT_INTEGRATION" [label="Phase I2.1 Backend Integration"];
-  "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="Phase I2.2 TUI Integration Com"];
   "PHASE_I2_MULTIFILE_ANALYSIS" [label="Phase I2 Multi-File Context An"];
   "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="Phase I2 ProjectAnalyzer Core "];
   "PROGRAMMING_AGENT_UI_ARCHITECTURE" [label="Programming Agent UI Architect"];
@@ -69,7 +68,7 @@ digraph "Doc Graph" {
   "STACK_YAML_VARIANTS" [label="stack.yaml Varianten für kicli"];
   "STRUCTURE" [label="Documentation Structure (Legac"];
   "TEXTUAL_HOWTO" [label="Textual UI Patterns & Recipes"];
-  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" [label="Phase 5.5.2.I1: Integration Co"];
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" [label="Phase 5.5.2 Transparency Integ"];
   "TRANSPARENCY_MODULES_ARCHITECTURE" [label="Phase 5.5.2: Transparency & Ob"];
   "TUI_BLOCKER_YAML_CFG_WIZARD" [label="TUI_BLOCKER_YAML_CFG_WIZARD"];
   "TUI_CLIENT_IMPLEMENTATION_PLAN" [label="TUI Client Implementation Plan"];
@@ -81,9 +80,9 @@ digraph "Doc Graph" {
   "WEB_EDITOR_EDIT_CAPABILITIES" [label="Web IDE Editor - Current Statu"];
   "WEB_EDITOR_FRAMEWORKS_COMPARISON" [label="Web Editor Frameworks - Compre"];
   
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" -> "AGENT_COORDINATION_ARCHITECTURE" [label="extends", color="#9b59b6"];
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" -> "MULTIFILE_REFACTORING_ARCHITECTURE" [label="extends", color="#9b59b6"];
   "AGENT_ROUTE_SPEC" -> "FUTURE_ROADMAP" [label="part-of", color="#3498db"];
-  "PHASE_I2_PROJECTANALYZER_COMPLETE" -> "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="depends-on", color="#e74c3c"];
   "PHASE_I2_MULTIFILE_ANALYSIS" -> "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="part-of", color="#3498db"];
   "PHASE_I2_1_ENDPOINT_INTEGRATION" -> "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="depends-on", color="#e74c3c"];
-  "PHASE_I2_1_ENDPOINT_INTEGRATION" -> "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="composed-of", color="#2ecc71"];
 }

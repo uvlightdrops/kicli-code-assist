@@ -3,6 +3,6 @@ digraph "Doc Graph" {
   node [shape=box, style=rounded];
   label="backend/layer-1-raw-llm";
   
-  "IDE_CAPABILITIES" [label="Layer 1: IDE Capabilities with"];
+  "IDE_CAPABILITIES" [label="Layer 1 IDE Capabilities with "];
   
 }

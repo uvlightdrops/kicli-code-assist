@@ -5,6 +5,8 @@ digraph "Doc Graph" {
   
   "AGENT_COORDINATION_ARCHITECTURE" [label="Agent Coordination Architectur"];
   "MULTIFILE_REFACTORING_ARCHITECTURE" [label="Multi-File Refactoring Coordin"];
-  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" [label="Phase 5.5.2.I1: Integration Co"];
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" [label="Phase 5.5.2 Transparency Integ"];
   
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" -> "AGENT_COORDINATION_ARCHITECTURE" [label="extends", color="#9b59b6"];
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" -> "MULTIFILE_REFACTORING_ARCHITECTURE" [label="extends", color="#9b59b6"];
 }
