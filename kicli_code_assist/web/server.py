@@ -131,6 +131,11 @@ def create_app(
     socketio = SocketIO(app, cors_allowed_origins=cors_origins)
     app.config["SOCKETIO"] = socketio
     
+    # Initialize execution manager (Phase 5.5.2.I2: WebSocket Streaming)
+    from kicli_code_assist.web.execution_manager import init_execution_manager
+    execution_manager = init_execution_manager(socketio)
+    app.config["EXECUTION_MANAGER"] = execution_manager
+    
     # Register root route before other routes
     @app.route("/", methods=["GET"])
     @app.route("/index.html", methods=["GET"])

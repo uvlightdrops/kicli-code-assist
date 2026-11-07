@@ -5,15 +5,29 @@ Emits real-time events (decisions, executions, errors, LLM calls, metrics)
 to connected frontend clients via SocketIO.
 
 Phase 5.5.2.I2: WebSocket Streaming
+
+This emitter intercepts events from:
+- ReasoningTracer: decision_point, execution, errors
+- LLMCallTracker: API calls, tokens, costs
+- PerformanceMetrics: phase timing, counters
+
+Events flow: Agent → Tracer → EventEmitter → WebSocket → Frontend
 """
 
+import logging
 from datetime import datetime
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
+logger = logging.getLogger("kicli-web")
+
 
 class TransparencyEventEmitter:
-    """Emit transparency events to WebSocket clients."""
+    """Emit transparency events to WebSocket clients.
+    
+    Bridge between agent execution (tracer, tracker, metrics) and
+    real-time WebSocket streaming to frontend clients.
+    """
     
     def __init__(self, socketio, execution_id: str):
         """Initialize event emitter.
@@ -26,6 +40,9 @@ class TransparencyEventEmitter:
         self.execution_id = execution_id
         self.room = f"execution:{execution_id}"
         self.event_count = 0
+        self.active = True  # Flag for lifecycle management
+        
+        logger.debug(f"TransparencyEventEmitter initialized for {execution_id}")
     
     def _emit(self, event_name: str, data: Dict[str, Any]) -> None:
         """Emit event to WebSocket room.
@@ -34,15 +51,25 @@ class TransparencyEventEmitter:
             event_name: Event name (e.g., "agent:decision")
             data: Event data dictionary
         """
-        # Add timestamp and execution_id to all events
-        event_data = {
-            "execution_id": self.execution_id,
-            "timestamp": datetime.now().isoformat(),
-            **data
-        }
+        if not self.active:
+            logger.warning(f"Attempt to emit {event_name} on inactive emitter")
+            return
         
-        self.socketio.emit(event_name, event_data, room=self.room, skip_sid=False)
-        self.event_count += 1
+        try:
+            # Add timestamp and execution_id to all events
+            event_data = {
+                "execution_id": self.execution_id,
+                "timestamp": datetime.now().isoformat(),
+                **data
+            }
+            
+            self.socketio.emit(event_name, event_data, room=self.room, skip_sid=False)
+            self.event_count += 1
+            
+            logger.debug(f"Emitted {event_name} (event #{self.event_count})")
+        
+        except Exception as e:
+            logger.error(f"Failed to emit {event_name}: {e}")
     
     def emit_decision(
         self,
@@ -200,3 +227,45 @@ class TransparencyEventEmitter:
             "status": status,
             "details": details or {}
         })
+    
+    # ========================================================================
+    # Lifecycle Management (Phase 5.5.2.I2)
+    # ========================================================================
+    
+    def start_execution(self, goal_id: str, goal_title: str) -> None:
+        """Emit execution start event.
+        
+        Args:
+            goal_id: Unique goal identifier
+            goal_title: Goal title/description
+        """
+        self.emit_status("started", {
+            "goal_id": goal_id,
+            "goal_title": goal_title
+        })
+    
+    def finish_execution(self, success: bool, summary: str = "", duration_ms: int = 0) -> None:
+        """Emit execution end event and deactivate.
+        
+        Args:
+            success: Whether execution succeeded
+            summary: Execution summary/result
+            duration_ms: Total execution time
+        """
+        self.emit_session_end(
+            success=success,
+            total_events=self.event_count,
+            duration_ms=duration_ms,
+            summary=summary
+        )
+        self.active = False
+        logger.info(f"Execution {self.execution_id} finished ({self.event_count} events)")
+    
+    def is_active(self) -> bool:
+        """Check if emitter is still active."""
+        return self.active
+    
+    def get_event_count(self) -> int:
+        """Get total events emitted."""
+        return self.event_count
+

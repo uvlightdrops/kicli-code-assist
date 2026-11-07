@@ -142,6 +142,18 @@ def register_routes(app: Flask):
             
             logger.info(f"[{session_id}] Agent route: query='{query[:50]}' file={file_path_obj.name}")
             
+            # Phase 5.5.2.I2: Create execution session for WebSocket streaming
+            from kicli_code_assist.web.execution_manager import get_execution_manager
+            try:
+                manager = get_execution_manager()
+                exec_session = manager.create_session(query)
+                execution_id = exec_session.execution_id
+                exec_session.start()
+            except RuntimeError:
+                # ExecutionManager not initialized (e.g., tests)
+                execution_id = session_id
+                exec_session = None
+            
             # Create coordination request
             coord_req = CoordinationRequest(
                 query=query,
@@ -155,10 +167,15 @@ def register_routes(app: Flask):
             coordinator = get_meta_coordinator()
             coord_result = coordinator.coordinate(coord_req)
             
+            # Phase 5.5.2.I2: Complete execution session
+            if exec_session:
+                exec_session.complete(coord_result.success)
+            
             # Build response
             response = {
                 "success": coord_result.success,
                 "session_id": session_id,
+                "execution_id": execution_id,  # For WebSocket subscription
                 "query": coord_result.query,
                 "answer": coord_result.answer,
                 "intent": {
@@ -184,6 +201,16 @@ def register_routes(app: Flask):
             
         except Exception as e:
             logger.error(f"[{session_id}] Agent route error: {e}\n{traceback.format_exc()}")
+            
+            # Phase 5.5.2.I2: Record error in execution session
+            try:
+                from kicli_code_assist.web.execution_manager import get_execution_manager
+                manager = get_execution_manager()
+                if 'exec_session' in locals() and exec_session:
+                    exec_session.error_occurred(str(e))
+            except (RuntimeError, NameError):
+                pass
+            
             return jsonify({
                 "success": False,
                 "error": str(e),

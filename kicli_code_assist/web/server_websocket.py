@@ -5,6 +5,8 @@ Handles:
 - Reasoning stream subscriptions (reasoning:subscribe)
 - Agent execution streaming (agent:execution namespace)
 - Token counting and response streaming
+
+Phase 5.5.2.I2: Enhanced WebSocket streaming with execution lifecycle management
 """
 
 import logging
@@ -98,11 +100,33 @@ def register_websocket(app: Flask, socketio: SocketIO):
             _EXECUTION_SUBSCRIPTIONS[execution_id] = set()
         _EXECUTION_SUBSCRIPTIONS[execution_id].add(request.sid)
         
-        app.logger.debug(f"Client subscribed to execution {execution_id} (room: {room})")
-        emit("agent:subscribed", {
-            "execution_id": execution_id,
-            "status": "subscribed"
-        })
+        # Get execution manager to validate session exists
+        from kicli_code_assist.web.execution_manager import get_execution_manager
+        try:
+            manager = get_execution_manager()
+            session = manager.get_session(execution_id)
+            
+            if session:
+                emit("agent:subscribed", {
+                    "execution_id": execution_id,
+                    "status": "subscribed",
+                    "session_status": session.status,
+                    "events_so_far": session.event_count
+                })
+                app.logger.debug(f"Client {request.sid} subscribed to execution {execution_id}")
+            else:
+                emit("error", {
+                    "message": f"Execution {execution_id} not found",
+                    "execution_id": execution_id
+                })
+        
+        except RuntimeError:
+            # ExecutionManager not initialized (e.g., in tests)
+            emit("agent:subscribed", {
+                "execution_id": execution_id,
+                "status": "subscribed"
+            })
+            app.logger.debug(f"Client {request.sid} subscribed to execution {execution_id}")
     
     @socketio.on("unsubscribe:execution", namespace="/agent/execution")
     def handle_execution_unsubscribe(data):
