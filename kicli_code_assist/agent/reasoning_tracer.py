@@ -138,7 +138,9 @@ class ReasoningTracer:
         self,
         agent_id: str,
         output_dir: Optional[Path] = None,
-        enable_async: bool = False
+        enable_async: bool = False,
+        event_emitter=None,
+        execution_id: Optional[str] = None
     ):
         """
         Initialize tracer.
@@ -147,6 +149,8 @@ class ReasoningTracer:
             agent_id: ID of the agent being traced
             output_dir: Where to save reasoning sessions (default: ./sessions)
             enable_async: If True, events queued and written async
+            event_emitter: Optional TransparencyEventEmitter for WebSocket streaming
+            execution_id: Execution ID (used if event_emitter provided)
         """
         self.agent_id = agent_id
         self.output_dir = Path(output_dir or "./reasoning_sessions")
@@ -154,6 +158,10 @@ class ReasoningTracer:
         
         self.enable_async = enable_async
         self.event_queue: Optional[Queue] = Queue() if enable_async else None
+        
+        # Phase 5.5.2.I2: WebSocket streaming
+        self.event_emitter = event_emitter
+        self.execution_id = execution_id
         
         self._current_session: Optional[ReasoningSession] = None
         self._lock = threading.RLock()
@@ -290,6 +298,20 @@ class ReasoningTracer:
         if self.enable_async:
             self.event_queue.put(("record", event))
         
+        # Phase 5.5.2.I2: Emit decision event via WebSocket
+        if self.event_emitter:
+            try:
+                self.event_emitter.emit_decision(
+                    options_considered=options,
+                    option_selected=selected,
+                    confidence_score=confidence,
+                    reasoning=reasoning
+                )
+            except Exception as e:
+                # Silently fail WebSocket emission to not block agent
+                import logging
+                logging.getLogger("kicli-web").debug(f"Failed to emit decision: {e}")
+        
         return event
     
     def record_execution(
@@ -322,6 +344,19 @@ class ReasoningTracer:
         
         if self.enable_async:
             self.event_queue.put(("record", event))
+        
+        # Phase 5.5.2.I2: Emit execution event via WebSocket
+        if self.event_emitter:
+            try:
+                self.event_emitter.emit_execution(
+                    action=action,
+                    result="success" if success else "failure",
+                    duration_ms=duration_ms or 0,
+                    details=context
+                )
+            except Exception as e:
+                import logging
+                logging.getLogger("kicli-web").debug(f"Failed to emit execution: {e}")
         
         return event
     
@@ -356,6 +391,18 @@ class ReasoningTracer:
         
         if self.enable_async:
             self.event_queue.put(("record", event))
+        
+        # Phase 5.5.2.I2: Emit error event via WebSocket
+        if self.event_emitter:
+            try:
+                self.event_emitter.emit_error(
+                    error_type=error_type,
+                    message=error_message,
+                    recovery_suggestion=recovery_suggestion or ""
+                )
+            except Exception as e:
+                import logging
+                logging.getLogger("kicli-web").debug(f"Failed to emit error: {e}")
         
         return event
     

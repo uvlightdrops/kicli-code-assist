@@ -128,7 +128,8 @@ class CodeImplementationAgent:
             
             self.tracer = ReasoningTracer(
                 agent_id="CodeImplementationAgent",
-                output_dir=str(traces_dir)
+                output_dir=str(traces_dir),
+                event_emitter=None  # Will be set below if socketio available
             )
             self.tracker = LLMCallTracker(
                 agent_id="CodeImplementationAgent",
@@ -143,6 +144,9 @@ class CodeImplementationAgent:
             if self.socketio and self.execution_id:
                 from kicli_code_assist.agent.transparency_event_emitter import TransparencyEventEmitter
                 self.event_emitter = TransparencyEventEmitter(self.socketio, self.execution_id)
+                # Update tracer with event emitter
+                self.tracer.event_emitter = self.event_emitter
+                self.tracer.execution_id = self.execution_id
         
     def discover_python_files(self, max_files: int = 50) -> List[Path]:
         """Discover Python files in project."""
