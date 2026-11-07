@@ -1,0 +1,16 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="backend/layer-2-workflow-orchestration";
+  
+  "AGENT_ROUTE_SPEC" [label="Agent Route API Specification"];
+  "PHASE_I2_1_ENDPOINT_INTEGRATION" [label="Phase I2.1 Backend Integration"];
+  "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="Phase I2.2 TUI Integration Com"];
+  "PHASE_I2_MULTIFILE_ANALYSIS" [label="Phase I2 Multi-File Context An"];
+  "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="Phase I2 ProjectAnalyzer Core "];
+  
+  "PHASE_I2_PROJECTANALYZER_COMPLETE" -> "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="depends-on", color="#e74c3c"];
+  "PHASE_I2_MULTIFILE_ANALYSIS" -> "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="part-of", color="#3498db"];
+  "PHASE_I2_1_ENDPOINT_INTEGRATION" -> "PHASE_I2_PROJECTANALYZER_COMPLETE" [label="depends-on", color="#e74c3c"];
+  "PHASE_I2_1_ENDPOINT_INTEGRATION" -> "PHASE_I2_2_TUI_INTEGRATION_COMPLETE" [label="composed-of", color="#2ecc71"];
+}

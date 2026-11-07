@@ -1,0 +1,19 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="deployment";
+  
+  "ANTI_PATTERNS_FAILED_APPROACHES" [label="ANTI_PATTERNS_FAILED_APPROACHE"];
+  "CONSOLIDATION_STRATEGY" [label="Deployment Documentation Conso"];
+  "CURRENT_STATUS" [label="Deployment Status Report"];
+  "DEVELOPMENT_STACK_TROUBLESHOOTING" [label="DEVELOPMENT_STACK_TROUBLESHOOT"];
+  "FUTURE_ROADMAP" [label="FUTURE_ROADMAP"];
+  "OPTION2_STACKCTL_SYSTEMD" [label="Option 2 Deployment: stackctl "];
+  "PHASE_1_REPORT" [label="Deployment Documentation Conso"];
+  "SEMI_PROD_DEPLOYMENT" [label="Semi-Prod Deployment Guide"];
+  "STACKCTL_ARCHITECTURE" [label="StackCtl Architecture & Config"];
+  "STACKCTL_IMPLEMENTATION" [label="StackCtl Implementation Guide"];
+  "STACKCTL_STATUS" [label="StackCtl Configuration Status"];
+  "STACK_YAML_VARIANTS" [label="stack.yaml Varianten für kicli"];
+  
+}

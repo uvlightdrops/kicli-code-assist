@@ -1,0 +1,10 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="specifications";
+  
+  "01_ARCHITECTURE" [label="System Architecture Overview"];
+  "02_PHASE_1_CHECKLIST" [label="Phase 1 TUI Checklist - Founda"];
+  "02_TUI_SPECIFICATION" [label="TUI Specification - Legacy Cha"];
+  
+}

@@ -1,0 +1,11 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="tracking";
+  
+  "DOCUMENTATION_AUDIT_PLAN" [label="kicli-code-assist Documentatio"];
+  "PHASE_5_5_2_I2_I3_COMPLETION" [label="Phase 5.5.2.I2-I3: WebSocket S"];
+  "PHASE_5_5_2_SESSION_PROGRESS" [label="Phase 5.5.2 Progress: Transpar"];
+  "PHASE_5_5_SESSION_SUMMARY_20261102" [label="Phase 5.5 Session Summary (202"];
+  
+}

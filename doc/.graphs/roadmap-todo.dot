@@ -1,0 +1,19 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="roadmap-todo";
+  
+  "AGENT_ROUTING_INTELLIGENCE_PLAN" [label="Agent Routing Intelligence Pla"];
+  "AGENT_TRANSPARENCY_ARCHITECTURE" [label="Agent Transparency Architectur"];
+  "AGENT_UI_QUICK_REFERENCE" [label="Agent UI Architecture Quick Re"];
+  "AI_ARCHITECTURE_BEST_PRACTICES_REVIEW" [label="AI-Powered Application Archite"];
+  "CLI_ARCHITECTURE_ROADMAP" [label="CLI Architecture Roadmap"];
+  "CODEBASE_ASSESSMENT" [label="KI Code Assistant - Codebase Q"];
+  "CONFIG_INTEGRATION" [label="Configuration Guide (Legacy)"];
+  "HYBRID_AGENT_IMPLEMENTATION_PLAN" [label="Hybrid Agent + Diff Viewer Imp"];
+  "PROGRAMMING_AGENT_UI_ARCHITECTURE" [label="Programming Agent UI Architect"];
+  "ROADMAP_AI_TERMINAL_IDE" [label="Roadmap: AI Terminal IDE Visio"];
+  "SHELL_EXECUTION_ARCHITECTURE_REVIEW" [label="Shell Execution Feature - Arch"];
+  "STRUCTURE" [label="Documentation Structure (Legac"];
+  
+}

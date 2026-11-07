@@ -1,0 +1,9 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label=".";
+  
+  "CODE_ANALYSIS_STRUCTURE" [label="Code Analysis Architecture & I"];
+  "TEXTUAL_HOWTO" [label="Textual UI Patterns & Recipes"];
+  
+}

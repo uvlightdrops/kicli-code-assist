@@ -1,0 +1,10 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="archive/tui_attempt_oct2026";
+  
+  "02_TUI_SPECIFICATION_LEGACY" [label="TUI Specification - Legacy Cha"];
+  "TUI_BLOCKER_YAML_CFG_WIZARD" [label="TUI_BLOCKER_YAML_CFG_WIZARD"];
+  "TUI_IMPLEMENTATION_SESSION_20261105" [label="TUI_IMPLEMENTATION_SESSION_202"];
+  
+}

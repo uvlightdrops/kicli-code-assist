@@ -1,0 +1,10 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="backend/layer-3-autonomous-agent";
+  
+  "AGENT_COORDINATION_ARCHITECTURE" [label="Agent Coordination Architectur"];
+  "MULTIFILE_REFACTORING_ARCHITECTURE" [label="Multi-File Refactoring Coordin"];
+  "TRANSPARENCY_INTEGRATION_ARCHITECTURE" [label="Phase 5.5.2.I1: Integration Co"];
+  
+}

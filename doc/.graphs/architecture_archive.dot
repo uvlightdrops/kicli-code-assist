@@ -1,0 +1,8 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="architecture/archive";
+  
+  "PROJECT_STRUCTURE" [label="PROJECT_STRUCTURE"];
+  
+}

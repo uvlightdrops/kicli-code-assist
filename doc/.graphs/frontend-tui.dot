@@ -1,0 +1,9 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="frontend-tui";
+  
+  "PHASE_I1_REAL_LLM_IMPLEMENTATION" [label="Phase I1: Real LLM Integration"];
+  "TUI_TEXTUAL_ARCHITECTURE" [label="TUI Textual Architecture - Wid"];
+  
+}

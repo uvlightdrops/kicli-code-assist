@@ -1,0 +1,9 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="guides";
+  
+  "TUI_CLIENT_IMPLEMENTATION_PLAN" [label="TUI Client Implementation Plan"];
+  "TUI_QUICK_START" [label="TUI_QUICK_START"];
+  
+}

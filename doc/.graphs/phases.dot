@@ -1,0 +1,21 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="phases";
+  
+  "PHASE_1_2_FINAL_SUMMARY" [label="Phase 1.2 - TUI WebSocket Stre"];
+  "PHASE_1_2_WEBSOCKET_STREAMING" [label="Phase 1.2 - TUI WebSocket Stre"];
+  "PHASE_1_3_ADVANCED_FEATURES" [label="Phase 1.3 - TUI Advanced Featu"];
+  "PHASE_1_TUI_IMPLEMENTATION_COMPLETE" [label="Phase 1 - TUI Implementation ("];
+  "PHASE_1_TUI_IMPLEMENTATION_PLAN" [label="Phase 1 - TUI Implementation P"];
+  "PHASE_5_1_SUMMARY" [label="PHASE_5_1_SUMMARY"];
+  "PHASE_5_2_SUMMARY" [label="PHASE_5_2_SUMMARY"];
+  "PHASE_5_3_SUMMARY" [label="PHASE_5_3_SUMMARY"];
+  "PHASE_5_4_PLAN" [label="PHASE_5_4_PLAN"];
+  "PHASE_5_4_SUMMARY" [label="PHASE_5_4_SUMMARY"];
+  "PHASE_5_5_1_IMPLEMENTATION_REPORT" [label="Phase 5.5.1: Multi-File Refact"];
+  "PHASE_5_5_2_IMPLEMENTATION_REPORT" [label="Phase 5.5.2: Transparency & Ob"];
+  "PHASE_5_5_2_SUMMARY" [label="PHASE_5_5_2_SUMMARY"];
+  "PHASE_5_5_CONCEPT" [label="Phase 5.5: Advanced Autonomy -"];
+  
+}

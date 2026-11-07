@@ -1,0 +1,14 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="frontend-web";
+  
+  "DIFF_USER_GUIDE" [label="Diff Engine & Code Edit Featur"];
+  "FRONTEND_SPECIFICATION" [label="Frontend Specification - Abstr"];
+  "PHASE_1_SUMMARY" [label="Phase 1 Hybrid Agent UI Implem"];
+  "REASONING_PANEL_FRONTEND_DESIGN" [label="Phase 5.5.2.I4: Frontend Reaso"];
+  "UI_TABS" [label="Terminal UI - Tabs Guide"];
+  "WEB_EDITOR_EDIT_CAPABILITIES" [label="Web IDE Editor - Current Statu"];
+  "WEB_EDITOR_FRAMEWORKS_COMPARISON" [label="Web Editor Frameworks - Compre"];
+  
+}

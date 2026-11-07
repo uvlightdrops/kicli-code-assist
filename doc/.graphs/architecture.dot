@@ -1,0 +1,11 @@
+digraph "Doc Graph" {
+  rankdir=LR;
+  node [shape=box, style=rounded];
+  label="architecture";
+  
+  "AGENT_ORCHESTRATION_ARCHITECTURE" [label="Phase 5.5.3: Orchestration Int"];
+  "ASYNC_LLM_SECURITY_ARCHITECTURE" [label="ASYNC_LLM_SECURITY_ARCHITECTUR"];
+  "TRANSPARENCY_MODULES_ARCHITECTURE" [label="Phase 5.5.2: Transparency & Ob"];
+  "WEBSOCKET_STREAMING_ARCHITECTURE" [label="Phase 5.5.2.I2: WebSocket Stre"];
+  
+}
