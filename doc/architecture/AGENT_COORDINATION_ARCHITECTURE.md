@@ -1,10 +1,22 @@
+---
+title: Agent Coordination Architecture
+project: kicli-code-assist
+scope: architecture
+purpose: Hierarchical agent coordination system design with clear separation of concerns across layers
+created: 2026-10-28T13
+updated: 2026-11-07T19
+update_reason: Add missing YAML header with semantic blocks
+status: active
+semantic_blocks: [overview, component-inventory, interaction-flow, design-principles, implementation-order, data-structures, integration-existing, success-criteria, open-questions, references]
+---
+
 # Agent Coordination Architecture
 
 **Phase**: 5 (Developer-Agent Interaction)  
 **Status**: Planning  
 **Date**: 2026-10-27
 
-## Overview
+## Overview [overview]
 
 The agent system operates in a **hierarchical, tool-based architecture** with clear separation between:
 1. **Coordination Layer**: Meta-agents that orchestrate workflows
@@ -54,7 +66,7 @@ The agent system operates in a **hierarchical, tool-based architecture** with cl
                     └──────────────────────┘
 ```
 
-## Component Inventory
+## Component Inventory [component-inventory]
 
 ### Analysis Layer (Phase 3 - Existing ✅)
 
@@ -155,7 +167,7 @@ Query: "Review my code"
 - `LintCodeTool(code)` → issues
 - `RunTestsTool(test_paths)` → results
 
-## Interaction Flow
+## Interaction Flow [interaction-flow]
 
 ### Chat → Agent Flow (Example: "Erkläre diese Datei")
 
@@ -247,7 +259,7 @@ Query: "Review my code"
    └─ Diff view: Inline diffs
 ```
 
-## Design Principles
+## Design Principles [design-principles]
 
 1. **Layered Architecture**: Each layer has single responsibility
    - Coordination: Workflow orchestration
@@ -276,7 +288,7 @@ Query: "Review my code"
    - Code review and synthesis
    - NOT for low-level operations (AST, parsing, etc.)
 
-## Implementation Order (Phase 5)
+## Implementation Order [implementation-order]
 
 ### Phase 5.1: MetaCoordinationAgent (High Priority)
 - Orchestrates existing analysis agents
@@ -308,7 +320,7 @@ Query: "Review my code"
 - Dependency investigation
 - **File**: agent/research_agent.py (~200 lines)
 
-## Data Structures
+## Data Structures [data-structures]
 
 ```python
 # Core request
@@ -338,7 +350,7 @@ class ToolResult:
     timing_ms: int
 ```
 
-## Integration with Existing Code
+## Integration with Existing Code [integration-existing]
 
 **Existing components used**:
 - IntentDetector (Phase 2A) ✅
@@ -356,7 +368,7 @@ class ToolResult:
 - ReviewAgent (5.4)
 - Optional: ResearchAgent (5.5)
 
-## Success Criteria
+## Success Criteria [success-criteria]
 
 Phase 5.1: ✅
 - [ ] MetaCoordinationAgent orchestrates existing agents
@@ -382,7 +394,7 @@ Phase 5.4: ✅
 - [ ] Multiple LLM perspectives integrated
 - [ ] Review comments structured and actionable
 
-## Open Questions
+## Open Questions [open-questions]
 
 1. **Multi-Agent Coordination**: Should we use a framework like Langchain, AutoGen, or build custom?
    - **Decision pending**: Assess tradeoffs (complexity vs. control)
@@ -396,7 +408,7 @@ Phase 5.4: ✅
 4. **Context Window**: How much code to include in LLM context?
    - **Proposal**: Use AST + file summaries to reduce tokens
 
-## References
+## References [references]
 
 - docs/REFACTORING_SERVER_MODULARIZATION.md - Server architecture
 - docs/ai_agent_intelligence_architecture.md - Theoretical foundations

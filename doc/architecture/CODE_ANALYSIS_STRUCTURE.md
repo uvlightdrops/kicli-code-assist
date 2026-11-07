@@ -1,16 +1,18 @@
 ---
 title: Code Analysis Architecture & Integration
 project: kicli-code-assist
-scope: Development Guide
+scope: architecture
 purpose: Comprehensive overview of code analysis pipeline from UI to backend
-created: 2026-11-06T07:55:00+01:00
-updated: 2026-11-06T07:55:00+01:00
+created: 2026-11-06T07
+updated: 2026-11-07T19
+update_reason: Fix scope (Development Guide → architecture), standardize timestamps, add semantic blocks
 status: active
+semantic_blocks: [overview, layer-1-tui-integration, layer-2-backend-orchestration, layer-3-analysis-engines, layer-4-streaming-chunks, layer-5-tui-display, blockers-next, testing-strategy, checklist-phase-i1, references]
 ---
 
 # Code Analysis Architecture
 
-## Overview
+## Overview [overview]
 
 Code analysis in kicli-code-assist is a multi-layered pipeline:
 
@@ -30,7 +32,7 @@ TUI displays in Agent Tabs with chunked feedback
 
 ---
 
-## Layer 1: TUI Integration (UI → Backend)
+## Layer 1: TUI Integration [layer-1-tui-integration]
 
 **Current Status:** Ready, but not fully wired to analysis yet
 
@@ -51,7 +53,7 @@ TUI displays in Agent Tabs with chunked feedback
 
 ---
 
-## Layer 2: Backend Orchestration
+## Layer 2: Backend Orchestration [layer-2-backend-orchestration]
 
 **Location:** `kicli_code_assist/web/server_routes.py` (lines 39-150)
 
@@ -85,7 +87,7 @@ TUI displays in Agent Tabs with chunked feedback
 
 ---
 
-## Layer 3: Analysis Engines
+## Layer 3: Analysis Engines [layer-3-analysis-engines]
 
 ### 3.1 Project Analysis (Foundation)
 
@@ -136,7 +138,7 @@ TUI displays in Agent Tabs with chunked feedback
 
 ---
 
-## Layer 4: Response Streaming & Chunks
+## Layer 4: Response Streaming ## Layer 4: Response Streaming & Chunks Chunks [layer-4-streaming-chunks]
 
 **Location:** `kicli_code_assist/web/server_routes.py` (agent_stream_reason)
 
@@ -160,7 +162,7 @@ TUI displays in Agent Tabs with chunked feedback
 
 ---
 
-## Layer 5: TUI Display
+## Layer 5: TUI Display [layer-5-tui-display]
 
 **Location:** `kicli_code_assist/ui/widgets/agent_tabs.py`
 
@@ -208,7 +210,7 @@ Each **Agent Tab** (Explain, Metrics, Refactor, Suggest) contains:
 
 ---
 
-## Blockers & Next Steps
+## Blockers ## Blockers & Next Steps Next Steps [blockers-next]
 
 ### Current Blockers:
 1. **TUI ↔ Backend Connection** - File selection doesn't trigger `/api/agent/route` yet
@@ -231,7 +233,7 @@ Each **Agent Tab** (Explain, Metrics, Refactor, Suggest) contains:
 
 ---
 
-## Testing Strategy
+## Testing Strategy [testing-strategy]
 
 **Unit Tests (Existing):**
 ```bash
@@ -256,7 +258,7 @@ curl -X POST http://localhost:3000/api/agent/route \
 
 ---
 
-## Checklist: Ready for Phase I1?
+## Checklist: Ready for Phase I1? [checklist-phase-i1]
 
 - [ ] **API Endpoints** - `/api/agent/route` and specialized agents working
   - Check: `curl -X POST http://localhost:3000/api/agent/route` returns 200
@@ -280,7 +282,7 @@ curl -X POST http://localhost:3000/api/agent/route \
 
 ---
 
-## References
+## References [references]
 
 - [Meta Coordinator Docs](../backend/layer-2-workflow-orchestration/) - 6-stage pipeline
 - [Project Analyzer Docs](../backend/layer-2-workflow-orchestration/) - AST, dependencies, metrics

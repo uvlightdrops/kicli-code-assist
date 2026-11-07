@@ -1,17 +1,18 @@
 ---
-title: "Phase 5.5.2: Transparency & Observability - Architecture"
-project: "kicli-code-assist"
-scope: "architecture"
-created: 2026-11-02T00:18:00+01:00
-updated: 2026-11-02T00:18:00+01:00
-update_reason: "Concept for real-time agent reasoning and cost tracking"
-status: "active"
-author: "Copilot"
+title: Transparency & Observability Architecture
+project: kicli-code-assist
+scope: architecture
+purpose: Transparency and observability modules for agent execution tracing and performance metrics
+created: 2026-11-02T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamp format, remove PHASE from title, add semantic blocks
+status: active
+semantic_blocks: [problem-statement, vision, architecture, integration-points, frontend-components, data-flow-example, success-criteria, files-to-create, next-steps]
 ---
 
-# Phase 5.5.2: Transparency & Observability - Architecture
+# Transparency & Observability Architecture
 
-## Problem Statement
+## Problem Statement [problem-statement]
 
 When agent executes a complex task, users have **zero visibility** into:
 - **Why** did agent choose this workflow?
@@ -27,7 +28,7 @@ Current state:
 
 ---
 
-## Vision
+## Vision [vision]
 
 **Goal:** Agents expose their complete reasoning in **real-time, at zero cost**.
 
@@ -53,7 +54,7 @@ Agent starts execution
 
 ---
 
-## Architecture
+## Architecture [architecture]
 
 ### 1. ReasoningTracer (Core)
 
@@ -221,7 +222,7 @@ class AuditExporter:
 
 ---
 
-## Integration Points
+## Integration Points [integration-points]
 
 ### 1. Extend CoordinationResult
 
@@ -284,7 +285,7 @@ async def get_audit_trail(session_id: str, format: str = "json"):
 
 ---
 
-## Frontend Components
+## Frontend Components [frontend-components]
 
 ### ReasoningPanel
 
@@ -354,7 +355,7 @@ Display cost breakdown:
 
 ---
 
-## Data Flow Example
+## Data Flow Example [data-flow-example]
 
 **User:** "Refactor UserAccount class across project"
 
@@ -388,7 +389,7 @@ Result:
 
 ---
 
-## Success Criteria
+## Success Criteria [success-criteria]
 
 - ✅ Every decision traced + alternatives shown
 - ✅ Every LLM call logged + cost calculated
@@ -400,7 +401,7 @@ Result:
 
 ---
 
-## Files to Create
+## Files to Create [files-to-create]
 
 ```
 kicli_code_assist/agent/
@@ -413,7 +414,7 @@ kicli_code_assist/agent/
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 1. Implement core modules (tracing, tracking, metrics)
 2. Integrate into existing agents (no breaking changes)

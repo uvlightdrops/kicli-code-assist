@@ -1,14 +1,16 @@
 ---
+title: Async LLM & Security Architecture
 project: kicli-code-assist
 scope: architecture
-created: 2026-10-XX XX
-updated: 2026-11-02 13
-update_reason: Added canonical YAML header
-status: current
-agent_project: kicli-code-assist
+purpose: Async LLM processing with security integration, comprehensive system design
+created: 2026-10-XX T00
+updated: 2026-11-07T19
+update_reason: Add missing title, fix malformed timestamps, standardize format, add semantic blocks
+status: active
+semantic_blocks: [system-architecture, component-details, data-flow-end-to-end, security-design, performance-characteristics, testing-strategy, deployment-operations, future-enhancements]
 ---
 
-# Phase 4: Architecture Overview
+# Async LLM & Security Architecture
 
 **Covers**: Async LLM Processing, Security, AI Workflow Integration  
 **Status**: ✅ Complete  
@@ -16,7 +18,7 @@ agent_project: kicli-code-assist
 
 ---
 
-## System Architecture
+## System Architecture [system-architecture]
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -77,7 +79,7 @@ agent_project: kicli-code-assist
 
 ---
 
-## Component Details
+## Component Details [component-details]
 
 ### Phase 4.1: Async & Security Layer
 
@@ -334,7 +336,7 @@ class AIWorkflowManager:
 
 ---
 
-## Data Flow: AI Suggestion End-to-End
+## Data Flow: AI Suggestion End-to-End [data-flow-end-to-end]
 
 ```
 User Action: Enables "🤖 AI Suggestions" checkbox in FileEditorPane
@@ -376,7 +378,7 @@ User can review and save
 
 ---
 
-## Security Design
+## Security Design [security-design]
 
 ### Secret Handling
 1. **Pre-LLM Filtering**: SensitiveDataFilter catches secrets before sending
@@ -395,7 +397,7 @@ User can review and save
 
 ---
 
-## Performance Characteristics
+## Performance Characteristics [performance-characteristics]
 
 | Operation | Time | Limiting Factor |
 |-----------|------|-----------------|
@@ -407,7 +409,7 @@ User can review and save
 
 ---
 
-## Testing Strategy
+## Testing Strategy [testing-strategy]
 
 ### Phase 4.1 Tests (Async + Security)
 - ✅ AsyncOpenAIClient initialization & timeouts
@@ -439,7 +441,7 @@ User can review and save
 
 ---
 
-## Deployment & Operations
+## Deployment ## Deployment & Operations Operations [deployment-operations]
 
 ### Required Configuration
 ```bash
@@ -469,7 +471,7 @@ kicli-assist doctor
 
 ---
 
-## Future Enhancements (Phase 5+)
+## Future Enhancements [future-enhancements]
 
 1. **Better Context Matching**: Use embeddings to find exact lines changed
 2. **Collaborative Approval**: Multiple users approve same suggestion

@@ -1,21 +1,22 @@
 ---
-title: "Phase 5.5.2.I2: WebSocket Streaming Architecture"
-project: "kicli-code-assist"
-scope: "architecture"
-created: 2026-11-02T03:18:24+01:00
-updated: 2026-11-02T03:18:24+01:00
-update_reason: "Design for real-time transparency event streaming"
-status: "active"
-author: "Copilot"
+title: WebSocket Streaming Architecture
+project: kicli-code-assist
+scope: architecture
+purpose: Real-time WebSocket streaming architecture for agent execution events and response streaming
+created: 2026-11-02T03
+updated: 2026-11-07T19
+update_reason: Standardize timestamp format, remove PHASE from title, add semantic blocks
+status: active
+semantic_blocks: [architecture, implementation-components, frontend-integration, testing-strategy, performance-considerations, implementation-phases]
 ---
 
-# Phase 5.5.2.I2: WebSocket Streaming Architecture
+# WebSocket Streaming Architecture
 
 **Objective:** Enable real-time event streaming from CodeImplementationAgent to frontend
 
 ---
 
-## Architecture
+## Architecture [architecture]
 
 ### Event Flow
 
@@ -137,7 +138,7 @@ get:execution_status
 
 ---
 
-## Implementation Components
+## Implementation Components [implementation-components]
 
 ### 1. TransparencyEventEmitter (NEW)
 
@@ -257,7 +258,7 @@ if self.event_emitter:
 
 ---
 
-## Frontend Integration (Phase 5.5.2.I4)
+## Frontend Integration [frontend-integration]
 
 ### useReasoningStream Hook
 
@@ -317,7 +318,7 @@ export function ReasoningPanel({ executionId }: { executionId: string }) {
 
 ---
 
-## Testing Strategy
+## Testing Strategy [testing-strategy]
 
 ### 1. Unit Tests
 
@@ -376,7 +377,7 @@ def test_frontend_receives_events():
 
 ---
 
-## Performance Considerations
+## Performance Considerations [performance-considerations]
 
 ### Event Rate Limiting
 - Don't emit every tracer record (could be thousands/sec)
@@ -395,7 +396,7 @@ def test_frontend_receives_events():
 
 ---
 
-## Implementation Phases
+## Implementation Phases [implementation-phases]
 
 **Phase 5.5.2.I2a (30 min):** Create TransparencyEventEmitter
 **Phase 5.5.2.I2b (20 min):** Extend server_websocket.py

@@ -1,17 +1,18 @@
 ---
-title: "Phase 5.5.3: Orchestration Integration - Architecture"
-project: "kicli-code-assist"
-scope: "architecture"
-created: 2026-11-02T00:22:00+01:00
-updated: 2026-11-02T00:22:00+01:00
-update_reason: "Concept for stackctl + staging verification pipeline"
-status: "active"
-author: "Copilot"
+title: Orchestration Integration Architecture
+project: kicli-code-assist
+scope: architecture
+purpose: Orchestration integration layer for multi-component workflow coordination
+created: 2026-11-02T00
+updated: 2026-11-07T19
+update_reason: Standardize timestamp format, remove PHASE from title, add semantic blocks
+status: active
+semantic_blocks: [problem-statement, vision, architecture, api-endpoints, integration-phase-5, multi-host-setup, success-criteria, files-to-create, next-steps]
 ---
 
-# Phase 5.5.3: Orchestration Integration - Architecture
+# Orchestration Integration Architecture
 
-## Problem Statement
+## Problem Statement [problem-statement]
 
 After agent commits code to feature branch, the feedback loop breaks:
 - Developer must manually test locally
@@ -23,7 +24,7 @@ After agent commits code to feature branch, the feedback loop breaks:
 
 ---
 
-## Vision
+## Vision [vision]
 
 ```
 Agent completes refactoring:
@@ -62,7 +63,7 @@ Agent completes refactoring:
 
 ---
 
-## Architecture
+## Architecture [architecture]
 
 ### 1. DeploymentCoordinator (Local)
 
@@ -311,7 +312,7 @@ class DeploymentTracker:
 
 ---
 
-## API Endpoints
+## API Endpoints [api-endpoints]
 
 ### REST Endpoints
 
@@ -357,7 +358,7 @@ async def consumer_staging_verification():
 
 ---
 
-## Integration with Phase 5.5.1 & 5.5.2
+## Integration with Phase 5.5.1 ## Integration with Phase 5.5.1 & 5.5.2 5.5.2 [integration-phase-5]
 
 ### CodeImplementationAgent Extension
 
@@ -411,7 +412,7 @@ class CodeImplementationAgent:
 
 ---
 
-## Multi-Host Setup Example
+## Multi-Host Setup Example [multi-host-setup]
 
 ```
 Developer Machine (Local)
@@ -437,7 +438,7 @@ Staging Machine (2nd dev machine)
 
 ---
 
-## Success Criteria
+## Success Criteria [success-criteria]
 
 - ✅ DeploymentCoordinator prepares code safely
 - ✅ StagingVerifier deploys without manual intervention
@@ -450,7 +451,7 @@ Staging Machine (2nd dev machine)
 
 ---
 
-## Files to Create
+## Files to Create [files-to-create]
 
 ```
 kicli_code_assist/agent/
@@ -465,7 +466,7 @@ Plus remote deployment scripts on staging host.
 
 ---
 
-## Next Steps
+## Next Steps [next-steps]
 
 1. Implement coordination modules
 2. Set up SSH access to staging host
