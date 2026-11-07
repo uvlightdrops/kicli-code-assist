@@ -1,3 +1,40 @@
+---
+title: Phase I2 Multi-File Context Analysis Architecture
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Phase I2 - Multi-File Context Analysis / Architecture
+purpose: Design overview for project-wide dependency analysis and impact detection
+created: 2026-11-07T00:46:00+01:00
+updated: 2026-11-07T10:00:00+01:00
+update_reason: Added YAML header for semantic organization
+status: stable
+
+semantic_blocks:
+  - id: architecture-overview
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: data-structures
+    type: architecture
+    status: stable
+    version: 1.0
+    
+  - id: impact-analysis-logic
+    type: implementation
+    status: stable
+    version: 1.0
+
+relations:
+  - target: PHASE_I2_PROJECTANALYZER_COMPLETE
+    type: part-of
+    reason: "Architecture guide for core modules"
+    
+  - target: PHASE_I2_1_ENDPOINT_INTEGRATION
+    type: depends-on
+    reason: "Endpoint implements this architecture"
+---
+
 # Phase I2: Multi-File Context Analysis Architecture
 
 **Date**: 2026-11-07  

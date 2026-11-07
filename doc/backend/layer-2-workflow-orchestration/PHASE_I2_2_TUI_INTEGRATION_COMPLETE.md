@@ -2,16 +2,41 @@
 title: Phase I2.2 TUI Integration Complete
 project: kicli-code-assist
 agent_project: kicli-code-assist
-scope: Phase I2 - Multi-File Context Analysis
+scope: Phase I2 - Multi-File Context Analysis / TUI Frontend
 purpose: Document completion of ProjectAnalysisPanel TUI integration with HTTP client
-created: 2025-01-16T10:00:00+01:00
-updated: 2025-01-16T11:30:00+01:00
-update_reason: Complete integration of analyze_project endpoint with TUI
-status: complete
-cross_references:
-  - doc/backend/layer-2-workflow-orchestration/PHASE_I2_MULTIFILE_ANALYSIS.md
-  - doc/backend/layer-2-workflow-orchestration/PHASE_I2_PROJECTANALYZER_COMPLETE.md
-  - doc/backend/layer-2-workflow-orchestration/PHASE_I2_1_ENDPOINT_INTEGRATION.md
+created: 2026-11-07T10:00:00+01:00
+updated: 2026-11-07T11:58:00+01:00
+update_reason: Upgraded header schema, fixed dates
+status: stable
+
+semantic_blocks:
+  - id: tui-integration
+    type: implementation
+    status: stable
+    version: 1.0
+    
+  - id: http-client-interface
+    type: implementation
+    status: stable
+    version: 1.0
+    
+  - id: ui-redesign-tabbed
+    type: implementation
+    status: stable
+    version: 1.0
+
+relations:
+  - target: PHASE_I2_MULTIFILE_ANALYSIS
+    type: depends-on
+    reason: "Architecture design for backend modules"
+    
+  - target: PHASE_I2_PROJECTANALYZER_COMPLETE
+    type: depends-on
+    reason: "Consumes ProjectAnalyzer implementation"
+    
+  - target: PHASE_I2_1_ENDPOINT_INTEGRATION
+    type: depends-on
+    reason: "Calls /api/projects/analyze endpoint"
 ---
 
 # Phase I2.2: TUI Integration - Complete
