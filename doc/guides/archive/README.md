@@ -45,4 +45,3 @@ Rather than delete, we archive here to:
 
 - **Current Guides**: `/guides/README.md`
 - **Active How-To Docs**: Current guides in `/guides/`
-

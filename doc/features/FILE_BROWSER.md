@@ -1,10 +1,48 @@
-# TUI File Browser
+---
+title: TUI File Browser
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / Navigation
+purpose: File browser and project navigation in TUI
+created: 2026-09-02T07:28:07+02:00
+updated: 2026-11-07T13:43:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
 
-## Overview
+semantic_blocks:
+  - id: file-browser-overview
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: navigation-features
+    type: operations
+    status: stable
+    version: 1.0
+  - id: file-selection-workflow
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: ui-layout-reference
+    type: reference
+    status: stable
+    version: 1.0
+
+relations:
+  - target: CHAT_WITH_FILES_WORKFLOW.md
+    type: implements
+    reason: "Provides file selection for chat workflows"
+  - target: AI_WORKFLOW.md
+    type: depends-on
+    reason: "Loads files for AI analysis"
+---
+
+# TUI File Browser [file-browser-overview]
+
+## Overview [file-browser-overview]
 
 The kicli-code-assist TUI now includes an integrated **file browser** that lets you browse and preview files in your project directory without leaving the terminal UI.
 
-## Features
+## Features [navigation-features]
 
 ✅ **File Navigation**
 - Browse directories with arrow keys
@@ -32,7 +70,7 @@ The kicli-code-assist TUI now includes an integrated **file browser** that lets 
 - 🔧 Shell scripts
 - And more...
 
-## Keyboard Shortcuts
+## Keyboard Shortcuts [file-selection-workflow]
 
 | Key | Action |
 |-----|--------|
@@ -44,7 +82,7 @@ The kicli-code-assist TUI now includes an integrated **file browser** that lets 
 | `?` | Show help |
 | `Ctrl+C` | Quit |
 
-## Layout
+## Layout [ui-layout-reference]
 
 The TUI now uses a split-screen layout:
 

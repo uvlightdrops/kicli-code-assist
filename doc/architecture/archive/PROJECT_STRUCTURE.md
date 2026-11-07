@@ -124,4 +124,3 @@ Previously, prompts CLI was in yaml-cfg-wizard, but this violated separation of 
 - ✅ kicli-code-assist is self-contained with all its features
 - ✅ Clear separation of concerns
 - ✅ Easier to extend or replace kicli-code-assist without affecting yaml-cfg-wizard
-

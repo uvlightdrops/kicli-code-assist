@@ -105,4 +105,3 @@ cross_references:
 - **Phase Summaries**: `/phases/README.md` (what was tested)
 - **Setup Guides**: `/guides/TESTING.md` (how to run tests)
 - **Architecture**: `/architecture/` (what to test)
-

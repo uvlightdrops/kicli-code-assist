@@ -45,4 +45,3 @@ Old feature docs are archived to:
 
 - **Current Features**: `/features/README.md`
 - **Active Feature Docs**: Current docs in `/features/`
-

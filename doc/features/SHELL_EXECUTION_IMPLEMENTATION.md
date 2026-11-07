@@ -1,10 +1,51 @@
-# Shell Command Execution: Complete Implementation (Tasks 1-6)
+---
+title: Shell Command Execution - Complete Implementation
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / Shell Execution
+purpose: Safe shell command execution with approval workflow and audit trail
+created: 2026-10-16T14:38:10+02:00
+updated: 2026-11-07T13:45:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
+
+semantic_blocks:
+  - id: shell-execution-overview
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: architecture-design
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: approval-workflow
+    type: operations
+    status: stable
+    version: 1.0
+  - id: audit-trail-system
+    type: architecture
+    status: stable
+    version: 1.0
+
+relations:
+  - target: SHELL_COMMAND_EDITING.md
+    type: composed-of
+    reason: "Editing interface for command execution"
+  - target: ../backend/layer-1-raw-llm/OS_COMMAND_EXECUTION_ARCHITECTURE.md
+    type: implements
+    reason: "Implements OS command execution backend"
+  - target: ../backend/layer-2-workflow-orchestration/CHUNK_FORMAT_STANDARDIZATION.md
+    type: depends-on
+    reason: "Uses standardized response chunk format"
+---
+
+# Shell Command Execution: Complete Implementation (Tasks 1-6) [shell-execution-overview]
 
 **Status:** ✅ **ALL TASKS COMPLETE** (Tasks 1-6)
 
 ---
 
-## Summary: What's Been Implemented
+## Summary: What's Been Implemented [shell-execution-overview]
 
 **Total Code:** ~3,000 lines  
 **New Modules:** 7 (executor + UI + tests)  
@@ -109,7 +150,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 2: TUI Approval Widget ✅ COMPLETE
+## Task 2: TUI Approval Widget ✅ COMPLETE [approval-workflow]
 
 **File:** `ui/shell_approval_widget.py` (265 lines)
 
@@ -138,7 +179,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 3: Extended Executor ✅ COMPLETE
+## Task 3: Extended Executor ✅ COMPLETE [architecture-design]
 
 **File:** `executor/safe_executor.py` (207 lines)
 
@@ -169,7 +210,7 @@ CRITICAL = "critical"
 
 ---
 
-## Task 4: Audit Trail ✅ COMPLETE
+## Task 4: Audit Trail ✅ COMPLETE [audit-trail-system]
 
 **File:** `executor/audit_trail.py` (285 lines)
 

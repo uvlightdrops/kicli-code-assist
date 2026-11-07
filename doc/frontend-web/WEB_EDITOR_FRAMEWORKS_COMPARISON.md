@@ -341,4 +341,3 @@ npm install @vim/wasm
 | Ace | https://ace.c9.io/ | ajaxorg/ace |
 | Vim.Wasm | https://vim.wasm.in/ | vim/vim (wasm branch) |
 | Highlight.js | https://highlightjs.org/ | highlightjs/highlight.js |
-

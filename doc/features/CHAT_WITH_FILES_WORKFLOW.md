@@ -1,6 +1,47 @@
-# Chat Integration: Files + Comments + KI
+---
+title: Chat With Files Workflow
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / User Workflow
+purpose: Interactive chat with file and project context
+created: 2026-09-02T07:28:07+02:00
+updated: 2026-11-07T13:42:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
 
-## Quick Start
+semantic_blocks:
+  - id: chat-files-workflow
+    type: operations
+    status: stable
+    version: 1.0
+  - id: context-loading
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: ai-analysis-integration
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: workflow-patterns
+    type: reference
+    status: stable
+    version: 1.0
+
+relations:
+  - target: AI_WORKFLOW.md
+    type: depends-on
+    reason: "Extends AI suggestions with file context"
+  - target: FILE_BROWSER.md
+    type: depends-on
+    reason: "Uses file browser for navigation"
+  - target: CHAT_HISTORY_AND_PROMPTS.md
+    type: depends-on
+    reason: "Uses chat history and session management"
+---
+
+# Chat Integration: Files + Comments + KI [chat-files-workflow]
+
+## Quick Start [workflow-patterns]
 
 ### Workflow 1: Simple Chat with Loaded File (EMPFOHLEN)
 
@@ -63,7 +104,7 @@
 4. ENTER → KI response mit vollem Kontext
 ```
 
-## Available Commands
+## Available Commands [context-loading]
 
 ### Navigation (File Browser)
 ```
@@ -83,7 +124,7 @@ Ctrl+L          → Load project context
 Ctrl+C          → Quit
 ```
 
-## What Happens When You Send a Message
+## What Happens When You Send a Message [ai-analysis-integration]
 
 1. **User Input**: "How does this work?"
 2. **UI adds to chat**: "You: How does this work?"

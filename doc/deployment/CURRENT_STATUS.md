@@ -163,4 +163,3 @@ This session made these commits:
 - ki.yaml auto-creation for config loading
 
 (Add actual commit SHAs after completion)
-

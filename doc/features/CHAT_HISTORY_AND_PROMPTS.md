@@ -1,6 +1,44 @@
-# Chat History & Session Management
+---
+title: Chat History & Session Management
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / Data Persistence
+purpose: Persistent chat sessions with automatic save/restore
+created: 2026-09-02T11:09:04+02:00
+updated: 2026-11-07T13:42:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
 
-## Overview
+semantic_blocks:
+  - id: chat-persistence-overview
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: session-management-api
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: session-workflow
+    type: operations
+    status: stable
+    version: 1.0
+  - id: data-storage-format
+    type: architecture
+    status: stable
+    version: 1.0
+
+relations:
+  - target: ../backend/layer-2-workflow-orchestration/SESSION_MANAGEMENT_STATE.md
+    type: implements
+    reason: "Implements session state management"
+  - target: AI_WORKFLOW.md
+    type: referenced-by
+    reason: "Provides context for AI workflows"
+---
+
+# Chat History & Session Management [chat-persistence-overview]
+
+## Overview [chat-persistence-overview]
 
 kicli-code-assist now supports persistent chat sessions with automatic save/restore functionality. Sessions are stored locally in `$HOME/dev_data/kicli-code-assist/chat_history/` and can be resumed at any time.
 
@@ -29,9 +67,9 @@ session = ChatSession.load_session("my-chat-name")
 print(session.history.get_messages())  # All previous messages
 ```
 
-## Features
+## Features [session-management-api]
 
-### 1. Automatic Persistence
+### 1. Automatic Persistence [session-workflow]
 - Every message is automatically saved to disk
 - Sessions survive app crashes
 - No manual saving required
@@ -59,7 +97,7 @@ json_data = ChatHistory.export_session("my-session", format="json")
 history.clear()
 ```
 
-### 4. Export Options
+### 4. Export Options [data-storage-format]
 Sessions can be exported to:
 - **Markdown**: For sharing, documentation, blog posts
 - **JSON**: For archiving, analysis, integration

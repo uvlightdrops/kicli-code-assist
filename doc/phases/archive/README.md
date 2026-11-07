@@ -62,4 +62,3 @@ All docs here have `status: archived` in their YAML headers.
 
 - **Current Phases**: `/phases/README.md` (active phase documentation)
 - **Lessons Learned**: `/home/flow/dev_doc/` (anti-patterns, failed approaches)
-

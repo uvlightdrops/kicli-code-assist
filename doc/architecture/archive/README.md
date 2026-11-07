@@ -132,4 +132,3 @@ cross_references:
 - **Feature Guides**: `/features/` (how to use features)
 - **Setup Guides**: `/guides/` (how to set up/configure the project)
 - **Standards**: `/home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md` (ecosystem-wide guide)
-

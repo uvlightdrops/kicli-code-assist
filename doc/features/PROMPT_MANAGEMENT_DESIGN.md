@@ -1,4 +1,42 @@
-# Prompt Management - Design Document
+---
+title: Prompt Management - Design Document
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / Configuration
+purpose: Prompt templates, roles, and context management
+created: 2026-09-05T22:30:58+02:00
+updated: 2026-11-07T13:44:00+01:00
+update_reason: Added semantic schema documentation
+status: draft
+
+semantic_blocks:
+  - id: prompt-management-overview
+    type: design
+    status: draft
+    version: 1.0
+  - id: prompt-configuration-schema
+    type: architecture
+    status: draft
+    version: 1.0
+  - id: role-system-design
+    type: implementation
+    status: draft
+    version: 1.0
+  - id: prompt-versioning-strategy
+    type: architecture
+    status: draft
+    version: 1.0
+
+relations:
+  - target: ../backend/layer-2-workflow-orchestration/SESSION_MANAGEMENT_STATE.md
+    type: depends-on
+    reason: "Prompt state stored in session management"
+  - target: AI_WORKFLOW.md
+    type: implements
+    reason: "Prompts drive AI workflow behavior"
+---
+
+# Prompt Management - Design Document [prompt-management-overview]
 
 **Status:** Design Phase (Ready for Implementation)  
 **Category:** KI Settings  
@@ -6,7 +44,7 @@
 
 ---
 
-## 🎯 Overview
+## 🎯 Overview [prompt-management-overview]
 
 Prompt Management ermöglicht Benutzern:
 - Multiple vordefinierte **Rollen** (Developer, Tutor, Translator, etc.)
@@ -17,7 +55,7 @@ Prompt Management ermöglicht Benutzern:
 
 ---
 
-## 📋 Configuration Schema
+## 📋 Configuration Schema [prompt-configuration-schema]
 
 ### Schema-Erweiterung in `ki-core` (config.schema.yaml)
 
@@ -252,7 +290,7 @@ Long-press → Schnelles Wechseln zu andere Rolle
 
 ---
 
-## 💾 File Structure
+## 💾 File Structure [prompt-versioning-strategy]
 
 ### In kicli-code-assist:
 
@@ -293,7 +331,7 @@ yaml_cfg_wizard/
 
 ---
 
-## 🔧 Implementation Steps
+## 🔧 Implementation Steps [role-system-design]
 
 ### Phase 1: Core Data Structure (1-2 days)
 - [ ] Add prompts section to ki-core schema

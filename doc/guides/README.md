@@ -137,4 +137,3 @@ cross_references:
 - **Features**: `/features/` (what can you do)
 - **Architecture**: `/architecture/` (how it works internally)
 - **Troubleshooting**: Cross-reference `/architecture/` for root cause analysis
-

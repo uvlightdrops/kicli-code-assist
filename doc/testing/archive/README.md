@@ -45,4 +45,3 @@ Rather than delete, we keep them for:
 
 - **Current Test Reports**: `/testing/README.md`
 - **Test Strategy**: Active test docs in `/testing/`
-

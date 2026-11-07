@@ -318,4 +318,3 @@ Result:
 - Current implementation: `kicli_code_assist/agent/code_implementation.py`
 - Phase 5.4 reference: `doc/phases/PHASE_5_4_SUMMARY.md`
 - Autonomy analysis: `doc/phases/PHASE_5_AUTONOMY_ANALYSIS.md`
-

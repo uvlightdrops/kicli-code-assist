@@ -1,4 +1,42 @@
-# Shell Command Editing & Manual Entry
+---
+title: Shell Command Editing & Manual Entry
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / Shell Integration
+purpose: Interactive shell command editing and manual entry
+created: 2026-10-16T20:38:27+02:00
+updated: 2026-11-07T13:44:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
+
+semantic_blocks:
+  - id: shell-command-editing-overview
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: command-editor-architecture
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: batch-editing-workflow
+    type: operations
+    status: stable
+    version: 1.0
+  - id: risk-classification-system
+    type: reference
+    status: stable
+    version: 1.0
+
+relations:
+  - target: SHELL_EXECUTION_IMPLEMENTATION.md
+    type: part-of
+    reason: "Editing layer for shell execution"
+  - target: ../backend/layer-1-raw-llm/FILE_IO_GIT_OPERATIONS.md
+    type: depends-on
+    reason: "Executes OS commands and file operations"
+---
+
+# Shell Command Editing & Manual Entry [shell-command-editing-overview]
 
 **Status:** ✅ **FEATURE COMPLETE**  
 **Date:** 2026-10-16  
@@ -6,7 +44,7 @@
 
 ---
 
-## Overview
+## Overview [shell-command-editing-overview]
 
 Users can now:
 1. **Edit individual commands** - Fix/adjust LLM proposals
@@ -16,7 +54,7 @@ Users can now:
 
 ---
 
-## Architecture
+## Architecture [command-editor-architecture]
 
 ### 1. CommandEditor Modal (`shell_command_editor.py`)
 
@@ -378,7 +416,7 @@ result = ManualCommandEntry.parse_command_input("echo test")
 
 ---
 
-## Risk Classification Updates
+## Risk Classification Updates [risk-classification-system]
 
 When user edits a command, risk level is **immediately re-classified**:
 
@@ -395,7 +433,7 @@ Risk updates to: 🟢 LOW
 
 ---
 
-## Batch Editing Workflow
+## Batch Editing Workflow [batch-editing-workflow]
 
 ### Before Edit
 ```

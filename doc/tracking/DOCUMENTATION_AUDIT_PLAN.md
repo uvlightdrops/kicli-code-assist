@@ -332,4 +332,3 @@ status: "active"
 5. **Commit as single PR:** `docs: add YAML headers and metadata to all doc files`
 
 ---
-

@@ -198,4 +198,3 @@ def update_file(file_id):
 3. Should saves go to filesystem or only to session storage?
 4. Do you want auto-save, or explicit save only?
 5. Should we track file changes for LLM context (e.g., "you edited main.py")?
-

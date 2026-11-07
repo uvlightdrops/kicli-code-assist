@@ -45,4 +45,3 @@ Rather than delete, we archive here to:
 
 - **Current Tracking**: `/tracking/README.md`
 - **Active Sessions**: Current tracking docs in `/tracking/`
-

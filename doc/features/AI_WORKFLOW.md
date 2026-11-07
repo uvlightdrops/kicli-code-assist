@@ -1,6 +1,44 @@
-# AI Auto-Completion & Suggestions Workflow
+---
+title: AI Auto-Completion & Suggestions Workflow
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Feature Implementation / User Workflow
+purpose: AI-assisted code analysis and suggestion workflow for editor
+created: 2026-10-17T22:23:19+02:00
+updated: 2026-11-07T13:41:00+01:00
+update_reason: Added semantic schema documentation
+status: stable
 
-## Quick Start
+semantic_blocks:
+  - id: ai-workflow-overview
+    type: implementation
+    status: stable
+    version: 1.0
+  - id: quick-start-guide
+    type: operations
+    status: stable
+    version: 1.0
+  - id: workflow-execution
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: ai-operations-matrix
+    type: reference
+    status: stable
+    version: 1.0
+
+relations:
+  - target: CHAT_HISTORY_AND_PROMPTS.md
+    type: depends-on
+    reason: "Uses chat history for context"
+  - target: ../backend/layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
+    type: implements
+    reason: "Implements agent routing for AI suggestions"
+---
+
+# AI Auto-Completion & Suggestions Workflow [ai-workflow-overview]
+
+## Quick Start [quick-start-guide]
 
 ### Get AI Suggestions for Code
 
@@ -21,7 +59,7 @@
    - Or "❌ Reject" to discard
    - Changes applied to editor with auto-save
 
-## How It Works
+## How It Works [workflow-execution]
 
 ### Step-by-Step
 
@@ -43,7 +81,7 @@
   [Show Details] [✅ Apply] [❌ Reject]
 ```
 
-### Available AI Operations
+### Available AI Operations [ai-operations-matrix]
 
 | Operation | How To Trigger | Result |
 |-----------|----------------|--------|
