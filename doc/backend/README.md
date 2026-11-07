@@ -1,12 +1,34 @@
 ---
 title: Backend API & Architecture Documentation
 project: kicli-code-assist
-scope: backend
-type: reference
-status: active
+agent_project: kicli-code-assist
+scope: Backend Architecture / Meta-Documentation
+purpose: Central hub for backend system architecture, APIs, and integration guides
 created: 2026-11-06T09:20:00+01:00
-updated: 2026-11-06T10:25:00+01:00
-update_reason: Reorganized into 3-layer intelligence model with subfolders
+updated: 2026-11-07T12:45:00+01:00
+update_reason: Upgraded to semantic schema with layer documentation
+status: stable
+
+semantic_blocks:
+  - id: layer-model
+    type: architecture
+    status: stable
+    version: 1.0
+  - id: layer-docs
+    type: reference
+    status: stable
+    version: 1.0
+
+relations:
+  - target: layer-1-raw-llm/README.md
+    type: composed-of
+    reason: "Layer 1 is foundation of architecture"
+  - target: layer-2-workflow-orchestration/README.md
+    type: composed-of
+    reason: "Layer 2 builds on Layer 1"
+  - target: layer-3-autonomous-agent/README.md
+    type: composed-of
+    reason: "Layer 3 orchestrates Layers 1-2"
 ---
 
 # Backend API & Architecture Documentation
@@ -23,7 +45,7 @@ Organized by **3-layer intelligence model** for progressive complexity.
 **Understanding Full Architecture?**
 → Start with [layer-1-raw-llm/](layer-1-raw-llm/) → [layer-2-workflow-orchestration/](layer-2-workflow-orchestration/) → [layer-3-autonomous-agent/](layer-3-autonomous-agent/)
 
-## 📊 3-Layer Model
+## 📊 3-Layer Model [layer-model]
 
 ```
 Layer 3: Autonomous Agent Layer
@@ -42,7 +64,7 @@ Layer 1: Raw LLM Layer
 └── File I/O & OS commands
 ```
 
-## 📚 Layer Documentation
+## 📚 Layer Documentation [layer-docs]
 
 | Layer | Folder | Entry Point | Purpose |
 |-------|--------|------------|---------|
