@@ -1,15 +1,43 @@
 ---
-title: "Agent Route API Specification"
-project: "kicli-code-assist"
-scope: "backend-api"
+title: Agent Route API Specification
+project: kicli-code-assist
+agent_project: kicli-code-assist
+scope: Phase 5.1+ Backend / Agent Orchestration API
+purpose: Specify REST endpoint for unified agent routing and multi-capability orchestration
 created: 2026-11-06T09:20:00+01:00
-updated: 2026-11-06T09:20:00+01:00
-update_reason: "Extracted from server_routes.py for client clarity"
-status: "active"
-endpoint: "POST /api/agent/route"
-cross_references:
-  - kicli_code_assist/web/server_routes.py:39-200
-  - doc/backend/README.md
+updated: 2026-11-07T12:31:00+01:00
+update_reason: Upgraded to semantic schema, added block IDs
+status: stable
+
+semantic_blocks:
+  - id: api-specification
+    type: implementation
+    status: stable
+    version: 2.0
+    
+  - id: request-schema
+    type: implementation
+    status: stable
+    version: 1.0
+    
+  - id: response-schema
+    type: implementation
+    status: stable
+    version: 1.0
+    
+  - id: error-handling
+    type: implementation
+    status: stable
+    version: 1.0
+
+relations:
+  - target: PHASE_I2_1_ENDPOINT_INTEGRATION
+    type: references
+    reason: "Similar endpoint pattern for project analysis"
+    
+  - target: ../../../FUTURE_ROADMAP.md
+    type: part-of
+    reason: "Core capability for Phase 5.1+ orchestration"
 ---
 
 # Agent Route API Specification
@@ -46,7 +74,7 @@ result = response.json()
 
 ---
 
-## Request Schema
+## Request Schema [request-schema]
 
 **Method:** `POST`  
 **Content-Type:** `application/json`
@@ -80,7 +108,7 @@ result = response.json()
 
 ---
 
-## Response Schema
+## Response Schema [response-schema]
 
 **Status 200 (Success)**
 
@@ -191,7 +219,7 @@ Used in `tabs.*.chunks` array. Each chunk has `type` and `content`.
 
 ---
 
-## Error Responses
+## Error Responses [error-handling]
 
 **Status 400 (Bad Request)**
 
