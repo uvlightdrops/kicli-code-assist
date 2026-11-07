@@ -1,24 +1,19 @@
 # 📋 Documentation Master Tracker
 **Project:** kicli-code-assist  
-**Status:** Session-persistent tracking  
-**Updated:** 2026-11-07 18:26
+**Last Updated:** 2026-11-07 18:54
 
 ---
 
 ## 🎯 Status Legend
-- ✅ Complete (YAML header, semantic blocks, correct folder, referenced in README)
-- ⚠️ Partial (has YAML, needs semantic blocks or README link)
-- 🔶 In Progress (being worked on now)
-- ❌ Missing (doc needed but doesn't exist)
-- ⏸️ Skipped (intentionally not documented)
+- ✅ Complete | ⚠️ Partial | 🔶 In Progress | ❌ Missing | ⏸️ Skipped
 
 ---
 
 ## 📊 Folder × Skills Matrix
 
-| Folder | YAML Headers | Semantic Blocks | Folder Audit | Hybrid Split | Cross-Ref Links | README Index | Status |
+| Folder | YAML | Blocks | Audit | Hybrid | Cross-Ref | README | Status |
 |--------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **doc/** (root) | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
+| **doc/** | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
 | **doc/guides/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
 | **doc/architecture/** | ✅ | ⚠️ | 🔶 | - | ✅ | 🔶 | ⚠️ |
 | **doc/features/** | ⚠️ | ❌ | - | - | ⚠️ | ✅ | ⚠️ |
@@ -33,170 +28,46 @@
 
 ## 📝 File Status by Folder
 
-### ✅ doc/frontend-tui/ (8 files, 1956 LOC) - Session Fixes Applied
-| File | YAML | Blocks | Scope | Status | Updated | Notes |
-|------|:---:|:---:|:---:|:---:|:---:|---|
-| TEXTUAL_HOWTO.md | ✅ | ✅ | ✅ | active | 18:36 | ✅ FIXED: Added 10 semantic blocks, scope corrected, update_reason added |
-| I1_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | active | 14:30 | Ready for blocks (next) |
-| I2_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | stable | 16:20 | Ready for blocks (next) |
-| PHASE_I1_LAYER_2_REASONING_DISPLAY.md | ✅ | ⚠️ | ✅ | active | 17:25 | ✅ FIXED: Removed PHASE prefix from title |
-| PHASE_I1_REAL_LLM_IMPLEMENTATION.md | ✅ | ❌ | ✅ | in_progress | 17:25 | ✅ FIXED: Removed Phase prefix from title |
-| TUI_TEXTUAL_ARCHITECTURE.md | ✅ | ❌ | ✅ | in_progress | 17:25 | ✅ FIXED: Scope corrected (architecture→frontend-tui) |
-| UI_TABS.md | ✅ | ⚠️ | ✅ | active | 18:36 | ✅ FIXED: Scope standardized, timestamp updated |
-| README.md | ✅ | ❌ | ✅ | active | 18:07 | Index doc; needs verification |
-
-### ✅ doc/architecture/
-| File | YAML | Blocks | Folder | Readme | Notes |
+### ✅ doc/frontend-tui/ (8 files, 1956 LOC)
+| File | YAML | Blocks | Scope | Status | Notes |
 |------|:---:|:---:|:---:|:---:|---|
-| CODE_ANALYSIS_STRUCTURE.md | ✅ | ⚠️ | ✅ | 🔶 | Moved today; needs semantic blocks + timestamp fix |
-| AGENT_COORDINATION_ARCHITECTURE.md | ✅ | ⚠️ | ✅ | ✅ | Needs semantic blocks |
-| WEBSOCKET_STREAMING_ARCHITECTURE.md | ⚠️ | ❌ | ✅ | ✅ | Needs YAML, blocks |
-| ASYNC_LLM_SECURITY_ARCHITECTURE.md | ⚠️ | ❌ | ✅ | ✅ | Needs YAML, blocks |
+| TEXTUAL_HOWTO.md | ✅ | ✅ | ✅ | active | ✅ DONE |
+| I1_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | active | 2 H2, 2 blocks (ready) |
+| I2_ENDPOINT_CONSUMPTION_TUI.md | ✅ | ❌ | ✅ | stable | 4 H2, 3 blocks (1 missing) |
+| I1_LAYER_2_REASONING_DISPLAY.md | ✅ | ⚠️ | ✅ | active | 11 H2, 7 blocks (4 missing) |
+| I1_REAL_LLM_IMPLEMENTATION.md | ✅ | ❌ | ✅ | in_progress | 11 H2, 9 blocks (2 missing) |
+| TUI_TEXTUAL_ARCHITECTURE.md | ✅ | ✅ | ✅ | in_progress | ✅ COMPLETE |
+| UI_TABS.md | ✅ | ⚠️ | ✅ | active | 8 H2, 10 blocks (check dup) |
+| README.md | ✅ | ❌ | ✅ | active | 2 H2, 0 blocks (2 missing) |
+
+### ✅ doc/architecture/ (4+ files)
+| File | YAML | Blocks | Notes |
+|------|:---:|:---:|---|
+| CODE_ANALYSIS_STRUCTURE.md | ✅ | ⚠️ | Moved; incomplete blocks |
+| AGENT_COORDINATION_ARCHITECTURE.md | ✅ | ⚠️ | Needs blocks |
+| WEBSOCKET_STREAMING_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
+| ASYNC_LLM_SECURITY_ARCHITECTURE.md | ⚠️ | ❌ | Missing YAML, blocks |
 
 ### ✅ doc/backend/
-| Folder | Status | Notes |
-|--------|:---:|---|
-| **layer-1-raw-llm/** | ⚠️ | Needs audit |
-| **layer-2-workflow-orchestration/** | ⚠️ | Needs audit |
-| **layer-3-autonomous-agent/** | ⚠️ | Needs audit |
+| Folder | Status |
+|--------|:---:|
+| **layer-1-raw-llm/** | ⚠️ |
+| **layer-2-workflow-orchestration/** | ⚠️ |
+| **layer-3-autonomous-agent/** | ⚠️ |
 
 ---
 
-## 🔍 Audit Findings: doc/frontend-tui/
-
-**Date:** 2026-11-07 18:28  
-**Files Scanned:** 8  
-**Status:** ⚠️ Mixed (4 ✅ / 4 ⚠️)
-
-### 🟢 Good State
-- ✅ All 8 files have YAML headers (100%)
-- ✅ Most have `update_reason` field
-- ✅ Timestamps present and recent
-
-### 🟡 Issues Found
-
-**1. Missing Semantic Blocks (CRITICAL)**
-- ❌ 6 of 8 files lack `[block-id]` tags on H2 headings
-- ⚠️ 2 files mention `semantic_blocks:` field but empty
-- **Action:** Apply semantic-block-tagging skill to all
-
-**2. Scope Inconsistencies**
-- ⚠️ TEXTUAL_HOWTO.md: `scope: "Development Guide"` (too generic, should be `frontend-tui`)
-- ⚠️ TUI_TEXTUAL_ARCHITECTURE.md: `scope: architecture` (should be `frontend-tui`)
-- ⚠️ UI_TABS.md: `scope: "TUI Feature (Temporary Location)"` (unclear, has TODO comment)
-- **Action:** Standardize to `scope: frontend-tui`
-
-**3. Title Issues**
-- ⚠️ PHASE_I1_REAL_LLM_IMPLEMENTATION.md: Title has `Phase I1:` prefix
-- ⚠️ PHASE_I1_LAYER_2_REASONING_DISPLAY.md: Title is ALL_CAPS + PHASE prefix
-- **Action:** Remove PHASE prefix from all titles
-
-**4. Timestamp Issues**
-- ⚠️ TEXTUAL_HOWTO.md: `updated: 2026-11-06` (2 days old, should reflect today's move)
-- **Action:** Run timestamp-correction-from-git
-
-**5. Update Reason Field**
-- ⚠️ TEXTUAL_HOWTO.md: Missing `update_reason` field
-- **Action:** Add explanation of reorganization
-
-### ✅ Ready for Blocks
-6 files are ready for semantic-block-tagging immediately.
-
----
-
-### Session Today (Current)
-- [ ] Fix timestamps in `TEXTUAL_HOWTO.md` (update_reason, updated date)
-- [ ] Fix timestamps in `CODE_ANALYSIS_STRUCTURE.md` (update_reason, updated date)
-- [ ] Add semantic-block-tagging to both docs
-- [ ] Update doc/README.md references (cross-link to new locations)
-
-### Session Phase I (Docs Polish)
-- [ ] Apply semantic blocks to all `doc/frontend-tui/` docs
-- [ ] Apply semantic blocks to all `doc/architecture/` docs
-- [ ] Fix YAML headers (missing created/updated/status)
-- [ ] Add `update_reason` to all modified docs
-- [ ] Run folder-structure-audit on each folder
-
-### Session Phase II (Hybrid Splitting)
-- [ ] Identify hybrid docs (backend+frontend) in `doc/backend/`
-- [ ] Create frontend mirrors in `doc/frontend-tui/`
-- [ ] Update YAML headers with relations
-
-### Session Phase III (Full Coherence)
-- [ ] Run documentation-coherence-check on each folder
-- [ ] Verify all cross-references are bidirectional
-- [ ] Update README indexes in each folder
-- [ ] Commit all changes with proper trailer
-
----
-
-## 📌 Skills Used
-
-| Skill | Applied To | Status | Notes |
-|-------|-----------|:---:|---|
-| folder-structure-audit | doc/frontend-tui, doc/architecture | 🔶 | Running now |
-| semantic-block-tagging | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | ⏭️ | Next: H2 → [block-id] |
-| documentation-maintenance-standards | All docs | ⏭️ | YAML timestamps, update_reason |
-| hybrid-doc-splitting | doc/backend/ | ⏭️ | Identify backend+frontend mix |
-| documentation-coherence-check | doc/frontend-tui | ⏭️ | After blocks added |
-| timestamp-correction-from-git | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | ⏭️ | Extract from git history |
-
----
-
-## 🔗 Cross-Reference Map
-
-**doc/README.md** →
-- ✅ doc/frontend-tui/TEXTUAL_HOWTO.md
-- ✅ doc/architecture/CODE_ANALYSIS_STRUCTURE.md
-- ⚠️ All other docs need link review
-
-**doc/frontend-tui/TEXTUAL_HOWTO.md** →
-- ✅ doc/architecture/CODE_ANALYSIS_STRUCTURE.md (added today)
-- ❌ Other TUI docs not linked
-
-**doc/architecture/CODE_ANALYSIS_STRUCTURE.md** →
-- ✅ doc/frontend-tui/TEXTUAL_HOWTO.md (added today)
-- ❌ Backend layer docs not linked
-
----
-
-## 📋 Session Tracking
+## 📋 Session Log
 
 | Date | Action | Files | Status |
 |------|--------|-------|:---:|
-| 2026-11-07 18:26 | Create master tracker | DOCUMENTATION_MASTER_TRACKER.md | ✅ |
-| 2026-11-07 18:26 | Reorganize docs + commit | TEXTUAL_HOWTO, CODE_ANALYSIS_STRUCTURE | ✅ |
-| 2026-11-07 18:36 | Fix TEXTUAL_HOWTO YAML + blocks + PHASE removals | 6 files | ✅ |
-| 2026-11-07 18:46 | Remove PHASE prefix from filenames | I1_LAYER_2_*, I1_REAL_LLM_* | ✅ |
+| 2026-11-07 18:26 | Create tracker | master | ✅ |
+| 2026-11-07 18:26 | Move docs | 2 files | ✅ |
+| 2026-11-07 18:36 | YAML + blocks | 1 file | ✅ |
+| 2026-11-07 18:36 | Fix scope/title/timestamp | 5 files | ✅ |
+| 2026-11-07 18:46 | Remove PHASE from names | 2 files | ✅ |
+| 2026-11-07 18:54 | Trim to lean format | master | ✅ |
 
 ---
 
-## 🎯 Nächste kleine Schritte in doc/frontend-tui/
-
-### Sofort Ready (5 min pro File)
-1. ✅ **TEXTUAL_HOWTO.md** - ERLEDIGT (commit 3934962)
-2. ⏳ **I1_ENDPOINT_CONSUMPTION_TUI.md** - 2 H2 headings, 2 block tags → 0 FEHLEND → READY
-3. ⏳ **I2_ENDPOINT_CONSUMPTION_TUI.md** - 4 H2 headings, 3 block tags → **1 FEHLEND**
-4. ⏳ **README.md** - 2 H2 headings, 0 block tags → **2 FEHLEND**
-
-### Teilweise Done (10-15 min pro File)
-5. 🟡 **I1_LAYER_2_REASONING_DISPLAY.md** - 11 H2, 7 tags → **4 FEHLEND**
-6. 🟡 **I1_REAL_LLM_IMPLEMENTATION.md** - 11 H2, 9 tags → **2 FEHLEND**
-7. ✅ **TUI_TEXTUAL_ARCHITECTURE.md** - 8 H2, 8 tags → COMPLETE
-8. ⚠️ **UI_TABS.md** - 8 H2, 10 tags → CHECK DUPLIKATE
-
----
-
-## 🎯 Master Rules
-
-1. **Every change** → Update this tracker
-2. **Status matrix** → Always accurate before new work
-3. **Skill application** → Track in "Skills Used" table
-4. **Cross-refs** → Bidirectional; both sides updated
-5. **Commits** → Reference tracker updates in commit messages
-
----
-
-**Maintained by:** Copilot (Session ID: 8a674ccc-c04f-4a96-b796-89107f9acdae)  
-**Last Session:** 2026-11-07 18:26  
-**Next Review:** Before each major change
+**Update before major work. Matrix always accurate. Announce before writing prose.**
