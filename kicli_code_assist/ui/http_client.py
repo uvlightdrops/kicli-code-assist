@@ -355,6 +355,49 @@ class TUIBackendClient:
             logger.error(f"File update error: {e}")
             return {"success": False, "error": str(e)}
 
+    def understand_project(
+        self,
+        project_path: str,
+        depth: str = "detailed"
+    ) -> Dict[str, Any]:
+        """Request comprehensive project understanding from backend.
+        
+        Args:
+            project_path: Path to project directory
+            depth: Analysis depth ('overview', 'detailed', 'deep')
+        
+        Returns:
+            Response dict with synthesis_report, metrics, etc.
+        """
+        try:
+            url = f"{self.base_url}/api/projects/understand"
+            payload = {
+                "project_path": project_path,
+                "depth": depth,
+            }
+            
+            request_body = json.dumps(payload).encode('utf-8')
+            req = Request(url, data=request_body, headers={"Content-Type": "application/json"})
+            
+            logger.info(f"Understanding project: {project_path} (depth: {depth})")
+            
+            with urlopen(req, timeout=60) as response:
+                data = json.loads(response.read().decode('utf-8'))
+                logger.info(f"Project understanding complete")
+                return data
+        
+        except HTTPError as e:
+            error_msg = f"HTTP error {e.code}"
+            if e.code == 404:
+                error_msg = "Project not found"
+            elif e.code == 400:
+                error_msg = "Invalid project path"
+            logger.error(f"Error understanding project: {error_msg}")
+            return {"success": False, "error": error_msg}
+        except Exception as e:
+            logger.error(f"Project understanding error: {e}")
+            return {"success": False, "error": str(e)}
+
 
 # Global client instance
 _client: Optional[TUIBackendClient] = None

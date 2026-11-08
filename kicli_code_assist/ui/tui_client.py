@@ -147,6 +147,7 @@ class KICLITUIApp(App):
         ("ctrl+6", "tab_6", "Tab 6"),
         ("n", "new_file", "New File"),
         ("ctrl+s", "save_current_file", "Save File"),
+        ("ctrl+u", "understand_project", "Analyze Project"),
     ]
     
     def __init__(self, config_path: str = None):
@@ -474,6 +475,121 @@ class KICLITUIApp(App):
             app = self.query_one(CodeAssistantApp)
             app.action_save_current_file()
         except Exception as e:
+            self.notify(f"❌ Error: {e}", severity="error", timeout=2)
+
+    def action_understand_project(self) -> None:
+        """Analyze selected project and display understanding (Ctrl+U)."""
+        try:
+            from kicli_code_assist.ui.http_client import get_backend_client
+            from kicli_code_assist.ui.panels.project_understanding_panel import ProjectUnderstandingPanel
+            from textual.app import ComposeResult
+            from textual.containers import Container
+            from textual.widgets import Input, Button
+            
+            # Try to get selected project from file browser
+            file_tree = self.query_one(FileTree)
+            
+            if not file_tree.current_dir:
+                self.notify("❌ Please select a project folder first", severity="error", timeout=2)
+                return
+            
+            project_path = str(file_tree.current_dir)
+            
+            # Create modal dialog for project understanding
+            class UnderstandProjectDialog(Container):
+                """Dialog for project understanding with depth selection."""
+                
+                DEFAULT_CSS = """
+                UnderstandProjectDialog {
+                    align: center middle;
+                    width: 60;
+                    height: 15;
+                    background: $primary;
+                    border: solid $accent;
+                }
+                
+                UnderstandProjectDialog Input {
+                    margin: 1 1;
+                    width: 1fr;
+                }
+                
+                UnderstandProjectDialog Button {
+                    margin: 0 1 1 1;
+                }
+                """
+                
+                def __init__(self, app_ref, project_path: str):
+                    super().__init__()
+                    self.app_ref = app_ref
+                    self.project_path = project_path
+                
+                def compose(self) -> ComposeResult:
+                    from textual.widgets import Label
+                    yield Label(f"📊 Analyze Project: {self.project_path}")
+                    yield Input(
+                        value="detailed",
+                        id="depth-input",
+                        placeholder="overview|detailed|deep"
+                    )
+                    yield Button("Analyze", id="btn-analyze", variant="primary")
+                    yield Button("Cancel", id="btn-cancel")
+                
+                def on_button_pressed(self, event) -> None:
+                    """Handle button press."""
+                    if event.button.id == "btn-analyze":
+                        depth = self.query_one("#depth-input", Input).value or "detailed"
+                        self._start_analysis(depth)
+                        self.app.exit_dialog(self)
+                    elif event.button.id == "btn-cancel":
+                        self.app.exit_dialog(self)
+                
+                def _start_analysis(self, depth: str) -> None:
+                    """Start project understanding analysis."""
+                    self.app_ref._run_project_understanding(self.project_path, depth)
+            
+            # Show dialog
+            dialog = UnderstandProjectDialog(self, project_path)
+            self.push_screen(dialog)
+            
+        except Exception as e:
+            logger.error(f"Error in understand_project action: {e}")
+            self.notify(f"❌ Error: {e}", severity="error", timeout=2)
+
+    @work(exclusive=True)
+    async def _run_project_understanding(self, project_path: str, depth: str) -> None:
+        """Run project understanding in background worker."""
+        try:
+            from kicli_code_assist.ui.http_client import get_backend_client
+            from kicli_code_assist.ui.panels.project_understanding_panel import ProjectUnderstandingPanel
+            
+            # Show loading state
+            try:
+                panel = self.query_one(ProjectUnderstandingPanel)
+                panel.set_loading(True)
+            except Exception:
+                pass  # Panel might not exist yet
+            
+            # Call backend
+            client = get_backend_client()
+            self.notify("⏳ Analyzing project... (this may take a moment)", timeout=3)
+            
+            result = client.understand_project(project_path, depth)
+            
+            if result.get("success"):
+                # Display results
+                try:
+                    panel = self.query_one(ProjectUnderstandingPanel)
+                    panel.set_understanding_data(result)
+                    self.notify(f"✅ Analysis complete: {result.get('project_name')}", timeout=2)
+                except Exception as e:
+                    logger.error(f"Error displaying results: {e}")
+                    self.notify("✅ Analysis complete (view in Output panel)", timeout=2)
+            else:
+                error = result.get("error", "Unknown error")
+                self.notify(f"❌ Analysis failed: {error}", severity="error", timeout=2)
+                
+        except Exception as e:
+            logger.error(f"Project understanding error: {e}")
             self.notify(f"❌ Error: {e}", severity="error", timeout=2)
 
 
