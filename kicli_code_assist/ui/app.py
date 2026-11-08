@@ -515,15 +515,25 @@ class CodeAssistantApp(Static):
     def action_new_file(self) -> None:
         """Create new file in current directory."""
         try:
+            from kicli_code_assist.logging_integration import get_logger
+            logger = get_logger()
+            logger.info("🔍 action_new_file called")
+            
             file_browser = self.query_one(SelectableFileList)
+            logger.info(f"✅ Found file_browser: {file_browser}")
+            logger.info(f"   current_dir: {file_browser.current_dir}")
+            
             self.show_create_file_dialog(file_browser.current_dir)
+            logger.info("✅ Dialog shown")
+            
         except Exception as e:
             import traceback
-            error_msg = f"Error creating file: {str(e)}\n{traceback.format_exc()}"
+            error_msg = f"Error in action_new_file: {str(e)}\n{traceback.format_exc()}"
             from kicli_code_assist.logging_integration import get_logger
             logger = get_logger()
             logger.error(error_msg)
-            self.notify(f"❌ {str(e)}", severity="error", timeout=10)
+            logger.error(f"Full traceback:\n{error_msg}")
+            self.notify(f"❌ {str(e)[:80]}", severity="error", timeout=10)
     
     def action_app_quit(self) -> None:
         """Quit the application."""
