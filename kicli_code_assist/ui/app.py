@@ -248,6 +248,12 @@ class CodeAssistantApp(Static):
                         self.background_debug_display = SelectableRichLog(highlight=False, markup=True)
                         yield self.background_debug_display
                     
+                    # Project Understanding tab
+                    with TabPane("📊 Project", id="tab_project_understanding"):
+                        from kicli_code_assist.ui.panels.project_understanding_panel import ProjectUnderstandingPanel
+                        self.project_understanding_panel = ProjectUnderstandingPanel()
+                        yield self.project_understanding_panel
+                    
                     # Terminal tab
                     with TabPane("🖥️  Terminal", id="tab_terminal"):
                         self.terminal_panel = TerminalPanel(id="terminal_panel")
