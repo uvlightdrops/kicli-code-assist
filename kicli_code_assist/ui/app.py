@@ -18,7 +18,6 @@ from kicli_code_assist.ui.shell_executor_integration import ShellExecutorIntegra
 from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
 from kicli_code_assist.ui.terminal_panel import TerminalPanel
-from kicli_code_assist.ui.widgets.shell_input import ShellPanel
 from kicli_code_assist.ui.edit_tab import EditTab
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 from kicli_code_assist.ui.panels.file_browser import SelectableFileList
@@ -88,7 +87,7 @@ class CodeAssistantApp(Static):
         self.chat_display = None
         self.debug_chat_display = None  # Debug chat display (direct OpenAI)
         self.terminal_panel = None  # Terminal output panel
-        self.shell_panel = None  # Shell input panel
+        self.shell_panel = None  # Shell input panel (not yet implemented)
         self.input_field = None
         self.status_bar = None
         self.selected_file = None
@@ -259,10 +258,9 @@ class CodeAssistantApp(Static):
                         self.terminal_panel = TerminalPanel(id="terminal_panel")
                         yield self.terminal_panel
                     
-                    # Shell tab (Ctrl+X)
+                    # Shell tab (Ctrl+X) - placeholder, not yet implemented
                     with TabPane("⌨️  Shell", id="tab_shell"):
-                        self.shell_panel = ShellPanel(id="shell_panel")
-                        yield self.shell_panel
+                        yield Static("Shell panel not yet implemented", id="shell_panel")
         
         # Input area with Send button
         self.input_title = Static("⌨️  Input", classes="input_title", id="input_title")
