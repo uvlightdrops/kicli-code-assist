@@ -3,7 +3,7 @@
 import os
 import asyncio
 from pathlib import Path
-from textual.app import ComposeResult, App
+from textual.app import ComposeResult
 from textual.containers import Vertical, Horizontal
 from textual.widgets import Static, TabbedContent, TabPane, Button
 from textual.binding import Binding
@@ -33,7 +33,7 @@ from kicli_code_assist.ai_workflow import AIWorkflowManager
 from kicli_code_assist.llm_integration import get_async_integration
 
 
-class CodeAssistantApp(App):
+class CodeAssistantApp(Static):
     """Code assistant with file browser and chat."""
     
     CSS_PATH = "styles/textual_app.tcss"
@@ -518,7 +518,12 @@ class CodeAssistantApp(App):
             file_browser = self.query_one(SelectableFileList)
             self.show_create_file_dialog(file_browser.current_dir)
         except Exception as e:
-            self.app.notify(f"❌ Error: {e}", severity="error", timeout=2)
+            import traceback
+            error_msg = f"Error creating file: {str(e)}\n{traceback.format_exc()}"
+            from kicli_code_assist.logging_integration import get_logger
+            logger = get_logger()
+            logger.error(error_msg)
+            self.notify(f"❌ {str(e)}", severity="error", timeout=10)
     
     def action_app_quit(self) -> None:
         """Quit the application."""
@@ -912,110 +917,9 @@ File: {suggestion.file_path}[/dim]
         Args:
             current_dir: Directory where to create file
         """
-        from textual.containers import Vertical, Horizontal
-        from textual.widgets import Input, Button, Label
-        from textual.app import Screen
+        from kicli_code_assist.ui.modals.create_file_modal import CreateFileModal
         
-        class CreateFileDialog(Screen):
-            """Dialog for creating new file."""
-            
-            DEFAULT_CSS = """
-            CreateFileDialog {
-                align: center middle;
-            }
-            
-            CreateFileDialog > Vertical {
-                width: 60;
-                height: 11;
-                border: solid $primary;
-                background: $surface;
-            }
-            
-            CreateFileDialog Label {
-                margin: 1 0;
-            }
-            
-            CreateFileDialog Input {
-                margin: 0 1 1 1;
-            }
-            
-            CreateFileDialog Horizontal {
-                height: 1;
-                margin: 0 1 1 1;
-            }
-            
-            CreateFileDialog Button {
-                margin-right: 1;
-            }
-            """
-            
-            def __init__(self, app_ref, current_dir: Path):
-                super().__init__()
-                self.app_ref = app_ref
-                self.current_dir = current_dir
-            
-            def compose(self) -> ComposeResult:
-                with Vertical():
-                    yield Label("📄 Create New File")
-                    yield Input(id="filename-input", placeholder="Enter relative path (e.g., src/main.py)")
-                    with Horizontal():
-                        yield Button("Create", id="btn-create", variant="primary")
-                        yield Button("Cancel", id="btn-cancel")
-            
-            def on_mount(self):
-                self.query_one("#filename-input", Input).focus()
-            
-            def on_button_pressed(self, event: Button.Pressed):
-                if event.button.id == "btn-create":
-                    filename = self.query_one("#filename-input", Input).value.strip()
-                    if filename:
-                        self._create_file(filename)
-                    else:
-                        self.app.notify("❌ Please enter a filename", severity="error", timeout=2)
-                elif event.button.id == "btn-cancel":
-                    self.app.pop_screen()
-            
-            def _create_file(self, filename: str):
-                """Create file via backend."""
-                try:
-                    from kicli_code_assist.ui.http_client import get_backend_client
-                    
-                    # Ensure no absolute paths
-                    rel_path = filename.lstrip("/")
-                    
-                    # Get project root
-                    project_root = str(self.app_ref.get_allowed_base_path())
-                    
-                    # Call backend to create file
-                    client = get_backend_client()
-                    result = client.create_file(
-                        path=rel_path,
-                        content="",
-                        project_root=project_root
-                    )
-                    
-                    if result.get("success"):
-                        # Refresh file browser
-                        file_browser = self.app_ref.query_one(SelectableFileList)
-                        file_browser.load_directory()
-                        
-                        # Open in editor
-                        full_path = self.current_dir / rel_path
-                        editor = self.app_ref.left_panel.create_editor_tab(str(full_path), "")
-                        
-                        self.app.notify(f"✅ File created: {rel_path}", timeout=2)
-                        self.app.pop_screen()
-                    else:
-                        error = result.get("error", "Unknown error")
-                        if "already exists" in error.lower():
-                            self.app.notify(f"❌ File already exists", severity="error", timeout=2)
-                        else:
-                            self.app.notify(f"❌ Error: {error}", severity="error", timeout=2)
-                
-                except Exception as e:
-                    self.app.notify(f"❌ Error creating file: {e}", severity="error", timeout=2)
-        
-        dialog = CreateFileDialog(self, current_dir)
+        dialog = CreateFileModal(self, current_dir)
         self.app.push_screen(dialog)
 
     def action_save_current_file(self):
