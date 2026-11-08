@@ -3,7 +3,7 @@
 import os
 import asyncio
 from pathlib import Path
-from textual.app import ComposeResult
+from textual.app import ComposeResult, App
 from textual.containers import Vertical, Horizontal
 from textual.widgets import Static, TabbedContent, TabPane, Button
 from textual.binding import Binding
@@ -33,7 +33,7 @@ from kicli_code_assist.ai_workflow import AIWorkflowManager
 from kicli_code_assist.llm_integration import get_async_integration
 
 
-class CodeAssistantApp(Static):
+class CodeAssistantApp(App):
     """Code assistant with file browser and chat."""
     
     CSS_PATH = "styles/textual_app.tcss"
