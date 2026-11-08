@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: Backend Architecture / Autonomous Agent Layer
 purpose: Index and overview for Layer 3 autonomous agent orchestration documentation
 created: 2026-11-06T10:25:00+01:00
-updated: 2026-11-07T12:38:00+01:00
-update_reason: Upgraded to semantic schema
+updated: 2026-11-08T00:00:00+01:00
+update_reason: Added Project Understanding System (Phase 5.5.3)
 status: stable
 
 semantic_blocks:
@@ -40,6 +40,10 @@ relations:
   - target: TRANSPARENCY_INTEGRATION_ARCHITECTURE
     type: part-of
     reason: "Phase 5.5.2 implementation"
+
+  - target: PROJECT_UNDERSTANDING_SYSTEM
+    type: part-of
+    reason: "Phase 5.5.3 implementation - autonomous project analysis"
 ---
 
 # Layer 3 - Autonomous Agent Layer
@@ -55,12 +59,14 @@ Multi-agent reasoning with self-correction, transparency, and adaptive decision-
 - WebSocket streaming (real-time execution visibility)
 - Adaptive decision-making (learn from outcomes)
 - Agent capability discovery
+- **Project Understanding** (autonomous analysis of external projects)
 
 ## Who Uses This?
 
 - **Advanced automation scenarios** where user can't specify exact workflow upfront
 - **Self-improving systems** that adapt based on outcomes
 - **Observable AI** scenarios where reasoning traces are valuable for debugging/audit
+- **Project Analysis** for understanding external codebases autonomously
 - Built on top of Layer 2 (doesn't call Layer 1 directly)
 
 ## Documentation
@@ -70,11 +76,13 @@ Multi-agent reasoning with self-correction, transparency, and adaptive decision-
 | AGENT_COORDINATION_ARCHITECTURE.md | 6-stage orchestration & agent selection | ✅ Complete |
 | MULTIFILE_REFACTORING_ARCHITECTURE.md | Phase 5.5.1 implementation (multi-file changes) | ✅ Complete |
 | TRANSPARENCY_INTEGRATION_ARCHITECTURE.md | Phase 5.5.2 transparency modules (traces, streaming) | ✅ Complete |
+| **PROJECT_UNDERSTANDING_SYSTEM.md** | **Phase 5.5.3: 5-stage project analysis pipeline** | **✅ Complete** |
 | *TBD* | Self-Correction & Feedback Loop Strategy | ❌ Missing |
 | *TBD* | Agent Capability Discovery | ❌ Missing |
 
 ## Key Features (Phase 5.5.x Complete)
 
+### Phase 5.5.1-5.5.2 (Transparency & Refactoring)
 - **ReasoningTracer** (970 LOC): Capture intermediate reasoning steps
 - **LLMCallTracker** (970 LOC): Track all LLM API calls with timing
 - **PerformanceMetrics** (950 LOC): System-wide performance analysis
@@ -82,11 +90,27 @@ Multi-agent reasoning with self-correction, transparency, and adaptive decision-
 - **REST API**: 9 historical query endpoints `/api/traces/...`
 - **Test Coverage**: 93/93 tests passing
 
+### Phase 5.5.3 (Project Understanding - NEW)
+- **ProjectStructureAnalyzer** (289 LOC): AST-based code analysis
+- **ProjectUnderstandingPipeline** (367 LOC): 5-stage orchestration
+- **Backend Endpoint**: `POST /api/projects/understand` (98 LOC)
+- **TUI Integration**: Ctrl+U analysis trigger + ProjectUnderstandingPanel (460 LOC)
+- **12-Aspect Analysis**: Purpose, architecture, patterns, complexity, recommendations
+- **Supports**: Any Python project (18+ modules tested on ypipe)
+
 ## Implementation
 
-See:
+### Phase 5.5.1-5.5.2
 - `kicli_code_assist/agent/meta_coordinator.py` (orchestration)
 - `kicli_code_assist/agent/reasoning_tracer.py` (transparency module)
 - `kicli_code_assist/agent/llm_call_tracker.py` (LLM tracking)
 - `kicli_code_assist/agent/performance_metrics.py` (metrics)
 - `kicli_code_assist/web/server.py` (WebSocket & REST endpoints)
+
+### Phase 5.5.3 (NEW)
+- `kicli_code_assist/agent/project_structure_analyzer.py` (AST analysis)
+- `kicli_code_assist/agent/project_understanding.py` (pipeline orchestration)
+- `kicli_code_assist/web/server_routes.py` (backend endpoint)
+- `kicli_code_assist/ui/panels/project_understanding_panel.py` (TUI widget)
+- `kicli_code_assist/ui/tui_client.py` (Ctrl+U action)
+- `kicli_code_assist/ui/http_client.py` (API client method)
