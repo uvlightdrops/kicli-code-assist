@@ -1203,6 +1203,104 @@ def register_project_routes(app: Flask):
                 "error": str(e)
             }), 500
     
+    @app.route("/api/projects/understand", methods=["POST"])
+    def understand_project():
+        """
+        Comprehensive project understanding analysis.
+        
+        Runs 5-stage pipeline:
+        1. Discovery: Scans documentation
+        2. Code Structure: AST analysis
+        3. Aggregation: Combines findings
+        4. LLM Analysis: Prepares synthesis
+        5. Synthesis: Generates understanding report
+        
+        Request:
+        {
+            "project_path": "/path/to/project",
+            "depth": "overview|detailed|deep"  (default: detailed)
+        }
+        
+        Response:
+        {
+            "success": true,
+            "project_name": "ypipe",
+            "synthesis_report": "# ypipe - Comprehensive Understanding...",
+            "aggregated_context": "Full analysis context...",
+            "llm_insights": "LLM analysis prompt...",
+            "metrics": {
+                "total_modules": 18,
+                "total_loc": 1160,
+                "patterns": ["Factory Pattern", ...]
+            }
+        }
+        """
+        try:
+            from kicli_code_assist.agent.project_understanding import (
+                create_understanding_pipeline,
+                AnalysisDepth,
+            )
+            
+            data = request.json or {}
+            project_path = data.get("project_path", "").strip()
+            depth_str = data.get("depth", "detailed").lower()
+            
+            if not project_path:
+                return jsonify({"success": False, "error": "project_path required"}), 400
+            
+            # Validate path
+            project_path = Path(project_path)
+            if not project_path.exists():
+                return jsonify({"success": False, "error": f"Project not found: {project_path}"}), 404
+            
+            if not project_path.is_dir():
+                return jsonify({"success": False, "error": "project_path must be a directory"}), 400
+            
+            # Parse depth
+            try:
+                depth = AnalysisDepth[depth_str.upper()]
+            except (KeyError, ValueError):
+                depth = AnalysisDepth.DETAILED
+            
+            logger.info(f"Starting project understanding for {project_path.name} (depth: {depth.value})")
+            
+            # Run pipeline
+            pipeline = create_understanding_pipeline(str(project_path), depth)
+            understanding = pipeline.run()
+            
+            # Build response
+            response = {
+                "success": True,
+                "project_name": understanding.project_name,
+                "project_root": understanding.project_root,
+                "depth": understanding.depth,
+                "synthesis_report": understanding.synthesis_report or "",
+                "aggregated_context": understanding.aggregated_context or "",
+                "llm_insights": understanding.llm_insights or "",
+                "metrics": {},
+            }
+            
+            # Add metrics
+            if understanding.structure:
+                response["metrics"] = {
+                    "total_modules": len(understanding.structure.modules),
+                    "total_loc": understanding.structure.total_loc,
+                    "external_dependencies": len(understanding.structure.external_dependencies),
+                    "key_abstractions": len(understanding.structure.key_abstractions),
+                    "patterns": understanding.structure.architectural_patterns,
+                    "entry_points": understanding.structure.entry_points,
+                }
+            
+            logger.info(f"Project understanding complete for {project_path.name}")
+            return jsonify(response), 200
+            
+        except Exception as e:
+            logger.error(f"Project understanding error: {e}\n{traceback.format_exc()}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
+    
     @app.route("/api/projects/create", methods=["POST"])
     def create_project():
         """Create a new project."""
