@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: frontend-tui
 purpose: Central reference for frontend-tui documentation
 created: 2026-11-07T18:07:00+01:00
-updated: 2026-11-08 03
-update_reason: Added 3 comprehensive docs - Modal flows, Stability analysis, Search design
+updated: 2026-11-08 09
+update_reason: Added TUI_WORK_SESSIONS.md for central tracking of interactive debugging sessions
 status: active
 relations:
   - target: ../README.md
@@ -13,6 +13,9 @@ relations:
   - target: ../backend/layer-3-autonomous-agent/PROJECT_UNDERSTANDING_SYSTEM.md
     type: reference
     reason: Technical backend implementation
+  - target: TUI_WORK_SESSIONS.md
+    type: reference
+    reason: Central log for all interactive TUI testing and debugging sessions
 semantic_blocks:
   - documentation-index
   - navigation
@@ -26,6 +29,7 @@ semantic_blocks:
 
 | File | Status | Purpose |
 |------|--------|---------|
+| **TUI_WORK_SESSIONS.md** | **active** | **Central log of all interactive TUI testing sessions & results** |
 | **MODAL_DIALOG_FLOWS.md** | **active** | **All modal/dialog workflows with state diagrams and data flow** |
 | **STABILITY_ANALYSIS.md** | **active** | **Crash patterns, audit checklist, fixes, debugging techniques** |
 | **SEARCH_FILES_DESIGN.md** | **active** | **3 design options (File/Content/Analysis search) with recommendation** |
@@ -41,6 +45,7 @@ semantic_blocks:
 
 ## Navigation [navigation]
 
+- See: [TUI_WORK_SESSIONS.md](./TUI_WORK_SESSIONS.md) for all interactive testing sessions and discovered issues
 - See: [MODAL_DIALOG_FLOWS.md](./MODAL_DIALOG_FLOWS.md) for all modal workflows and state diagrams
 - See: [STABILITY_ANALYSIS.md](./STABILITY_ANALYSIS.md) for crash patterns and stability audit
 - See: [SEARCH_FILES_DESIGN.md](./SEARCH_FILES_DESIGN.md) for search feature design options
