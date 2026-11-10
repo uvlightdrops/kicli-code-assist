@@ -2,8 +2,8 @@
 project: kicli-code-assist
 scope: deployment
 created: 2026-11-02 14
-updated: 2026-11-02 14
-update_reason: Created archive for superseded deployment docs
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 status: current
 agent_project: kicli-code-assist
 ---
@@ -44,5 +44,5 @@ Rather than delete, we archive here to:
 ## Related Documentation
 
 - **Current Deployment Docs**: `/deployment/README.md`
-- **Canonical Standards**: `/home/flow/dev_doc/DEPLOYMENT_STANDARDS.md` (cross-project)
+- **Canonical Standards**: `/home/flow/dev_doc/doc/DEPLOYMENT_STANDARDS.md` (cross-project)
 - **Active Deployment Docs**: Current docs in `/deployment/`

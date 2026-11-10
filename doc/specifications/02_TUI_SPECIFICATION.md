@@ -4,12 +4,12 @@ scope: specification
 project: kicli-code-assist
 status: archived
 created: 2026-10-17
-updated: 2026-11-05T19:50+01:00
-update_reason: Archived in favor of agent-backend interface approach (see TUI_STRATEGY_CLARIFICATION.md)
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 superseded_by: doc/guides/TUI_CLIENT_IMPLEMENTATION_PLAN.md
 agent_project: kicli-code-assist
 cross_references:
-  - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
+  - /home/flow/dev_doc/doc/TUI_STRATEGY_CLARIFICATION.md
 semantic_blocks:
   - id: layout
     title: Layout
@@ -36,7 +36,7 @@ semantic_blocks:
 
 # TUI Specification - User Interface & Interaction
 
-**STATUS: ARCHIVED** — This represents an earlier chat-based terminal design (October 2026). The project now uses an agent-backend interface approach. See [TUI_STRATEGY_CLARIFICATION.md](/home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md) for decision context.
+**STATUS: ARCHIVED** — This represents an earlier chat-based terminal design (October 2026). The project now uses an agent-backend interface approach. See [TUI_STRATEGY_CLARIFICATION.md](../../../../dev_doc/doc/TUI_STRATEGY_CLARIFICATION.md) for decision context.
 
 ## Layout [layout]
 

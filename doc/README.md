@@ -40,8 +40,8 @@ Complete documentation for the KI Code Assistant project, organized by topic and
 
 ### 💾 Server Management & Orchestration
 - **[Server & Orchestration Guide](server/README.md)** - Orchestration approach, links to stackctl design
-- **[Cross-Project Pattern](../../../dev_doc/SERVICE_ORCHESTRATION_PATTERN.md)** - stackctl + Layer 1 design
-- **[Historical Design](../../../dev_doc/server-mngm/)** - Oct 28 design (reference only)
+- **[Cross-Project Pattern](../../../dev_doc/doc/SERVICE_ORCHESTRATION_PATTERN.md)** - stackctl + Layer 1 design
+- **[Historical Design](../../../dev_doc/doc/server-mngm/)** - Oct 28 design (reference only)
 
 ### 📈 Development Phases
 - **[Phase Documentation](phases/)** - Phase-specific documentation and reports
@@ -158,8 +158,8 @@ doc/
 - README.md
 
 ### Server Management
-Moved to [shared server management documentation](../../../dev_doc/server-mngm/SERVER_MANAGEMENT_README.md)
-in `~/dev_doc/server-mngm/`.
+Moved to [shared server management documentation](../../../dev_doc/doc/server-mngm/SERVER_MANAGEMENT_README.md)
+in `~/dev_doc/doc/server-mngm/`.
 
 ### Phases
 - PHASE_1_HYBRID_IMPLEMENTATION.md

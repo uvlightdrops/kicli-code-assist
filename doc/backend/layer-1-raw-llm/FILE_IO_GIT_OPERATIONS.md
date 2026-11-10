@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: Backend Architecture / Layer 1 / File System & VCS
 purpose: Layer 1 primitives for file operations, directory traversal, and git integration
 created: 2026-11-07T13:32:00+01:00
-updated: 2026-11-07T13:32:00+01:00
-update_reason: Initial placeholder with semantic schema
+updated: "2026-11-10 20"
+update_reason: "Update shared-documentation paths after relocation"
 status: draft
 
 semantic_blocks:
@@ -34,7 +34,7 @@ relations:
   - target: ../layer-2-workflow-orchestration/PHASE_I2_PROJECTANALYZER_COMPLETE
     type: depends-on
     reason: "Project analysis uses file I/O to scan repos"
-  - target: ../../../dev_doc/security_guidelines.md
+  - target: ../../../../../dev_doc/doc/security_guidelines.md
     type: references
     reason: "Security constraints for file system access"
 ---

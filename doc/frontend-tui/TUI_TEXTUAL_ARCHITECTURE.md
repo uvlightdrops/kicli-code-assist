@@ -4,11 +4,11 @@ scope: frontend-tui
 project: kicli-code-assist
 status: in_progress
 created: 2026-11-05T21:29:23+01:00
-updated: 2026-11-07T20:57:00+01:00
-update_reason: Fixed semantic_blocks to simple list format
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 agent_project: kicli-code-assist
 cross_references:
-  - /home/flow/dev_doc/TUI_STRATEGY_CLARIFICATION.md
+  - /home/flow/dev_doc/doc/TUI_STRATEGY_CLARIFICATION.md
   - doc/features/tui/I1_IMPLEMENTATION_PLAN.md
 semantic_blocks:
   - widget-hierarchy

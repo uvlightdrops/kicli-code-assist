@@ -3,12 +3,12 @@ project: kicli-code-assist
 scope: architecture
 purpose: Document project structure and responsibility boundaries across ki-ecosystem
 created: 2026-11-02 13
-updated: 2026-11-02 13
-update_reason: Added canonical YAML header per DOCUMENTATION_MAINTENANCE_STANDARDS
+updated: "2026-11-10 20"
+update_reason: "Update shared-documentation paths after relocation"
 status: current
 agent_project: kicli-code-assist
 cross_references: 
-  - /home/flow/dev_doc/DOCUMENTATION_MAINTENANCE_STANDARDS.md
+  - /home/flow/dev_doc/doc/documentation-guidelines/DOCUMENTATION_MAINTENANCE_STANDARDS.md
 ---
 
 # KI Ecosystem - Project Structure

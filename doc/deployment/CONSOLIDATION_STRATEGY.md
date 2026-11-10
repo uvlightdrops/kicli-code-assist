@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: deployment
 purpose: Analysis of duplicated documentation across repos and consolidation planning
 created: 2026-11-02T04:12
-updated: 2026-11-07T19
-update_reason: Change scope from documentation to deployment, standardize timestamps
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 status: archived
 semantic_blocks: [problem-statement, current-state, duplication-analysis, consolidation-plan, implementation-phases]
 ---
@@ -135,7 +135,7 @@ update_reason: "Why was it updated?"
 status: "active" | "deprecated" | "proposal" | "archived"
 cross_references:
   - "stackctl/doc/README.md (Project-local usage)"
-  - "dev_doc/DEPLOYMENT_STANDARDS.md (Cross-project patterns)"
+  - "dev_doc/doc/DEPLOYMENT_STANDARDS.md (Cross-project patterns)"
   - "ki_core/docs/config.md (Config merge semantics)"
 ---
 ```
@@ -146,7 +146,7 @@ cross_references:
 
 ### Phase 1: Create Canonical Sources (Priority 1)
 
-**dev_doc/DEPLOYMENT_STANDARDS.md** (NEW)
+**dev_doc/doc/DEPLOYMENT_STANDARDS.md** (NEW)
 - Cross-project deployment architecture
 - Stage selection criteria (development, staging, production)
 - Config loader pattern (stackctl + ki_core)
@@ -229,7 +229,7 @@ See stackctl/doc/README.md for how to use stackctl in your project.
 title: "Deployment Setup for kicli-code-assist"
 cross_references:
   - "stackctl/doc/README.md: Project-local usage pattern"
-  - "dev_doc/DEPLOYMENT_STANDARDS.md: Cross-project context"
+  - "dev_doc/doc/DEPLOYMENT_STANDARDS.md: Cross-project context"
 ---
 
 # Deployment Setup
@@ -314,7 +314,7 @@ kicli-code-assist/doc/deployment/archive/
 - [ ] Document duplication matrix
 
 ### Session 2: Create Canonical Sources
-- [ ] Create dev_doc/DEPLOYMENT_STANDARDS.md
+- [ ] Create dev_doc/doc/DEPLOYMENT_STANDARDS.md
 - [ ] Enhance stackctl/doc/README.md
 - [ ] Add cross-references
 
@@ -333,7 +333,7 @@ kicli-code-assist/doc/deployment/archive/
 ## Questions for User
 
 1. **Canonical Location:** Should deployment standards live in:
-   - `dev_doc/DEPLOYMENT_STANDARDS.md` (recommended)
+   - `dev_doc/doc/DEPLOYMENT_STANDARDS.md` (recommended)
    - `ki-core/docs/DEPLOYMENT.md` (alternative)
    - Both with cross-reference? ✅
 

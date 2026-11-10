@@ -2,12 +2,12 @@
 project: kicli-code-assist
 scope: architecture
 created: 2026-11-02 13
-updated: 2026-11-02 13
-update_reason: Created folder README with guidelines
+updated: "2026-11-10 20"
+update_reason: "Update shared-documentation paths after relocation"
 status: current
 agent_project: kicli-code-assist
 cross_references:
-  - /home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md
+  - /home/flow/dev_doc/doc/documentation-guidelines/DOCUMENTATION_ORGANIZATION_GUIDE.md
 ---
 
 # Architecture Documentation
@@ -131,4 +131,4 @@ cross_references:
 - **Phase Summaries**: `/phases/README.md` (what was built in each phase)
 - **Feature Guides**: `/features/` (how to use features)
 - **Setup Guides**: `/guides/` (how to set up/configure the project)
-- **Standards**: `/home/flow/dev_doc/DOCUMENTATION_ORGANIZATION_GUIDE.md` (ecosystem-wide guide)
+- **Standards**: `/home/flow/dev_doc/doc/documentation-guidelines/DOCUMENTATION_ORGANIZATION_GUIDE.md` (ecosystem-wide guide)

@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: deployment
 purpose: Phase 1 completion report for deployment documentation consolidation initiative
 created: 2026-11-02T04:30
-updated: 2026-11-07T19
-update_reason: Change scope from documentation to deployment, standardize timestamps
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 status: archived
 semantic_blocks: [session-overview, phase-1-completion, documentation-updates, consolidation-results, next-phases]
 ---
@@ -49,7 +49,7 @@ semantic_blocks: [session-overview, phase-1-completion, documentation-updates, c
   - Storage locations for final state
   - Implementation sequence
 
-- ✅ `dev_doc/DEPLOYMENT_STANDARDS.md` (12.7KB)
+- ✅ `dev_doc/doc/DEPLOYMENT_STANDARDS.md` (12.7KB)
   - Canonical source for cross-project deployment patterns
   - 3-layer architecture model
   - Standard stages definition (development, staging, production, minimal)
@@ -106,7 +106,7 @@ cross_references:
 ✅ CANONICAL SOURCES (Single Source of Truth)
 ├── stackctl/doc/README.md
 │   └── Project-local stackctl usage pattern
-└── dev_doc/DEPLOYMENT_STANDARDS.md
+└── dev_doc/doc/DEPLOYMENT_STANDARDS.md
     └── Cross-project deployment architecture
 
 🟡 PROJECT-SPECIFIC (With Cross-References)
@@ -131,7 +131,7 @@ cross_references:
 
 ## Phase 2 Preview: Canonical Sources
 
-### dev_doc/DEPLOYMENT_STANDARDS.md (NEW - Canonical)
+### dev_doc/doc/DEPLOYMENT_STANDARDS.md (NEW - Canonical)
 
 **Content Added**:
 - 3-layer deployment architecture model
@@ -159,7 +159,7 @@ cross_references:
 
 **To Add Next Session**:
 - Quick-start examples for each project
-- Link to dev_doc/DEPLOYMENT_STANDARDS.md for context
+- Link to dev_doc/doc/DEPLOYMENT_STANDARDS.md for context
 
 ---
 
@@ -199,7 +199,7 @@ cross_references:
 | Location | LOC | Change | Purpose |
 |----------|-----|--------|---------|
 | kicli-code-assist/doc/deployment/ | ~600 | +40 (headers) | Project-specific |
-| dev_doc/DEPLOYMENT_STANDARDS.md | ~350 | NEW | Canonical |
+| dev_doc/doc/DEPLOYMENT_STANDARDS.md | ~350 | NEW | Canonical |
 | stackctl/doc/ | ~100 | No change | Canonical |
 | **Total** | ~1,050 | ~+390 | Consolidated |
 
@@ -241,7 +241,7 @@ grep -l "cross_references:" kicli-code-assist/doc/deployment/*.md | wc -l
 
 ### Session 2: Create Canonical Sources
 - [ ] Enhance stackctl/doc/README.md with project examples
-- [ ] Verify dev_doc/DEPLOYMENT_STANDARDS.md completeness
+- [ ] Verify dev_doc/doc/DEPLOYMENT_STANDARDS.md completeness
 - [ ] Test config loading from standards
 - [ ] Add quick-start for each stage type
 
@@ -262,7 +262,7 @@ grep -l "cross_references:" kicli-code-assist/doc/deployment/*.md | wc -l
 ## Key Decisions Made
 
 1. **Canonical Sources Location**
-   - ✅ Cross-project patterns → `dev_doc/DEPLOYMENT_STANDARDS.md`
+   - ✅ Cross-project patterns → `dev_doc/doc/DEPLOYMENT_STANDARDS.md`
    - ✅ StackCtl usage → `stackctl/doc/README.md` (already canonical)
    - ✅ Project-specific → Keep in each project with cross-refs
 

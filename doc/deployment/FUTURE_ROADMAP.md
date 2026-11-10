@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: deployment
 purpose: Roadmap and planning for development stack stabilization, deployment automation, and developer experience improvements
 created: 2026-11-02T04:17
-updated: 2026-11-07T19
-update_reason: Add missing title, standardize scope and timestamps
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 status: active
 semantic_blocks: [current-state, phase-1-immediate-fixes, phase-2-stabilization, phase-3-automation, monitoring-dashboard]
 ---
@@ -259,7 +259,7 @@ From `doc/deployment/CONSOLIDATION_STRATEGY.md`:
   - Service port documentation (frontend in multiple places)
 
 - Create canonical versions in:
-  - `dev_doc/DEPLOYMENT_STANDARDS.md` (already created, needs expansion)
+  - `dev_doc/doc/DEPLOYMENT_STANDARDS.md` (already created, needs expansion)
   - Link from project-local docs
 
 ### 3.2 Add YAML Headers to All Remaining Docs
@@ -280,7 +280,7 @@ Missing headers in:
 - **Getting Started**: DEVELOPMENT_STARTUP_CHECKLIST.md
 - **Troubleshooting**: DEVELOPMENT_STACK_TROUBLESHOOTING.md
 - **Architecture**: STACKCTL_ARCHITECTURE.md, STACK_YAML_VARIANTS.md
-- **Configuration**: dev_doc/DEPLOYMENT_STANDARDS.md (canonical)
+- **Configuration**: dev_doc/doc/DEPLOYMENT_STANDARDS.md (canonical)
 - **Failed Approaches**: ANTI_PATTERNS_FAILED_APPROACHES.md
 - **Consolidation Plan**: CONSOLIDATION_STRATEGY.md
 

@@ -17,6 +17,7 @@ semantic_blocks:
   - id: future-enhancements
     title: Future Enhancements
 Created: 2026-10-28
+update_reason: "Relocate shared documentation into doc/ and update references"
 ---
 
 ## Overview: Clean Layer Separation [overview-clean-layer-separation]
@@ -445,6 +446,6 @@ kicli-assist server logs --service api --follow
 ---
 
 ## See Also
-- `/home/flow/dev_doc/MULTI_REPO_ORCHESTRATION_STUDY.md` - Architecture overview
+- `/home/flow/dev_doc/doc/MULTI_REPO_ORCHESTRATION_STUDY.md` - Architecture overview
 - `/home/flow/dev_flow/stackctl/README.md` - stackctl detailed docs
 - `/home/flow/dev_flow/kicli-code-assist/ki.yaml` - Current config example

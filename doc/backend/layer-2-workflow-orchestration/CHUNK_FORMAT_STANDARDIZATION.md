@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: Backend Architecture / Layer 2 / Response Format
 purpose: Specification of chunk structure for agent responses, standardized observation/issue/solution taxonomy
 created: 2026-11-07T13:32:00+01:00
-updated: 2026-11-07T13:32:00+01:00
-update_reason: Initial placeholder with semantic schema
+updated: "2026-11-10 20"
+update_reason: "Update shared-documentation paths after relocation"
 status: draft
 
 semantic_blocks:
@@ -34,7 +34,7 @@ relations:
   - target: ../frontend-web/DIFF_USER_GUIDE.md
     type: depends-on
     reason: "Frontend renders chunks with type-specific UI"
-  - target: ../../../dev_doc/AGENTIC_DOCUMENTATION_PATTERNS.md
+  - target: ../../../../../dev_doc/doc/documentation-guidelines/AGENTIC_DOCUMENTATION_PATTERNS.md
     type: references
     reason: "Similar concerns to structured block documentation"
 ---

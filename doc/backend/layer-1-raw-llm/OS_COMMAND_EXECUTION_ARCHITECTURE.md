@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: Backend Architecture / Layer 1 / System Integration
 purpose: Architecture and API for safe OS command execution with output capture and streaming
 created: 2026-11-07T13:32:00+01:00
-updated: 2026-11-07T13:32:00+01:00
-update_reason: Initial placeholder with semantic schema
+updated: "2026-11-10 20"
+update_reason: "Update shared-documentation paths after relocation"
 status: draft
 
 semantic_blocks:
@@ -34,7 +34,7 @@ relations:
   - target: ../layer-2-workflow-orchestration/AGENT_ROUTE_SPEC.md
     type: composed-of
     reason: "Enables workflow agents to run shell commands"
-  - target: ../../../dev_doc/security_guidelines.md
+  - target: ../../../../../dev_doc/doc/security_guidelines.md
     type: references
     reason: "Security constraints for OS execution"
 ---

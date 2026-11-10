@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: deployment
 purpose: Troubleshooting guide for development stack issues (stackctl, API, Vite frontend configuration)
 created: 2026-11-02T04:10
-updated: 2026-11-07T19
-update_reason: Add missing title, standardize scope and timestamps
+updated: "2026-11-10 20"
+update_reason: "Relocate shared documentation into doc/ and update references"
 status: active
 semantic_blocks: [core-problems, problem-1-env-vars, vite-solutions, quick-start, debugging-checklist]
 ---
@@ -291,7 +291,7 @@ tail -f /home/flow/dev_flow/kicli-code-assist/var/log/frontend.log
 ## Cross-References
 
 - **ki-ecosystem** deployment patterns: `ki-ecosystem/doc/DEPLOYMENT_*.md`
-- **Canonical deployment standards**: `dev_doc/DEPLOYMENT_STANDARDS.md`
+- **Canonical deployment standards**: `dev_doc/doc/DEPLOYMENT_STANDARDS.md`
 - **Consolidation strategy**: `doc/deployment/CONSOLIDATION_STRATEGY.md`
 - **stackctl architecture**: `stackctl/doc/README.md` + `stackctl/doc/ARCHITECTURE.md`
 
