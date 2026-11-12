@@ -5,8 +5,8 @@ agent_project: kicli-code-assist
 scope: Backend Architecture / Layer 3 Autonomous Agents
 purpose: Design Layer 3 agent orchestration pipeline with 6-stage coordination
 created: 2026-10-01T00:00:00+01:00
-updated: 2026-11-07T12:38:00+01:00
-update_reason: Upgraded to semantic schema
+updated: "2026-11-12 10"
+update_reason: Update and tag the shared AI-agent theory reference
 status: stable
 
 semantic_blocks:
@@ -18,6 +18,10 @@ semantic_blocks:
   - id: agent-selection
     type: architecture
     status: stable
+    version: 1.0
+  - id: references
+    type: reference
+    status: active
     version: 1.0
 
 relations:
@@ -428,10 +432,19 @@ Phase 5.4: ✅
 4. **Context Window**: How much code to include in LLM context?
    - **Proposal**: Use AST + file summaries to reduce tokens
 
-## References
+## References [references]
+
+```yaml block-meta
+updated: "2026-11-12 10"
+status: active
+relations:
+  - target: "../../../../../dev_doc/doc/ai-agents/AI_AGENT_INTELLIGENCE_ARCHITECTURE.md#agent-intelligence-levels"
+    type: reference
+    reason: Shared conceptual background for the Layer 3 agent architecture
+```
 
 - docs/REFACTORING_SERVER_MODULARIZATION.md - Server architecture
-- docs/ai_agent_intelligence_architecture.md - Theoretical foundations
+- [Shared agent-intelligence theory](../../../../../dev_doc/doc/ai-agents/AI_AGENT_INTELLIGENCE_ARCHITECTURE.md#agent-intelligence-levels)
 - Checkpoint 007 - Phase 1-4 server modularization
 - Checkpoint 005 - Phase 2 intelligent agent routing
 - Checkpoint 003 - Phase 3 implementation

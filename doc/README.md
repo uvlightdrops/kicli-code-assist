@@ -1,8 +1,28 @@
+---
+project: kicli-code-assist
+agent_project: ki-ecosystem
+scope: navigation
+purpose: Entry point to documentation organized by topic and intended use
+created: null
+first_tracked: "2026-10-28 13"
+updated: "2026-11-11 05"
+update_reason: Add semantic block identifiers and local metadata to the documentation entry point
+status: active
+---
+
 # KI Code Assistant Documentation
 
 Complete documentation for the KI Code Assistant project, organized by topic and purpose.
 
-## 📖 Quick Navigation
+<a id="-quick-navigation"></a>
+
+## Quick Navigation [quick-navigation]
+
+```yaml block-meta
+updated: "2026-11-11 05"
+status: active
+relations: []
+```
 
 ### 🚀 Getting Started
 - **[Installation Guide](guides/INSTALLATION.md)** - Setup and installation instructions
@@ -65,7 +85,15 @@ Complete documentation for the KI Code Assistant project, organized by topic and
 
 ---
 
-## 📂 Directory Structure
+<a id="-directory-structure"></a>
+
+## Directory Structure [directory-structure]
+
+```yaml block-meta
+updated: "2026-11-11 05"
+status: active
+relations: []
+```
 
 ```
 doc/
@@ -82,7 +110,15 @@ doc/
 
 ---
 
-## 🔍 Finding What You Need
+<a id="-finding-what-you-need"></a>
+
+## Finding What You Need [finding-documentation]
+
+```yaml block-meta
+updated: "2026-11-11 05"
+status: active
+relations: []
+```
 
 | I want to... | Start here |
 |---|---|
@@ -96,7 +132,15 @@ doc/
 
 ---
 
-## 📋 Document Index
+<a id="-document-index"></a>
+
+## Document Index [document-index]
+
+```yaml block-meta
+updated: "2026-11-11 05"
+status: active
+relations: []
+```
 
 ### Guides
 - CONFIG_VALIDATION_GUIDE.md
@@ -190,7 +234,15 @@ in `~/dev_doc/doc/server-mngm/`.
 
 ---
 
-## 🔗 Related Resources
+<a id="-related-resources"></a>
+
+## Related Resources [related-resources]
+
+```yaml block-meta
+updated: "2026-11-11 05"
+status: active
+relations: []
+```
 
 - **[KI Core Documentation](../../ki-core/doc/)** - Core framework docs
 - **[YAML Configuration Wizard](../../yaml_cfg_wizard/doc/)** - Config management tool

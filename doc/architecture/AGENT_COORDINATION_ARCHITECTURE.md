@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: architecture
 purpose: Hierarchical agent coordination system design with clear separation of concerns across layers
 created: 2026-10-28T13
-updated: 2026-11-07T19
-update_reason: Add missing YAML header with semantic blocks
+updated: "2026-11-12 10"
+update_reason: Update the shared AI-agent theory reference
 status: active
 semantic_blocks: [overview, component-inventory, interaction-flow, design-principles, implementation-order, data-structures, integration-existing, success-criteria, open-questions, references]
 ---
@@ -410,8 +410,17 @@ Phase 5.4: ✅
 
 ## References [references]
 
+```yaml block-meta
+updated: "2026-11-12 10"
+status: active
+relations:
+  - target: "../../../../dev_doc/doc/ai-agents/AI_AGENT_INTELLIGENCE_ARCHITECTURE.md#agent-intelligence-levels"
+    type: reference
+    reason: Shared conceptual background for the project agent architecture
+```
+
 - docs/REFACTORING_SERVER_MODULARIZATION.md - Server architecture
-- docs/ai_agent_intelligence_architecture.md - Theoretical foundations
+- [Shared agent-intelligence theory](../../../../dev_doc/doc/ai-agents/AI_AGENT_INTELLIGENCE_ARCHITECTURE.md#agent-intelligence-levels)
 - Checkpoint 007 - Phase 1-4 server modularization
 - Checkpoint 005 - Phase 2 intelligent agent routing
 - Checkpoint 003 - Phase 3 implementation
