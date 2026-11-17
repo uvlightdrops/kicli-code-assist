@@ -27,7 +27,9 @@ class CodeWriter:
     ALLOWED_EXTENSIONS = {
         '.python', '.py', '.js', '.ts', '.tsx', '.jsx', 
         '.go', '.rs', '.java', '.cpp', '.c', '.h',
-        '.rb', '.php', '.sql', '.yaml', '.yml', '.json'
+        '.rb', '.php', '.sql', '.yaml', '.yml', '.json',
+        '.txt', '.md', '.sh', '.bash', '.requirements',
+        '.j2', '.jinja', '.jinja2', '.toml', '.ini', '.cfg', '.env'
     }
     
     # Max file size (10MB)
