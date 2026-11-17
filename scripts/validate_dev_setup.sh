@@ -20,16 +20,16 @@ fi
 
 # Test API health
 echo -n "Testing API health... "
-if curl -s http://127.0.0.1:8000/api/health > /dev/null 2>&1; then
+if curl -s http://127.0.0.1:8100/api/health > /dev/null 2>&1; then
     echo "✅"
 else
-    echo "❌ API not responding on :8000"
+    echo "❌ API not responding on :8100"
     exit 1
 fi
 
 # Test API root message
 echo -n "Testing API message... "
-API_MSG=$(curl -s http://127.0.0.1:8000/)
+API_MSG=$(curl -s http://127.0.0.1:8100/)
 if echo "$API_MSG" | grep -q "5173"; then
     echo "✅ (points to :5173)"
 else

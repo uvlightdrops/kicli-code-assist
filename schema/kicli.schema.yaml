@@ -48,16 +48,16 @@ properties:
         default: "127.0.0.1"
         description: "Interface the web backend binds to; keep loopback unless protected by a proxy"
       port:
-        type: integer
+        type: [integer, "null"]
         title: "Port"
-        default: 8000
+        default: null
         minimum: 1
         maximum: 65535
-        description: "TCP port of the web backend"
+        description: "TCP port override; otherwise the selected stack service port is used"
       cors_origins:
         type: array
         title: "Allowed origins"
-        default: ["http://localhost:3000"]
+        default: ["http://localhost:5173"]
         items:
           type: string
           pattern: "^https?://[A-Za-z0-9.\\[\\]:-]+$"

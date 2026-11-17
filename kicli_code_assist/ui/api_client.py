@@ -32,7 +32,7 @@ class HTTPClient:
         """Initialize HTTP client.
         
         Args:
-            base_url: Backend base URL (e.g., http://localhost:8000)
+            base_url: Backend base URL (e.g., http://localhost:8100)
             timeout: Request timeout in seconds
             retry_count: Number of retries on failure
         """
@@ -146,7 +146,7 @@ class WebSocketClient:
         """Initialize WebSocket client.
         
         Args:
-            ws_url: WebSocket URL (e.g., ws://localhost:8000/socket.io)
+            ws_url: WebSocket URL (e.g., ws://localhost:8100/socket.io)
         """
         self.ws_url = ws_url
         self.websocket: Optional[websockets.WebSocketClientProtocol] = None
