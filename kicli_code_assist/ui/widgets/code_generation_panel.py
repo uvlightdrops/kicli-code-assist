@@ -194,17 +194,39 @@ Example: "Create a Python FastAPI server with a health check endpoint"
                 
                 # Display agent response
                 agent_response = response.get("response", "No response")
-                self.chat_display.write(f"[cyan]Agent:[/cyan] {agent_response}\n")
+                self.chat_display.write(f"[cyan]Agent:[/cyan]\n")
+                # Truncate very long responses but keep format
+                display_response = agent_response
+                if len(display_response) > 500:
+                    # Find last newline before 500 chars
+                    display_response = agent_response[:500]
+                    last_newline = display_response.rfind('\n')
+                    if last_newline > 0:
+                        display_response = agent_response[:last_newline]
+                    display_response += "\n[dim]...[/dim]"
+                self.chat_display.write(f"{display_response}\n")
                 
                 # Display code blocks if any
                 code_blocks = response.get("code_blocks", [])
                 if code_blocks:
-                    self.chat_display.write("[bold]Generated Code:[/bold]\n")
-                    for block in code_blocks:
+                    # Show summary
+                    total_size = sum(len(block.get("content", "")) for block in code_blocks)
+                    self.chat_display.write(f"\n[bold cyan]📁 Generated {len(code_blocks)} file(s) ({total_size} bytes total):[/bold cyan]\n")
+                    
+                    # List each file
+                    for i, block in enumerate(code_blocks, 1):
                         filename = block.get("filename", "unknown.py")
                         content = block.get("content", "")
-                        self.chat_display.write(f"[yellow]📄 {filename}[/yellow]\n")
-                        self.chat_display.write(f"[dim]{content[:200]}...[/dim]\n\n")
+                        file_size = len(content)
+                        
+                        # Show file info
+                        self.chat_display.write(f"\n  [{i}] [yellow]📄 {filename}[/yellow] ({file_size} bytes)\n")
+                        
+                        # Show preview (first 150 chars)
+                        preview = content[:150].replace('\n', ' ')
+                        if len(content) > 150:
+                            preview += "..."
+                        self.chat_display.write(f"      [dim]{preview}[/dim]\n")
             else:
                 error = response.get("error", "Unknown error")
                 self.chat_display.write(f"[red]❌ Error: {error}[/red]\n")

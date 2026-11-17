@@ -3,6 +3,7 @@ Phase I3: Code Generation Routes
 
 Multi-turn code generation for empty projects via LLM.
 Supports iterative refinement of generated code.
+Supports multi-file code generation with smart parsing.
 
 Routes:
 - POST /api/code/generate - Generate code based on requirements
@@ -10,6 +11,7 @@ Routes:
 
 import logging
 import uuid
+import re
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from datetime import datetime
@@ -311,16 +313,104 @@ Please ask me to generate code for one of these!
         yield StreamEvent(type=StreamEventType.DONE)
 
 
+def extract_multifile_code_blocks(response_text: str, default_ext: str = "python") -> List[Dict[str, str]]:
+    """Extract multiple files from LLM response using "# File: name" markers.
+    
+    Format expected from LLM:
+    ---
+    # File: main.py
+    ```python
+    code here
+    ```
+    
+    ---
+    # File: utils.py
+    ```python
+    more code
+    ```
+    
+    Args:
+        response_text: LLM response text
+        default_ext: Default extension if not specified
+    
+    Returns:
+        List of dicts with 'filename' and 'content' keys
+    """
+    code_blocks = []
+    
+    # Split by file markers "---\n# File:"
+    file_sections = re.split(r'---\n+#\s*File:\s*', response_text)
+    
+    for section in file_sections:
+        if not section.strip():
+            continue
+        
+        # First line should be filename
+        lines = section.split('\n', 1)
+        if len(lines) < 2:
+            continue
+        
+        filename = lines[0].strip()
+        rest = lines[1] if len(lines) > 1 else ""
+        
+        # Extract code from markdown blocks
+        # Pattern: ```lang\ncode\n```
+        code_pattern = r'```(\w+)?\n(.*?)\n```'
+        matches = list(re.finditer(code_pattern, rest, re.DOTALL))
+        
+        if matches:
+            # Use first code block found
+            match = matches[0]
+            lang = match.group(1) or default_ext
+            content = match.group(2)
+            
+            # Ensure filename has extension
+            if not any(filename.endswith(f'.{ext}') for ext in ['py', 'js', 'ts', 'go', 'rs', 'java', 'cpp', 'txt', 'md', 'json', 'yaml', 'yml', 'xml', 'html', 'css']):
+                # Add extension based on language
+                lang_to_ext = {
+                    'python': 'py',
+                    'javascript': 'js',
+                    'typescript': 'ts',
+                    'go': 'go',
+                    'rust': 'rs',
+                    'java': 'java',
+                    'cpp': 'cpp',
+                    'bash': 'sh',
+                    'shell': 'sh',
+                    'yaml': 'yaml',
+                    'json': 'json',
+                    'xml': 'xml',
+                    'html': 'html',
+                    'css': 'css',
+                    'text': 'txt',
+                    'plain': 'txt'
+                }
+                ext = lang_to_ext.get(lang, 'txt')
+                filename = f"{filename}.{ext}" if '.' not in filename else filename
+            
+            code_blocks.append({
+                "filename": filename,
+                "content": content
+            })
+            
+            logger.info(f"Extracted file: {filename} ({len(content)} bytes)")
+    
+    return code_blocks
+
+
 def generate_code_prompt(message: str, project_root: str, file_type: str, context: str = "") -> str:
-    """Generate a prompt for code generation."""
-    prompt = f"""You are a code generation expert. Generate high-quality {file_type} code based on the user's requirements.
+    """Generate a prompt for code generation.
+    
+    Instructs LLM to generate multiple files with clear naming convention.
+    """
+    prompt = f"""You are a code generation expert. Generate high-quality production-ready code based on the user's requirements.
 
 ## User Request:
 {message}
 
 ## Context:
 - Project root: {project_root}
-- Target file type: {file_type}
+- Target language: {file_type}
 {f"- Additional context: {context}" if context else ""}
 
 ## Instructions:
@@ -329,10 +419,41 @@ def generate_code_prompt(message: str, project_root: str, file_type: str, contex
 3. Add docstrings and comments for clarity
 4. Follow best practices for the language
 5. Make the code modular and reusable
+6. When generating multiple files, clearly separate them
 
 ## Response Format:
-Start with a brief explanation, then provide the code in a markdown code block (```{file_type}...```).
-For multiple files, use multiple code blocks.
+
+For SINGLE file: Use a markdown code block:
+```{file_type}
+your code here
+```
+
+For MULTIPLE files: Use this format with file names clearly marked:
+
+---
+# File: filename1.ext
+```{file_type}
+code for file 1
+```
+
+---
+# File: filename2.ext
+```{file_type}
+code for file 2
+```
+
+---
+# File: requirements.txt
+numpy==1.24.0
+flask==2.3.0
+```
+
+IMPORTANT:
+- Always use "# File: <name>" to mark each file clearly
+- Use the separator "---" between files
+- Include file extensions (.py, .js, .txt, etc.)
+- Each file should be in its own markdown code block
+- For requirements, dependencies, config files, use appropriate extensions
 """
     return prompt
 
@@ -443,23 +564,27 @@ def register_code_generation_routes(app):
                 code_blocks = []
                 import re
                 
-                # Look for markdown code blocks (```language...```)
-                pattern = r"```(\w+)\n(.*?)\n```"
-                matches = re.finditer(pattern, response_text, re.DOTALL)
+                # First try: Multi-file format with "# File: name" markers
+                # Pattern: "---\n# File: name\n```lang\ncode\n```"
+                code_blocks = extract_multifile_code_blocks(response_text, file_type)
                 
-                block_num = 1
-                for match in matches:
-                    file_ext = match.group(1)
-                    content = match.group(2)
-                    code_blocks.append({
-                        "filename": f"generated_{block_num}.{file_ext}",
-                        "content": content
-                    })
-                    block_num += 1
-                
-                # If no code blocks found, try alternative patterns
+                # Fallback: Look for simple markdown code blocks (```language...```)
                 if not code_blocks:
-                    # Look for common code start patterns (def, class, import, etc.)
+                    pattern = r"```(\w+)\n(.*?)\n```"
+                    matches = re.finditer(pattern, response_text, re.DOTALL)
+                    
+                    block_num = 1
+                    for match in matches:
+                        file_ext = match.group(1)
+                        content = match.group(2)
+                        code_blocks.append({
+                            "filename": f"generated_{block_num}.{file_ext}",
+                            "content": content
+                        })
+                        block_num += 1
+                
+                # Second fallback: Look for common code start patterns
+                if not code_blocks:
                     lines = response_text.split('\n')
                     code_lines = []
                     in_code = False
