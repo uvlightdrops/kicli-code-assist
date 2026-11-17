@@ -23,11 +23,12 @@ from ki_core.adapters.mock import MockAIClient
 from ki_core.adapters.openai_compat import OpenAICompatibleClient
 from kicli_code_assist.app_config import AppConfig
 from kicli_code_assist.services.code_writer import CodeWriter, CodeWriterError
+from kicli_code_assist.services.chat_history import ChatHistoryManager
 
 logger = logging.getLogger(__name__)
 
-# In-memory conversation storage (for now; could be persisted)
-_conversations: Dict[str, List[Dict[str, Any]]] = {}
+# Chat history manager (persistent storage)
+_chat_history = ChatHistoryManager()
 
 # LLM client (cached)
 _llm_client = None
@@ -513,23 +514,26 @@ def register_code_generation_routes(app):
                 }), 400
             
             project_root = data.get("project_root", str(Path.cwd()))
-            conversation_id = data.get("conversation_id") or str(uuid.uuid4())
+            conversation_id = data.get("conversation_id")
             file_type = data.get("file_type", "python")
+            
+            # Create new conversation if not provided
+            if not conversation_id:
+                conversation_id = _chat_history.create_conversation(project_root)
             
             logger.info(f"Code generation request: conv={conversation_id}, msg_len={len(message)}")
             
-            # Initialize or retrieve conversation history
-            if conversation_id not in _conversations:
-                _conversations[conversation_id] = []
-            
-            history = _conversations[conversation_id]
+            # Load existing conversation or create if first message
+            conversation = _chat_history.load_conversation(conversation_id)
+            if not conversation:
+                conversation_id = _chat_history.create_conversation(project_root)
             
             # Add user message to history
-            history.append({
-                "role": "user",
-                "content": message,
-                "timestamp": datetime.utcnow().isoformat()
-            })
+            _chat_history.add_message(conversation_id, "user", message)
+            
+            # Build conversation history from storage
+            conversation = _chat_history.load_conversation(conversation_id)
+            history = conversation.get("messages", []) if conversation else []
             
             # Generate prompt and call LLM
             prompt = generate_code_prompt(message, project_root, file_type)
@@ -625,12 +629,21 @@ def register_code_generation_routes(app):
                 }]
             
             # Add assistant response to history
-            history.append({
-                "role": "assistant",
-                "content": response_text,
-                "code_blocks": code_blocks,
-                "timestamp": datetime.utcnow().isoformat()
-            })
+            files_generated = []
+            for block in code_blocks:
+                files_generated.append({
+                    "filename": block.get("filename", "unknown"),
+                    "size": len(block.get("content", "")),
+                    "saved": False,  # Will be updated when actually saved
+                    "saved_path": None
+                })
+            
+            _chat_history.add_message(
+                conversation_id,
+                "assistant",
+                response_text,
+                files_generated=files_generated
+            )
             
             logger.info(f"Code generation completed: conv={conversation_id}, blocks={len(code_blocks)}")
             
@@ -652,7 +665,7 @@ def register_code_generation_routes(app):
     
     @app.route("/api/code/conversations/<conversation_id>", methods=["GET"])
     def get_conversation(conversation_id):
-        """Get conversation history.
+        """Get conversation history from persistent storage.
         
         Args:
             conversation_id: UUID of conversation
@@ -660,17 +673,21 @@ def register_code_generation_routes(app):
         Returns:
             {
                 "success": true,
-                "conversation_id": "uuid",
-                "history": [...]
+                "conversation": {...}
             }
         """
         try:
-            history = _conversations.get(conversation_id, [])
+            conversation = _chat_history.load_conversation(conversation_id)
+            
+            if not conversation:
+                return jsonify({
+                    "success": False,
+                    "error": f"Conversation '{conversation_id}' not found"
+                }), 404
             
             return jsonify({
                 "success": True,
-                "conversation_id": conversation_id,
-                "history": history
+                "conversation": conversation
             }), 200
         
         except Exception as e:
@@ -682,7 +699,7 @@ def register_code_generation_routes(app):
     
     @app.route("/api/code/conversations/<conversation_id>", methods=["DELETE"])
     def delete_conversation(conversation_id):
-        """Delete conversation.
+        """Delete conversation from persistent storage.
         
         Args:
             conversation_id: UUID of conversation
@@ -693,8 +710,13 @@ def register_code_generation_routes(app):
             }
         """
         try:
-            if conversation_id in _conversations:
-                del _conversations[conversation_id]
+            deleted = _chat_history.delete_conversation(conversation_id)
+            
+            if not deleted:
+                return jsonify({
+                    "success": False,
+                    "error": f"Conversation '{conversation_id}' not found"
+                }), 404
             
             return jsonify({
                 "success": True
@@ -754,30 +776,50 @@ def register_code_generation_routes(app):
                     "error": "Missing 'conversation_id' field"
                 }), 400
             
-            # Get conversation history
-            if conversation_id not in _conversations:
+            # Load conversation from persistent storage
+            conversation = _chat_history.load_conversation(conversation_id)
+            if not conversation:
                 return jsonify({
                     "success": False,
                     "error": f"Conversation '{conversation_id}' not found"
                 }), 404
             
-            # Extract code blocks from conversation
-            conversation = _conversations[conversation_id]
+            # Extract code blocks from conversation history
             code_blocks = []
+            for msg in conversation.get("messages", []):
+                if msg["role"] == "assistant" and "files_generated" in msg:
+                    # Reconstruct code blocks from files_generated metadata
+                    # We need to find the actual content from the message
+                    # For now, we store the actual content in the message itself
+                    pass
             
-            for msg in conversation:
-                if msg["role"] == "assistant" and "code_blocks" in msg:
-                    code_blocks.extend(msg["code_blocks"])
+            # Alternative: Store code_blocks in the message for now
+            # (TODO: improve this to store content separately)
+            assistant_messages = [m for m in conversation.get("messages", []) if m["role"] == "assistant"]
             
-            if not code_blocks:
+            # For now, we'll need to get code_blocks from the last generate call
+            # This is a limitation of current design - we should improve this
+            # by storing code blocks separately
+            
+            if not assistant_messages:
                 return jsonify({
                     "success": False,
-                    "error": "No code blocks found in conversation"
+                    "error": "No assistant responses in conversation"
                 }), 400
             
             # Get parameters
             project_root = data.get("project_root", str(Path.cwd()))
             overwrite = data.get("overwrite", False)
+            
+            # NOTE: We need the code_blocks from the most recent generation
+            # For now, they should come with the save request
+            code_blocks = data.get("code_blocks", [])
+            
+            if not code_blocks:
+                return jsonify({
+                    "success": False,
+                    "error": "No code blocks provided in request"
+                }), 400
             
             logger.info(f"Saving {len(code_blocks)} code blocks to {project_root}")
             
@@ -785,6 +827,20 @@ def register_code_generation_routes(app):
             try:
                 writer = CodeWriter(project_root)
                 result = writer.write_code_blocks(code_blocks, overwrite=overwrite)
+                
+                # Update conversation history with saved file paths
+                for file_result in result.get('files', []):
+                    if file_result.get('success'):
+                        # Mark file as saved in history
+                        for msg in conversation.get("messages", []):
+                            if msg["role"] == "assistant" and "files_generated" in msg:
+                                for file_info in msg["files_generated"]:
+                                    if file_info.get("filename") == file_result.get("filename"):
+                                        file_info["saved"] = True
+                                        file_info["saved_path"] = file_result.get("filepath")
+                
+                # Save updated conversation back to storage
+                _chat_history._save_conversation(conversation_id, conversation)
                 
                 return jsonify({
                     "success": result['success'],
