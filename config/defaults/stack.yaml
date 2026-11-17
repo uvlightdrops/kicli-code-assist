@@ -10,7 +10,7 @@ stack:
       command: ["{python}", "-m", "kicli_code_assist.web.server"]
       cwd: "{root}"
       host: 127.0.0.1
-      port: 8000
+      port: 8100
       env:
         PYTHONUNBUFFERED: "1"
       health_path: /api/health
@@ -25,14 +25,15 @@ stack:
       command: [
         "{root}/web/frontend/node_modules/.bin/vite",
         "--host", "127.0.0.1",
-        "--port", "5173"
+        "--port", "5173",
+        "--strictPort"
       ]
       cwd: "{root}/web/frontend"
       host: 127.0.0.1
       port: 5173
       depends_on: [api]
       env:
-        VITE_API_URL: "http://127.0.0.1:8000"
+        VITE_API_URL: "http://127.0.0.1:8100"
       health_path: /
       health_timeout: 15
       health_retries: 3

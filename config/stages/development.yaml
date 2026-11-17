@@ -12,7 +12,7 @@ stack:
     
     frontend:
       env:
-        VITE_API_URL: "http://127.0.0.1:8000"
+        VITE_API_URL: "http://127.0.0.1:8100"
         VITE_HMR_HOST: "127.0.0.1"
         VITE_HMR_PORT: "5173"
 
@@ -21,6 +21,5 @@ web:
   cors_origins:
     - "http://127.0.0.1:5173"  # Vite dev server (development)
     - "http://localhost:5173"
-    - "http://127.0.0.1:8000"  # API itself (for testing)
-
+    - "http://127.0.0.1:8100"  # API itself (for testing)
 

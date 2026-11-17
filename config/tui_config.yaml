@@ -30,7 +30,7 @@ agent_tabs:
 
 # Backend API
 backend:
-  url: "http://localhost:8000"
+  url: "http://localhost:8100"
   timeout: 30
   retry_count: 3
 

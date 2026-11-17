@@ -52,7 +52,7 @@ jobs:
           sleep 5
           
           # Test health check
-          response=$(curl -s http://127.0.0.1:8000/api/health)
+          response=$(curl -s http://127.0.0.1:8100/api/health)
           echo "Health check response: $response"
           
           # Verify the response contains 'ok'
