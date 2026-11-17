@@ -48,6 +48,9 @@ from kicli_code_assist.web.agent_config import register_agent_config_routes
 # Import trace routes (Phase 5.5.2.I3)
 from kicli_code_assist.web.agent_traces import register_trace_routes
 
+# Import code generation routes (Phase I3)
+from kicli_code_assist.web.code_generation_routes import register_code_generation_routes
+
 # Runtime settings (shared ki_core.runtime_settings service)
 from kicli_code_assist.web.settings_routes import register_settings_routes
 from kicli_code_assist.llm_runtime import get_live_config
@@ -96,7 +99,13 @@ def create_app(
     app.config["KICLI_LIVE_CONFIG"] = live
     app.config["KI_CONFIG_MANAGER"] = ki_config_manager
     app.config["ACTIVE_REQUESTS"] = {}
-    app.config["CHAT_SESSION"] = ChatSession()
+    
+    # Try to initialize ChatSession, but catch errors
+    try:
+        app.config["CHAT_SESSION"] = ChatSession()
+    except Exception as e:
+        app.logger.warning(f"Could not initialize ChatSession: {e}, proceeding without it")
+        app.config["CHAT_SESSION"] = None
 
     def refresh_config(force: bool = False) -> None:
         """Pick up config changes; drop clients that cached the old LLM settings."""
@@ -181,6 +190,9 @@ def create_app(
     
     # Register trace routes (Phase 5.5.2.I3) - transparency data queries
     register_trace_routes(app, project_root=project_root)
+    
+    # Register code generation routes (Phase I3) - multi-turn code generation
+    register_code_generation_routes(app)
     
     # Register all other routes (Phase 2D unified router)
     register_routes(app)

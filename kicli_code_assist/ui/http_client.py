@@ -31,11 +31,11 @@ class AnalysisResponse:
 class TUIBackendClient:
     """HTTP client for TUI to query backend."""
     
-    def __init__(self, base_url: str = "http://localhost:8000"):
+    def __init__(self, base_url: str = "http://localhost:8100"):
         """Initialize client.
         
         Args:
-            base_url: Backend URL (default: http://localhost:8000)
+            base_url: Backend URL (default: http://localhost:8100)
         """
         self.base_url = base_url.rstrip("/")
         self.timeout = 32  # 32 second timeout per AGENT_ROUTE_SPEC
@@ -397,13 +397,124 @@ class TUIBackendClient:
         except Exception as e:
             logger.error(f"Project understanding error: {e}")
             return {"success": False, "error": str(e)}
+    
+    def generate_code(
+        self,
+        message: str,
+        project_root: str,
+        conversation_id: Optional[str] = None,
+        file_type: str = "python"
+    ) -> Dict[str, Any]:
+        """Generate code via /api/code/generate endpoint.
+        
+        Args:
+            message: User requirement description
+            project_root: Project root directory
+            conversation_id: Optional conversation ID for multi-turn (None creates new)
+            file_type: Type of code to generate (python, javascript, go, etc.)
+        
+        Returns:
+            {
+                "success": bool,
+                "conversation_id": "uuid",
+                "response": "Generated code/text",
+                "code_blocks": [{"filename": "...", "content": "..."}],
+                "error": "error message if failed"
+            }
+        """
+        try:
+            url = f"{self.base_url}/api/code/generate"
+            payload = {
+                "message": message,
+                "project_root": project_root,
+                "conversation_id": conversation_id,
+                "file_type": file_type
+            }
+            
+            logger.info(f"Code generation: conv={conversation_id}, msg_len={len(message)}")
+            request = Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            
+            with urlopen(request, timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                logger.info(f"Code generation response: {data.get('conversation_id')}")
+                return data
+        
+        except HTTPError as e:
+            error_msg = f"HTTP error {e.code}"
+            logger.error(f"Code generation error: {error_msg}")
+            return {"success": False, "error": error_msg, "conversation_id": conversation_id}
+        except Exception as e:
+            logger.error(f"Code generation error: {e}")
+            return {"success": False, "error": str(e), "conversation_id": conversation_id}
+    
+    def save_code(
+        self,
+        conversation_id: str,
+        project_root: str,
+        overwrite: bool = False
+    ) -> Dict[str, Any]:
+        """Save generated code to files via /api/code/save endpoint.
+        
+        Args:
+            conversation_id: Conversation ID containing code blocks
+            project_root: Project directory to write files to
+            overwrite: Whether to overwrite existing files
+        
+        Returns:
+            {
+                "success": bool,
+                "written": int (number of files written),
+                "total": int (total code blocks),
+                "files": [
+                    {
+                        "filename": "...",
+                        "filepath": "...",
+                        "success": bool,
+                        "size": int,
+                        "error": str or None
+                    }
+                ],
+                "errors": [list of error strings if any]
+            }
+        """
+        try:
+            url = f"{self.base_url}/api/code/save"
+            payload = {
+                "conversation_id": conversation_id,
+                "project_root": project_root,
+                "overwrite": overwrite
+            }
+            
+            logger.info(f"Saving code: conv={conversation_id}, root={project_root}")
+            request = Request(
+                url,
+                data=json.dumps(payload).encode("utf-8"),
+                headers={"Content-Type": "application/json"}
+            )
+            
+            with urlopen(request, timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                logger.info(f"Save response: written={data.get('written')}/{data.get('total')}")
+                return data
+        
+        except HTTPError as e:
+            error_msg = f"HTTP error {e.code}"
+            logger.error(f"Save error: {error_msg}")
+            return {"success": False, "error": error_msg, "written": 0, "total": 0, "files": []}
+        except Exception as e:
+            logger.error(f"Save error: {e}")
+            return {"success": False, "error": str(e), "written": 0, "total": 0, "files": []}
 
 
 # Global client instance
 _client: Optional[TUIBackendClient] = None
 
 
-def get_backend_client(base_url: str = "http://localhost:8000") -> TUIBackendClient:
+def get_backend_client(base_url: str = "http://localhost:8100") -> TUIBackendClient:
     """Get or create global backend client."""
     global _client
     if _client is None:
