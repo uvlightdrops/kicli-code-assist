@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: guides
 purpose: Guide for deploying kicli-code-assist web frontend and services
 created: 2026-10-28 13:38
-updated: 2026-11-07T20
-update_reason: Standardized YAML header and semantic block tagging
+updated: "2026-11-15 23"
+update_reason: Align local API and frontend ports with ecosystem assignments
 status: active
 semantic_blocks:
   - quick-start
@@ -20,6 +20,10 @@ semantic_blocks:
   - deployment-production
   - next-steps
   - support
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md
+    type: reference
+    reason: "Defines the local API and frontend port assignments."
 ---
 
 # Web Frontend Deployment & Usage Guide
@@ -32,11 +36,20 @@ semantic_blocks:
 
 ## Quick Start [quick-start]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API and frontend ports."
+```
+
 ### Prerequisites
 - Python 3.10+ (venv with flask, flask-socketio)
 - Node.js 18+ (npm)
-- Backend running on localhost:8000
-- Frontend dev server on localhost:3000
+- Backend running on localhost:8100
+- Frontend dev server on localhost:5173
 
 ### Start Backend
 
@@ -46,17 +59,17 @@ source .venv/bin/activate
 python -m kicli_code_assist.web.server
 ```
 
-Listens on **http://127.0.0.1:8000** (configurable via ki.yaml web.port)
+Listens on **http://127.0.0.1:8100** (configurable via ki.yaml web.port)
 
 ### Start Frontend (Dev)
 
 ```bash
 cd kicli-code-assist/web/frontend
 npm install
-npm run dev
+VITE_API_URL=http://127.0.0.1:8100 npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
 ```
 
-Opens browser on **http://localhost:3000** with hot-reload
+Opens browser on **http://localhost:5173** with hot-reload
 
 ### Production Build
 
@@ -92,6 +105,15 @@ npm run build
 
 ## API Endpoints [api-endpoints]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API port."
+```
+
 ### REST Endpoints
 
 ```
@@ -105,7 +127,7 @@ DELETE /api/files/{id}        - Remove file
 
 ### WebSocket Events
 
-**Connect:** `ws://localhost:8000/socket.io`
+**Connect:** `ws://localhost:8100/socket.io`
 
 **Events:**
 - `subscribe` - Subscribe to channel (e.g., `{"channel": "chat.response.{id}"}`)
@@ -120,16 +142,24 @@ DELETE /api/files/{id}        - Remove file
 
 ## Configuration (ki.yaml) [configuration-kiyaml]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Documents the assigned local API and frontend ports."
+```
+
 Add web section to your ki.yaml:
 
 ```yaml
 web:
   enabled: true
   host: "127.0.0.1"
-  port: 8000
+  port: 8100
   cors_origins:
-    - "http://localhost:3000"
-    - "http://localhost:5173"  # Vite default
+    - "http://localhost:5173"
   max_upload_size_mb: 50
 
 storage:
@@ -227,6 +257,15 @@ Results: 5 passed, 0 failed
 
 ## Troubleshooting [troubleshooting]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API port."
+```
+
 ### Backend won't start
 - Check: `python -c "import flask; print(flask.__version__)"`
 - Install: `pip install flask flask-socketio python-socketio python-engineio flask-cors`
@@ -237,13 +276,13 @@ Results: 5 passed, 0 failed
 - Clear cache: `rm -rf node_modules package-lock.json && npm install`
 
 ### WebSocket connection fails
-- Check backend is running: `curl http://localhost:8000/api/health`
+- Check backend is running: `curl http://localhost:8100/api/health`
 - Check CORS: See web.cors_origins in ki.yaml
 - Browser console: Look for WebSocket errors
 
 ### Logs not appearing
 - Check path: `ls ~/dev_data/kicli-code-assist/log/`
-- Check config: `curl http://localhost:8000/api/config | grep log_dir`
+- Check config: `curl http://localhost:8100/api/config | grep log_dir`
 - Restart backend to create logs directory
 
 ### Chat messages not sending

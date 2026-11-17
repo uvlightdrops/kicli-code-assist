@@ -4,8 +4,8 @@ project: kicli-code-assist
 scope: guides
 purpose: Project tracking, phase status, and management guidelines
 created: 2026-10-28 13:38
-updated: 2026-11-07T20
-update_reason: Standardized YAML header and semantic block tagging
+updated: "2026-11-15 23"
+update_reason: Align local API examples with the ecosystem port assignment
 status: active
 semantic_blocks:
   - features
@@ -15,6 +15,10 @@ semantic_blocks:
   - file-structure
   - development
   - future-enhancements
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md
+    type: reference
+    reason: "Defines the local API port used by the examples."
 ---
 
 # Project Management System
@@ -52,6 +56,15 @@ Implementiert ein benutzerfreundliches Project Management System für die kicli-
 
 ## API Endpoints [api-endpoints]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API port."
+```
+
 ### `GET /api/projects/current`
 Aktuelles offenes Project abrufen.
 
@@ -66,7 +79,7 @@ Aktuelles offenes Project abrufen.
 Project öffnen (validiert Path).
 
 ```bash
-curl -X POST http://localhost:8000/api/projects/open \
+curl -X POST http://localhost:8100/api/projects/open \
   -H "Content-Type: application/json" \
   -d '{"path":"/home/flow/dev_flow/kicli-code-assist"}'
 ```
@@ -92,7 +105,7 @@ curl -X POST http://localhost:8000/api/projects/open \
 Neues Project erstellen.
 
 ```bash
-curl -X POST http://localhost:8000/api/projects/create \
+curl -X POST http://localhost:8100/api/projects/create \
   -H "Content-Type: application/json" \
   -d '{
     "name": "my-project",
@@ -110,7 +123,7 @@ curl -X POST http://localhost:8000/api/projects/create \
 Folder Browser für Project Selection.
 
 ```bash
-curl 'http://localhost:8000/api/projects/browse?path=/home/flow/dev_flow'
+curl 'http://localhost:8100/api/projects/browse?path=/home/flow/dev_flow'
 ```
 
 **Response:**
@@ -130,7 +143,7 @@ curl 'http://localhost:8000/api/projects/browse?path=/home/flow/dev_flow'
 Recent Projects aus Cache.
 
 ```bash
-curl http://localhost:8000/api/projects/recent
+curl http://localhost:8100/api/projects/recent
 ```
 
 ## Frontend Components [frontend-components]
@@ -220,17 +233,17 @@ python3 -m kicli_code_assist.web.server
 ### Test APIs
 ```bash
 # Create project
-curl -X POST http://localhost:8000/api/projects/create \
+curl -X POST http://localhost:8100/api/projects/create \
   -H "Content-Type: application/json" \
   -d '{"name":"test","parentPath":"/home/flow/dev_flow","template":"empty"}'
 
 # Open project
-curl -X POST http://localhost:8000/api/projects/open \
+curl -X POST http://localhost:8100/api/projects/open \
   -H "Content-Type: application/json" \
   -d '{"path":"/home/flow/dev_flow/kicli-code-assist"}'
 
 # Browse folders
-curl 'http://localhost:8000/api/projects/browse?path=/home/flow/dev_flow'
+curl 'http://localhost:8100/api/projects/browse?path=/home/flow/dev_flow'
 ```
 
 ## Future Enhancements [future-enhancements]

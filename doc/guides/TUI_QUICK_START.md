@@ -4,9 +4,13 @@ project: kicli-code-assist
 scope: guides
 purpose: Quick start guide for using the TUI client for remote code assistance
 created: 2026-11-05 16:11
-updated: 2026-11-07T20
-update_reason: Standardized YAML header and semantic block tagging
+updated: "2026-11-15 23"
+update_reason: Align the local backend default with ecosystem port assignments
 status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md
+    type: reference
+    reason: "Defines the default local backend port."
 semantic_blocks:
   - motivation
   - installation
@@ -43,11 +47,21 @@ python3 -c "import textual; import httpx; import rich; print('✅ All OK')"
 
 ## Usage [usage]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API port."
+```
+
 ### Local Development
 ```bash
 # Start backend (from ki-ecosystem or project root)
 .venv/bin/python -m stackctl start
 
+# API: http://127.0.0.1:8100
 # In another terminal, launch TUI
 kicli-assist tui --project /path/to/project
 
@@ -107,6 +121,15 @@ Input (F7)            │ • Maintainability: 8/10
 
 ## Architecture Diagram [architecture-diagram]
 
+```yaml block-meta
+updated: "2026-11-15 23"
+status: active
+relations:
+  - target: ../../../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md#application-services
+    type: reference
+    reason: "Lists the assigned local API port."
+```
+
 ```
 TUI Client (Your Terminal)
     │
@@ -119,7 +142,7 @@ TUI Client (Your Terminal)
     └─► Display via Textual + Rich
         └─ Syntax highlighting, tables, panels
 
-Backend (localhost:8000 or remote)
+Backend (localhost:8100 or remote)
     │
     ├─► CodeImplementationAgent
     ├─► MetaCoordinationAgent  
@@ -131,7 +154,7 @@ Backend (localhost:8000 or remote)
 
 ### Backend Unreachable
 ```
-❌ Cannot reach backend at http://localhost:8000
+❌ Cannot reach backend at http://localhost:8100
 ```
 **Fix**: Ensure backend is running:
 ```bash

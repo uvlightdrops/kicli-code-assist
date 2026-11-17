@@ -3,7 +3,8 @@ project: kicli-code-assist
 scope: development
 purpose: Step-by-step checklist for reliable development stack startup
 created: 2026-11-02T04:18:00+01:00
-updated: 2026-11-02T04:18:00+01:00
+updated: "2026-11-15 23"
+update_reason: "Align local API checks with the assigned 8100 port"
 status: active
 agent_project: kicli-code-assist
 ---
@@ -59,11 +60,11 @@ ps aux | grep -E "vite|python -m kicli_code_assist" | grep -v grep
 
 Expected output:
 ```
-api: gestartet (PID XXXXX) http://127.0.0.1:8000/api/health
+api: gestartet (PID XXXXX) http://127.0.0.1:8100/api/health
   frontend: gestartet (PID XXXXX) http://127.0.0.1:5173/
 
 kicli-assist (lokal)
-  api       running    :8000  PID XXXXX
+  api       running    :8100  PID XXXXX
   frontend  running    :5173  PID XXXXX
 ```
 
@@ -76,7 +77,7 @@ Wait 6-8 seconds for services to fully boot.
 ### 4A: API Health Check
 
 ```bash
-curl -s http://127.0.0.1:8000/api/health | jq .
+curl -s http://127.0.0.1:8100/api/health | jq .
 ```
 
 Expected output:
@@ -94,7 +95,7 @@ Expected output:
 ### 4B: API Root Message
 
 ```bash
-curl -s http://127.0.0.1:8000/ | jq .
+curl -s http://127.0.0.1:8100/ | jq .
 ```
 
 Expected output:
@@ -176,9 +177,9 @@ tail -f var/log/frontend.log
 | Issue | Solution |
 |-------|----------|
 | "KI_STAGE not set" error | Run: `export KI_STAGE=development` |
-| API not responding (:8000) | Check: `tail -f var/log/api.log` for errors |
+| API not responding (:8100) | Check: `tail -f var/log/api.log` for errors |
 | Vite not responding (:5173) | Check: `ps aux \| grep vite` (is it running?) |
-| "Port already in use" | Run: `lsof -i :8000` and `lsof -i :5173` to see what's holding them |
+| "Port already in use" | Run: `lsof -i :8100` and `lsof -i :5173` to see what's holding them |
 | Browser shows blank page | Check browser console (F12) for JS errors |
 | API message says ":3000" | Wrong stage loaded; verify `echo $KI_STAGE` |
 

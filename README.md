@@ -154,14 +154,13 @@ selected project as cwd. It never invokes a project wrapper or installs stackctl
 in a project venv. The central tool loads project configuration and runs Python
 services with that project's `.venv/bin/python` or `venv/bin/python`.
 
-Assist's actual services are defined in `config/defaults/stack.yaml`:
-`backend` on 8000 and the separately started, monitored Vite `frontend` on 3000.
-The frontend is declared external; start it using its existing npm workflow.
-Existing manually started
-backend processes are recognized by command and project directory, so
-`kicli-assist server stop -s backend` can stop them. No service is stopped as
-part of updating this configuration. Django also defaults to 8000; configure
-different ports before running both projects simultaneously.
+Assist's local development stack is defined in `config/defaults/stack.yaml`:
+the API uses **8100** and the Vite frontend uses **5173**. Start both with
+`stackctl -t local start`; the frontend has a strict port so it fails clearly
+if 5173 is already occupied. The frontend proxy and TUI defaults target API
+port 8100. The API-only `minimal` stage also uses 8100; the `production` stage
+retains its separate 8000 setting. See the ecosystem
+[local development port map](../ki-ecosystem/docs/LOCAL_DEVELOPMENT_PORTS.md).
 
 API:
 
