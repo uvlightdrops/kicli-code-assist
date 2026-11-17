@@ -524,6 +524,46 @@ class TUIBackendClient:
                 "total": 0, 
                 "files": []
             }
+    
+    def list_conversations(self, project_root: str = None) -> Dict[str, Any]:
+        """List all saved conversations via /api/code/conversations endpoint.
+        
+        Args:
+            project_root: Optional project path to filter conversations
+        
+        Returns:
+            {
+                "success": bool,
+                "conversations": [
+                    {
+                        "conversation_id": "uuid",
+                        "created_at": "ISO8601",
+                        "updated_at": "ISO8601",
+                        "project_path": "/path/to/project",
+                        "message_count": int
+                    }
+                ]
+            }
+        """
+        try:
+            url = f"{self.base_url}/api/code/conversations"
+            if project_root:
+                url += f"?project_path={project_root}"
+            
+            logger.info(f"Fetching conversations list from {url}")
+            request = Request(url)
+            
+            with urlopen(request, timeout=self.timeout) as response:
+                data = json.loads(response.read().decode("utf-8"))
+                return data
+        
+        except Exception as e:
+            logger.error(f"List conversations error: {e}")
+            return {
+                "success": False,
+                "error": str(e),
+                "conversations": []
+            }
 
 
 # Global client instance

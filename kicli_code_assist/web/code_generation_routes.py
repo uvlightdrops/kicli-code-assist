@@ -863,3 +863,43 @@ def register_code_generation_routes(app):
                 "success": False,
                 "error": f"Exception: {str(e)}"
             }), 500
+    
+    @app.route("/api/code/conversations", methods=["GET"])
+    def list_conversations_endpoint():
+        """List all saved conversations.
+        
+        Query params:
+            project_path: Optional filter by project
+        
+        Returns:
+            {
+                "success": true,
+                "conversations": [
+                    {
+                        "conversation_id": "uuid",
+                        "created_at": "ISO8601",
+                        "updated_at": "ISO8601",
+                        "project_path": "/path/to/project",
+                        "message_count": 5
+                    }
+                ]
+            }
+        """
+        try:
+            project_path = request.args.get("project_path")
+            
+            conversations = _chat_history.list_conversations(project_path=project_path)
+            
+            logger.info(f"Listed {len(conversations)} conversation(s)")
+            
+            return jsonify({
+                "success": True,
+                "conversations": conversations
+            }), 200
+        
+        except Exception as e:
+            logger.error(f"List conversations error: {e}")
+            return jsonify({
+                "success": False,
+                "error": str(e)
+            }), 500
