@@ -11,8 +11,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical, Horizontal
-from textual.widgets import Static, Button, Label, ListItem, ListItemId
-from textual.widgets.list_view import ListView
+from textual.widgets import Static, Button, Label, ListItem, ListView
 from textual.screen import ModalScreen
 
 logger = logging.getLogger(__name__)
