@@ -504,10 +504,31 @@ class TUIBackendClient:
         except HTTPError as e:
             error_msg = f"HTTP error {e.code}"
             logger.error(f"Save error: {error_msg}")
-            return {"success": False, "error": error_msg, "written": 0, "total": 0, "files": []}
+            # Try to parse error response from server if available
+            try:
+                error_data = json.loads(e.read().decode("utf-8"))
+                # Return server's response which includes errors, files, etc.
+                return error_data
+            except:
+                # Fallback if can't parse
+                return {
+                    "success": False, 
+                    "error": error_msg, 
+                    "errors": [error_msg],
+                    "written": 0, 
+                    "total": 0, 
+                    "files": []
+                }
         except Exception as e:
             logger.error(f"Save error: {e}")
-            return {"success": False, "error": str(e), "written": 0, "total": 0, "files": []}
+            return {
+                "success": False, 
+                "error": str(e), 
+                "errors": [str(e)],
+                "written": 0, 
+                "total": 0, 
+                "files": []
+            }
 
 
 # Global client instance
