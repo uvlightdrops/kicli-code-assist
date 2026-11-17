@@ -36,7 +36,9 @@ class ConversationListItem(ListItem):
         # Format: ID | Created | Messages | Project
         label = f"[cyan]{conv_id}[/cyan] | {created} | {msg_count} msgs | {project}"
         
-        super().__init__(Label(label), id=id or conv_id, **kwargs)
+        # Prefix ID with 'conv-' to avoid starting with a number
+        item_id = id or f"conv-{conv_id}"
+        super().__init__(Label(label), id=item_id, **kwargs)
 
 
 class ConversationBrowserModal(ModalScreen):
