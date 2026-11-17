@@ -67,7 +67,7 @@ const AppContent: React.FC = () => {
 
   // Initialize WebSocket
   useEffect(() => {
-    socketRef.current = io('http://localhost:8000', {
+    socketRef.current = io('http://localhost:8100', {
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 5,

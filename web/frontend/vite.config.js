@@ -1,16 +1,21 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+var port = 5173;
+var host = '127.0.0.1';
+var apiUrl = 'http://127.0.0.1:8100';
 export default defineConfig({
     plugins: [react()],
     server: {
-        port: 3000,
+        host: host,
+        port: port,
+        strictPort: true,
         proxy: {
             '/api': {
-                target: 'http://localhost:8000',
+                target: apiUrl,
                 changeOrigin: true,
             },
             '/socket.io': {
-                target: 'http://localhost:8000',
+                target: apiUrl,
                 ws: true,
             },
         },

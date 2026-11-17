@@ -29,7 +29,7 @@ const StatusBar: React.FC<StatusBarProps> = ({ connected, error }) => {
       {/* Stats */}
       <div className="pt-2 border-t border-gray-700">
         <p className="text-gray-500">
-          <span className="text-gray-400">localhost:8000</span>
+          <span className="text-gray-400">localhost:8100</span>
         </p>
       </div>
     </div>

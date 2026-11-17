@@ -26,7 +26,7 @@ export function ThinkingStepsPanel({ selectedFile }: ThinkingStepsPanelProps) {
 
   useEffect(() => {
     // Initialize WebSocket connection
-    socketRef.current = io('http://localhost:8000', {
+    socketRef.current = io('http://localhost:8100', {
       reconnection: true,
       reconnectionDelay: 1000,
     });

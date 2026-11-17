@@ -24,7 +24,7 @@ find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
 find . -name "*.pyc" -delete 2>/dev/null || true
 
 echo ""
-echo "📡 Starting Flask backend on http://localhost:8000"
+echo "📡 Starting Flask backend on http://127.0.0.1:8100"
 echo ""
 echo "Press Ctrl+C to stop"
 echo ""

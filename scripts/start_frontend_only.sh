@@ -24,11 +24,11 @@ echo "▶ Clearing Vite cache..."
 rm -rf node_modules/.vite 2>/dev/null || true
 
 echo ""
-echo "🎨 Starting Vite dev server on http://localhost:3000"
+echo "🎨 Starting Vite dev server on http://127.0.0.1:5173"
 echo ""
-echo "Backend should be running on :8000 (in another terminal)"
+echo "Backend should be running on :8100 (in another terminal)"
 echo ""
 echo "Press Ctrl+C to stop"
 echo ""
 
-HOST=0.0.0.0 PORT=3000 npm run dev
+VITE_API_URL=http://127.0.0.1:8100 npm run dev -- --host 127.0.0.1 --port 5173 --strictPort

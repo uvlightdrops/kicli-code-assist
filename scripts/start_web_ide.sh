@@ -62,14 +62,14 @@ echo ""
 cd "$PROJECT_ROOT"
 source .venv/bin/activate
 
-echo "📡 Starting backend on http://localhost:8000"
+echo "📡 Starting backend on http://127.0.0.1:8100"
 python -m kicli_code_assist.web.server > /tmp/kicli-web-backend.log 2>&1 &
 BACKEND_PID=$!
 sleep 2
 
-echo "🎨 Starting frontend on http://localhost:3000"
+echo "🎨 Starting frontend on http://127.0.0.1:5173"
 cd web/frontend
-npm run dev > /tmp/kicli-web-frontend.log 2>&1 &
+VITE_API_URL=http://127.0.0.1:8100 npm run dev -- --host 127.0.0.1 --port 5173 --strictPort > /tmp/kicli-web-frontend.log 2>&1 &
 FRONTEND_PID=$!
 sleep 3
 
@@ -78,8 +78,8 @@ echo "================================================"
 echo "  ✅ Web IDE is running!"
 echo "================================================"
 echo ""
-echo "  Frontend: http://localhost:3000"
-echo "  Backend:  http://localhost:8000/api/health"
+echo "  Frontend: http://127.0.0.1:5173"
+echo "  Backend:  http://127.0.0.1:8100/api/health"
 echo ""
 echo "Logs:"
 echo "  Backend:  tail -f /tmp/kicli-web-backend.log"
@@ -93,4 +93,3 @@ trap "echo ''; echo 'Shutting down...'; kill $BACKEND_PID $FRONTEND_PID 2>/dev/n
 
 # Keep running
 wait
-
