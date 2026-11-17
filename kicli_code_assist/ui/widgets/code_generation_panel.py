@@ -18,6 +18,7 @@ from textual import work
 
 from ..panels.chat_display import SelectableRichLog
 from ..input.chat_input import ChatInput
+from .code_preview_modal import CodePreviewModal
 
 logger = logging.getLogger(__name__)
 
@@ -97,6 +98,7 @@ class CodeGenerationPanel(Static):
         self.is_generating = False
         self.conversation_id: Optional[str] = None
         self.backend_client = None
+        self.last_code_blocks: list = []  # Store code blocks from last generation
     
     def compose(self) -> ComposeResult:
         """Compose the panel."""
@@ -208,6 +210,8 @@ Example: "Create a Python FastAPI server with a health check endpoint"
                 
                 # Display code blocks if any
                 code_blocks = response.get("code_blocks", [])
+                self.last_code_blocks = code_blocks  # Store for save operation
+                
                 if code_blocks:
                     # Show summary
                     total_size = sum(len(block.get("content", "")) for block in code_blocks)
@@ -240,13 +244,34 @@ Example: "Create a Python FastAPI server with a health check endpoint"
     def _save_code(self) -> None:
         """Save generated code to files.
         
-        Calls POST /api/code/save with current conversation_id.
-        First attempt ohne overwrite, dann mit overwrite=true falls Files existieren.
+        Shows preview modal first, then saves with auto-retry on conflict.
         """
         if not self.conversation_id:
             self.chat_display.write("[yellow]⚠️  No code generated yet. Generate code first.[/yellow]\n")
             return
         
+        if not self.last_code_blocks:
+            self.chat_display.write("[yellow]⚠️  No code blocks to save.[/yellow]\n")
+            return
+        
+        # Show preview modal
+        def _handle_preview_response(should_save: bool) -> None:
+            """Callback when preview modal closes."""
+            if should_save:
+                self._do_save_code()
+        
+        # Push modal screen (non-blocking)
+        modal = CodePreviewModal(
+            code_blocks=self.last_code_blocks,
+            project_root=self.project_root
+        )
+        self.app.push_screen(modal, callback=_handle_preview_response)
+    
+    def _do_save_code(self) -> None:
+        """Actually save code to files (called after preview modal).
+        
+        Implements auto-retry logic for file conflicts.
+        """
         try:
             self.chat_display.write("[cyan]💾 Saving code files...[/cyan]\n")
             
@@ -254,6 +279,7 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             response = self.backend_client.save_code(
                 conversation_id=self.conversation_id,
                 project_root=self.project_root,
+                code_blocks=self.last_code_blocks,
                 overwrite=False
             )
             
@@ -266,6 +292,7 @@ Example: "Create a Python FastAPI server with a health check endpoint"
                     response = self.backend_client.save_code(
                         conversation_id=self.conversation_id,
                         project_root=self.project_root,
+                        code_blocks=self.last_code_blocks,
                         overwrite=True
                     )
             

@@ -455,6 +455,7 @@ class TUIBackendClient:
         self,
         conversation_id: str,
         project_root: str,
+        code_blocks: list = None,
         overwrite: bool = False
     ) -> Dict[str, Any]:
         """Save generated code to files via /api/code/save endpoint.
@@ -462,6 +463,7 @@ class TUIBackendClient:
         Args:
             conversation_id: Conversation ID containing code blocks
             project_root: Project directory to write files to
+            code_blocks: List of code blocks to save (required)
             overwrite: Whether to overwrite existing files
         
         Returns:
@@ -469,15 +471,7 @@ class TUIBackendClient:
                 "success": bool,
                 "written": int (number of files written),
                 "total": int (total code blocks),
-                "files": [
-                    {
-                        "filename": "...",
-                        "filepath": "...",
-                        "success": bool,
-                        "size": int,
-                        "error": str or None
-                    }
-                ],
+                "files": [...],
                 "errors": [list of error strings if any]
             }
         """
@@ -486,10 +480,11 @@ class TUIBackendClient:
             payload = {
                 "conversation_id": conversation_id,
                 "project_root": project_root,
+                "code_blocks": code_blocks or [],
                 "overwrite": overwrite
             }
             
-            logger.info(f"Saving code: conv={conversation_id}, root={project_root}")
+            logger.info(f"Saving code: conv={conversation_id}, blocks={len(code_blocks or [])}")
             request = Request(
                 url,
                 data=json.dumps(payload).encode("utf-8"),
