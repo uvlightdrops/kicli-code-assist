@@ -33,11 +33,15 @@ def get_config() -> Dict[str, Any]:
     except Exception as e:
         logger = logging.getLogger("kicli-web")
         logger.error(f"Failed to load config: {e}")
+        fallback_port = 8000 if os.environ.get("KI_STAGE") == "production" else 8100
         return {
             "web": {
-                "host": "127.0.0.1", 
-                "port": 8000,
-                "cors_origins": ["http://127.0.0.1:5173", "http://127.0.0.1:8000"]
+                "host": "127.0.0.1",
+                "port": fallback_port,
+                "cors_origins": [
+                    "http://127.0.0.1:5173",
+                    f"http://127.0.0.1:{fallback_port}",
+                ],
             },
             "storage": {"log_dir": str(Path.home() / "dev_data" / "kicli-code-assist" / "log")},
         }
@@ -90,7 +94,7 @@ def get_cors_origins(config: Dict[str, Any]) -> list[str]:
         pass
     
     # Fallback to development defaults
-    return ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8000"]
+    return ["http://127.0.0.1:5173", "http://localhost:5173", "http://127.0.0.1:8100"]
 
 
 def get_web_settings(config: Dict[str, Any]) -> tuple[str, int]:
@@ -103,6 +107,10 @@ def get_web_settings(config: Dict[str, Any]) -> tuple[str, int]:
         Tuple of (host, port)
     """
     web_config = config.get("web", {})
-    host = web_config.get("host", "127.0.0.1")
-    port = web_config.get("port", 8000)
+    services = config.get("stack", {}).get("services", {})
+    service = services.get("web") or services.get("api") or {}
+    host = web_config.get("host", service.get("host", "127.0.0.1"))
+    port = web_config.get("port")
+    if port is None:
+        port = service.get("port", 8100)
     return host, port

@@ -111,7 +111,7 @@ def register_settings_routes(app: Flask, project_root: Optional[Path] = None) ->
         return web if isinstance(web, dict) else {}
 
     def _configured_origins() -> set[str]:
-        origins = _web_config().get("cors_origins") or ["http://localhost:3000"]
+        origins = _web_config().get("cors_origins") or ["http://localhost:5173"]
         return {o for o in (_origin_of(str(x)) for x in origins) if o}
 
     def _allowed_origins() -> set[str]:
