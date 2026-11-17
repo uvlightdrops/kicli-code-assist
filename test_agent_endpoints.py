@@ -5,7 +5,7 @@ import requests
 import json
 from pathlib import Path
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8100"
 
 
 def test_explain_endpoint():
@@ -38,7 +38,7 @@ def test_explain_endpoint():
             return False
 
     except requests.ConnectionError:
-        print("❌ Connection error - server not running on http://127.0.0.1:8000")
+        print("❌ Connection error - server not running on http://127.0.0.1:8100")
         return False
     except Exception as e:
         print(f"❌ Error: {e}")

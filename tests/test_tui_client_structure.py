@@ -10,8 +10,8 @@ from kicli_code_assist.ui.tui_agent_client import TUIAgentClient
 def test_tui_config_creation():
     """Test TUIConfig initialization."""
     config = TUIConfig()
-    assert config.api_base_url == "http://localhost:8000"
-    assert config.ws_base_url == "ws://localhost:8000"
+    assert config.api_base_url == "http://localhost:8100"
+    assert config.ws_base_url == "ws://localhost:8100"
     assert config.max_output_lines == 500
 
 
@@ -24,6 +24,6 @@ def test_tui_config_from_env(monkeypatch):
 
 def test_agent_client_initialization():
     """Test TUIAgentClient creation."""
-    client = TUIAgentClient("http://localhost:8000")
-    assert client.base_url == "http://localhost:8000"
-    assert client.ws_url == "ws://localhost:8000"
+    client = TUIAgentClient("http://localhost:8100")
+    assert client.base_url == "http://localhost:8100"
+    assert client.ws_url == "ws://localhost:8100"

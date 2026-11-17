@@ -14,7 +14,7 @@ async def test_agent_integration():
         KI_STAGE=development python -m stackenv start
         python tests/test_tui_integration_example.py
     """
-    client = TUIAgentClient("http://localhost:8000")
+    client = TUIAgentClient("http://localhost:8100")
     
     # Check backend health
     print("Checking backend health...")

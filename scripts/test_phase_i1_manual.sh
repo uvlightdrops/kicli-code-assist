@@ -1,11 +1,11 @@
 #!/bin/bash
 # Phase I1 Manual Testing Guide
-# Backend must be running on port 8000
+# Backend must be running on port 8100
 
 set -e
 
 PROJECT_ROOT="/home/flow/dev_flow/kicli-code-assist"
-BACKEND_URL="http://localhost:8000"
+BACKEND_URL="http://127.0.0.1:8100"
 
 echo ""
 echo "╔══════════════════════════════════════════════════════════════════╗"

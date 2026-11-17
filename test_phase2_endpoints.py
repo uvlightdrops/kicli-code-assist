@@ -6,7 +6,7 @@ import requests
 import time
 from pathlib import Path
 
-BASE_URL = "http://127.0.0.1:8000"
+BASE_URL = "http://127.0.0.1:8100"
 
 # Test file
 TEST_FILE = "kicli_code_assist/agent/analysis/ast_analyzer.py"

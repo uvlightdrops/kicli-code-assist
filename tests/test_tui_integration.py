@@ -40,8 +40,8 @@ class TestAPIClient:
         """Test HTTP client initialization."""
         from kicli_code_assist.ui.api_client import HTTPClient
         
-        client = HTTPClient("http://localhost:8000")
-        assert client.base_url == "http://localhost:8000"
+        client = HTTPClient("http://localhost:8100")
+        assert client.base_url == "http://localhost:8100"
         assert client.timeout == 30
         assert client.retry_count == 3
         
@@ -52,8 +52,8 @@ class TestAPIClient:
         """Test WebSocket client initialization."""
         from kicli_code_assist.ui.api_client import WebSocketClient
         
-        client = WebSocketClient("ws://localhost:8000/socket.io")
-        assert client.ws_url == "ws://localhost:8000/socket.io"
+        client = WebSocketClient("ws://localhost:8100/socket.io")
+        assert client.ws_url == "ws://localhost:8100/socket.io"
         assert client.websocket is None
     
     @pytest.mark.asyncio
@@ -61,8 +61,8 @@ class TestAPIClient:
         """Test backend client initialization."""
         from kicli_code_assist.ui.api_client import BackendClient
         
-        client = BackendClient("http://localhost:8000")
-        assert client.backend_url == "http://localhost:8000"
+        client = BackendClient("http://localhost:8100")
+        assert client.backend_url == "http://localhost:8100"
         assert client.http_client is not None
         assert client.ws_client is not None
 

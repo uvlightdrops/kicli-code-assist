@@ -11,7 +11,7 @@ import requests
 import json
 from pathlib import Path
 
-API_URL = "http://localhost:8000/api"
+API_URL = "http://127.0.0.1:8100/api"
 TIMEOUT = 10
 
 def test_health():

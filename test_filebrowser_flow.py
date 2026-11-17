@@ -6,7 +6,7 @@ import requests
 import json
 from pathlib import Path
 
-BASE_URL = "http://localhost:8000"
+BASE_URL = "http://localhost:8100"
 PROJECT_PATH = "/home/flow/dev_flow/ki-knowledge"
 
 print("=" * 60)
