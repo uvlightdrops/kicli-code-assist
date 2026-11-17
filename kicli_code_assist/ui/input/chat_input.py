@@ -8,9 +8,10 @@ from textual.containers import Horizontal
 class ChatInput(TextArea):
     """Chat input with command history support and visual Send button."""
 
-    def __init__(self, parent_app, *args, **kwargs):
+    def __init__(self, parent_app, *args, on_send_callback=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.parent_app = parent_app
+        self.on_send_callback = on_send_callback  # Optional callback for send event
         self.command_history = []  # History of submitted commands
         self.history_index = -1  # Current position in history (-1 = new input)
         self.pending_input = ""  # Store current input while browsing history
@@ -22,8 +23,14 @@ class ChatInput(TextArea):
             self.command_history.append(text)
             self.history_index = -1
             self.pending_input = ""
-            # Submit to app
-            self.parent_app.action_select_cursor()
+            
+            # Call callback if provided, otherwise use action_select_cursor
+            if self.on_send_callback:
+                self.on_send_callback(text)
+            else:
+                # Submit to app
+                self.parent_app.action_select_cursor()
+            
             # Clear input after sending
             self.text = ""
     

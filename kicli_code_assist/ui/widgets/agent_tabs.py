@@ -1,12 +1,13 @@
 """
-Agent Tabs Panel Widget - Phase I1
+Agent Tabs Panel Widget - Phase I1, I3
 
-Tabbed container for agent analysis results.
-Each tab = one agent type (Explain, Metrics, Refactor, Suggest, Dependencies, Reason)
+Tabbed container for agent analysis results + code generation.
+Each tab = one agent type (Explain, Metrics, Refactor, Suggest, Dependencies, Reason, Generate)
 
 Layout per tab:
 - Top 50%: Agent Response (conversational result)
 - Bottom 50%: Agent Chunks (streaming thinking/observations)
+- Generate tab: Chat interface for iterative code generation
 
 Features:
 - Real LLM analysis via /api/agent/route (Phase I1)
@@ -27,6 +28,7 @@ from textual.app import ComposeResult
 from textual import work
 
 from .agent_response import AgentTabContent
+from .code_generation_panel import CodeGenerationPanel
 from ..mock_data import get_mock_response, get_mock_chunks
 from ..http_client import get_backend_client, AnalysisResponse
 
@@ -85,7 +87,7 @@ class AgentTabPanel(Static):
         default_tab: str = "explain",
         file_path: Optional[str] = None,
         project_root: Optional[str] = None,
-        backend_url: str = "http://localhost:8000"
+        backend_url: str = "http://localhost:8100"
     ):
         """Initialize agent tabs.
         
@@ -97,9 +99,10 @@ class AgentTabPanel(Static):
             backend_url: Backend URL for API calls
         """
         super().__init__()
-        self.enabled_tabs = enabled_tabs or ["Explain", "Metrics", "Refactor", "Suggest", "Dependencies", "Reason"]
+        self.enabled_tabs = enabled_tabs or ["Explain", "Metrics", "Refactor", "Suggest", "Dependencies", "Reason", "Generate"]
         self.default_tab = default_tab.lower() if default_tab else "explain"
         self.tab_contents: Dict[str, AgentTabContent] = {}
+        self.code_gen_panel: Optional[CodeGenerationPanel] = None
         self.tabbed_content: Optional[TabbedContent] = None
         self.file_path = file_path
         self.project_root = project_root or str(Path.cwd())
@@ -109,16 +112,29 @@ class AgentTabPanel(Static):
     
     def compose(self):
         """Compose the panel: button + tabs."""
+        import logging
+        logger = logging.getLogger("agent_tabs")
+        logger.info(f"Composing AgentTabPanel with tabs: {self.enabled_tabs}")
+        
         yield Button("Analyze", id="btn-analyze", variant="primary")
         
         # Create tabbed content with tabs as children
         with TabbedContent():
             for tab_name in self.enabled_tabs:
                 tab_id = tab_name.lower()
-                tab_content = AgentTabContent(tab_id)
-                self.tab_contents[tab_id] = tab_content
+                logger.info(f"Creating tab: {tab_name} (id: {tab_id})")
                 
-                yield TabPane(tab_name, tab_content, id=f"tab-{tab_id}")
+                # Special handling for Generate tab (code generation chat)
+                if tab_id == "generate":
+                    logger.info("Creating CodeGenerationPanel for Generate tab")
+                    self.code_gen_panel = CodeGenerationPanel(project_root=self.project_root)
+                    yield TabPane(tab_name, self.code_gen_panel, id=f"tab-{tab_id}")
+                else:
+                    # Regular analysis tabs
+                    tab_content = AgentTabContent(tab_id)
+                    self.tab_contents[tab_id] = tab_content
+                    yield TabPane(tab_name, tab_content, id=f"tab-{tab_id}")
+        logger.info(f"Finished composing {len(self.enabled_tabs)} tabs")
     
     def on_mount(self) -> None:
         """Setup after mount."""

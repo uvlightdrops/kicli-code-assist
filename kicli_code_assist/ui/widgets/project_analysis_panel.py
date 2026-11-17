@@ -108,7 +108,7 @@ class ProjectAnalysisPanel(Static):
     def __init__(
         self,
         project_root: Optional[str] = None,
-        backend_url: str = "http://localhost:8000"
+        backend_url: str = "http://localhost:8100"
     ):
         """Initialize project analysis panel.
         
