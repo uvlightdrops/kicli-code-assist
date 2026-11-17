@@ -29,7 +29,7 @@ class AgentTabsConfig(BaseModel):
     """Agent tabs panel configuration."""
     enabled: bool = True
     enabled_tabs: List[str] = Field(
-        default_factory=lambda: ["Explain", "Suggest", "Reason", "Metrics"]
+        default_factory=lambda: ["Explain", "Suggest", "Reason", "Metrics", "Generate"]
     )
     default_tab: str = "Explain"
 
@@ -68,7 +68,7 @@ class PreviewPanelConfig(BaseModel):
 
 class BackendConfig(BaseModel):
     """Backend API configuration."""
-    url: str = "http://localhost:8000"
+    url: str = "http://localhost:8100"
     timeout: int = 30
     retry_count: int = 3
     ws_url: Optional[str] = None  # Auto-derived if None

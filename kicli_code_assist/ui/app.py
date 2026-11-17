@@ -19,6 +19,7 @@ from kicli_code_assist.ui.shell_approval_widget import ShellCommandApprovalModal
 from kicli_code_assist.ui.command_editing_workflow import CommandEditingWorkflow
 from kicli_code_assist.ui.terminal_panel import TerminalPanel
 from kicli_code_assist.ui.edit_tab import EditTab
+from kicli_code_assist.ui.widgets.code_generation_panel import CodeGenerationPanel
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 from kicli_code_assist.ui.panels.file_browser import SelectableFileList
 from kicli_code_assist.ui.panels.preview_pane import PreviewPane
@@ -84,6 +85,7 @@ class CodeAssistantApp(Static):
         self.left_panel = None  # New LeftPanel with browser/editor tabs
         self.preview_display = None
         self.preview_title = None
+        self.code_gen_panel = None  # Code generation panel (Phase I3)
         self.chat_display = None
         self.debug_chat_display = None  # Debug chat display (direct OpenAI)
         self.terminal_panel = None  # Terminal output panel
@@ -232,6 +234,11 @@ class CodeAssistantApp(Static):
             # Right: Chat/Terminal tabs
             with Vertical(id="right_panel", classes="panel"):
                 with TabbedContent(id="chat_terminal_tabs"):
+                    # Code Generation tab (Phase I3)
+                    with TabPane("🚀 Generate", id="tab_code_generation"):
+                        self.code_gen_panel = CodeGenerationPanel(project_root=self.current_cwd)
+                        yield self.code_gen_panel
+                    
                     # Chat tab
                     with TabPane("💬 Chat", id="tab_chat"):
                         self.chat_display = SelectableRichLog(highlight=False, markup=True)

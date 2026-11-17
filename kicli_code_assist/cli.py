@@ -29,7 +29,7 @@ def run_tui(config: str | None = None, provider: str | None = None) -> None:
 
 @click.command()
 @click.option("--project", default=None, help="Project root (defaults to current directory)")
-@click.option("--api-url", default="http://localhost:8000", help="Backend API URL")
+@click.option("--api-url", default="http://localhost:8100", help="Backend API URL")
 def tui(project: str | None, api_url: str) -> None:
     """Launch agent-driven TUI client (for jump hosts without GUI access).
     
