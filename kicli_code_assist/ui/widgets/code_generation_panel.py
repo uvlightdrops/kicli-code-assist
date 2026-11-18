@@ -247,6 +247,36 @@ Example: "Create a Python FastAPI server with a health check endpoint"
         finally:
             self.is_generating = False
     
+    def _debug_widget_tree(self) -> str:
+        """Debug: show widget tree structure."""
+        lines = []
+        try:
+            # Show all widgets on screen
+            from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
+            from kicli_code_assist.ui.app import CodeAssistantApp
+            
+            all_widgets = self.screen.query("*")
+            tabbedpane_widgets = self.screen.query("TabbedEditorPane")
+            codeassistant_widgets = self.screen.query(CodeAssistantApp)
+            
+            lines.append(f"Total widgets: {len(all_widgets)}")
+            lines.append(f"TabbedEditorPane count: {len(tabbedpane_widgets)}")
+            lines.append(f"CodeAssistantApp count: {len(codeassistant_widgets)}")
+            
+            # Show hierarchy
+            lines.append("\nWidget types on screen:")
+            widget_types = {}
+            for w in all_widgets:
+                wtype = type(w).__name__
+                widget_types[wtype] = widget_types.get(wtype, 0) + 1
+            for wtype, count in sorted(widget_types.items())[:10]:
+                lines.append(f"  {wtype}: {count}")
+                
+        except Exception as ex:
+            lines.append(f"Debug error: {ex}")
+        
+        return "\n".join(lines)
+    
     def _save_code(self) -> None:
         """Save generated code to files.
         
@@ -266,7 +296,18 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
             tabbed_editor = self.screen.query_one(TabbedEditorPane, expect_type=TabbedEditorPane)
         except Exception as e:
-            self.chat_display.write(f"[red]❌ Editor not available: {e}[/red]\n")
+            # Diagnostic info
+            msg = f"""[red]❌ Editor not available[/red]
+[dim]Error: {type(e).__name__}: {e}[/dim]
+
+[yellow]Checking widget tree...[/yellow]
+[dim]Screen: {self.screen}
+Screen ID: {self.screen.id if hasattr(self.screen, 'id') else 'N/A'}
+Parent: {self.parent}
+
+Available widgets:
+{self._debug_widget_tree()}[/dim]"""
+            self.chat_display.write(msg + "\n")
             return
         
         # Add each code block as a tab
