@@ -32,4 +32,5 @@ semantic_blocks: [documentation-index, navigation, subfolders]
 
 ## Subfolders [subfolders]
 
-- **archive/**
+- **archive/** - Outdated or superseded architecture docs
+- **nice2have/** - Future enhancements & reference implementations (not in active roadmap)

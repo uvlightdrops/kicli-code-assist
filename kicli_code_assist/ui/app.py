@@ -22,7 +22,7 @@ from kicli_code_assist.ui.edit_tab import EditTab
 from kicli_code_assist.ui.widgets.code_generation_panel import CodeGenerationPanel
 from kicli_code_assist.executor.shell_execution import ShellCommandBatch
 from kicli_code_assist.ui.panels.file_browser import SelectableFileList
-from kicli_code_assist.ui.panels.preview_pane import PreviewPane
+from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
 from kicli_code_assist.ui.panels.left_panel import LeftPanel
 from kicli_code_assist.ui.panels.chat_display import SelectableRichLog
 from kicli_code_assist.ui.input.chat_input import ChatInput
@@ -291,7 +291,7 @@ class CodeAssistantApp(Static):
         """Setup after mount."""
         # Get references to file_list and preview_display after widgets are mounted
         self.file_list = self.left_panel.query_one("#file-browser", SelectableFileList)
-        self.preview_display = PreviewPane(self, id="preview_display", classes="preview")
+        self.preview_display = TabbedEditorPane(id="preview_display", classes="preview")
         self.left_panel.add_preview_pane(self.preview_display)
         
         # Set Chat tab as default active tab
@@ -301,11 +301,10 @@ class CodeAssistantApp(Static):
         if self.input_field:
             self.call_after_refresh(self.input_field.focus)
     
-    def on_preview_pane_preview_enter(self, message: PreviewPane.PreviewEnter) -> None:
-        """Handle Enter key in preview to open editor tab."""
-        # Create editor tab
-        editor = self.left_panel.create_editor_tab(str(message.file_path), message.content)
-        self.app.notify(f"📝 Editing {message.file_path.name}", timeout=2)
+    def on_tabbed_editor_pane_tab_changed(self, message: TabbedEditorPane.TabChanged) -> None:
+        """Handle tab change in TabbedEditorPane."""
+        # Can be used to update status or other UI elements
+        pass
     
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
@@ -481,15 +480,16 @@ class CodeAssistantApp(Static):
                 self.run_worker(lambda: self._submit_chat(text), thread=True)
     
     def action_mark_selection_start(self) -> None:
-        """Mark selection start in preview."""
-        if self.current_focus == "preview" and self.preview_display:
-            self.preview_display.mark_start()
+        """Mark selection start in preview (deprecated for TabbedEditorPane)."""
+        # TabbedEditorPane doesn't support line selection yet
+        # This is kept for compatibility but is a no-op
+        pass
     
     def action_mark_selection_end(self) -> None:
-        """Mark selection end in preview."""
-        if self.current_focus == "preview" and self.preview_display:
-            self.preview_display.mark_end()
-            self.preview_display.append_selection_to_context()
+        """Mark selection end in preview (deprecated for TabbedEditorPane)."""
+        # TabbedEditorPane doesn't support line selection yet
+        # This is kept for compatibility but is a no-op
+        pass
     
     def action_load_context(self) -> None:
         """Load selected file to context (Ctrl+L)."""
@@ -709,19 +709,18 @@ class CodeAssistantApp(Static):
         """Update preview pane with file contents."""
         try:
             if not self.is_path_allowed(path):
-                self.preview_display.update("❌ Path not allowed")
+                # Can't directly update TabbedEditorPane; show notification instead
+                self.show_status_message("❌ Path not allowed", duration_ms=2000)
                 return
             
             with open(path, 'r', encoding='utf-8', errors='replace') as f:
-                lines = f.readlines()
+                content = f.read()
             
-            # Remove trailing newlines
-            lines = [line.rstrip('\n') for line in lines]
-            
-            self.preview_display.set_content(path, lines)
+            # Add tab to tabbed editor
+            self.preview_display.add_file_tab(str(path), content, status="saved")
             self.selected_file = str(path)
         except Exception as e:
-            self.preview_display.update(f"Error loading preview: {e}")
+            self.show_status_message(f"Error loading preview: {e}", duration_ms=3000)
     
     def append_preview_selection(self, file_path: Path, start_line: int, end_line: int, lines: list[str]) -> None:
         """Append file selection to context."""
