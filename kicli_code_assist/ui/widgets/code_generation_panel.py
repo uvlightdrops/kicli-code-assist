@@ -263,7 +263,12 @@ Example: "Create a Python FastAPI server with a health check endpoint"
         # Get tabbed editor from app
         tabbed_editor = getattr(self.app, 'preview_display', None)
         if not tabbed_editor:
-            self.chat_display.write("[red]❌ Editor not available.[/red]\n")
+            app_type = type(self.app).__name__
+            app_attrs = [a for a in dir(self.app) if not a.startswith('_')]
+            self.chat_display.write(f"[red]❌ Editor not available.[/red]\n")
+            self.chat_display.write(f"[dim]Debug: app type={app_type}, attrs={len(app_attrs)}[/dim]\n")
+            if 'preview_display' in app_attrs:
+                self.chat_display.write(f"[dim]Has preview_display: {self.app.preview_display}[/dim]\n")
             return
         
         # Add each code block as a tab
