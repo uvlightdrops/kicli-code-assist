@@ -18,7 +18,6 @@ from textual import work
 
 from ..panels.chat_display import SelectableRichLog
 from ..input.chat_input import ChatInput
-from .code_preview_modal import CodePreviewModal
 from .conversation_browser_modal import ConversationBrowserModal
 
 logger = logging.getLogger(__name__)
@@ -261,18 +260,30 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             self.chat_display.write("[yellow]⚠️  No code blocks to save.[/yellow]\n")
             return
         
-        # Show preview modal
-        def _handle_preview_response(should_save: bool) -> None:
-            """Callback when preview modal closes."""
-            if should_save:
-                self._do_save_code()
+        # Get tabbed editor from app
+        tabbed_editor = getattr(self.app, 'preview_display', None)
+        if not tabbed_editor:
+            self.chat_display.write("[red]❌ Editor not available.[/red]\n")
+            return
         
-        # Push modal screen (non-blocking)
-        modal = CodePreviewModal(
-            code_blocks=self.last_code_blocks,
-            project_root=self.project_root
-        )
-        self.app.push_screen(modal, callback=_handle_preview_response)
+        # Add each code block as a tab
+        for block in self.last_code_blocks:
+            filepath = block.get('filepath', 'unknown')
+            content = block.get('content', '')
+            
+            # Determine status: new or modified
+            status = "new"  # Could check if file exists in project
+            
+            # Add to tabbed editor
+            tabbed_editor.add_file_tab(
+                filepath=filepath,
+                content=content,
+                status=status
+            )
+            self.chat_display.write(f"[cyan]📄 Added: {filepath}[/cyan]\n")
+        
+        # Trigger auto-save via agent
+        self._do_save_code()
     
     def _do_save_code(self) -> None:
         """Actually save code to files (called after preview modal).
