@@ -260,15 +260,13 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             self.chat_display.write("[yellow]⚠️  No code blocks to save.[/yellow]\n")
             return
         
-        # Get tabbed editor from app
-        tabbed_editor = getattr(self.app, 'preview_display', None)
-        if not tabbed_editor:
-            app_type = type(self.app).__name__
-            app_attrs = [a for a in dir(self.app) if not a.startswith('_')]
-            self.chat_display.write(f"[red]❌ Editor not available.[/red]\n")
-            self.chat_display.write(f"[dim]Debug: app type={app_type}, attrs={len(app_attrs)}[/dim]\n")
-            if 'preview_display' in app_attrs:
-                self.chat_display.write(f"[dim]Has preview_display: {self.app.preview_display}[/dim]\n")
+        # Get tabbed editor from widget hierarchy using screen query
+        try:
+            # Query up the widget tree to find TabbedEditorPane
+            from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
+            tabbed_editor = self.screen.query_one(TabbedEditorPane, expect_type=TabbedEditorPane)
+        except Exception as e:
+            self.chat_display.write(f"[red]❌ Editor not available: {e}[/red]\n")
             return
         
         # Add each code block as a tab
