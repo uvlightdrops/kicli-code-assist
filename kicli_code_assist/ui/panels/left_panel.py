@@ -1,6 +1,7 @@
 """Left panel with tabbed file browsing and editing."""
 
 from pathlib import Path
+from typing import Union
 from textual.app import ComposeResult
 from textual.containers import Container, Vertical
 from textual.widgets import TabbedContent, TabPane
@@ -8,6 +9,7 @@ from textual.widgets import TabbedContent, TabPane
 from kicli_code_assist.ui.panels.file_browser import SelectableFileList
 from kicli_code_assist.ui.panels.preview_pane import PreviewPane
 from kicli_code_assist.ui.panels.file_editor import FileEditorPane
+from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
 
 
 class LeftPanel(Container):
@@ -55,19 +57,21 @@ class LeftPanel(Container):
         # Get reference to TabbedContent after composition
         self.tabbed_content = self.query_one(TabbedContent)
     
-    def add_preview_pane(self, preview_pane: PreviewPane) -> None:
+    def add_preview_pane(self, preview_pane: Union[PreviewPane, TabbedEditorPane]) -> None:
         """Add preview pane to browser tab.
         
         Args:
-            preview_pane: PreviewPane widget to add
+            preview_pane: PreviewPane or TabbedEditorPane widget to add
         """
         if not self.tabbed_content:
             return
         
         browser_tab = self.tabbed_content.query_one("#tab-browser", TabPane)
-        # Remove old preview if exists
+        # Remove old preview/editor if exists
         for old_preview in browser_tab.query("PreviewPane"):
             old_preview.remove()
+        for old_editor in browser_tab.query("TabbedEditorPane"):
+            old_editor.remove()
         browser_tab.mount(preview_pane)
     
     def create_editor_tab(self, file_path: str, content: str) -> FileEditorPane:
