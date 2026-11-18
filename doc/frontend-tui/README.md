@@ -29,6 +29,7 @@ semantic_blocks:
 
 | File | Status | Purpose |
 |------|--------|---------|
+| **MULTIFILE_GENERATION_UI.md** | **active** | **Tabbed file editor design & implementation for multi-file code generation** |
 | **TUI_WORK_SESSIONS.md** | **active** | **Central log of all interactive TUI testing sessions & results** |
 | **MODAL_DIALOG_FLOWS.md** | **active** | **All modal/dialog workflows with state diagrams and data flow** |
 | **STABILITY_ANALYSIS.md** | **active** | **Crash patterns, audit checklist, fixes, debugging techniques** |
@@ -45,6 +46,7 @@ semantic_blocks:
 
 ## Navigation [navigation]
 
+- See: **[MULTIFILE_GENERATION_UI.md](./MULTIFILE_GENERATION_UI.md)** for new tabbed editor design & implementation
 - See: [TUI_WORK_SESSIONS.md](./TUI_WORK_SESSIONS.md) for all interactive testing sessions and discovered issues
 - See: [MODAL_DIALOG_FLOWS.md](./MODAL_DIALOG_FLOWS.md) for all modal workflows and state diagrams
 - See: [STABILITY_ANALYSIS.md](./STABILITY_ANALYSIS.md) for crash patterns and stability audit
