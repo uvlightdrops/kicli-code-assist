@@ -68,8 +68,37 @@ class FileTree(Tree):
         logger.info(f"FileTree initialized: {self.project_root}")
     
     def on_mount(self) -> None:
-        """Scan project on mount."""
+        """Scan project on mount and auto-expand root to depth 1."""
         self.scan_project()
+        self._auto_expand_root()
+    
+    def _auto_expand_root(self) -> None:
+        """Auto-expand root node to depth 1 on startup.
+        
+        Shows first-level folders to user without overwhelming with deep nesting.
+        Skips if root has >100 children (too slow).
+        """
+        try:
+            root = self.root
+            
+            # Safety check: don't auto-expand huge directories
+            if len(root.children) > 100:
+                logger.warning(f"Skipping auto-expand: {len(root.children)} root items (too many)")
+                return
+            
+            # Expand immediate children (depth 1 only)
+            for child in root.children:
+                if not child.is_expanded:
+                    # Lazy-load the child if it's a directory
+                    if child.data and child.data.get("is_dir"):
+                        self._populate_node(child)
+                    # Expand it
+                    child.expand()
+            
+            logger.info(f"Auto-expanded root: {len(root.children)} items expanded")
+        
+        except Exception as e:
+            logger.warning(f"Error during auto-expand: {e}")
     
     def scan_project(self, highlight_files: set = None) -> None:
         """Scan project root and populate tree.
