@@ -206,7 +206,7 @@ class TabBar(Static):
     TabBar .tab-button.active {
         background: $primary;
         color: $text;
-        bold: true;
+        text-style: bold;
     }
     
     TabBar .tab-button:hover {
