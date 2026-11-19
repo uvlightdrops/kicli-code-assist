@@ -109,26 +109,33 @@ class FileContentViewer(Static):
     
     def render(self) -> Text:
         """Render file content with syntax highlighting and line numbers."""
+        # Handle empty content
+        if not self.file_tab.content or not self.file_tab.content.strip():
+            return Text("[dim]No content[/dim]", style="dim")
+        
         lines = self.file_tab.content.split("\n")
         language = self.file_tab.get_language()
         
         # Try syntax highlighting if language is detected
         try:
-            if language and lines:
+            if language and self.file_tab.content.strip():
                 syntax = Syntax(
                     self.file_tab.content,
                     language,
                     theme="monokai",
                     line_numbers=True,
-                    start_line=self.scroll_offset + 1,
+                    start_line=max(1, self.scroll_offset + 1),
+                    word_wrap=False,
+                    background_color="default",
                 )
                 return syntax
-        except Exception:
+        except Exception as e:
+            # Debug: log the error but continue
             pass
         
         # Fallback: render with line numbers manually
         rendered = []
-        start = self.scroll_offset
+        start = max(0, self.scroll_offset)
         end = min(len(lines), start + self.page_size)
         
         for line_no in range(start, end):
