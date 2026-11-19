@@ -100,6 +100,7 @@ class CodeGenerationPanel(Static):
         self.conversation_id: Optional[str] = None
         self.backend_client = None
         self.last_code_blocks: list = []  # Store code blocks from last generation
+        self.saved_files_this_session: set = set()  # Track newly saved file paths
     
     def compose(self) -> ComposeResult:
         """Compose the panel."""
@@ -343,9 +344,11 @@ Available widgets:
         self._do_save_code()
     
     def _do_save_code(self) -> None:
-        """Actually save code to files (called after preview modal).
+        """Actually save code to files and populate editor tabs.
         
         Implements auto-retry logic for file conflicts.
+        Tracks newly saved files for highlight display in FileTree.
+        Populates TabbedEditorPane with saved file content.
         """
         try:
             self.chat_display.write("[cyan]💾 Saving code files...[/cyan]\n")
@@ -371,7 +374,7 @@ Available widgets:
                         overwrite=True
                     )
             
-            # Display results
+            # Display results and collect newly saved file paths
             if response.get("success") or response.get("written", 0) > 0:
                 written = response.get("written", 0)
                 total = response.get("total", 0)
@@ -379,19 +382,41 @@ Available widgets:
                 
                 self.chat_display.write(f"[green]✅ Saved {written}/{total} files[/green]\n")
                 
+                # Collect successful file paths for highlighting and editor population
+                newly_saved = []
+                editor_files_added = 0
+                
                 for file_result in files:
                     if file_result.get("success"):
                         filepath = file_result.get("filepath", "")
                         size = file_result.get("size", 0)
                         filename = file_result.get("filename", "")
+                        content = file_result.get("content", "")
+                        
                         self.chat_display.write(f"  [green]✓[/green] {filename} ({size} bytes)\n")
+                        
+                        # Track newly saved file
+                        if filepath:
+                            self.saved_files_this_session.add(filepath)
+                            newly_saved.append(filepath)
+                            
+                            # Add to editor if content is available
+                            if content and self._add_file_to_editor(filepath, content):
+                                editor_files_added += 1
                     else:
                         filename = file_result.get("filename", "")
                         error = file_result.get("error", "Unknown error")
                         self.chat_display.write(f"  [red]✗[/red] {filename}: {error}\n")
                 
-                # Refresh FileTree to show newly saved files
-                self._refresh_file_tree()
+                # Refresh FileTree with highlight list
+                self._refresh_file_tree(highlight_files=set(newly_saved))
+                
+                # Show editor population summary
+                if editor_files_added > 0:
+                    self.chat_display.write(
+                        f"[bold cyan]📝 {editor_files_added} files ready for review in Editor tab[/bold cyan]\n"
+                    )
+                    logger.info(f"Added {editor_files_added} files to editor, highlighting {len(newly_saved)}")
             else:
                 error = response.get("error", "Unknown error")
                 self.chat_display.write(f"[red]❌ Save failed: {error}[/red]\n")
@@ -480,8 +505,12 @@ Available widgets:
             logger.error(f"Delete conversation failed: {e}")
             self.chat_display.write(f"[red]❌ Error: {e}[/red]\n")
     
-    def _refresh_file_tree(self) -> None:
-        """Refresh FileTree to show newly saved files."""
+    def _refresh_file_tree(self, highlight_files: set = None) -> None:
+        """Refresh FileTree to show newly saved files with highlighting.
+        
+        Args:
+            highlight_files: Set of file paths to highlight with 🆕 emoji
+        """
         try:
             # Find FileTree widget anywhere on screen
             from .file_browser import FileTree
@@ -489,9 +518,36 @@ Available widgets:
             file_trees = self.screen.query(FileTree)
             if file_trees:
                 file_tree = file_trees.first()
-                file_tree.scan_project()
-                logger.info("FileTree refreshed after save")
+                file_tree.scan_project(highlight_files=highlight_files)
+                logger.info(f"FileTree refreshed with {len(highlight_files or [])} highlighted files")
             else:
                 logger.debug("FileTree not found on screen")
         except Exception as e:
             logger.warning(f"Could not refresh FileTree: {e}")
+    
+    def _add_file_to_editor(self, filepath: str, content: str) -> bool:
+        """Add a file to the tabbed editor.
+        
+        Args:
+            filepath: Full file path
+            content: File content
+            
+        Returns:
+            True if successfully added, False otherwise
+        """
+        try:
+            from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
+            
+            tabbed_editors = self.screen.query(TabbedEditorPane)
+            if not tabbed_editors:
+                logger.debug("TabbedEditorPane not found, skipping editor population")
+                return False
+            
+            editor = tabbed_editors.first()
+            editor.add_file_tab(filepath=filepath, content=content, status="new")
+            logger.debug(f"Added {filepath} to editor")
+            return True
+        
+        except Exception as e:
+            logger.warning(f"Could not add file to editor: {e}")
+            return False
