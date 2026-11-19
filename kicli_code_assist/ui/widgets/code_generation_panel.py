@@ -255,14 +255,22 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             # Show all widgets on screen
             from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
             from kicli_code_assist.ui.app import CodeAssistantApp
+            from kicli_code_assist.ui.panels.left_panel import LeftPanel
             
             all_widgets = self.screen.query("*")
             tabbedpane_widgets = self.screen.query("TabbedEditorPane")
             codeassistant_widgets = self.screen.query(CodeAssistantApp)
+            left_panels = self.screen.query(LeftPanel)
             
             lines.append(f"Total widgets: {len(all_widgets)}")
-            lines.append(f"TabbedEditorPane count: {len(tabbedpane_widgets)}")
             lines.append(f"CodeAssistantApp count: {len(codeassistant_widgets)}")
+            lines.append(f"LeftPanel count: {len(left_panels)}")
+            lines.append(f"TabbedEditorPane count: {len(tabbedpane_widgets)}")
+            
+            if left_panels:
+                for i, lp in enumerate(left_panels):
+                    lines.append(f"\n  LeftPanel[{i}]:")
+                    lines.append(f"    tabbed_content: {lp.tabbed_content}")
             
             # Show hierarchy
             lines.append("\nWidget types on screen:")
@@ -270,7 +278,7 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             for w in all_widgets:
                 wtype = type(w).__name__
                 widget_types[wtype] = widget_types.get(wtype, 0) + 1
-            for wtype, count in sorted(widget_types.items())[:10]:
+            for wtype, count in sorted(widget_types.items())[:15]:
                 lines.append(f"  {wtype}: {count}")
                 
         except Exception as ex:
