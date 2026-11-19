@@ -374,7 +374,7 @@ class TabbedEditorPane(Static):
         yield self.status_label
     
     def add_file_tab(self, filepath: str, content: str, status: str = "new") -> None:
-        """Add a new file tab.
+        """Add a new file tab or focus if already open.
         
         Args:
             filepath: Full path to file
@@ -382,9 +382,17 @@ class TabbedEditorPane(Static):
             status: File status ('new', 'modified', 'saved')
             
         Note:
+            - If file already in tabs, sets it as active (focus existing)
             - Handles large files gracefully (>10MB shows truncation warning)
-            - Sets status to NEW for newly generated files
         """
+        # If file already in tabs, just focus it
+        if filepath in self.tabs:
+            self.active_tab = filepath
+            self._refresh_ui()
+            import logging
+            logging.debug(f"File already open, focusing: {filepath}")
+            return
+        
         # Handle very large files
         content_size_mb = len(content) / (1024 * 1024)
         if content_size_mb > 10:
@@ -403,6 +411,9 @@ class TabbedEditorPane(Static):
         )
         
         if self.active_tab is None:
+            self.active_tab = filepath
+        else:
+            # New file added, switch to it
             self.active_tab = filepath
         
         self._refresh_ui()
@@ -444,6 +455,21 @@ class TabbedEditorPane(Static):
             tab = self.tabs[self.active_tab]
             return (self.active_tab, tab.content)
         return None
+    
+    def set_active_tab(self, filepath: str) -> bool:
+        """Set the active tab by file path.
+        
+        Args:
+            filepath: Full path to file to activate
+        
+        Returns:
+            True if successful, False if file not in tabs
+        """
+        if filepath in self.tabs:
+            self.active_tab = filepath
+            self._refresh_ui()
+            return True
+        return False
     
     def save_all_files(self) -> Dict[str, bool]:
         """Save all files to disk.
@@ -551,9 +577,41 @@ class TabbedEditorPane(Static):
     def _refresh_ui(self) -> None:
         """Update UI after state changes.
         
-        This method is called after tab operations. In a full Textual app,
-        it would refresh the UI. In tests, we only update internal state.
+        Updates TabBar with current tabs and updates FileContentViewer with active file.
         """
-        # Note: Don't try to query DOM here - testing context may not have it.
-        # Only update internal state that's safe to access without full rendering.
-        pass
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        try:
+            # Update TabBar
+            if self.tab_bar:
+                self.tab_bar.tabs = self.tabs
+                self.tab_bar.active_tab = self.active_tab
+                self.tab_bar.refresh()
+                logger.debug(f"TabBar refreshed: {len(self.tabs)} tabs, active={self.active_tab}")
+            
+            # Update FileContentViewer with active file content
+            if self.content_viewer and self.active_tab and self.active_tab in self.tabs:
+                active_file_tab = self.tabs[self.active_tab]
+                self.content_viewer.file_tab = active_file_tab
+                self.content_viewer.refresh()
+                logger.debug(f"FileContentViewer refreshed: {self.active_tab}")
+            
+            # Update file path label
+            if self.file_path_label:
+                if self.active_tab:
+                    from pathlib import Path
+                    filename = Path(self.active_tab).name
+                    self.file_path_label.update(f"📄 {filename}")
+                else:
+                    self.file_path_label.update("No file selected")
+            
+            # Update status label
+            if self.status_label and self.active_tab and self.active_tab in self.tabs:
+                tab = self.tabs[self.active_tab]
+                status = tab.status.value
+                lines = len(tab.content.split("\n")) if tab.content else 0
+                self.status_label.update(f"{status} {lines} lines | {len(self.tabs)} tabs open")
+        
+        except Exception as e:
+            logger.error(f"Error refreshing UI: {e}", exc_info=True)

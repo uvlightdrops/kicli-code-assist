@@ -389,18 +389,31 @@ class KICLITUIApp(App):
         """Handle file selection from tree.
         
         Updates:
-        1. Preview panel (shows file content)
+        1. TabbedEditorPane (shows file content)
         2. Agent tabs (sets context for analysis)
         """
         self.selected_file = file_path
         logger.debug(f"File selected: {file_path}")
         
-        # Update preview panel if available
+        # Update tabbed editor pane if available
         try:
-            preview_panel = self.query_one(PreviewPanel)
-            preview_panel.preview_file(file_path)
+            from pathlib import Path
+            file_path_obj = Path(file_path)
+            
+            # Read file content
+            if file_path_obj.is_file():
+                content = file_path_obj.read_text(encoding="utf-8", errors="replace")
+                
+                # Add tab to editor (or focus existing if already open)
+                from .panels.tabbed_editor_pane import TabbedEditorPane
+                editor_pane = self.query_one(TabbedEditorPane)
+                editor_pane.add_file_tab(file_path, content, status="saved")
+                
+                logger.info(f"File loaded in editor: {file_path}")
+            else:
+                logger.warning(f"File not found or not a file: {file_path}")
         except Exception as e:
-            logger.debug(f"Could not update preview panel: {e}")
+            logger.debug(f"Could not update editor pane: {e}")
         
         # Update agent tabs with file context (Phase I1 Real LLM Integration)
         try:
