@@ -94,18 +94,8 @@ class FileContentViewer(Static):
         super().__init__(name=name, id=id)
         self.file_tab = file_tab
         self.cursor_line = 0
-        self._scroll_offset = 0
+        self._line_scroll = 0
         self.page_size = 20
-    
-    @property
-    def scroll_offset(self) -> int:
-        """Get current scroll offset."""
-        return self._scroll_offset
-    
-    @scroll_offset.setter
-    def scroll_offset(self, value: int) -> None:
-        """Set scroll offset."""
-        self._scroll_offset = value
     
     def render(self) -> Text:
         """Render file content with syntax highlighting and line numbers."""
@@ -124,7 +114,7 @@ class FileContentViewer(Static):
                     language,
                     theme="monokai",
                     line_numbers=True,
-                    start_line=max(1, self.scroll_offset + 1),
+                    start_line=max(1, self._line_scroll + 1),
                     word_wrap=False,
                     background_color="default",
                 )
@@ -135,7 +125,7 @@ class FileContentViewer(Static):
         
         # Fallback: render with line numbers manually
         rendered = []
-        start = max(0, self.scroll_offset)
+        start = max(0, self._line_scroll)
         end = min(len(lines), start + self.page_size)
         
         for line_no in range(start, end):
@@ -180,10 +170,10 @@ class FileContentViewer(Static):
     
     def _ensure_cursor_visible(self) -> None:
         """Adjust scroll offset to keep cursor visible."""
-        if self.cursor_line < self.scroll_offset:
-            self.scroll_offset = self.cursor_line
-        elif self.cursor_line >= self.scroll_offset + self.page_size:
-            self.scroll_offset = max(0, self.cursor_line - self.page_size + 1)
+        if self.cursor_line < self._line_scroll:
+            self._line_scroll = self.cursor_line
+        elif self.cursor_line >= self._line_scroll + self.page_size:
+            self._line_scroll = max(0, self.cursor_line - self.page_size + 1)
         
         self.refresh()
 
