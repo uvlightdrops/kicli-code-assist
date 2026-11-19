@@ -11,6 +11,7 @@ from typing import Optional, Set, List
 from textual.widgets import Tree
 from textual.widgets.tree import TreeNode
 from textual.reactive import reactive
+from textual.binding import Binding
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,10 @@ class FileTree(Tree):
         border: double $accent;
     }
     """
+    
+    BINDINGS = [
+        Binding("e", "edit_file", "Edit File", show=True),
+    ]
     
     def __init__(self, project_root: str = ".", ignore_patterns: List[str] = None):
         """Initialize file tree.
@@ -295,3 +300,21 @@ class FileTree(Tree):
         """VI-style right (l) - expand."""
         if self.current_selection and not self.current_selection.is_expanded:
             self.current_selection.toggle()
+    
+    def action_edit_file(self) -> None:
+        """Edit/Open selected file (e key).
+        
+        Explicitly opens the currently selected file in the editor.
+        """
+        if self.cursor_node and self.cursor_node.data:
+            path = self.cursor_node.data.get("path")
+            is_dir = self.cursor_node.data.get("is_dir", False)
+            
+            if path and not is_dir:
+                self.selected_path = str(path)
+                # Trigger file selection callback to open in editor
+                if self.on_file_selected_callback:
+                    try:
+                        self.on_file_selected_callback(self.selected_path)
+                    except Exception as e:
+                        logger.error(f"Error opening file in editor: {e}")
