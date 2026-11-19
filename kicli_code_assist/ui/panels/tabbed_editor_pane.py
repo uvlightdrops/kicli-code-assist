@@ -360,7 +360,7 @@ class TabbedEditorPane(Static):
         with Vertical(id="editor-header"):
             self.file_path_label = Label("No file selected")
             yield self.file_path_label
-            self.tab_bar = TabBar({}, None)
+            self.tab_bar = TabBar(self.tabs, self.active_tab)
             yield self.tab_bar
         
         self.content_viewer = FileContentViewer(
