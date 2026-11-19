@@ -1,14 +1,24 @@
 """
-Project Analysis Panel Widget - Phase I2.3
+Project Analysis Panel Widget - ARCHIVED
 
-Shows project-wide analysis:
+⚠️  DEPRECATED: This widget was removed from the TUI middle pane in the
+layout simplification refactor (2026-11-19). The panel showed project-wide
+analysis including file complexity, dependency graphs, and high-impact files.
+
+This file is kept for reference and historical purposes. If you need project
+analysis functionality, consider:
+1. The right-pane "Metrics" tab for future enhancement
+2. The /api/projects/analyze backend endpoint for programmatic access
+3. CLI-based project analysis tools
+
+The ProjectAnalysisPanel is no longer instantiated or used in tui_client.py.
+
+Original Features (for reference):
 - File list with complexity
 - Dependency graph
 - High-impact files
 - Circular dependencies
 - Impact zones
-
-Features:
 - Real-time project analysis via /api/projects/analyze
 - Drill-down: click file to see full analysis
 - Impact visualization

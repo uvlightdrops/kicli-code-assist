@@ -10,7 +10,7 @@ import logging
 import asyncio
 from textual.app import ComposeResult, on, App
 from textual.containers import Container, Horizontal, Vertical
-from textual.widgets import Header, Footer, Static, TabbedContent, TabPane
+from textual.widgets import Header, Footer, Static
 from textual import work
 
 from .config import ConfigLoader, TUIConfig
@@ -21,7 +21,6 @@ from .widgets.input_bar import InputBar, StatusBar
 from .widgets.preview_panel import PreviewPanel
 from .widgets.preview_modal import FilePreviewModal
 from .widgets.vi_editor_modal import VIEditorModal
-from .widgets.project_analysis_panel import ProjectAnalysisPanel
 from .app import CodeAssistantApp
 
 
@@ -162,7 +161,7 @@ class KICLITUIApp(App):
             self.config_loader.debug_print()
     
     def compose(self) -> ComposeResult:
-        """Compose main UI layout: FileTree (left) | Preview (center, 50%) | Agent (right, 50%)"""
+        """Compose main UI layout: FileTree (left) | Editor (center, 50%) | Agent (right, 50%)"""
         # Header
         yield Header()
         
@@ -177,17 +176,11 @@ class KICLITUIApp(App):
                             ignore_patterns=self.config.file_tree.ignore_patterns,
                         )
                 
-                # Center panel: Preview + Project Analysis (tabs)
+                # Center panel: Editor with TabBar + FileContentViewer
                 if self.config_loader.is_enabled("preview"):
                     with Vertical(id="center-panel"):
-                        with TabbedContent():
-                            with TabPane("Preview", id="tab-preview"):
-                                from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
-                                yield TabbedEditorPane(id="preview_display", classes="preview")
-                            with TabPane("Project", id="tab-project"):
-                                yield ProjectAnalysisPanel(
-                                    project_root=self.config.file_tree.project_root
-                                )
+                        from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
+                        yield TabbedEditorPane(id="preview_display", classes="preview")
                 
                 # Right panel: Agent tabs (50% of remaining)
                 if self.config_loader.is_enabled("agent_tabs"):
