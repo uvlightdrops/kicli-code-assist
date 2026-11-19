@@ -384,6 +384,8 @@ class TabbedEditorPane(Static):
         Note:
             - If file already in tabs, sets it as active (focus existing)
             - Handles large files gracefully (>10MB shows truncation warning)
+            - For programmatic use: add_file_tab doesn't change active tab
+            - For UI use: call display_file_in_editor() after to show it
         """
         # If file already in tabs, just focus it
         if filepath in self.tabs:
@@ -410,13 +412,23 @@ class TabbedEditorPane(Static):
             status=status_enum,
         )
         
+        # Only set as active if it's the first tab
         if self.active_tab is None:
-            self.active_tab = filepath
-        else:
-            # New file added, switch to it
             self.active_tab = filepath
         
         self._refresh_ui()
+    
+    def display_file_in_editor(self, filepath: str) -> None:
+        """Display a file in the editor (focus its tab).
+        
+        Used when user clicks a file in the tree - ensures the file is visible.
+        
+        Args:
+            filepath: Path to file to display
+        """
+        if filepath in self.tabs:
+            self.active_tab = filepath
+            self._refresh_ui()
     
     def remove_file_tab(self, filepath: str) -> None:
         """Remove a file tab.
