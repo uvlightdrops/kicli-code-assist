@@ -341,6 +341,9 @@ class TabbedEditorPane(Static):
         self.status_label: Optional[Label] = None
     
     BINDINGS = [
+        Binding("ctrl+tab", "next_tab", "Next Tab", show=False),
+        Binding("ctrl+shift+tab", "prev_tab", "Previous Tab", show=False),
+        Binding("ctrl+w", "close_tab", "Close Tab", show=False),
         Binding("ctrl+left", "prev_tab", "Previous Tab", show=False),
         Binding("ctrl+right", "next_tab", "Next Tab", show=False),
         Binding("shift+tab", "prev_tab", "Previous Tab", show=False),
@@ -377,7 +380,20 @@ class TabbedEditorPane(Static):
             filepath: Full path to file
             content: File content
             status: File status ('new', 'modified', 'saved')
+            
+        Note:
+            - Handles large files gracefully (>10MB shows truncation warning)
+            - Sets status to NEW for newly generated files
         """
+        # Handle very large files
+        content_size_mb = len(content) / (1024 * 1024)
+        if content_size_mb > 10:
+            # For very large files, truncate or show warning
+            import logging
+            logging.warning(f"Large file {filepath}: {content_size_mb:.1f}MB - truncating preview")
+            # Keep only first 1MB for rendering to avoid slowdown
+            content = content[:1024*1024] + "\n\n[... file truncated for preview - full content saved ...]"
+        
         status_enum = FileStatus[status.upper()] if status.upper() in FileStatus.__members__ else FileStatus.NEW
         
         self.tabs[filepath] = FileTab(
@@ -478,6 +494,32 @@ class TabbedEditorPane(Static):
         prev_index = (current_index - 1) % len(tab_list)
         
         self.active_tab = tab_list[prev_index]
+        self._refresh_ui()
+    
+    def action_close_tab(self) -> None:
+        """Close the current tab (Ctrl+W).
+        
+        Removes active tab and switches to previous or first tab.
+        """
+        if not self.tabs or not self.active_tab:
+            return
+        
+        tab_list = list(self.tabs.keys())
+        current_index = tab_list.index(self.active_tab) if self.active_tab in tab_list else -1
+        
+        # Remove the current tab
+        self.remove_file_tab(self.active_tab)
+        
+        # If there are still tabs left, select a new one
+        if self.tabs:
+            remaining_tabs = list(self.tabs.keys())
+            # Try to select the tab that was before this one
+            if current_index > 0 and current_index - 1 < len(remaining_tabs):
+                self.active_tab = remaining_tabs[current_index - 1]
+            else:
+                # Otherwise select first tab
+                self.active_tab = remaining_tabs[0]
+        
         self._refresh_ui()
     
     def action_cursor_up(self) -> None:
