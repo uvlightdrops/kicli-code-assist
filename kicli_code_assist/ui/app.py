@@ -289,17 +289,40 @@ class CodeAssistantApp(Static):
     
     def on_mount(self) -> None:
         """Setup after mount."""
-        # Get references to file_list and preview_display after widgets are mounted
-        self.file_list = self.left_panel.query_one("#file-browser", SelectableFileList)
-        self.preview_display = TabbedEditorPane(id="preview_display", classes="preview")
-        self.left_panel.add_preview_pane(self.preview_display)
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info("CodeAssistantApp.on_mount() called")
         
-        # Set Chat tab as default active tab
-        tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
-        tabs.active = "tab_chat"
+        try:
+            # Get references to file_list and preview_display after widgets are mounted
+            self.file_list = self.left_panel.query_one("#file-browser", SelectableFileList)
+            logger.info("✅ Found file_list")
+        except Exception as e:
+            logger.error(f"❌ Failed to find file_list: {e}")
         
-        if self.input_field:
-            self.call_after_refresh(self.input_field.focus)
+        try:
+            self.preview_display = TabbedEditorPane(id="preview_display", classes="preview")
+            logger.info("✅ Created TabbedEditorPane")
+            
+            self.left_panel.add_preview_pane(self.preview_display)
+            logger.info("✅ Added preview_pane to left_panel")
+        except Exception as e:
+            logger.error(f"❌ Failed to add preview_pane: {e}")
+        
+        try:
+            # Set Chat tab as default active tab
+            tabs = self.query_one("#chat_terminal_tabs", TabbedContent)
+            tabs.active = "tab_chat"
+            logger.info("✅ Set chat tab active")
+        except Exception as e:
+            logger.error(f"❌ Failed to set chat tab active: {e}")
+        
+        try:
+            if self.input_field:
+                self.call_after_refresh(self.input_field.focus)
+                logger.info("✅ Focused input field")
+        except Exception as e:
+            logger.error(f"❌ Failed to focus input field: {e}")
     
     def on_tabbed_editor_pane_tab_changed(self, message: TabbedEditorPane.TabChanged) -> None:
         """Handle tab change in TabbedEditorPane."""
