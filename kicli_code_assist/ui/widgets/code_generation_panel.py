@@ -56,7 +56,7 @@ class CodeGenerationPanel(Static):
     
     #code-gen-input-container {
         width: 1fr;
-        height: 6;
+        height: 7;
         border-top: solid $primary;
         background: $boost;
         layout: vertical;
@@ -70,7 +70,7 @@ class CodeGenerationPanel(Static):
     
     #code-gen-input-container > Horizontal > ChatInput {
         width: 1fr;
-        height: 3;
+        height: 4;
     }
     
     #code-gen-send-btn {

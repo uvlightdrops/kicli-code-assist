@@ -54,18 +54,7 @@ class AgentTabPanel(Static):
         background: $surface;
     }
     
-    AgentTabPanel > Vertical {
-        width: 1fr;
-        height: 1fr;
-        layout: vertical;
-    }
-    
-    AgentTabPanel > Vertical > Button {
-        margin: 1 2;
-        width: 20;
-    }
-    
-    AgentTabPanel > Vertical > TabbedContent {
+    AgentTabPanel > TabbedContent {
         width: 1fr;
         height: 1fr;
     }
@@ -111,12 +100,10 @@ class AgentTabPanel(Static):
         self.is_analyzing = False
     
     def compose(self):
-        """Compose the panel: button + tabs."""
+        """Compose the panel: tabs only (no button)."""
         import logging
         logger = logging.getLogger("agent_tabs")
         logger.info(f"Composing AgentTabPanel with tabs: {self.enabled_tabs}")
-        
-        yield Button("Analyze", id="btn-analyze", variant="primary")
         
         # Create tabbed content with tabs as children
         with TabbedContent():
