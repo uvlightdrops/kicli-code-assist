@@ -182,7 +182,8 @@ class KICLITUIApp(App):
                     with Vertical(id="center-panel"):
                         with TabbedContent():
                             with TabPane("Preview", id="tab-preview"):
-                                yield PreviewPanel()
+                                from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
+                                yield TabbedEditorPane(id="preview_display", classes="preview")
                             with TabPane("Project", id="tab-project"):
                                 yield ProjectAnalysisPanel(
                                     project_root=self.config.file_tree.project_root
