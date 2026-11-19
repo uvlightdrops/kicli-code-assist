@@ -58,6 +58,7 @@ class FileTree(Tree):
         self.ignore_patterns = ignore_patterns or [".git", "__pycache__", ".venv"]
         self.current_selection: Optional[TreeNode] = None
         self.on_file_selected_callback: Optional[callable] = None
+        self.highlight_files: set = set()  # Set of file paths to highlight with 🆕
         
         logger.info(f"FileTree initialized: {self.project_root}")
     
@@ -65,9 +66,16 @@ class FileTree(Tree):
         """Scan project on mount."""
         self.scan_project()
     
-    def scan_project(self) -> None:
-        """Scan project root and populate tree."""
+    def scan_project(self, highlight_files: set = None) -> None:
+        """Scan project root and populate tree.
+        
+        Args:
+            highlight_files: Set of file paths to highlight with 🆕 emoji
+        """
         logger.debug(f"Scanning project: {self.project_root}")
+        
+        if highlight_files:
+            self.highlight_files = highlight_files
         
         try:
             root = self.root
@@ -77,7 +85,7 @@ class FileTree(Tree):
             
             self._add_directory(root, self.project_root)
             
-            logger.info(f"Project scan complete: {self.project_root}")
+            logger.info(f"Project scan complete: {self.project_root} ({len(self.highlight_files)} highlighted)")
         
         except Exception as e:
             logger.error(f"Error scanning project: {e}")
@@ -103,7 +111,16 @@ class FileTree(Tree):
             # Add each item
             for item in items:
                 icon = "📁" if item.is_dir() else "📄"
-                label = f"{icon} {item.name}"
+                filename = item.name
+                
+                # Check if this file should be highlighted
+                is_highlighted = str(item) in self.highlight_files
+                if is_highlighted and not item.is_dir():
+                    filename = f"🆕 {filename}"
+                    label = f"{icon} {filename}"
+                    # Could use: label = f"[bold]{label}[/bold]" for text-style emphasis
+                else:
+                    label = f"{icon} {filename}"
                 
                 # Start all nodes collapsed (expand=False)
                 # They will be expanded on-demand via on_tree_node_expanded
