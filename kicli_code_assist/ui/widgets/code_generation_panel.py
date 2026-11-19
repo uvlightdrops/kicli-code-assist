@@ -19,6 +19,7 @@ from textual import work
 from ..panels.chat_display import SelectableRichLog
 from ..input.chat_input import ChatInput
 from .conversation_browser_modal import ConversationBrowserModal
+from .debug_modal import DebugModal
 
 logger = logging.getLogger(__name__)
 
@@ -296,18 +297,22 @@ Example: "Create a Python FastAPI server with a health check endpoint"
             from kicli_code_assist.ui.panels.tabbed_editor_pane import TabbedEditorPane
             tabbed_editor = self.screen.query_one(TabbedEditorPane, expect_type=TabbedEditorPane)
         except Exception as e:
-            # Diagnostic info
-            msg = f"""[red]❌ Editor not available[/red]
-[dim]Error: {type(e).__name__}: {e}[/dim]
+            # Diagnostic info with modal
+            debug_msg = f"""Error: {type(e).__name__}: {e}
 
-[yellow]Checking widget tree...[/yellow]
-[dim]Screen: {self.screen}
+Screen: {self.screen}
 Screen ID: {self.screen.id if hasattr(self.screen, 'id') else 'N/A'}
 Parent: {self.parent}
 
 Available widgets:
-{self._debug_widget_tree()}[/dim]"""
-            self.chat_display.write(msg + "\n")
+{self._debug_widget_tree()}"""
+            
+            # Show in debug modal
+            modal = DebugModal(
+                title="Editor Not Available - Debug Info",
+                content=debug_msg
+            )
+            self.app.push_screen(modal)
             return
         
         # Add each code block as a tab
