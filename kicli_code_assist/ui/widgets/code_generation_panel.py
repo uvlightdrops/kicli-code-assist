@@ -389,6 +389,9 @@ Available widgets:
                         filename = file_result.get("filename", "")
                         error = file_result.get("error", "Unknown error")
                         self.chat_display.write(f"  [red]✗[/red] {filename}: {error}\n")
+                
+                # Refresh FileTree to show newly saved files
+                self._refresh_file_tree()
             else:
                 error = response.get("error", "Unknown error")
                 self.chat_display.write(f"[red]❌ Save failed: {error}[/red]\n")
@@ -476,3 +479,19 @@ Available widgets:
         except Exception as e:
             logger.error(f"Delete conversation failed: {e}")
             self.chat_display.write(f"[red]❌ Error: {e}[/red]\n")
+    
+    def _refresh_file_tree(self) -> None:
+        """Refresh FileTree to show newly saved files."""
+        try:
+            # Find FileTree widget anywhere on screen
+            from .file_browser import FileTree
+            
+            file_trees = self.screen.query(FileTree)
+            if file_trees:
+                file_tree = file_trees.first()
+                file_tree.scan_project()
+                logger.info("FileTree refreshed after save")
+            else:
+                logger.debug("FileTree not found on screen")
+        except Exception as e:
+            logger.warning(f"Could not refresh FileTree: {e}")
