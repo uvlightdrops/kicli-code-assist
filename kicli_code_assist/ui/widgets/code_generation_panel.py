@@ -18,7 +18,6 @@ from textual import work
 
 from ..panels.chat_display import SelectableRichLog
 from ..input.chat_input import ChatInput
-from .conversation_browser_modal import ConversationBrowserModal
 from .debug_modal import DebugModal
 
 logger = logging.getLogger(__name__)
@@ -129,9 +128,6 @@ class CodeGenerationPanel(Static):
                     
                     # Save button
                     yield Button("💾 Save", id="code-gen-save-btn", variant="success")
-                    
-                    # History button
-                    yield Button("📋 History", id="code-gen-history-btn", variant="default")
     
     def on_mount(self) -> None:
         """Setup after mount."""
@@ -159,9 +155,6 @@ Example: "Create a Python FastAPI server with a health check endpoint"
         elif event.button.id == "code-gen-save-btn":
             # Trigger save
             self._save_code()
-        elif event.button.id == "code-gen-history-btn":
-            # Show conversation history browser
-            self._show_history_browser()
     
     def _on_send_message(self, message: str) -> None:
         """Handle message send from input.
@@ -424,86 +417,6 @@ Available widgets:
         except Exception as e:
             logger.error(f"Save failed: {e}")
             self.chat_display.write(f"[red]❌ Save error: {e}[/red]\n")
-    
-    def _show_history_browser(self) -> None:
-        """Show conversation history browser modal.
-        
-        Fetches list of past conversations and shows browser.
-        When user selects one, loads it for continued editing.
-        """
-        try:
-            self.chat_display.write("[cyan]📋 Loading conversation history...[/cyan]\n")
-            
-            # Fetch conversations from backend
-            response = self.backend_client.list_conversations(project_root=self.project_root)
-            
-            if not response.get("success"):
-                error = response.get("error", "Failed to load history")
-                self.chat_display.write(f"[red]❌ Error: {error}[/red]\n")
-                return
-            
-            conversations = response.get("conversations", [])
-            
-            if not conversations:
-                self.chat_display.write("[yellow]⚠️  No conversation history yet.[/yellow]\n")
-                return
-            
-            self.chat_display.write(f"[cyan]Found {len(conversations)} conversation(s).[/cyan]\n")
-            
-            # Show browser modal
-            def _handle_browser_response(result) -> None:
-                """Callback when browser modal closes."""
-                if result:
-                    if isinstance(result, dict) and result.get("action") == "delete":
-                        # Handle delete
-                        self._delete_conversation(result["conversation"])
-                    else:
-                        # Load selected conversation
-                        self._load_conversation(result)
-            
-            modal = ConversationBrowserModal(conversations=conversations)
-            self.app.push_screen(modal, callback=_handle_browser_response)
-        
-        except Exception as e:
-            logger.error(f"Show history browser failed: {e}")
-            self.chat_display.write(f"[red]❌ Error: {e}[/red]\n")
-    
-    def _load_conversation(self, conversation: dict) -> None:
-        """Load a saved conversation for continued editing.
-        
-        Args:
-            conversation: Conversation metadata dict
-        """
-        try:
-            conversation_id = conversation.get("conversation_id")
-            self.conversation_id = conversation_id
-            
-            self.chat_display.write(f"\n[cyan]📂 Loaded conversation: {conversation_id[:8]}[/cyan]\n")
-            self.chat_display.write(f"[dim]Created: {conversation.get('created_at', 'unknown')}[/dim]\n")
-            self.chat_display.write(f"[dim]Messages: {conversation.get('message_count', 0)}[/dim]\n")
-            self.chat_display.write("[cyan]You can now continue generating or refining code...[/cyan]\n\n")
-        
-        except Exception as e:
-            logger.error(f"Load conversation failed: {e}")
-            self.chat_display.write(f"[red]❌ Error loading conversation: {e}[/red]\n")
-    
-    def _delete_conversation(self, conversation: dict) -> None:
-        """Delete a conversation from history.
-        
-        Args:
-            conversation: Conversation metadata dict
-        """
-        try:
-            conversation_id = conversation.get("conversation_id")
-            
-            # Call backend to delete
-            # (This would need a DELETE endpoint, for now just info message)
-            self.chat_display.write(f"[yellow]🗑️  To delete: {conversation_id[:8]}[/yellow]\n")
-            self.chat_display.write("[dim](Delete functionality can be added later)[/dim]\n")
-        
-        except Exception as e:
-            logger.error(f"Delete conversation failed: {e}")
-            self.chat_display.write(f"[red]❌ Error: {e}[/red]\n")
     
     def _refresh_file_tree(self, highlight_files: set = None) -> None:
         """Refresh FileTree to show newly saved files with highlighting.
