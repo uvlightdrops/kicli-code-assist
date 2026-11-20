@@ -130,6 +130,20 @@ class KICLITUIApp(App):
         height: 1;
         border-top: solid $primary;
     }
+    
+    /* Frame Minimalism: Global override - remove all borders */
+    * {
+        border: none;
+    }
+    
+    /* Keep essential visual separators via margins/padding */
+    StatusBar {
+        border-top: solid $primary;
+    }
+    
+    TabBar {
+        border-bottom: solid $primary;
+    }
     """
     
     TITLE = "KI Code Assistant"
