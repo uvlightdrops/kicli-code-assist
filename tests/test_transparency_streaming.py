@@ -124,19 +124,35 @@ class TestExecutionWebSocketHandlers:
 
     def test_subscribe_and_unsubscribe_track_sid_and_emit_ack(self, websocket_server):
         app, socketio = websocket_server
+        # Create an execution session
+        from kicli_code_assist.web.execution_manager import get_execution_manager
+        manager = get_execution_manager()
+        session = manager.create_session("Test execution")
+        execution_id = session.execution_id
+        
         client = socketio.test_client(app, namespace="/agent/execution")
+        # Clear any connection events
         client.get_received("/agent/execution")
-        client.emit("subscribe:execution", {"execution_id": "run-1"},
+        
+        # Subscribe and check response
+        client.emit("subscribe:execution", {"execution_id": execution_id},
                     namespace="/agent/execution")
-        assert "run-1" in server_websocket._EXECUTION_SUBSCRIPTIONS
+        assert execution_id in server_websocket._EXECUTION_SUBSCRIPTIONS
         # The server records the Socket.IO SID (the test client intentionally
         # does not expose it), and exactly one client is subscribed.
-        assert len(server_websocket._EXECUTION_SUBSCRIPTIONS["run-1"]) == 1
-        assert received(client, "agent:subscribed")[-1]["status"] == "subscribed"
-        client.emit("unsubscribe:execution", {"execution_id": "run-1"},
+        assert len(server_websocket._EXECUTION_SUBSCRIPTIONS[execution_id]) == 1
+        # GET RESPONSES AFTER EMIT, NOT BEFORE
+        sub_responses = received(client, "agent:subscribed")
+        assert len(sub_responses) > 0, "No subscription response received"
+        assert sub_responses[-1]["status"] == "subscribed"
+        
+        # Unsubscribe and check response
+        client.emit("unsubscribe:execution", {"execution_id": execution_id},
                     namespace="/agent/execution")
-        assert "run-1" not in server_websocket._EXECUTION_SUBSCRIPTIONS
-        assert received(client, "agent:unsubscribed")[-1]["status"] == "unsubscribed"
+        assert execution_id not in server_websocket._EXECUTION_SUBSCRIPTIONS
+        unsub_responses = received(client, "agent:unsubscribed")
+        assert len(unsub_responses) > 0, "No unsubscription response received"
+        assert unsub_responses[-1]["status"] == "unsubscribed"
 
     def test_status_returns_status_object(self, websocket_server):
         app, socketio = websocket_server
